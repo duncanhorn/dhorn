@@ -11,13 +11,14 @@ namespace dhorn
 {
     namespace d3d
     {
+        template <int _Dim>
+        class vector;
+
         namespace garbage
         {
             template <int _Dim>
             struct vector_traits
             {
-                static_assert(false, "ERROR: DirectX only supports, 2, 3, and 4 dimensional "
-                    "vectors");
             };
 
             template <>
@@ -25,6 +26,7 @@ namespace dhorn
             {
                 static const int dimension = 2;
                 using storage_type = DirectX::XMFLOAT2;
+                using cross_product_result_type = float;
 
                 /* Functions */
                 static inline DirectX::XMVECTOR load(_In_ const storage_type &vector)
@@ -41,7 +43,17 @@ namespace dhorn
                 }
                 static inline bool equals(_In_ DirectX::FXMVECTOR v1, _In_ DirectX::FXMVECTOR v2)
                 {
-                    auto result = DirectX::XMVector2Equal(v1, v2);
+                    return DirectX::XMVector2Equal(v1, v2);
+                }
+                static inline DirectX::XMVECTOR dot(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVector2Dot(v1, v2);
+                }
+                static inline float cross(_In_ DirectX::FXMVECTOR v1, _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVectorGetX(DirectX::XMVector2Cross(v1, v2));
                 }
             };
 
@@ -50,6 +62,7 @@ namespace dhorn
             {
                 static const int dimension = 3;
                 using storage_type = DirectX::XMFLOAT3;
+                using cross_product_result_type = vector<3>;
 
                 /* Functions */
                 static inline DirectX::XMVECTOR load(_In_ const storage_type &vector)
@@ -66,7 +79,19 @@ namespace dhorn
                 }
                 static inline bool equals(_In_ DirectX::FXMVECTOR v1, _In_ DirectX::FXMVECTOR v2)
                 {
-                    auto result = DirectX::XMVector3Equal(v1, v2);
+                    return DirectX::XMVector3Equal(v1, v2);
+                }
+                static inline DirectX::XMVECTOR dot(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVector3Dot(v1, v2);
+                }
+                static inline DirectX::XMVECTOR cross(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVector3Cross(v1, v2);
                 }
             };
 
@@ -75,6 +100,7 @@ namespace dhorn
             {
                 static const int dimension = 4;
                 using storage_type = DirectX::XMFLOAT4;
+                using cross_product_result_type = vector<4>;
 
                 /* Functions */
                 static inline DirectX::XMVECTOR load(_In_ const storage_type &vector)
@@ -91,15 +117,27 @@ namespace dhorn
                 }
                 static inline bool equals(_In_ DirectX::FXMVECTOR v1, _In_ DirectX::FXMVECTOR v2)
                 {
-                    auto result = DirectX::XMVector4Equal(v1, v2);
+                    return DirectX::XMVector4Equal(v1, v2);
+                }
+                static inline DirectX::XMVECTOR dot(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVector4Dot(v1, v2);
+                }
+                static inline DirectX::XMVECTOR cross(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2,
+                    _In_ DirectX::FXMVECTOR v3)
+                {
+                    return DirectX::XMVector4Cross(v1, v2, v3);
                 }
             };
 
             template <int _Dim1, int _Dim2>
             struct vector_result_type
             {
-                static const int dimension =
-                    (_Dim1 > _Dim2) ? vector_traits<_Dim1> : vector_traits<_Dim2>;
+                static const int dimension = (_Dim1 > _Dim2) ? _Dim1 : _Dim2;
                 using traits_type = vector_traits<dimension>;
             };
         }
@@ -112,11 +150,12 @@ namespace dhorn
             /* Type and static variable declaration */
             static const int dimension = _Dim;
             using traits = garbage::vector_traits<_Dim>;
-            using storage_type = traits::storage_type;
+            using storage_type = typename traits::storage_type;
 
         public:
             vector(void)
             {
+                traits::store(DirectX::g_XMZero, this->_vector);
             }
 
             vector(_In_ const storage_type &other)
@@ -171,7 +210,20 @@ namespace dhorn
                 return traits::equals(*this, other);
             }
 
+            template <int _Dim2>
+            inline bool operator==(_In_ const vector<_Dim2> &other) const
+            {
+                using traits_type = typename garbage::vector_result_type<_Dim, _Dim2>::traits_type;
+                return traits_type::equals(*this, other);
+            }
+
             inline bool operator!=(_In_ const vector &other) const
+            {
+                return !(*this == other);
+            }
+
+            template <int _Dim2>
+            inline bool operator!=(_In_ const vector<_Dim2> &other) const
             {
                 return !(*this == other);
             }
@@ -183,17 +235,22 @@ namespace dhorn
              */
             inline vector normalize(void) const
             {
-                return traits::normalize(this->_vector);
+                auto v = traits::load(this->_vector);
+                return traits::normalize(v);
             }
 
-            inline FLOAT dot_product(_In_ const vector &other) const
+            inline float dot_product(_In_ const vector &other) const
             {
-                // TODO
+                // No need to template the dot product function as vector<_Dim> * vector<_Dim2> is
+                // going to have zeros in higher resolution spots anyway
+                return DirectX::XMVectorGetX(traits::dot(*this, other));
             }
 
-            inline vector cross_product(_In_ const vector &other) const
+            template <typename... _Args>
+            inline typename traits::cross_product_result_type
+                cross_product(_In_ _Args... other) const
             {
-                // TODO
+                return traits::cross(*this, other...);
             }
 
 
@@ -208,7 +265,7 @@ namespace dhorn
 
             template <int _Dim2>
             inline vector<garbage::vector_result_type<_Dim, _Dim2>::dimension> operator+(
-                _In_ const vector &other<_Dim2>) const
+                _In_ const vector<_Dim2> &other) const
             {
                 return DirectX::XMVectorAdd(*this, other);
             }
@@ -221,7 +278,7 @@ namespace dhorn
 
             template <int _Dim2>
             inline vector<garbage::vector_result_type<_Dim, _Dim2>::dimension> operator-(
-                _In_ const vector &other<_Dim2>) const
+                _In_ const vector<_Dim2> &other) const
             {
                 return DirectX::XMVectorSubtract(*this, other);
             }
@@ -243,5 +300,36 @@ namespace dhorn
         using vector2 = vector<2>;
         using vector3 = vector<3>;
         using vector4 = vector<4>;
+
+
+
+        /* Operators */
+        template <int _Dim>
+        inline bool operator==(
+            _In_ const typename garbage::vector_traits<_Dim>::storage_type &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return rhs == lhs;
+        }
+
+        template <int _Dim>
+        inline bool operator==(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs == lhs;
+        }
+
+        template <int _Dim>
+        inline bool operator!=(
+            _In_ const typename garbage::vector_traits<_Dim>::storage_type &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return rhs != lhs;
+        }
+
+        template <int _Dim>
+        inline bool operator!=(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs != lhs;
+        }
     }
 }
