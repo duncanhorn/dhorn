@@ -58,6 +58,8 @@ namespace dhorn
                 Assert::AreEqual(res1.z, res2.z, 1e-6f);
             }
 
+
+
             TEST_METHOD(ConstructorTest)
             {
                 ConstructorTestHelper<2>();
@@ -101,6 +103,8 @@ namespace dhorn
                 Assert::AreEqual(v1.z, (_Dim >= 3) ? v2.z : 0);
                 Assert::AreEqual(v1.w, (_Dim >= 4) ? v2.w : 0);
             }
+
+
 
             TEST_METHOD(AssignmentTest)
             {
@@ -148,6 +152,8 @@ namespace dhorn
                     Assert::AreEqual(v1.w, (_Dim >= 4) ? v2.w : 0);
                 }
             }
+
+
 
             TEST_METHOD(EqualityTest)
             {
@@ -212,6 +218,8 @@ namespace dhorn
                 Assert::IsFalse(expect != v1);
             }
 
+
+
             TEST_METHOD(NormalizeTest)
             {
                 NormalizeTestHelper<2>();
@@ -233,6 +241,8 @@ namespace dhorn
                     AssertVectorsEqual(res1, res2);
                 }
             }
+
+
 
             TEST_METHOD(DotProductTest)
             {
@@ -291,6 +301,8 @@ namespace dhorn
                 }
             }
 
+
+
             TEST_METHOD(CrossProductTest)
             {
                 CrossProductTest2Helper();
@@ -312,16 +324,57 @@ namespace dhorn
 
                     AssertFloatingPointEqual(expect, vector1.cross_product(vector2));
                     AssertFloatingPointEqual(expect, vector1.cross_product(v2));
+                    AssertFloatingPointEqual(-expect, vector2.cross_product(vector1));
                     AssertFloatingPointEqual(-expect, vector2.cross_product(v1));
                 }
             }
 
             void CrossProductTest3Helper(void)
             {
+                for (int i = 0; i < 100; i++)
+                {
+                    auto v1 = MakeRandomVector<3>();
+                    auto v2 = MakeRandomVector<3>();
 
+                    d3d::vector3 vector1(v1);
+                    d3d::vector3 vector2(v2);
+
+                    auto expect = DirectX::XMVector3Cross(v1, v2);
+
+                    Assert::IsTrue(expect == vector1.cross_product(vector2));
+                    Assert::IsTrue(expect == vector1.cross_product(v2));
+                    Assert::IsTrue(expect == -vector2.cross_product(vector1));
+                    Assert::IsTrue(expect == -vector2.cross_product(v1));
+                }
             }
 
             void CrossProductTest4Helper(void)
+            {
+                for (int i = 0; i < 100; i++)
+                {
+                    auto v1 = MakeRandomVector<4>();
+                    auto v2 = MakeRandomVector<4>();
+                    auto v3 = MakeRandomVector<4>();
+
+                    d3d::vector4 vector1(v1);
+                    d3d::vector4 vector2(v2);
+                    d3d::vector4 vector3(v3);
+
+                    auto expect = DirectX::XMVector4Cross(v1, v2, v3);
+
+                    Assert::IsTrue(expect == vector1.cross_product(vector2, vector3));
+                }
+            }
+
+
+
+            TEST_METHOD(NegationTest)
+            {
+
+            }
+
+            template <int _Dim>
+            void NegationTestHelper(void)
             {
 
             }
