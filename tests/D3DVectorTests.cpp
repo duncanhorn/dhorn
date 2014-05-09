@@ -439,7 +439,8 @@ namespace dhorn
                     Assert::IsTrue((v1 + vector2) == expect);
 
                     // Test for vector + XMFLOAT*
-
+                    Assert::IsTrue((vector1 + storage2) == expect);
+                    Assert::IsTrue((storage1 + vector2) == expect);
                 }
             }
         };

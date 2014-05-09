@@ -370,6 +370,22 @@ namespace dhorn
             return rhs != vector2(lhs);
         }
 
+        template <int _Dim>
+        inline vector<garbage::vector_result_type<_Dim, 2>::dimension> operator+(
+            _In_ const vector<_Dim> &lhs,
+            _In_ const DirectX::XMFLOAT2 &rhs)
+        {
+            return lhs + vector2(rhs);
+        }
+
+        template <int _Dim>
+        inline vector<garbage::vector_result_type<_Dim, 2>::dimension> operator+(
+            _In_ const DirectX::XMFLOAT2 &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return rhs + vector2(lhs);
+        }
+
 
 
         /* XMFLOAT3 */
@@ -397,6 +413,22 @@ namespace dhorn
             return rhs != vector3(lhs);
         }
 
+        template <int _Dim>
+        inline vector<garbage::vector_result_type<_Dim, 3>::dimension> operator+(
+            _In_ const vector<_Dim> &lhs,
+            _In_ const DirectX::XMFLOAT3 &rhs)
+        {
+            return lhs + vector3(rhs);
+        }
+
+        template <int _Dim>
+        inline vector<garbage::vector_result_type<_Dim, 3>::dimension> operator+(
+            _In_ const DirectX::XMFLOAT3 &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return rhs + vector3(lhs);
+        }
+
 
 
         /* XMFLOAT4 */
@@ -422,6 +454,22 @@ namespace dhorn
         inline bool operator!=(_In_ const DirectX::XMFLOAT4 &lhs, _In_ const vector<_Dim> &rhs)
         {
             return rhs != vector4(lhs);
+        }
+
+        template <int _Dim>
+        inline vector<garbage::vector_result_type<_Dim, 4>::dimension> operator+(
+            _In_ const vector<_Dim> &lhs,
+            _In_ const DirectX::XMFLOAT4 &rhs)
+        {
+            return lhs + vector4(rhs);
+        }
+
+        template <int _Dim>
+        inline vector<garbage::vector_result_type<_Dim, 4>::dimension> operator+(
+            _In_ const DirectX::XMFLOAT4 &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return rhs + vector4(lhs);
         }
     }
 }
