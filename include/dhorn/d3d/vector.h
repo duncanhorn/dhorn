@@ -205,11 +205,6 @@ namespace dhorn
             /*
              * Equality operators
              */
-            inline bool operator==(_In_ const vector &other) const
-            {
-                return traits::equals(*this, other);
-            }
-
             template <int _Dim2>
             inline bool operator==(_In_ const vector<_Dim2> &other) const
             {
@@ -217,13 +212,19 @@ namespace dhorn
                 return traits_type::equals(*this, other);
             }
 
-            inline bool operator!=(_In_ const vector &other) const
+            inline bool operator==(_In_ const vector<4> &other) const
             {
-                return !(*this == other);
+                using traits_type = typename garbage::vector_traits<4>;
+                return traits_type::equals(*this, other);
             }
 
             template <int _Dim2>
             inline bool operator!=(_In_ const vector<_Dim2> &other) const
+            {
+                return !(*this == other);
+            }
+
+            inline bool operator!=(_In_ const vector<4> &other) const
             {
                 return !(*this == other);
             }
@@ -270,6 +271,13 @@ namespace dhorn
                 return DirectX::XMVectorAdd(*this, other);
             }
 
+            inline vector<4> operator+(_In_ const vector<4> &other) const
+            {
+                /* If anyone tries to perform vector + XMVECTOR, then it is impossible to
+                   statically determine the resulting dimension. Therefore, use a dimension of 4 */
+                return DirectX::XMVectorAdd(*this, other);
+            }
+
             inline const vector &operator+=(_In_ const vector &other)
             {
                 *this = *this + other;
@@ -280,6 +288,13 @@ namespace dhorn
             inline vector<garbage::vector_result_type<_Dim, _Dim2>::dimension> operator-(
                 _In_ const vector<_Dim2> &other) const
             {
+                return DirectX::XMVectorSubtract(*this, other);
+            }
+
+            inline vector<4> operator-(_In_ const vector<4> &other) const
+            {
+                /* If anyone tries to perform vector - XMVECTOR, then it is impossible to
+                statically determine the resulting dimension. Therefore, use a dimension of 4 */
                 return DirectX::XMVectorSubtract(*this, other);
             }
 
@@ -305,31 +320,108 @@ namespace dhorn
 
         /* Operators */
         template <int _Dim>
-        inline bool operator==(
-            _In_ const typename garbage::vector_traits<_Dim>::storage_type &lhs,
-            _In_ const vector<_Dim> &rhs)
-        {
-            return rhs == lhs;
-        }
-
-        template <int _Dim>
         inline bool operator==(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
         {
             return rhs == lhs;
         }
 
         template <int _Dim>
-        inline bool operator!=(
-            _In_ const typename garbage::vector_traits<_Dim>::storage_type &lhs,
-            _In_ const vector<_Dim> &rhs)
+        inline bool operator!=(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
         {
             return rhs != lhs;
         }
 
         template <int _Dim>
-        inline bool operator!=(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
+        inline vector4 operator+(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
         {
-            return rhs != lhs;
+            return rhs + lhs;
+        }
+
+        template <int _Dim>
+        inline vector4 operator-(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return DirectX::XMVectorSubtract(lhs, rhs);
+        }
+
+
+
+        /* XMFLOAT2 */
+        template <int _Dim>
+        inline bool operator==(_In_ const vector<_Dim> &lhs, _In_ const DirectX::XMFLOAT2 &rhs)
+        {
+            return lhs == vector2(rhs);
+        }
+
+        template <int _Dim>
+        inline bool operator==(_In_ const DirectX::XMFLOAT2 &lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs == vector2(lhs);
+        }
+
+        template <int _Dim>
+        inline bool operator!=(_In_ const vector<_Dim> &lhs, _In_ const DirectX::XMFLOAT2 &rhs)
+        {
+            return lhs != vector2(rhs);
+        }
+
+        template <int _Dim>
+        inline bool operator!=(_In_ const DirectX::XMFLOAT2 &lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs != vector2(lhs);
+        }
+
+
+
+        /* XMFLOAT3 */
+        template <int _Dim>
+        inline bool operator==(_In_ const vector<_Dim> &lhs, _In_ const DirectX::XMFLOAT3 &rhs)
+        {
+            return lhs == vector3(rhs);
+        }
+
+        template <int _Dim>
+        inline bool operator==(_In_ const DirectX::XMFLOAT3 &lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs == vector3(lhs);
+        }
+
+        template <int _Dim>
+        inline bool operator!=(_In_ const vector<_Dim> &lhs, _In_ const DirectX::XMFLOAT3 &rhs)
+        {
+            return lhs != vector3(rhs);
+        }
+
+        template <int _Dim>
+        inline bool operator!=(_In_ const DirectX::XMFLOAT3 &lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs != vector3(lhs);
+        }
+
+
+
+        /* XMFLOAT4 */
+        template <int _Dim>
+        inline bool operator==(_In_ const vector<_Dim> &lhs, _In_ const DirectX::XMFLOAT4 &rhs)
+        {
+            return lhs == vector4(rhs);
+        }
+
+        template <int _Dim>
+        inline bool operator==(_In_ const DirectX::XMFLOAT4 &lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs == vector4(lhs);
+        }
+
+        template <int _Dim>
+        inline bool operator!=(_In_ const vector<_Dim> &lhs, _In_ const DirectX::XMFLOAT4 &rhs)
+        {
+            return lhs != vector4(rhs);
+        }
+
+        template <int _Dim>
+        inline bool operator!=(_In_ const DirectX::XMFLOAT4 &lhs, _In_ const vector<_Dim> &rhs)
+        {
+            return rhs != vector4(lhs);
         }
     }
 }
