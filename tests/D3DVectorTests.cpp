@@ -15,6 +15,8 @@
 using namespace dhorn;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+#define TEST_COUNT          (100)
+
 namespace dhorn
 {
     namespace tests
@@ -28,10 +30,10 @@ namespace dhorn
             {
                 float x = (float)(RAND_MAX / 2 - rand());
                 float y = (float)(RAND_MAX / 2 - rand());
-                float z = (float)(RAND_MAX / 2 - rand());
-                float w = (float)(RAND_MAX / 2 - rand());
+                float z = (_Dim >= 3) ? (float)(RAND_MAX / 2 - rand()) : 0;
+                float w = (_Dim >= 4) ? (float)(RAND_MAX / 2 - rand()) : 0;
 
-                return DirectX::XMVectorSet(x, y, (_Dim >= 3) ? z : 0, (_Dim >= 4) ? w : 0);
+                return DirectX::XMVectorSet(x, y, z, w);
             }
 
             void AssertFloatingPointEqual(_In_ float f1, _In_ float f2)
@@ -52,10 +54,10 @@ namespace dhorn
                 DirectX::XMStoreFloat4(&res1, v1);
                 DirectX::XMStoreFloat4(&res2, v2);
 
-                Assert::AreEqual(res1.w, res2.w, 1e-6f);
-                Assert::AreEqual(res1.x, res2.x, 1e-6f);
-                Assert::AreEqual(res1.y, res2.y, 1e-6f);
-                Assert::AreEqual(res1.z, res2.z, 1e-6f);
+                AssertFloatingPointEqual(res1.w, res2.w);
+                AssertFloatingPointEqual(res1.x, res2.x);
+                AssertFloatingPointEqual(res1.y, res2.y);
+                AssertFloatingPointEqual(res1.z, res2.z);
             }
 
 
@@ -123,7 +125,7 @@ namespace dhorn
                 test_type vector;
 
                 // Test operator= with the storage type
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     storage_type ty;
                     for (int j = 0; j < _Dim; j++)
@@ -136,7 +138,7 @@ namespace dhorn
                 }
 
                 // Test operator= with XMVECTOR
-                for (float i = 0; i < 100; i++)
+                for (float i = 0; i < TEST_COUNT; i++)
                 {
                     auto v = DirectX::XMVectorSet(i, i + 1, i + 2, i + 3);
                     vector = v;
@@ -188,6 +190,13 @@ namespace dhorn
                 Assert::IsFalse(v3 == vector);
                 Assert::IsTrue(v4 == vector);
                 Assert::IsFalse(v4 != vector);
+
+                Assert::IsTrue(vector != v2);
+                Assert::IsFalse(vector == v2);
+                Assert::IsTrue(vector != v3);
+                Assert::IsFalse(vector == v3);
+                Assert::IsTrue(vector == v4);
+                Assert::IsFalse(vector != v4);
             }
 
             template <int _Dim>
@@ -197,8 +206,13 @@ namespace dhorn
                 using traits = d3d::garbage::vector_traits<_Dim>;
                 using storage_type = typename traits::storage_type;
 
-                auto vector = DirectX::XMVectorSet(1, 2, 3, 4);
-                auto expect = DirectX::XMVectorSet(1, 2, (_Dim >= 3) ? 3 : 0, (_Dim >= 4) ? 4 : 0);
+                float x = (float)rand();
+                float y = (float)rand();
+                float z = (float)rand();
+                float w = (float)rand();
+
+                auto vector = DirectX::XMVectorSet(x, y, z, w);
+                auto expect = DirectX::XMVectorSet(x, y, (_Dim >= 3) ? z : 0, (_Dim >= 4) ? w : 0);
 
                 // Test for test_type == test_type
                 test_type v1 = vector;
@@ -217,10 +231,30 @@ namespace dhorn
                 Assert::IsFalse(storage != v1);
 
                 // Test for test_type == XMVECTOR
+                if (_Dim < 4)
+                {
+                    Assert::IsFalse(v1 == vector);
+                    Assert::IsTrue(v1 != vector);
+                }
+                else
+                {
+                    Assert::IsTrue(v1 == vector);
+                    Assert::IsFalse(v1 != vector);
+                }
                 Assert::IsTrue(v1 == expect);
                 Assert::IsFalse(v1 != expect);
 
                 // Test for XMVECTOR == test_type
+                if (_Dim < 4)
+                {
+                    Assert::IsFalse(vector == v1);
+                    Assert::IsTrue(vector != v1);
+                }
+                else
+                {
+                    Assert::IsTrue(vector == v1);
+                    Assert::IsFalse(vector != v1);
+                }
                 Assert::IsTrue(expect == v1);
                 Assert::IsFalse(expect != v1);
             }
@@ -237,7 +271,7 @@ namespace dhorn
             template <int _Dim>
             void NormalizeTestHelper(void)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     auto v = MakeRandomVector<_Dim>();
                     d3d::vector<_Dim> vector(v);
@@ -276,7 +310,7 @@ namespace dhorn
                 using test1_t = d3d::vector<_Dim1>;
                 using test2_t = d3d::vector<_Dim2>;
 
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     auto v1 = MakeRandomVector<_Dim1>();
                     auto v2 = MakeRandomVector<_Dim2>();
@@ -297,7 +331,7 @@ namespace dhorn
                 using traits = d3d::garbage::vector_traits<_Dim>;
                 using storage_type = typename traits::storage_type;
 
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     auto v1 = MakeRandomVector<_Dim>();
                     auto v2 = MakeRandomVector<_Dim>();
@@ -319,7 +353,7 @@ namespace dhorn
 
             void CrossProductTest2Helper(void)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     auto v1 = MakeRandomVector<2>();
                     auto v2 = MakeRandomVector<2>();
@@ -338,7 +372,7 @@ namespace dhorn
 
             void CrossProductTest3Helper(void)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     auto v1 = MakeRandomVector<3>();
                     auto v2 = MakeRandomVector<3>();
@@ -357,7 +391,7 @@ namespace dhorn
 
             void CrossProductTest4Helper(void)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     auto v1 = MakeRandomVector<4>();
                     auto v2 = MakeRandomVector<4>();
@@ -388,24 +422,52 @@ namespace dhorn
                 auto v = MakeRandomVector<_Dim>();
                 d3d::vector<_Dim> vector(v);
 
-                Assert::IsTrue(-vector == DirectX::XMVectorNegate(v));
+                AssertVectorsEqual(-vector, DirectX::XMVectorNegate(v));
             }
 
 
 
             TEST_METHOD(AdditionTest)
             {
+                AdditionTestHelper<2>();
                 AdditionTestHelper<2, 2>();
                 AdditionTestHelper<2, 3>();
                 AdditionTestHelper<2, 4>();
 
+                AdditionTestHelper<3>();
                 AdditionTestHelper<3, 2>();
                 AdditionTestHelper<3, 3>();
                 AdditionTestHelper<3, 4>();
 
+                AdditionTestHelper<4>();
                 AdditionTestHelper<4, 2>();
                 AdditionTestHelper<4, 3>();
                 AdditionTestHelper<4, 4>();
+            }
+
+            template <int _Dim>
+            void AdditionTestHelper(void)
+            {
+                using traits = d3d::garbage::vector_traits<_Dim>;
+                using storage_type = typename traits::storage_type;
+
+                for (int i = 0; i < TEST_COUNT; i++)
+                {
+                    auto v1 = MakeRandomVector<_Dim>();
+                    auto v2 = MakeRandomVector<_Dim>();
+                    auto v3 = MakeRandomVector<_Dim>();
+                    auto expect = DirectX::XMVectorAdd(v1, v2);
+                    expect = DirectX::XMVectorAdd(expect, v3);
+
+                    storage_type storage;
+                    traits::store(v3, storage);
+
+                    d3d::vector<_Dim> vector(v1);
+                    vector += v2;
+                    vector += storage;
+
+                    Assert::IsTrue(vector == expect);
+                }
             }
 
             template <int _Dim1, int _Dim2>
@@ -416,7 +478,7 @@ namespace dhorn
                 using storage_type1 = typename traits1::storage_type;
                 using storage_type2 = typename traits2::storage_type;
 
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < TEST_COUNT; i++)
                 {
                     auto v1 = MakeRandomVector<_Dim1>();
                     auto v2 = MakeRandomVector<_Dim2>();
@@ -441,6 +503,172 @@ namespace dhorn
                     // Test for vector + XMFLOAT*
                     Assert::IsTrue((vector1 + storage2) == expect);
                     Assert::IsTrue((storage1 + vector2) == expect);
+                }
+            }
+
+
+
+            TEST_METHOD(SubtractionTest)
+            {
+                SubtractionTestHelper<2>();
+                SubtractionTestHelper<2, 2>();
+                SubtractionTestHelper<2, 3>();
+                SubtractionTestHelper<2, 4>();
+
+                SubtractionTestHelper<3>();
+                SubtractionTestHelper<3, 2>();
+                SubtractionTestHelper<3, 3>();
+                SubtractionTestHelper<3, 4>();
+
+                SubtractionTestHelper<4>();
+                SubtractionTestHelper<4, 2>();
+                SubtractionTestHelper<4, 3>();
+                SubtractionTestHelper<4, 4>();
+            }
+
+            template <int _Dim>
+            void SubtractionTestHelper(void)
+            {
+                using traits = d3d::garbage::vector_traits<_Dim>;
+                using storage_type = typename traits::storage_type;
+
+                for (int i = 0; i < TEST_COUNT; i++)
+                {
+                    auto v1 = MakeRandomVector<_Dim>();
+                    auto v2 = MakeRandomVector<_Dim>();
+                    auto v3 = MakeRandomVector<_Dim>();
+                    auto expect = DirectX::XMVectorSubtract(v1, v2);
+                    expect = DirectX::XMVectorSubtract(expect, v3);
+
+                    storage_type storage;
+                    traits::store(v3, storage);
+
+                    d3d::vector<_Dim> vector(v1);
+                    vector -= v2;
+                    vector -= storage;
+
+                    Assert::IsTrue(vector == expect);
+                }
+            }
+
+            template <int _Dim1, int _Dim2>
+            void SubtractionTestHelper(void)
+            {
+                using traits1 = d3d::garbage::vector_traits<_Dim1>;
+                using traits2 = d3d::garbage::vector_traits<_Dim2>;
+                using storage_type1 = typename traits1::storage_type;
+                using storage_type2 = typename traits2::storage_type;
+
+                for (int i = 0; i < TEST_COUNT; i++)
+                {
+                    auto v1 = MakeRandomVector<_Dim1>();
+                    auto v2 = MakeRandomVector<_Dim2>();
+
+                    storage_type1 storage1;
+                    traits1::store(v1, storage1);
+                    storage_type2 storage2;
+                    traits2::store(v2, storage2);
+
+                    auto expect = DirectX::XMVectorSubtract(v1, v2);
+
+                    d3d::vector<_Dim1> vector1(v1);
+                    d3d::vector<_Dim2> vector2(v2);
+
+                    // Test for vector + vector
+                    Assert::IsTrue((vector1 - vector2) == expect);
+
+                    // Test for vector + XMVECTOR (and vice versa)
+                    Assert::IsTrue((vector1 - v2) == expect);
+                    Assert::IsTrue((v1 - vector2) == expect);
+
+                    // Test for vector + XMFLOAT*
+                    Assert::IsTrue((vector1 - storage2) == expect);
+                    Assert::IsTrue((storage1 - vector2) == expect);
+                }
+            }
+
+
+
+            TEST_METHOD(ScalarAdditionTest)
+            {
+                ScalarAdditionTestHelper<2>();
+                ScalarAdditionTestHelper<3>();
+                ScalarAdditionTestHelper<4>();
+            }
+
+            template <int _Dim>
+            void ScalarAdditionTestHelper(void)
+            {
+                using test_type = d3d::vector<_Dim>;
+
+                for (int i = 0; i < TEST_COUNT; i++)
+                {
+                    auto v = MakeRandomVector<_Dim>();
+                    float scalar = rand();
+
+                    auto add_v = DirectX::XMVectorSet(scalar, scalar, (_Dim >= 3) ? scalar : 0,
+                        (_Dim >= 4) ? scalar : 0);
+                    auto expect = DirectX::XMVectorAdd(v, add_v);
+
+                    test_type vector(v);
+
+                    // Test for vector + scalar
+                    test_type result = vector + scalar;
+                    Assert::IsTrue(result == expect);
+                    Assert::IsTrue(vector + scalar == expect);
+
+                    // Test for vector += scalar
+                    result = vector;
+                    result += scalar;
+                    Assert::IsTrue(result == expect);
+
+                    // Test for scalar + vector
+                    result = scalar + vector;
+                    Assert::IsTrue(result == expect);
+                    Assert::IsTrue(scalar + vector == expect);
+                }
+            }
+
+
+
+            TEST_METHOD(ScalarSubtractionTest)
+            {
+                ScalarSubtractionTest<2>();
+                ScalarSubtractionTest<3>();
+                ScalarSubtractionTest<4>();
+            }
+
+            template <int _Dim>
+            void ScalarSubtractionTest(void)
+            {
+                using test_type = d3d::vector<_Dim>;
+
+                for (int i = 0; i < TEST_COUNT; i++)
+                {
+                    auto v = MakeRandomVector<_Dim>();
+                    float scalar = rand();
+
+                    auto sub_v = DirectX::XMVectorSet(scalar, scalar, (_Dim >= 3) ? scalar : 0,
+                        (_Dim >= 4) ? scalar : 0);
+                    auto expect = DirectX::XMVectorSubtract(v, sub_v);
+                    auto expect2 = DirectX::XMVectorSubtract(sub_v, v);
+
+                    test_type vector(v);
+
+                    // Test for vector - scalar
+                    test_type result = vector - scalar;
+                    Assert::IsTrue(result == expect);
+                    Assert::IsTrue(vector - scalar == expect);
+
+                    // Test for vector += scalar
+                    result = vector;
+                    result -= scalar;
+                    Assert::IsTrue(result == expect);
+
+                    // Test for scalar + vector
+                    result = scalar - vector;
+                    Assert::IsTrue(result == expect2);
+                    Assert::IsTrue(scalar - vector == expect2);
                 }
             }
         };

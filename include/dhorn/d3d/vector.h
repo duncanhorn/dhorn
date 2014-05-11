@@ -11,9 +11,6 @@ namespace dhorn
 {
     namespace d3d
     {
-        template <int _Dim>
-        class vector;
-
         namespace garbage
         {
             template <int _Dim>
@@ -45,6 +42,12 @@ namespace dhorn
                 {
                     return DirectX::XMVector2Equal(v1, v2);
                 }
+                static inline bool not_equals(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVector2NotEqual(v1, v2);
+                }
                 static inline DirectX::XMVECTOR dot(
                     _In_ DirectX::FXMVECTOR v1,
                     _In_ DirectX::FXMVECTOR v2)
@@ -62,7 +65,7 @@ namespace dhorn
             {
                 static const int dimension = 3;
                 using storage_type = DirectX::XMFLOAT3;
-                using cross_product_result_type = vector<3>;
+                using cross_product_result_type = DirectX::XMVECTOR;
 
                 /* Functions */
                 static inline DirectX::XMVECTOR load(_In_ const storage_type &vector)
@@ -80,6 +83,12 @@ namespace dhorn
                 static inline bool equals(_In_ DirectX::FXMVECTOR v1, _In_ DirectX::FXMVECTOR v2)
                 {
                     return DirectX::XMVector3Equal(v1, v2);
+                }
+                static inline bool not_equals(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVector3NotEqual(v1, v2);
                 }
                 static inline DirectX::XMVECTOR dot(
                     _In_ DirectX::FXMVECTOR v1,
@@ -100,7 +109,7 @@ namespace dhorn
             {
                 static const int dimension = 4;
                 using storage_type = DirectX::XMFLOAT4;
-                using cross_product_result_type = vector<4>;
+                using cross_product_result_type = DirectX::XMVECTOR;
 
                 /* Functions */
                 static inline DirectX::XMVECTOR load(_In_ const storage_type &vector)
@@ -118,6 +127,12 @@ namespace dhorn
                 static inline bool equals(_In_ DirectX::FXMVECTOR v1, _In_ DirectX::FXMVECTOR v2)
                 {
                     return DirectX::XMVector4Equal(v1, v2);
+                }
+                static inline bool not_equals(
+                    _In_ DirectX::FXMVECTOR v1,
+                    _In_ DirectX::FXMVECTOR v2)
+                {
+                    return DirectX::XMVector4NotEqual(v1, v2);
                 }
                 static inline DirectX::XMVECTOR dot(
                     _In_ DirectX::FXMVECTOR v1,
@@ -152,19 +167,30 @@ namespace dhorn
             using traits = garbage::vector_traits<_Dim>;
             using storage_type = typename traits::storage_type;
 
+            static const bool has_x = (_Dim >= 1);
+            static const bool has_y = (_Dim >= 2);
+            static const bool has_z = (_Dim >= 3);
+            static const bool has_w = (_Dim >= 4);
+
         public:
-            vector(void)
+            inline vector(void)
             {
                 traits::store(DirectX::g_XMZero, this->_vector);
             }
 
-            vector(_In_ const storage_type &other)
+            inline vector(_In_ const vector &other)
             {
                 auto v = traits::load(other);
                 traits::store(v, this->_vector);
             }
 
-            vector(_In_ DirectX::FXMVECTOR other)
+            inline vector(_In_ const storage_type &other)
+            {
+                auto v = traits::load(other);
+                traits::store(v, this->_vector);
+            }
+
+            inline vector(_In_ DirectX::FXMVECTOR other)
             {
                 traits::store(other, this->_vector);
             }
@@ -172,11 +198,47 @@ namespace dhorn
 
 
             /*
+             * Accessors
+             */
+            float &x(void)
+            {
+                return this->_vector.x;
+            }
+
+            float &y(void)
+            {
+                return this->_vector.y;
+            }
+
+            float &z(void)
+            {
+                return this->_vector.z;
+            }
+
+            float &w(void)
+            {
+                return this->_vector.w;
+            }
+
+
+
+            /*
              * Assignment
              */
+            vector &operator=(_In_ const vector &other)
+            {
+                auto v = traits::load(other._vector);
+                traits::store(v, this->_vector);
+
+                return *this;
+            }
+
             vector &operator=(_In_ const storage_type &other)
             {
-                return (*this = traits::load(other));
+                auto v = traits::load(other);
+                traits::store(v, this->_vector);
+
+                return *this;
             }
 
             vector &operator=(_In_ DirectX::FXMVECTOR other)
@@ -212,21 +274,11 @@ namespace dhorn
                 return traits_type::equals(*this, other);
             }
 
-            inline bool operator==(_In_ const vector<4> &other) const
-            {
-                using traits_type = typename garbage::vector_traits<4>;
-                return traits_type::equals(*this, other);
-            }
-
             template <int _Dim2>
             inline bool operator!=(_In_ const vector<_Dim2> &other) const
             {
-                return !(*this == other);
-            }
-
-            inline bool operator!=(_In_ const vector<4> &other) const
-            {
-                return !(*this == other);
+                using traits_type = typename garbage::vector_result_type<_Dim, _Dim2>::traits_type;
+                return traits_type::not_equals(*this, other);
             }
 
 
@@ -234,10 +286,9 @@ namespace dhorn
             /*
              * Mathematical operations
              */
-            inline vector normalize(void) const
+            inline DirectX::XMVECTOR normalize(void) const
             {
-                auto v = traits::load(this->_vector);
-                return traits::normalize(v);
+                return traits::normalize(*this);
             }
 
             inline float dot_product(_In_ const vector &other) const
@@ -259,48 +310,69 @@ namespace dhorn
             /*
              * Operator overloads
              */
-            inline vector operator-(void) const
+            inline DirectX::XMVECTOR operator-(void) const
             {
                 return DirectX::XMVectorNegate(*this);
             }
 
+
             template <int _Dim2>
-            inline vector<garbage::vector_result_type<_Dim, _Dim2>::dimension> operator+(
+            inline DirectX::XMVECTOR operator+(
                 _In_ const vector<_Dim2> &other) const
             {
-                return DirectX::XMVectorAdd(*this, other);
-            }
-
-            inline vector<4> operator+(_In_ const vector<4> &other) const
-            {
-                /* If anyone tries to perform vector + XMVECTOR, then it is impossible to
-                   statically determine the resulting dimension. Therefore, use a dimension of 4 */
                 return DirectX::XMVectorAdd(*this, other);
             }
 
             inline const vector &operator+=(_In_ const vector &other)
             {
-                *this = *this + other;
+                auto v = DirectX::XMVectorAdd(*this, other);
+                traits::store(v, this->_vector);
+
+                return *this;
+            }
+
+            inline DirectX::XMVECTOR operator+(_In_ float val) const
+            {
+                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
+                return *this + v;
+            }
+
+            inline vector &operator+=(_In_ float val)
+            {
+                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
+                auto result = *this + v;
+                traits::store(result, this->_vector);
+
                 return *this;
             }
 
             template <int _Dim2>
-            inline vector<garbage::vector_result_type<_Dim, _Dim2>::dimension> operator-(
+            inline DirectX::XMVECTOR operator-(
                 _In_ const vector<_Dim2> &other) const
             {
                 return DirectX::XMVectorSubtract(*this, other);
             }
 
-            inline vector<4> operator-(_In_ const vector<4> &other) const
-            {
-                /* If anyone tries to perform vector - XMVECTOR, then it is impossible to
-                statically determine the resulting dimension. Therefore, use a dimension of 4 */
-                return DirectX::XMVectorSubtract(*this, other);
-            }
-
             inline const vector &operator-=(_In_ const vector &other)
             {
-                *this = *this - other;
+                auto v = DirectX::XMVectorSubtract(*this, other);
+                traits::store(v, this->_vector);
+
+                return *this;
+            }
+
+            inline DirectX::XMVECTOR operator-(_In_ float val) const
+            {
+                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
+                return *this - v;
+            }
+
+            inline vector &operator-=(_In_ float val)
+            {
+                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
+                auto result = *this - v;
+                traits::store(result, this->_vector);
+
                 return *this;
             }
 
@@ -319,28 +391,17 @@ namespace dhorn
 
 
         /* Operators */
+#pragma region Operators
         template <int _Dim>
-        inline bool operator==(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
-        {
-            return rhs == lhs;
-        }
-
-        template <int _Dim>
-        inline bool operator!=(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
-        {
-            return rhs != lhs;
-        }
-
-        template <int _Dim>
-        inline vector4 operator+(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
+        inline DirectX::XMVECTOR operator+(_In_ float lhs, _In_ const vector<_Dim> &rhs)
         {
             return rhs + lhs;
         }
 
         template <int _Dim>
-        inline vector4 operator-(_In_ DirectX::FXMVECTOR lhs, _In_ const vector<_Dim> &rhs)
+        inline DirectX::XMVECTOR operator-(_In_ float lhs, _In_ const vector<_Dim> &rhs)
         {
-            return DirectX::XMVectorSubtract(lhs, rhs);
+            return vector<_Dim>(-rhs) + lhs;
         }
 
 
@@ -355,7 +416,7 @@ namespace dhorn
         template <int _Dim>
         inline bool operator==(_In_ const DirectX::XMFLOAT2 &lhs, _In_ const vector<_Dim> &rhs)
         {
-            return rhs == vector2(lhs);
+            return vector2(lhs) == rhs;
         }
 
         template <int _Dim>
@@ -367,11 +428,11 @@ namespace dhorn
         template <int _Dim>
         inline bool operator!=(_In_ const DirectX::XMFLOAT2 &lhs, _In_ const vector<_Dim> &rhs)
         {
-            return rhs != vector2(lhs);
+            return vector2(lhs) != rhs;
         }
 
         template <int _Dim>
-        inline vector<garbage::vector_result_type<_Dim, 2>::dimension> operator+(
+        inline DirectX::XMVECTOR operator+(
             _In_ const vector<_Dim> &lhs,
             _In_ const DirectX::XMFLOAT2 &rhs)
         {
@@ -379,11 +440,27 @@ namespace dhorn
         }
 
         template <int _Dim>
-        inline vector<garbage::vector_result_type<_Dim, 2>::dimension> operator+(
+        inline DirectX::XMVECTOR operator+(
             _In_ const DirectX::XMFLOAT2 &lhs,
             _In_ const vector<_Dim> &rhs)
         {
-            return rhs + vector2(lhs);
+            return vector2(lhs) + rhs;
+        }
+
+        template <int _Dim>
+        inline DirectX::XMVECTOR operator-(
+            _In_ const vector<_Dim> &lhs,
+            _In_ const DirectX::XMFLOAT2 &rhs)
+        {
+            return lhs - vector2(rhs);
+        }
+
+        template <int _Dim>
+        inline DirectX::XMVECTOR operator-(
+            _In_ const DirectX::XMFLOAT2 &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return vector2(lhs) - rhs;
         }
 
 
@@ -398,7 +475,7 @@ namespace dhorn
         template <int _Dim>
         inline bool operator==(_In_ const DirectX::XMFLOAT3 &lhs, _In_ const vector<_Dim> &rhs)
         {
-            return rhs == vector3(lhs);
+            return vector3(lhs) == rhs;
         }
 
         template <int _Dim>
@@ -410,11 +487,11 @@ namespace dhorn
         template <int _Dim>
         inline bool operator!=(_In_ const DirectX::XMFLOAT3 &lhs, _In_ const vector<_Dim> &rhs)
         {
-            return rhs != vector3(lhs);
+            return vector3(lhs) != rhs;
         }
 
         template <int _Dim>
-        inline vector<garbage::vector_result_type<_Dim, 3>::dimension> operator+(
+        inline DirectX::XMVECTOR operator+(
             _In_ const vector<_Dim> &lhs,
             _In_ const DirectX::XMFLOAT3 &rhs)
         {
@@ -422,11 +499,27 @@ namespace dhorn
         }
 
         template <int _Dim>
-        inline vector<garbage::vector_result_type<_Dim, 3>::dimension> operator+(
+        inline DirectX::XMVECTOR operator+(
             _In_ const DirectX::XMFLOAT3 &lhs,
             _In_ const vector<_Dim> &rhs)
         {
-            return rhs + vector3(lhs);
+            return vector3(lhs) + rhs;
+        }
+
+        template <int _Dim>
+        inline DirectX::XMVECTOR operator-(
+            _In_ const vector<_Dim> &lhs,
+            _In_ const DirectX::XMFLOAT3 &rhs)
+        {
+            return lhs - vector3(rhs);
+        }
+
+        template <int _Dim>
+        inline DirectX::XMVECTOR operator-(
+            _In_ const DirectX::XMFLOAT3 &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return vector3(lhs) - rhs;
         }
 
 
@@ -441,7 +534,7 @@ namespace dhorn
         template <int _Dim>
         inline bool operator==(_In_ const DirectX::XMFLOAT4 &lhs, _In_ const vector<_Dim> &rhs)
         {
-            return rhs == vector4(lhs);
+            return vector4(lhs) == rhs;
         }
 
         template <int _Dim>
@@ -453,11 +546,11 @@ namespace dhorn
         template <int _Dim>
         inline bool operator!=(_In_ const DirectX::XMFLOAT4 &lhs, _In_ const vector<_Dim> &rhs)
         {
-            return rhs != vector4(lhs);
+            return vector4(lhs) != rhs;
         }
 
         template <int _Dim>
-        inline vector<garbage::vector_result_type<_Dim, 4>::dimension> operator+(
+        inline DirectX::XMVECTOR operator+(
             _In_ const vector<_Dim> &lhs,
             _In_ const DirectX::XMFLOAT4 &rhs)
         {
@@ -465,11 +558,73 @@ namespace dhorn
         }
 
         template <int _Dim>
-        inline vector<garbage::vector_result_type<_Dim, 4>::dimension> operator+(
+        inline DirectX::XMVECTOR operator+(
             _In_ const DirectX::XMFLOAT4 &lhs,
             _In_ const vector<_Dim> &rhs)
         {
-            return rhs + vector4(lhs);
+            return vector4(lhs) + rhs;
         }
+
+        template <int _Dim>
+        inline DirectX::XMVECTOR operator-(
+            _In_ const vector<_Dim> &lhs,
+            _In_ const DirectX::XMFLOAT4 &rhs)
+        {
+            return lhs - vector4(rhs);
+        }
+
+        template <int _Dim>
+        inline DirectX::XMVECTOR operator-(
+            _In_ const DirectX::XMFLOAT4 &lhs,
+            _In_ const vector<_Dim> &rhs)
+        {
+            return vector4(lhs) - rhs;
+        }
+#pragma endregion
     }
 }
+
+
+
+#ifndef _DHORN_D3D_VECTOR_NO_OPERATORS
+inline bool operator==(_In_ DirectX::FXMVECTOR lhs, _In_ DirectX::FXMVECTOR rhs)
+{
+    return DirectX::XMVector4Equal(lhs, rhs);
+}
+
+inline bool operator!=(_In_ DirectX::FXMVECTOR lhs, _In_ DirectX::FXMVECTOR rhs)
+{
+    return DirectX::XMVector4NotEqual(lhs, rhs);
+}
+
+inline DirectX::XMVECTOR operator-(_In_ DirectX::FXMVECTOR v)
+{
+    return DirectX::XMVectorNegate(v);
+}
+
+inline DirectX::XMVECTOR operator+(
+    _In_ DirectX::FXMVECTOR lhs,
+    _In_ DirectX::FXMVECTOR rhs)
+{
+    return DirectX::XMVectorAdd(lhs, rhs);
+}
+
+inline DirectX::XMVECTOR operator-(
+    _In_ DirectX::FXMVECTOR lhs,
+    _In_ DirectX::FXMVECTOR rhs)
+{
+    return DirectX::XMVectorSubtract(lhs, rhs);
+}
+
+inline DirectX::XMVECTOR operator+(_In_ float lhs, _In_ DirectX::XMVECTOR rhs)
+{
+    auto v = DirectX::XMVectorSet(lhs, lhs, lhs, lhs);
+    return v + rhs;
+}
+
+inline DirectX::XMVECTOR operator-(_In_ float lhs, _In_ DirectX::XMVECTOR rhs)
+{
+    auto v = DirectX::XMVectorSet(lhs, lhs, lhs, lhs);
+    return v - rhs;
+}
+#endif  /* _DHORN_D3D_VECTOR_NO_OPERATORS */

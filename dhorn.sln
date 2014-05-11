@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dhorn", "dhorn.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tests", "tests\tests.vcxproj", "{D9ECEDDA-1F56-4876-AEE6-214389F991AE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "efficiency_tests", "efficiency_tests\efficiency_tests.vcxproj", "{593676EF-B372-4DFA-BA7F-250E89C2C770}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{D9ECEDDA-1F56-4876-AEE6-214389F991AE}.Debug|Win32.Build.0 = Debug|Win32
 		{D9ECEDDA-1F56-4876-AEE6-214389F991AE}.Release|Win32.ActiveCfg = Release|Win32
 		{D9ECEDDA-1F56-4876-AEE6-214389F991AE}.Release|Win32.Build.0 = Release|Win32
+		{593676EF-B372-4DFA-BA7F-250E89C2C770}.Debug|Win32.ActiveCfg = Debug|Win32
+		{593676EF-B372-4DFA-BA7F-250E89C2C770}.Debug|Win32.Build.0 = Debug|Win32
+		{593676EF-B372-4DFA-BA7F-250E89C2C770}.Release|Win32.ActiveCfg = Release|Win32
+		{593676EF-B372-4DFA-BA7F-250E89C2C770}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
