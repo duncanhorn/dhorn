@@ -3,7 +3,43 @@
  *
  * Duncan Horn
  *
- * A C++ wrapper around the DirectX Math vector
+ * A C++ wrapper around the DirectX Math vector. It is recommended that the d3d::vector class be
+ * used only for storage as well as quick and easy conversion as it is much more likely that the
+ * resulting code be much more optimized if the majority of operations work on DirectX::XMVECTOR
+ * types. It is for this reason that the return type of most d3d::vector functions be a
+ * DirectX::XMVECTOR. In the worst case (unoptimized), one operation on a d3d::vector consists of
+ * two loads, one SIMD operation, and one store whereas in the best case (fully optimized), one
+ * operation consists of no loads, one SIMD operation, and no store in the case of intermediate
+ * values. If many operations need to take place, it is recommended that you cascade these
+ * operations together like so:
+ *
+ *      result = (v1 + v2) - (v3 + v4) * 4;
+ *
+ * Alternatively, use of the C++11 keyword auto should give roughly the same results:
+ *
+ *      auto res1 = v1 + v2;
+ *      auto res2 = v3 + v4;
+ *      res2 = res2 * 4;
+ *      auto result = res1 - res2;
+ *
+ * Of course, performing the above requires that operator+, etc. be defined for the
+ * DirectX::XMVECTOR type. If you would not like these definitions for any reason (e.g. you have
+ * written your own or are using a separate library that defines them), you can compile with the
+ * _DHORN_D3D_VECTOR_NO_OPERATORS define set.
+ *
+ * In the case of non-operator function calls (e.g. cross_product, length, etc.), the
+ * left-hand-side of the operation must be a d3d::vector, so you can either explicitly assign to
+ * the relevant type and then perform the operation, or you can add a call to the constructor
+ * inline:
+ *
+ *      float result = vector3(vector3(v1 + v2).cross_product(v3)).length();
+ *
+ * In the event that you need to perform a more specific operation than offered by a function call
+ * or an operator overload, the d3d::vector provides all relevant casts that you should need. For
+ * example:
+ *
+ *      d3d::vector3 v1(...);
+ *      bool result = DirectX::XMVector3NearEqual(v1, v2, EPSILON);
  */
 #pragma once
 
@@ -58,6 +94,14 @@ namespace dhorn
                 {
                     return DirectX::XMVectorGetX(DirectX::XMVector2Cross(v1, v2));
                 }
+                static inline float length(_In_ DirectX::FXMVECTOR v)
+                {
+                    return DirectX::XMVectorGetX(DirectX::XMVector2Length(v));
+                }
+                static inline float length_sq(_In_ DirectX::FXMVECTOR v)
+                {
+                    return DirectX::XMVectorGetX(DirectX::XMVector2LengthSq(v));
+                }
             };
 
             template <>
@@ -101,6 +145,14 @@ namespace dhorn
                     _In_ DirectX::FXMVECTOR v2)
                 {
                     return DirectX::XMVector3Cross(v1, v2);
+                }
+                static inline float length(_In_ DirectX::FXMVECTOR v)
+                {
+                    return DirectX::XMVectorGetX(DirectX::XMVector3Length(v));
+                }
+                static inline float length_sq(_In_ DirectX::FXMVECTOR v)
+                {
+                    return DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(v));
                 }
             };
 
@@ -147,6 +199,14 @@ namespace dhorn
                 {
                     return DirectX::XMVector4Cross(v1, v2, v3);
                 }
+                static inline float length(_In_ DirectX::FXMVECTOR v)
+                {
+                    return DirectX::XMVectorGetX(DirectX::XMVector4Length(v));
+                }
+                static inline float length_sq(_In_ DirectX::FXMVECTOR v)
+                {
+                    return DirectX::XMVectorGetX(DirectX::XMVector4LengthSq(v));
+                }
             };
 
             template <int _Dim1, int _Dim2>
@@ -178,16 +238,14 @@ namespace dhorn
                 traits::store(DirectX::g_XMZero, this->_vector);
             }
 
-            inline vector(_In_ const vector &other)
+            inline vector(_In_ const vector &other) :
+                _vector(other._vector)
             {
-                auto v = traits::load(other);
-                traits::store(v, this->_vector);
             }
 
-            inline vector(_In_ const storage_type &other)
+            inline vector(_In_ const storage_type &other) :
+                _vector(other)
             {
-                auto v = traits::load(other);
-                traits::store(v, this->_vector);
             }
 
             inline vector(_In_ DirectX::FXMVECTOR other)
@@ -227,16 +285,14 @@ namespace dhorn
              */
             vector &operator=(_In_ const vector &other)
             {
-                auto v = traits::load(other._vector);
-                traits::store(v, this->_vector);
+                this->_vector = other._vector;
 
                 return *this;
             }
 
             vector &operator=(_In_ const storage_type &other)
             {
-                auto v = traits::load(other);
-                traits::store(v, this->_vector);
+                this->_vector = other;
 
                 return *this;
             }
@@ -303,6 +359,16 @@ namespace dhorn
                 cross_product(_In_ _Args... other) const
             {
                 return traits::cross(*this, other...);
+            }
+
+            inline float length(void) const
+            {
+                return traits::length(*this);
+            }
+
+            inline float length_sq(void) const
+            {
+                return traits::length_sq(*this);
             }
 
 
@@ -616,13 +682,13 @@ inline DirectX::XMVECTOR operator-(
     return DirectX::XMVectorSubtract(lhs, rhs);
 }
 
-inline DirectX::XMVECTOR operator+(_In_ float lhs, _In_ DirectX::XMVECTOR rhs)
+inline DirectX::XMVECTOR operator+(_In_ float lhs, _In_ DirectX::FXMVECTOR rhs)
 {
     auto v = DirectX::XMVectorSet(lhs, lhs, lhs, lhs);
     return v + rhs;
 }
 
-inline DirectX::XMVECTOR operator-(_In_ float lhs, _In_ DirectX::XMVECTOR rhs)
+inline DirectX::XMVECTOR operator-(_In_ float lhs, _In_ DirectX::FXMVECTOR rhs)
 {
     auto v = DirectX::XMVectorSet(lhs, lhs, lhs, lhs);
     return v - rhs;

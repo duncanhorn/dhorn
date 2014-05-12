@@ -671,6 +671,45 @@ namespace dhorn
                     Assert::IsTrue(scalar - vector == expect2);
                 }
             }
+
+
+
+            TEST_METHOD(LengthTest)
+            {
+                LengthTestHelper<2>();
+                LengthTestHelper<3>();
+                LengthTestHelper<4>();
+            }
+
+            template <int _Dim>
+            void LengthTestHelper(void)
+            {
+                using test_type = d3d::vector<_Dim>;
+
+                for (int i = 0; i < TEST_COUNT; i++)
+                {
+                    auto v = MakeRandomVector<_Dim>();
+                    test_type vector(v);
+
+                    float expect = DirectX::XMVectorGetX(DirectX::XMVector4Length(v));
+                    float expect_sq = DirectX::XMVectorGetX(DirectX::XMVector4LengthSq(v));
+
+                    AssertFloatingPointEqual(vector.length(), expect);
+                    AssertFloatingPointEqual(vector.length_sq(), expect_sq);
+                }
+
+                test_type v(DirectX::g_XMZero);
+                Assert::AreEqual(v.length(), 0.0f);
+                Assert::AreEqual(v.length_sq(), 0.0f);
+
+                v = test_type(DirectX::g_XMIdentityR0);
+                Assert::AreEqual(v.length(), 1.0f);
+                Assert::AreEqual(v.length_sq(), 1.0f);
+
+                v = test_type(DirectX::g_XMIdentityR1);
+                Assert::AreEqual(v.length(), 1.0f);
+                Assert::AreEqual(v.length_sq(), 1.0f);
+            }
         };
     }
 }

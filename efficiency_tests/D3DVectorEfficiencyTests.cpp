@@ -19,7 +19,7 @@
 using namespace dhorn;
 using namespace dhorn::tests;
 
-#define GLOBAL_TEST_COUNT       10000000000l
+#define GLOBAL_TEST_COUNT       2000000000l
 
 
 
@@ -64,7 +64,7 @@ DirectX::XMVECTOR GenerateRandomVector(void)
 template <int _Dim>
 static void EqualityTest(void)
 {
-    static const uint64_t TEST_COUNT = GLOBAL_TEST_COUNT / 5;
+    static const uint64_t TEST_COUNT = GLOBAL_TEST_COUNT;
     using traits = d3d::garbage::vector_traits<_Dim>;
 
     efficiency_test test;
@@ -128,7 +128,7 @@ static void NegationTest(void)
 
     // Test for -DirectX::XMVECTOR
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         v1 = DirectX::XMVectorNegate(v1);
     }
@@ -137,7 +137,7 @@ static void NegationTest(void)
 
     // Test for -d3d::vector
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         vector1 = -vector1;
     }
@@ -178,7 +178,7 @@ static void DotProductTest(void)
 
     // Test for DirectX::XMVECTOR . DirectX::XMVECTOR
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         total += DirectX::XMVectorGetX(traits::dot(v1, v2));
     }
@@ -187,7 +187,7 @@ static void DotProductTest(void)
 
     // Test for d3d::vector . d3d::vector
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         total += vector1.dot_product(vector2);
     }
@@ -225,7 +225,7 @@ static void CrossProductTest2(void)
     float total = 0;
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         total += DirectX::XMVectorGetX(DirectX::XMVector2Cross(v1, v2));
     }
@@ -233,7 +233,7 @@ static void CrossProductTest2(void)
     if (total == 0) std::cout << "hmm";
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         total += vector1.cross_product(vector2);
     }
@@ -257,7 +257,7 @@ static void CrossProductTest3(void)
     d3d::vector3 vector2(v2);
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         v1 = DirectX::XMVector3Cross(v1, v2);
     }
@@ -265,7 +265,7 @@ static void CrossProductTest3(void)
     if (DirectX::XMVectorGetX(v1) == 0) std::cout << "hmm";
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         vector1 = vector1.cross_product(vector2);
     }
@@ -291,7 +291,7 @@ static void CrossProductTest4(void)
     d3d::vector4 vector3(v3);
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         v1 = DirectX::XMVector4Cross(v1, v2, v3);
     }
@@ -299,7 +299,7 @@ static void CrossProductTest4(void)
     if (DirectX::XMVectorGetX(v1) == 0) std::cout << "hmm";
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         vector1 = vector1.cross_product(vector2, vector3);
     }
@@ -337,7 +337,7 @@ static void NormalizeTest(void)
     float total = 0;
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         total += DirectX::XMVectorGetX(traits::normalize(vector1));
     }
@@ -345,7 +345,7 @@ static void NormalizeTest(void)
     if (total == 0) std::cout << "hmm";
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         total += DirectX::XMVectorGetX(vector1.normalize());
     }
@@ -371,7 +371,7 @@ static void NormalizeTest(void)
 template <int _Dim>
 static void AdditionTest(void)
 {
-    static const uint64_t TEST_COUNT = GLOBAL_TEST_COUNT / 12;
+    static const uint64_t TEST_COUNT = GLOBAL_TEST_COUNT / 2;
     using test_type = d3d::vector<_Dim>;
 
     efficiency_test test;
@@ -390,7 +390,7 @@ static void AdditionTest(void)
     test_type vector6(v6);
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         auto t1 = DirectX::XMVectorAdd(v1, v2);
         auto t2 = DirectX::XMVectorAdd(v3, v4);
@@ -412,7 +412,7 @@ static void AdditionTest(void)
     if (DirectX::XMVectorGetX(v1) == 0) std::cout << "hmm";
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         test_type t1 = vector1 + vector2;
         test_type t2 = vector3 + vector4;
@@ -452,7 +452,7 @@ static void AdditionTest(void)
 template <int _Dim>
 static void SubtractionTest(void)
 {
-    static const uint64_t TEST_COUNT = GLOBAL_TEST_COUNT / 12;
+    static const uint64_t TEST_COUNT = GLOBAL_TEST_COUNT / 2;
     using test_type = d3d::vector<_Dim>;
 
     efficiency_test test;
@@ -471,7 +471,7 @@ static void SubtractionTest(void)
     test_type vector6(v6);
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         auto t1 = DirectX::XMVectorSubtract(v1, v2);
         auto t2 = DirectX::XMVectorSubtract(v3, v4);
@@ -493,7 +493,7 @@ static void SubtractionTest(void)
     if (DirectX::XMVectorGetX(v1) == 0) std::cout << "hmm";
 
     test.start();
-    for (int i = 0; i < TEST_COUNT; i++)
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
     {
         test_type t1 = vector1 - vector2;
         test_type t2 = vector3 - vector4;
@@ -531,6 +531,54 @@ static void SubtractionTest(void)
 
 
 template <int _Dim>
+static void LengthTest(void)
+{
+    static const uint64_t TEST_COUNT = GLOBAL_TEST_COUNT / 2;
+    using traits = d3d::garbage::vector_traits<_Dim>;
+
+    efficiency_test test;
+    auto v1 = GenerateRandomVector<_Dim>();
+
+    d3d::vector<_Dim> vector1(v1);
+
+    // To prevent optimizations
+    float total = 0;
+
+    test.start();
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
+    {
+        total += traits::length(v1);
+        total += traits::length_sq(v1);
+    }
+    test.stop();
+    if (total == 0) std::cout << "hmm";
+
+    test.start();
+    for (uint64_t i = 0; i < TEST_COUNT; i++)
+    {
+        total += vector1.length();
+        total += vector1.length_sq();
+    }
+    test.stop();
+    if (total == 0) std::cout << "hmm";
+
+    std::stringstream name;
+    name << "vector" << _Dim << " length";
+    printStats(name.str(), test.get_times());
+}
+
+static void LengthTest(void)
+{
+    LengthTest<2>();
+    LengthTest<3>();
+    LengthTest<4>();
+
+    std::cout << std::endl;
+}
+
+
+
+template <int _Dim>
 static void ArithmeticTest(void)
 {
 
@@ -550,11 +598,15 @@ void D3DVectorEfficiencyTests(void)
     printf("TEST NAME           DirectX Time        d3d::vector Time    Percentage\n");
     printf("-------------------------------------------------------------------------------\n");
 
-    EqualityTest();
-    NegationTest();
-    DotProductTest();
-    CrossProductTest();
-    NormalizeTest();
-    AdditionTest();
-    SubtractionTest();
+    //EqualityTest();
+    //NegationTest();
+    //DotProductTest();
+    //CrossProductTest();
+    //NormalizeTest();
+    //AdditionTest();
+    //SubtractionTest();
+    LengthTest();
+
+    // Situational Tests
+
 }
