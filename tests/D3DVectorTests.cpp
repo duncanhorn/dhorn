@@ -589,86 +589,59 @@ namespace dhorn
 
 
 
-            TEST_METHOD(ScalarAdditionTest)
+            TEST_METHOD(ScalarMultiplicationTest)
             {
-                ScalarAdditionTestHelper<2>();
-                ScalarAdditionTestHelper<3>();
-                ScalarAdditionTestHelper<4>();
+                ScalarMultiplicationTestHelper<2>();
+                ScalarMultiplicationTestHelper<3>();
+                ScalarMultiplicationTestHelper<4>();
             }
 
             template <int _Dim>
-            void ScalarAdditionTestHelper(void)
+            void ScalarMultiplicationTestHelper(void)
             {
-                using test_type = d3d::vector<_Dim>;
-
                 for (int i = 0; i < TEST_COUNT; i++)
                 {
+                    float scalar = (float)(RAND_MAX / 2 - rand());
+
                     auto v = MakeRandomVector<_Dim>();
-                    float scalar = rand();
+                    auto scalar_vector = DirectX::XMVectorSet(scalar, scalar, scalar, scalar);
+                    auto expect = DirectX::XMVectorMultiply(v, scalar_vector);
 
-                    auto add_v = DirectX::XMVectorSet(scalar, scalar, (_Dim >= 3) ? scalar : 0,
-                        (_Dim >= 4) ? scalar : 0);
-                    auto expect = DirectX::XMVectorAdd(v, add_v);
+                    d3d::vector<_Dim> vector(v);
+                    AssertVectorsEqual(vector * scalar, expect);
 
-                    test_type vector(v);
+                    AssertVectorsEqual(scalar * vector, expect);
 
-                    // Test for vector + scalar
-                    test_type result = vector + scalar;
-                    Assert::IsTrue(result == expect);
-                    Assert::IsTrue(vector + scalar == expect);
-
-                    // Test for vector += scalar
-                    result = vector;
-                    result += scalar;
-                    Assert::IsTrue(result == expect);
-
-                    // Test for scalar + vector
-                    result = scalar + vector;
-                    Assert::IsTrue(result == expect);
-                    Assert::IsTrue(scalar + vector == expect);
+                    vector *= scalar;
+                    AssertVectorsEqual(vector, expect);
                 }
             }
 
 
 
-            TEST_METHOD(ScalarSubtractionTest)
+            TEST_METHOD(ScalarDivisionTest)
             {
-                ScalarSubtractionTest<2>();
-                ScalarSubtractionTest<3>();
-                ScalarSubtractionTest<4>();
+                ScalarDivisionTestHelper<2>();
+                ScalarDivisionTestHelper<3>();
+                ScalarDivisionTestHelper<4>();
             }
 
             template <int _Dim>
-            void ScalarSubtractionTest(void)
+            void ScalarDivisionTestHelper(void)
             {
-                using test_type = d3d::vector<_Dim>;
-
                 for (int i = 0; i < TEST_COUNT; i++)
                 {
+                    float scalar = (float)(RAND_MAX / 2 - rand());
+
                     auto v = MakeRandomVector<_Dim>();
-                    float scalar = rand();
+                    auto scalar_vector = DirectX::XMVectorSet(scalar, scalar, scalar, scalar);
+                    auto expect = DirectX::XMVectorDivide(v, scalar_vector);
 
-                    auto sub_v = DirectX::XMVectorSet(scalar, scalar, (_Dim >= 3) ? scalar : 0,
-                        (_Dim >= 4) ? scalar : 0);
-                    auto expect = DirectX::XMVectorSubtract(v, sub_v);
-                    auto expect2 = DirectX::XMVectorSubtract(sub_v, v);
+                    d3d::vector<_Dim> vector(v);
+                    AssertVectorsEqual(vector / scalar, expect);
 
-                    test_type vector(v);
-
-                    // Test for vector - scalar
-                    test_type result = vector - scalar;
-                    Assert::IsTrue(result == expect);
-                    Assert::IsTrue(vector - scalar == expect);
-
-                    // Test for vector += scalar
-                    result = vector;
-                    result -= scalar;
-                    Assert::IsTrue(result == expect);
-
-                    // Test for scalar + vector
-                    result = scalar - vector;
-                    Assert::IsTrue(result == expect2);
-                    Assert::IsTrue(scalar - vector == expect2);
+                    vector /= scalar;
+                    AssertVectorsEqual(vector, expect);
                 }
             }
 

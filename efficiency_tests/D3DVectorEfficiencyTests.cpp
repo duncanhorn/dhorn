@@ -598,13 +598,13 @@ void D3DVectorEfficiencyTests(void)
     printf("TEST NAME           DirectX Time        d3d::vector Time    Percentage\n");
     printf("-------------------------------------------------------------------------------\n");
 
-    //EqualityTest();
-    //NegationTest();
-    //DotProductTest();
-    //CrossProductTest();
-    //NormalizeTest();
-    //AdditionTest();
-    //SubtractionTest();
+    EqualityTest();
+    NegationTest();
+    DotProductTest();
+    CrossProductTest();
+    NormalizeTest();
+    AdditionTest();
+    SubtractionTest();
     LengthTest();
 
     // Situational Tests

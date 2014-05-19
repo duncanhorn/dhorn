@@ -258,9 +258,19 @@ namespace dhorn
             /*
              * Accessors
              */
+            float x(void) const
+            {
+                return this->_vector.x;
+            }
+
             float &x(void)
             {
                 return this->_vector.x;
+            }
+
+            float y(void) const
+            {
+                return this->_vector.y();
             }
 
             float &y(void)
@@ -268,9 +278,19 @@ namespace dhorn
                 return this->_vector.y;
             }
 
+            float z(void) const
+            {
+                return this->_vector.z;
+            }
+
             float &z(void)
             {
                 return this->_vector.z;
+            }
+
+            float w(void) const
+            {
+                return this->_vector.w;
             }
 
             float &w(void)
@@ -378,37 +398,19 @@ namespace dhorn
              */
             inline DirectX::XMVECTOR operator-(void) const
             {
-                return DirectX::XMVectorNegate(*this);
+                return -(DirectX::XMVECTOR)*this;
             }
-
 
             template <int _Dim2>
             inline DirectX::XMVECTOR operator+(
                 _In_ const vector<_Dim2> &other) const
             {
-                return DirectX::XMVectorAdd(*this, other);
+                return (DirectX::XMVECTOR)*this + (DirectX::XMVECTOR)other;
             }
 
-            inline const vector &operator+=(_In_ const vector &other)
+            inline vector &operator+=(_In_ const vector &other)
             {
-                auto v = DirectX::XMVectorAdd(*this, other);
-                traits::store(v, this->_vector);
-
-                return *this;
-            }
-
-            inline DirectX::XMVECTOR operator+(_In_ float val) const
-            {
-                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
-                return *this + v;
-            }
-
-            inline vector &operator+=(_In_ float val)
-            {
-                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
-                auto result = *this + v;
-                traits::store(result, this->_vector);
-
+                *this = *this + other;
                 return *this;
             }
 
@@ -416,29 +418,34 @@ namespace dhorn
             inline DirectX::XMVECTOR operator-(
                 _In_ const vector<_Dim2> &other) const
             {
-                return DirectX::XMVectorSubtract(*this, other);
+                return (DirectX::XMVECTOR)*this - (DirectX::XMVECTOR)other;
             }
 
-            inline const vector &operator-=(_In_ const vector &other)
+            inline vector &operator-=(_In_ const vector &other)
             {
-                auto v = DirectX::XMVectorSubtract(*this, other);
-                traits::store(v, this->_vector);
-
+                *this = *this - other;
                 return *this;
             }
 
-            inline DirectX::XMVECTOR operator-(_In_ float val) const
+            inline DirectX::XMVECTOR operator*(_In_ float scalar) const
             {
-                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
-                return *this - v;
+                return (DirectX::XMVECTOR)*this * scalar;
             }
 
-            inline vector &operator-=(_In_ float val)
+            inline vector &operator*=(_In_ float scalar)
             {
-                auto v = DirectX::XMVectorSet(val, val, has_z ? val : 0, has_w ? val : 0);
-                auto result = *this - v;
-                traits::store(result, this->_vector);
+                *this = *this * scalar;
+                return *this;
+            }
 
+            inline DirectX::XMVECTOR operator/(_In_ float scalar) const
+            {
+                return (DirectX::XMVECTOR)*this / scalar;
+            }
+
+            inline vector &operator/=(_In_ float scalar)
+            {
+                *this = *this / scalar;
                 return *this;
             }
 
@@ -458,20 +465,6 @@ namespace dhorn
 
         /* Operators */
 #pragma region Operators
-        template <int _Dim>
-        inline DirectX::XMVECTOR operator+(_In_ float lhs, _In_ const vector<_Dim> &rhs)
-        {
-            return rhs + lhs;
-        }
-
-        template <int _Dim>
-        inline DirectX::XMVECTOR operator-(_In_ float lhs, _In_ const vector<_Dim> &rhs)
-        {
-            return vector<_Dim>(-rhs) + lhs;
-        }
-
-
-
         /* XMFLOAT2 */
         template <int _Dim>
         inline bool operator==(_In_ const vector<_Dim> &lhs, _In_ const DirectX::XMFLOAT2 &rhs)
@@ -653,6 +646,7 @@ namespace dhorn
 
 
 #ifndef _DHORN_D3D_VECTOR_NO_OPERATORS
+
 inline bool operator==(_In_ DirectX::FXMVECTOR lhs, _In_ DirectX::FXMVECTOR rhs)
 {
     return DirectX::XMVector4Equal(lhs, rhs);
@@ -663,34 +657,88 @@ inline bool operator!=(_In_ DirectX::FXMVECTOR lhs, _In_ DirectX::FXMVECTOR rhs)
     return DirectX::XMVector4NotEqual(lhs, rhs);
 }
 
-inline DirectX::XMVECTOR operator-(_In_ DirectX::FXMVECTOR v)
+
+
+// Bring the XMVECTOR operators into scope (but only the operators)
+DirectX::XMVECTOR XM_CALLCONV operator+(_In_ DirectX::FXMVECTOR v)
 {
-    return DirectX::XMVectorNegate(v);
+    return DirectX::operator+(v);
 }
 
-inline DirectX::XMVECTOR operator+(
-    _In_ DirectX::FXMVECTOR lhs,
-    _In_ DirectX::FXMVECTOR rhs)
+DirectX::XMVECTOR XM_CALLCONV operator-(DirectX::FXMVECTOR v)
 {
-    return DirectX::XMVectorAdd(lhs, rhs);
+    return DirectX::operator-(v);
 }
 
-inline DirectX::XMVECTOR operator-(
-    _In_ DirectX::FXMVECTOR lhs,
-    _In_ DirectX::FXMVECTOR rhs)
+
+
+DirectX::XMVECTOR &XM_CALLCONV operator+=(DirectX::XMVECTOR &lhs, DirectX::FXMVECTOR rhs)
 {
-    return DirectX::XMVectorSubtract(lhs, rhs);
+    return DirectX::operator+=(lhs, rhs);
 }
 
-inline DirectX::XMVECTOR operator+(_In_ float lhs, _In_ DirectX::FXMVECTOR rhs)
+DirectX::XMVECTOR &XM_CALLCONV operator-=(DirectX::XMVECTOR &lhs, DirectX::FXMVECTOR rhs)
 {
-    auto v = DirectX::XMVectorSet(lhs, lhs, lhs, lhs);
-    return v + rhs;
+    return DirectX::operator-=(lhs, rhs);
 }
 
-inline DirectX::XMVECTOR operator-(_In_ float lhs, _In_ DirectX::FXMVECTOR rhs)
+DirectX::XMVECTOR &XM_CALLCONV operator*=(DirectX::XMVECTOR &lhs, DirectX::FXMVECTOR rhs)
 {
-    auto v = DirectX::XMVectorSet(lhs, lhs, lhs, lhs);
-    return v - rhs;
+    return DirectX::operator*=(lhs, rhs);
 }
+
+DirectX::XMVECTOR &XM_CALLCONV operator/=(DirectX::XMVECTOR &lhs, DirectX::FXMVECTOR rhs)
+{
+    return DirectX::operator/=(lhs, rhs);
+}
+
+
+
+DirectX::XMVECTOR &operator*=(DirectX::XMVECTOR &lhs, float rhs)
+{
+    return DirectX::operator*=(lhs, rhs);
+}
+
+DirectX::XMVECTOR &operator/=(DirectX::XMVECTOR &lhs, float rhs)
+{
+    return DirectX::operator/=(lhs, rhs);
+}
+
+
+
+DirectX::XMVECTOR XM_CALLCONV operator+(DirectX::FXMVECTOR lhs, DirectX::FXMVECTOR rhs)
+{
+    return DirectX::operator+(lhs, rhs);
+}
+
+DirectX::XMVECTOR XM_CALLCONV operator-(DirectX::FXMVECTOR lhs, DirectX::FXMVECTOR rhs)
+{
+    return DirectX::operator-(lhs, rhs);
+}
+
+DirectX::XMVECTOR XM_CALLCONV operator*(DirectX::FXMVECTOR lhs, DirectX::FXMVECTOR rhs)
+{
+    return DirectX::operator*(lhs, rhs);
+}
+
+DirectX::XMVECTOR XM_CALLCONV operator/(DirectX::FXMVECTOR lhs, DirectX::FXMVECTOR rhs)
+{
+    return DirectX::operator/(lhs, rhs);
+}
+
+DirectX::XMVECTOR XM_CALLCONV operator*(DirectX::FXMVECTOR lhs, float rhs)
+{
+    return DirectX::operator*(lhs, rhs);
+}
+
+DirectX::XMVECTOR XM_CALLCONV operator*(float lhs, DirectX::FXMVECTOR rhs)
+{
+    return DirectX::operator*(lhs, rhs);
+}
+
+DirectX::XMVECTOR XM_CALLCONV operator/(DirectX::FXMVECTOR lhs, float rhs)
+{
+    return DirectX::operator/(lhs, rhs);
+}
+
 #endif  /* _DHORN_D3D_VECTOR_NO_OPERATORS */
