@@ -398,14 +398,14 @@ namespace dhorn
              */
             inline DirectX::XMVECTOR operator-(void) const
             {
-                return -(DirectX::XMVECTOR)*this;
+                return DirectX::operator-(*this);
             }
 
             template <int _Dim2>
             inline DirectX::XMVECTOR operator+(
                 _In_ const vector<_Dim2> &other) const
             {
-                return (DirectX::XMVECTOR)*this + (DirectX::XMVECTOR)other;
+                return DirectX::operator+(*this, other);
             }
 
             inline vector &operator+=(_In_ const vector &other)
@@ -415,10 +415,9 @@ namespace dhorn
             }
 
             template <int _Dim2>
-            inline DirectX::XMVECTOR operator-(
-                _In_ const vector<_Dim2> &other) const
+            inline DirectX::XMVECTOR operator-(_In_ const vector<_Dim2> &other) const
             {
-                return (DirectX::XMVECTOR)*this - (DirectX::XMVECTOR)other;
+                return DirectX::operator-(*this, other);
             }
 
             inline vector &operator-=(_In_ const vector &other)
@@ -427,9 +426,21 @@ namespace dhorn
                 return *this;
             }
 
+            template <int _Dim2>
+            inline DirectX::XMVECTOR operator*(_In_ const vector<_Dim2> &other) const
+            {
+                return DirectX::operator*(*this, other);
+            }
+
+            inline vector &operator*=(_In_ const vector &other)
+            {
+                *this = *this * other;
+                return *this;
+            }
+
             inline DirectX::XMVECTOR operator*(_In_ float scalar) const
             {
-                return (DirectX::XMVECTOR)*this * scalar;
+                return DirectX::operator*(*this, scalar);
             }
 
             inline vector &operator*=(_In_ float scalar)
@@ -440,7 +451,7 @@ namespace dhorn
 
             inline DirectX::XMVECTOR operator/(_In_ float scalar) const
             {
-                return (DirectX::XMVECTOR)*this / scalar;
+                return DirectX::operator/(*this, scalar);
             }
 
             inline vector &operator/=(_In_ float scalar)
@@ -645,8 +656,6 @@ namespace dhorn
 
 
 
-#ifndef _DHORN_D3D_VECTOR_NO_OPERATORS
-
 inline bool operator==(_In_ DirectX::FXMVECTOR lhs, _In_ DirectX::FXMVECTOR rhs)
 {
     return DirectX::XMVector4Equal(lhs, rhs);
@@ -658,6 +667,8 @@ inline bool operator!=(_In_ DirectX::FXMVECTOR lhs, _In_ DirectX::FXMVECTOR rhs)
 }
 
 
+
+#ifdef  _DHORN_D3D_VECTOR_OPERATORS
 
 // Bring the XMVECTOR operators into scope (but only the operators)
 DirectX::XMVECTOR XM_CALLCONV operator+(_In_ DirectX::FXMVECTOR v)
@@ -741,4 +752,4 @@ DirectX::XMVECTOR XM_CALLCONV operator/(DirectX::FXMVECTOR lhs, float rhs)
     return DirectX::operator/(lhs, rhs);
 }
 
-#endif  /* _DHORN_D3D_VECTOR_NO_OPERATORS */
+#endif  /* _DHORN_D3D_VECTOR_OPERATORS */

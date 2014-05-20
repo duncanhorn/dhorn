@@ -13,6 +13,7 @@
 #include "dhorn/d3d.h"
 
 using namespace dhorn;
+using namespace DirectX;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 #define TEST_COUNT          (100)
@@ -26,14 +27,14 @@ namespace dhorn
         public:
 
             template <int _Dim>
-            DirectX::XMVECTOR MakeRandomVector(void)
+            XMVECTOR MakeRandomVector(void)
             {
                 float x = (float)(RAND_MAX / 2 - rand());
                 float y = (float)(RAND_MAX / 2 - rand());
                 float z = (_Dim >= 3) ? (float)(RAND_MAX / 2 - rand()) : 0;
                 float w = (_Dim >= 4) ? (float)(RAND_MAX / 2 - rand()) : 0;
 
-                return DirectX::XMVectorSet(x, y, z, w);
+                return XMVectorSet(x, y, z, w);
             }
 
             void AssertFloatingPointEqual(_In_ float f1, _In_ float f2)
@@ -48,11 +49,11 @@ namespace dhorn
                 Assert::AreEqual(f1, f2, tolerance);
             }
 
-            void AssertVectorsEqual(_In_ DirectX::FXMVECTOR v1, _In_ DirectX::FXMVECTOR v2)
+            void AssertVectorsEqual(_In_ FXMVECTOR v1, _In_ FXMVECTOR v2)
             {
-                DirectX::XMFLOAT4 res1, res2;
-                DirectX::XMStoreFloat4(&res1, v1);
-                DirectX::XMStoreFloat4(&res2, v2);
+                XMFLOAT4 res1, res2;
+                XMStoreFloat4(&res1, v1);
+                XMStoreFloat4(&res2, v2);
 
                 AssertFloatingPointEqual(res1.w, res2.w);
                 AssertFloatingPointEqual(res1.x, res2.x);
@@ -78,7 +79,7 @@ namespace dhorn
 
                 // No-arg constructor should yield an all-zero vector
                 test_type empty;
-                Assert::IsTrue(DirectX::XMVector4Equal(empty, DirectX::g_XMZero));
+                Assert::IsTrue(XMVector4Equal(empty, g_XMZero));
 
                 // Load from the storage class
                 storage_type vector;
@@ -89,16 +90,16 @@ namespace dhorn
 
                 test_type storage(vector);
                 auto test = d3d::garbage::vector_traits<_Dim>::load(vector);
-                Assert::IsTrue(DirectX::XMVector4Equal(storage, test));
+                Assert::IsTrue(XMVector4Equal(storage, test));
 
                 // Load from an XMVECTOR
-                test = DirectX::XMVectorSet(1, 2, 3, 4);
+                test = XMVectorSet(1, 2, 3, 4);
                 test_type result(test);
 
-                DirectX::XMFLOAT4 v1;
-                DirectX::XMFLOAT4 v2;
-                DirectX::XMStoreFloat4(&v1, result);
-                DirectX::XMStoreFloat4(&v2, test);
+                XMFLOAT4 v1;
+                XMFLOAT4 v2;
+                XMStoreFloat4(&v1, result);
+                XMStoreFloat4(&v2, test);
 
                 Assert::AreEqual(v1.x, (_Dim >= 1) ? v2.x : 0);
                 Assert::AreEqual(v1.y, (_Dim >= 2) ? v2.y : 0);
@@ -134,19 +135,19 @@ namespace dhorn
                     }
 
                     vector = ty;
-                    Assert::IsTrue(DirectX::XMVector4Equal(vector, traits::load(ty)));
+                    Assert::IsTrue(XMVector4Equal(vector, traits::load(ty)));
                 }
 
                 // Test operator= with XMVECTOR
                 for (float i = 0; i < TEST_COUNT; i++)
                 {
-                    auto v = DirectX::XMVectorSet(i, i + 1, i + 2, i + 3);
+                    auto v = XMVectorSet(i, i + 1, i + 2, i + 3);
                     vector = v;
 
-                    DirectX::XMFLOAT4 v1;
-                    DirectX::XMFLOAT4 v2;
-                    DirectX::XMStoreFloat4(&v1, vector);
-                    DirectX::XMStoreFloat4(&v2, v);
+                    XMFLOAT4 v1;
+                    XMFLOAT4 v2;
+                    XMStoreFloat4(&v1, vector);
+                    XMStoreFloat4(&v2, v);
 
                     Assert::AreEqual(v1.x, (_Dim >= 1) ? v2.x : 0);
                     Assert::AreEqual(v1.y, (_Dim >= 2) ? v2.y : 0);
@@ -164,7 +165,7 @@ namespace dhorn
                 EqualityTestHelper<4>();
 
                 // Test different size vectors
-                auto vector = DirectX::XMVectorSet(1, 2, 3, 4);
+                auto vector = XMVectorSet(1, 2, 3, 4);
                 d3d::vector2 v2 = vector;
                 d3d::vector3 v3 = vector;
                 d3d::vector4 v4 = vector;
@@ -211,8 +212,8 @@ namespace dhorn
                 float z = (float)rand();
                 float w = (float)rand();
 
-                auto vector = DirectX::XMVectorSet(x, y, z, w);
-                auto expect = DirectX::XMVectorSet(x, y, (_Dim >= 3) ? z : 0, (_Dim >= 4) ? w : 0);
+                auto vector = XMVectorSet(x, y, z, w);
+                auto expect = XMVectorSet(x, y, (_Dim >= 3) ? z : 0, (_Dim >= 4) ? w : 0);
 
                 // Test for test_type == test_type
                 test_type v1 = vector;
@@ -276,7 +277,7 @@ namespace dhorn
                     auto v = MakeRandomVector<_Dim>();
                     d3d::vector<_Dim> vector(v);
 
-                    auto res1 = DirectX::XMVector4Normalize(v);
+                    auto res1 = XMVector4Normalize(v);
                     auto res2 = vector.normalize();
 
                     AssertVectorsEqual(res1, res2);
@@ -317,7 +318,7 @@ namespace dhorn
                     test1_t test1(v1);
                     test2_t test2(v2);
 
-                    float res1 = DirectX::XMVectorGetX(DirectX::XMVector4Dot(v1, v2));
+                    float res1 = XMVectorGetX(XMVector4Dot(v1, v2));
                     float res2 = test1.dot_product(v2);
 
                     AssertFloatingPointEqual(res1, res2);
@@ -337,7 +338,7 @@ namespace dhorn
                     auto v2 = MakeRandomVector<_Dim>();
 
                     test_type vector(v1);
-                    float expect = DirectX::XMVectorGetX(DirectX::XMVector4Dot(v1, v2));
+                    float expect = XMVectorGetX(XMVector4Dot(v1, v2));
                     AssertFloatingPointEqual(vector.dot_product(v2), expect);
                 }
             }
@@ -361,7 +362,7 @@ namespace dhorn
                     d3d::vector2 vector1(v1);
                     d3d::vector2 vector2(v2);
 
-                    auto expect = DirectX::XMVectorGetX(DirectX::XMVector2Cross(v1, v2));
+                    auto expect = XMVectorGetX(XMVector2Cross(v1, v2));
 
                     AssertFloatingPointEqual(expect, vector1.cross_product(vector2));
                     AssertFloatingPointEqual(expect, vector1.cross_product(v2));
@@ -380,7 +381,7 @@ namespace dhorn
                     d3d::vector3 vector1(v1);
                     d3d::vector3 vector2(v2);
 
-                    auto expect = DirectX::XMVector3Cross(v1, v2);
+                    auto expect = XMVector3Cross(v1, v2);
 
                     Assert::IsTrue(expect == vector1.cross_product(vector2));
                     Assert::IsTrue(expect == vector1.cross_product(v2));
@@ -401,7 +402,7 @@ namespace dhorn
                     d3d::vector4 vector2(v2);
                     d3d::vector4 vector3(v3);
 
-                    auto expect = DirectX::XMVector4Cross(v1, v2, v3);
+                    auto expect = XMVector4Cross(v1, v2, v3);
 
                     Assert::IsTrue(expect == vector1.cross_product(vector2, vector3));
                 }
@@ -422,7 +423,7 @@ namespace dhorn
                 auto v = MakeRandomVector<_Dim>();
                 d3d::vector<_Dim> vector(v);
 
-                AssertVectorsEqual(-vector, DirectX::XMVectorNegate(v));
+                AssertVectorsEqual(-vector, XMVectorNegate(v));
             }
 
 
@@ -456,8 +457,8 @@ namespace dhorn
                     auto v1 = MakeRandomVector<_Dim>();
                     auto v2 = MakeRandomVector<_Dim>();
                     auto v3 = MakeRandomVector<_Dim>();
-                    auto expect = DirectX::XMVectorAdd(v1, v2);
-                    expect = DirectX::XMVectorAdd(expect, v3);
+                    auto expect = XMVectorAdd(v1, v2);
+                    expect = XMVectorAdd(expect, v3);
 
                     storage_type storage;
                     traits::store(v3, storage);
@@ -488,7 +489,7 @@ namespace dhorn
                     storage_type2 storage2;
                     traits2::store(v2, storage2);
 
-                    auto expect = DirectX::XMVectorAdd(v1, v2);
+                    auto expect = XMVectorAdd(v1, v2);
 
                     d3d::vector<_Dim1> vector1(v1);
                     d3d::vector<_Dim2> vector2(v2);
@@ -537,8 +538,8 @@ namespace dhorn
                     auto v1 = MakeRandomVector<_Dim>();
                     auto v2 = MakeRandomVector<_Dim>();
                     auto v3 = MakeRandomVector<_Dim>();
-                    auto expect = DirectX::XMVectorSubtract(v1, v2);
-                    expect = DirectX::XMVectorSubtract(expect, v3);
+                    auto expect = XMVectorSubtract(v1, v2);
+                    expect = XMVectorSubtract(expect, v3);
 
                     storage_type storage;
                     traits::store(v3, storage);
@@ -569,7 +570,7 @@ namespace dhorn
                     storage_type2 storage2;
                     traits2::store(v2, storage2);
 
-                    auto expect = DirectX::XMVectorSubtract(v1, v2);
+                    auto expect = XMVectorSubtract(v1, v2);
 
                     d3d::vector<_Dim1> vector1(v1);
                     d3d::vector<_Dim2> vector2(v2);
@@ -604,8 +605,8 @@ namespace dhorn
                     float scalar = (float)(RAND_MAX / 2 - rand());
 
                     auto v = MakeRandomVector<_Dim>();
-                    auto scalar_vector = DirectX::XMVectorSet(scalar, scalar, scalar, scalar);
-                    auto expect = DirectX::XMVectorMultiply(v, scalar_vector);
+                    auto scalar_vector = XMVectorSet(scalar, scalar, scalar, scalar);
+                    auto expect = XMVectorMultiply(v, scalar_vector);
 
                     d3d::vector<_Dim> vector(v);
                     AssertVectorsEqual(vector * scalar, expect);
@@ -634,8 +635,8 @@ namespace dhorn
                     float scalar = (float)(RAND_MAX / 2 - rand());
 
                     auto v = MakeRandomVector<_Dim>();
-                    auto scalar_vector = DirectX::XMVectorSet(scalar, scalar, scalar, scalar);
-                    auto expect = DirectX::XMVectorDivide(v, scalar_vector);
+                    auto scalar_vector = XMVectorSet(scalar, scalar, scalar, scalar);
+                    auto expect = XMVectorDivide(v, scalar_vector);
 
                     d3d::vector<_Dim> vector(v);
                     AssertVectorsEqual(vector / scalar, expect);
@@ -664,22 +665,22 @@ namespace dhorn
                     auto v = MakeRandomVector<_Dim>();
                     test_type vector(v);
 
-                    float expect = DirectX::XMVectorGetX(DirectX::XMVector4Length(v));
-                    float expect_sq = DirectX::XMVectorGetX(DirectX::XMVector4LengthSq(v));
+                    float expect = XMVectorGetX(XMVector4Length(v));
+                    float expect_sq = XMVectorGetX(XMVector4LengthSq(v));
 
                     AssertFloatingPointEqual(vector.length(), expect);
                     AssertFloatingPointEqual(vector.length_sq(), expect_sq);
                 }
 
-                test_type v(DirectX::g_XMZero);
+                test_type v(g_XMZero);
                 Assert::AreEqual(v.length(), 0.0f);
                 Assert::AreEqual(v.length_sq(), 0.0f);
 
-                v = test_type(DirectX::g_XMIdentityR0);
+                v = test_type(g_XMIdentityR0);
                 Assert::AreEqual(v.length(), 1.0f);
                 Assert::AreEqual(v.length_sq(), 1.0f);
 
-                v = test_type(DirectX::g_XMIdentityR1);
+                v = test_type(g_XMIdentityR1);
                 Assert::AreEqual(v.length(), 1.0f);
                 Assert::AreEqual(v.length_sq(), 1.0f);
             }
