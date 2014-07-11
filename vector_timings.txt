@@ -1,0 +1,35 @@
+----- Starting d3d::vector efficiency tests -----
+
+TEST NAME           DirectX Time        d3d::vector Time    Percentage
+-------------------------------------------------------------------------------
+vector2 equality    3960                3990                1.008x slower
+vector3 equality    3960                4440                1.121x slower
+vector4 equality    3940                11420               2.898x slower
+
+vector2 negation    3950                5260                1.332x slower
+vector3 negation    3950                5770                1.461x slower
+vector4 negation    3940                1760                2.239x faster
+
+vector2 dot         3940                3960                1.005x slower
+vector3 dot         3950                3950                N/A
+vector4 dot         3940                3980                1.010x slower
+
+vector2 cross       3950                3950                N/A
+vector3 cross       5260                9300                1.768x slower
+vector4 cross       6750                7130                1.056x slower
+
+vector2 normalize   12340               12300               1.003x faster
+vector3 normalize   12370               12290               1.007x faster
+vector4 normalize   12370               12330               1.003x faster
+
+vector2 addition    4270                14800               3.466x slower
+vector3 addition    4280                25691               6.003x slower
+vector4 addition    4280                3720                1.151x faster
+
+vector2 subtraction 4060                14780               3.640x slower
+vector3 subtraction 4060                25670               6.323x slower
+vector4 subtraction 4060                3730                1.088x faster
+
+vector2 length      3060                3070                1.003x slower
+vector3 length      3060                3070                1.003x slower
+vector4 length      3060                3060                N/A

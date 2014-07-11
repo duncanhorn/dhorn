@@ -23,9 +23,9 @@
  *      auto result = res1 - res2;
  *
  * Of course, performing the above requires that operator+, etc. be defined for the
- * DirectX::XMVECTOR type. If you would not like these definitions for any reason (e.g. you have
- * written your own or are using a separate library that defines them), you can compile with the
- * _DHORN_D3D_VECTOR_NO_OPERATORS define set.
+ * DirectX::XMVECTOR type. If you would like these functions to live in the global namespace
+ * without adding "using namespace DirectX;" (e.g. you are using them in a header file), you can
+ * compile with _DHORN_D3D_VECTOR_OPERATORS defined.
  *
  * In the case of non-operator function calls (e.g. cross_product, length, etc.), the
  * left-hand-side of the operation must be a d3d::vector, so you can either explicitly assign to

@@ -15,5 +15,8 @@
     <ClInclude Include="include\dhorn\d3d\vector.h">
       <Filter>include\d3d</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\sockets.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
