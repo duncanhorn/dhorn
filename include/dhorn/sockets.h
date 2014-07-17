@@ -267,6 +267,8 @@ namespace dhorn
     /*
      * dhorn::udp_packet
      */
+#pragma region udp_packet
+
     template <typename _CharT>
     class basic_udp_packet
     {
@@ -276,5 +278,7 @@ namespace dhorn
 
     using upd_packet = basic_udp_packet<char>;
     using wudp_packet = basic_udp_packet<wchar_t>;
+
+#pragma endregion
 
 }
