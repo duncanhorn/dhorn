@@ -8,20 +8,20 @@
 #pragma once
 
 #include <cassert>
+#include <iostream>
 #include <string>
 
 #ifdef  WIN32
 
-/* Force the project to link against the Windows Sockets Header */
+/* Force the project to link against the Windows Sockets library */
 #pragma comment(lib, "ws2_32.lib")
 
 #include <WinSock2.h>
-//#include <in6addr.h>
 #include <WS2tcpip.h>
 
 #else
 
-#error "Your compiler is not supported by the dhorn sockets API"
+#error "Your compiler is not yet supported by the dhorn sockets API"
 
 #endif
 
@@ -262,5 +262,19 @@ namespace dhorn
 
 #pragma endregion
 
+
+
+    /*
+     * dhorn::udp_packet
+     */
+    template <typename _CharT>
+    class basic_udp_packet
+    {
+    public:
+
+    };
+
+    using upd_packet = basic_udp_packet<char>;
+    using wudp_packet = basic_udp_packet<wchar_t>;
 
 }
