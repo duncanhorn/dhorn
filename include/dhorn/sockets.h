@@ -270,7 +270,8 @@ namespace dhorn
 #pragma region udp_packet
 
     template <typename _CharT>
-    class basic_udp_packet
+    class basic_udp_packet :
+        public std::iostream
     {
     public:
 
