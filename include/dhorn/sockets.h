@@ -10,6 +10,7 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 #ifdef  WIN32
 
