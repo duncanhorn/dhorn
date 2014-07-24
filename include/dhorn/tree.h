@@ -17,8 +17,10 @@
 namespace dhorn
 {
     /*
-     * Tree Iterator Types. These types should never be referenced directly. 
+     * Tree iterator types. These types should never be referenced directly. 
      */
+#pragma region Iterators
+
     template <typename _Tree>
     class _dhorn_tree_const_iterator :
         public std::iterator<std::bidirectional_iterator_tag, _Ty>
@@ -40,7 +42,76 @@ namespace dhorn
 
     };
 
+#pragma endregion
 
+
+
+    /*
+     * Tree node class. This is an internal class and should never be referenced directly by client
+     * code as it may change/disappear without notice.
+     */
+#pragma region Tree Node
+
+    template <typename _Tree>
+    class _dhorn_tree_node
+    {
+    public:
+        using value_type = typename _Tree::value_type;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        _dhorn_tree_node(void)
+        {
+        }
+
+        _dhorn_tree_node(_In_ const _dhorn_tree_node &other)
+        {
+
+        }
+
+        _dhorn_tree_node(_Inout_ _dhorn_tree_node &&other)
+        {
+
+        }
+
+        _dhorn_tree_node(_In_ const value_type &value) :
+            _value(value)
+        {
+        }
+
+        _dhorn_tree_node(_Inout_ value_type &&value) :
+            _value(std::move(value))
+        {
+        }
+
+
+
+        value_type &value(void) _NOEXCEPT
+        {
+            return this->_value;
+        }
+
+        const value_type &value(void) const _NOEXCEPT
+        {
+            return this->_value;
+        }
+
+    private:
+
+        value_type _value;
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * dhorn::tree
+     */
+#pragma region tree
 
     template <typename _Ty, typename _Alloc = std::allocator<_Ty>>
     class tree
@@ -268,6 +339,8 @@ namespace dhorn
         allocator_type  _alloc;
         size_type       _size;
     };
+
+#pragma endregion
 }
 
 
@@ -277,7 +350,7 @@ namespace dhorn
 namespace std
 {
     template <typename _Ty, typename _Alloc>
-    void swap(_Inout_ dhorn::tree<_Ty, _Alloc> &lhs, _Inout_ dhorn::tree<_Ty, _Alloc> &rhs)
+    inline void swap(_Inout_ dhorn::tree<_Ty, _Alloc> &lhs, _Inout_ dhorn::tree<_Ty, _Alloc> &rhs)
     {
         lhs.swap(rhs);
     }

@@ -82,6 +82,7 @@
     <ClInclude Include="include\dhorn\d3d.h" />
     <ClInclude Include="include\dhorn\d3d\vector.h" />
     <ClInclude Include="include\dhorn\sockets.h" />
+    <ClInclude Include="include\dhorn\tree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,5 +18,8 @@
     <ClInclude Include="include\dhorn\sockets.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\tree.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
