@@ -12,7 +12,7 @@
 #endif  /* WIN32 */
 
 #include <algorithm>
-#include <set>
+#include <vector>
 
 namespace dhorn
 {
@@ -23,11 +23,11 @@ namespace dhorn
 
     template <typename _Tree>
     class _dhorn_tree_const_iterator :
-        public std::iterator<std::bidirectional_iterator_tag, _Ty>
+        public std::iterator<std::bidirectional_iterator_tag, typename _Tree::value_type>
     {
     public:
         using value_type = typename _Tree::value_type;
-        using difference_type = typename _Tree::difference_type;
+        using difference_type = typename _Tree::allocator_type::difference_type;
         using pointer = typename _Tree::const_pointer;
         using reference = typename _Tree::const_reference;
     };
@@ -57,38 +57,80 @@ namespace dhorn
     {
     public:
         using value_type = typename _Tree::value_type;
+        using size_type = typename _Tree::size_type;
+        using node_pointer = _dhorn_tree_node *;
 
 
 
         /*
          * Constructor(s)/Destructor
          */
-        _dhorn_tree_node(void)
+        _dhorn_tree_node(void) :
+            _size(0),
+            _front(nullptr),
+            _back(nullptr)
         {
         }
 
-        _dhorn_tree_node(_In_ const _dhorn_tree_node &other)
+        _dhorn_tree_node(_In_ const _dhorn_tree_node &other) :
+            _size(other._size),
+            _value(other._value)
         {
-
+            // TODO
         }
 
-        _dhorn_tree_node(_Inout_ _dhorn_tree_node &&other)
+        _dhorn_tree_node(_Inout_ _dhorn_tree_node &&other) :
+            _size(other._size),
+            _front(other._front),
+            _back(other._back),
+            _value(std::move(other._value))
         {
-
+            other._size = 0;
+            other._front = nullptr;
+            other._back = nullptr;
         }
 
         _dhorn_tree_node(_In_ const value_type &value) :
+            _size(0),
+            _front(nullptr),
+            _back(nullptr),
             _value(value)
         {
         }
 
         _dhorn_tree_node(_Inout_ value_type &&value) :
+            _size(0),
+            _front(nullptr),
+            _back(nullptr),
             _value(std::move(value))
         {
         }
 
+        ~_dhorn_tree_node(void)
+        {
+            // TODO
+        }
 
 
+
+        /*
+         * Assignment Operators
+         */
+        _dhorn_tree_node &operator=(_In_ const _dhorn_tree_node &other)
+        {
+
+        }
+
+        _dhorn_tree_node &operator=(_In_ _dhorn_tree_node &&other)
+        {
+
+        }
+
+
+
+        /*
+         * Accessors
+         */
         value_type &value(void) _NOEXCEPT
         {
             return this->_value;
@@ -99,9 +141,24 @@ namespace dhorn
             return this->_value;
         }
 
+
+
+        /*
+         * Capacity
+         */
+        size_type size(void) const _NOEXCEPT
+        {
+            return this->_size;
+        }
+
+
+
     private:
 
-        value_type _value;
+        value_type   _value;
+        size_type    _size;
+        node_pointer _front;
+        node_pointer _back;
     };
 
 #pragma endregion
