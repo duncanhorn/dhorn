@@ -12,7 +12,8 @@
 #endif  /* WIN32 */
 
 #include <algorithm>
-#include <vector>
+#include <cassert>
+#include <set>
 
 namespace dhorn
 {
@@ -26,10 +27,18 @@ namespace dhorn
         public std::iterator<std::bidirectional_iterator_tag, typename _Tree::value_type>
     {
     public:
+        using target_type = _Tree;
         using value_type = typename _Tree::value_type;
         using difference_type = typename _Tree::allocator_type::difference_type;
         using pointer = typename _Tree::const_pointer;
         using reference = typename _Tree::const_reference;
+        using size_type = typename _Tree::size_type;
+
+
+
+    protected:
+
+
     };
 
     template <typename _Tree>
@@ -39,7 +48,6 @@ namespace dhorn
     public:
         using pointer = typename _Tree::pointer;
         using reference = typename _Tree::reference;
-
     };
 
 #pragma endregion
@@ -56,9 +64,15 @@ namespace dhorn
     class _dhorn_tree_node
     {
     public:
+        using allocator_type = typename _Tree::allocator_type::template rebind<_dhorn_tree_node>::other;
         using value_type = typename _Tree::value_type;
         using size_type = typename _Tree::size_type;
         using node_pointer = _dhorn_tree_node *;
+        using pnode_pointer = node_pointer *;
+
+        // Nodes require the ability to hold valid references to to their parent, etc., so we need
+        // the ability to allocate an array of node_pointers as well.
+        using _Array_Alloc = typename _Tree::allocator_type::template rebind<node_pointer>::other;
 
 
 
@@ -66,49 +80,59 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         _dhorn_tree_node(void) :
-            _size(0),
+            _value{},
+            _capacity(0),
             _front(nullptr),
             _back(nullptr)
         {
+            this->_Allocate(min_capacity);
         }
 
         _dhorn_tree_node(_In_ const _dhorn_tree_node &other) :
-            _size(other._size),
-            _value(other._value)
+            _capacity(0),
+            _front(nullptr),
+            _back(nullptr),
+            _value(other._value),
+            _alloc(other._alloc),
+            _palloc(other._palloc)
         {
-            // TODO
+            this->_Copy(other);
         }
 
         _dhorn_tree_node(_Inout_ _dhorn_tree_node &&other) :
-            _size(other._size),
+            _capacity(other._capacity),
             _front(other._front),
             _back(other._back),
-            _value(std::move(other._value))
+            _value(std::move(other._value)),
+            _alloc(std::move(other._alloc)),
+            _palloc(std::move(other._palloc))
         {
-            other._size = 0;
+            other._capacity = 0;
             other._front = nullptr;
             other._back = nullptr;
         }
 
         _dhorn_tree_node(_In_ const value_type &value) :
-            _size(0),
+            _capacity(0),
             _front(nullptr),
             _back(nullptr),
             _value(value)
         {
+            this->_Allocate(min_capacity);
         }
 
         _dhorn_tree_node(_Inout_ value_type &&value) :
-            _size(0),
+            _capacity(0),
             _front(nullptr),
             _back(nullptr),
             _value(std::move(value))
         {
+            this->_Allocate(min_capacity);
         }
 
         ~_dhorn_tree_node(void)
         {
-            // TODO
+            this->_Destroy();
         }
 
 
@@ -118,12 +142,31 @@ namespace dhorn
          */
         _dhorn_tree_node &operator=(_In_ const _dhorn_tree_node &other)
         {
+            if (this != &other)
+            {
+                this->_Destroy();
 
+                this->_value = other._value;
+                this->_Copy(other);
+            }
+
+            return *this;
         }
 
         _dhorn_tree_node &operator=(_In_ _dhorn_tree_node &&other)
         {
+            this->_value = std::move(other._value);
+            this->_alloc = std::move(other._alloc);
+            this->_palloc = std::move(other._palloc);
+            this->_capacity = other._capacity;
+            this->_front = other._front;
+            this->_back = other._back;
 
+            other._capacity = 0;
+            other._front = nullptr;
+            other._back = nullptr;
+
+            return *this;
         }
 
 
@@ -144,21 +187,78 @@ namespace dhorn
 
 
         /*
-         * Capacity
+         * Size
          */
         size_type size(void) const _NOEXCEPT
         {
-            return this->_size;
+            return this->_back - this->_front;
         }
 
 
 
     private:
 
-        value_type   _value;
-        size_type    _size;
-        node_pointer _front;
-        node_pointer _back;
+        void _Allocate(_In_ size_type new_capacity = 0)
+        {
+            // Must allocate more than before
+            assert(new_capacity >= this->_capacity);
+
+            if (new_capacity < min_capacity)
+            {
+                new_capacity = min_capacity;
+            }
+
+            // Allocate space
+            this->_capacity = new_capacity;
+            auto data = this->_palloc.allocate(this->_capacity);
+
+            for (size_type i = 0; i < this->size(); i++)
+            {
+                data[i] = this->_front[i];
+            }
+
+            this->_palloc.deallocate(this->_front, this->size());
+
+            this->_back = data + this->size();
+            this->_front = data;
+        }
+
+        void _Destroy(void)
+        {
+            for (size_type i = 0; i < this->size(); i++)
+            {
+                this->_alloc.destroy(this->_front[i]);
+                this->_alloc.deallocate(this->_front[i], 1);
+            }
+
+            this->_palloc.deallocate(this->_front, this->size());
+
+            this->_capacity = 0;
+            this->_front = nullptr;
+            this->_back = nullptr;
+        }
+
+        // Must be called after copying value. This is so we can insure that the copy constructor
+        // is used for _value when appropriate
+        void _Copy(_In_ const _dhorn_tree_node &other)
+        {
+            this->_Allocate(other.size());
+
+            for (size_type i = 0; i < other.size(); i++)
+            {
+                this->_front[i] = this->_alloc.allocate(1);
+                this->_alloc.construct(this->_front[i], *other._front[i]);
+            }
+        }
+
+        static const size_type min_capacity = 5;
+
+        allocator_type _alloc;
+        _Array_Alloc   _palloc;
+        value_type     _value;
+        size_type      _capacity;
+        pnode_pointer  _front;
+        pnode_pointer  _back;
     };
 
 #pragma endregion
@@ -381,19 +481,8 @@ namespace dhorn
 
 
 
-        /*
-         * Allocator
-         */
-        allocator_type get_allocator(void) const _NOEXCEPT
-        {
-            return this->_alloc;
-        }
-
-
-
     private:
 
-        allocator_type  _alloc;
         size_type       _size;
     };
 
