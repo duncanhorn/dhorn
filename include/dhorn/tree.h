@@ -18,43 +18,6 @@
 namespace dhorn
 {
     /*
-     * Tree iterator types. These types should never be referenced directly. 
-     */
-#pragma region Iterators
-
-    template <typename _Tree>
-    class _dhorn_tree_const_iterator :
-        public std::iterator<std::bidirectional_iterator_tag, typename _Tree::value_type>
-    {
-    public:
-        using target_type = _Tree;
-        using value_type = typename _Tree::value_type;
-        using difference_type = typename _Tree::allocator_type::difference_type;
-        using pointer = typename _Tree::const_pointer;
-        using reference = typename _Tree::const_reference;
-        using size_type = typename _Tree::size_type;
-
-
-
-    protected:
-
-
-    };
-
-    template <typename _Tree>
-    class _dhorn_tree_iterator :
-        public _dhorn_tree_const_iterator<_Tree>
-    {
-    public:
-        using pointer = typename _Tree::pointer;
-        using reference = typename _Tree::reference;
-    };
-
-#pragma endregion
-
-
-
-    /*
      * Tree node class. This is an internal class and should never be referenced directly by client
      * code as it may change/disappear without notice.
      */
@@ -266,6 +229,192 @@ namespace dhorn
 
 
     /*
+    * Tree iterator types. These types should never be referenced directly.
+    */
+#pragma region Iterators
+
+    template <typename _Tree>
+    class _dhorn_tree_const_iterator :
+        public std::iterator<std::random_access_iterator_tag, typename _Tree::value_type>
+    {
+    public:
+        using value_type = typename _Tree::value_type;
+        using difference_type = typename _Tree::allocator_type::difference_type;
+        using pointer = typename _Tree::const_pointer;
+        using reference = typename _Tree::const_reference;
+        using size_type = typename _Tree::size_type;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        _dhorn_tree_const_iterator(void) :
+            _node(nullptr),
+            _parent(nullptr),
+            _target(nullptr)
+        {
+        }
+
+        _dhorn_tree_const_iterator(
+            _In_ _dhorn_tree_node<_Tree> **node,
+            _In_ _dhorn_tree_node<_Tree> *parent,
+            _In_ const _Tree *tree) :
+            _node(node),
+            _parent(parent),
+            _tree(tree)
+        {
+        }
+
+
+
+        /*
+         * Random Access Iterator Operators
+         */
+        bool operator==(_In_ const _dhorn_tree_const_iterator &itr) const
+        {
+            this->_validate_comparable(itr);
+            return this->_node == itr._node;
+        }
+
+        bool operator!=(_In_ const _dhorn_tree_const_iterator &itr) const
+        {
+            return !(*this == itr);
+        }
+
+        bool operator<(_In_ const _dhorn_tree_const_iterator &itr) const
+        {
+            this->_validate_comparable(itr);
+            return this->_node < itr._node;
+        }
+
+        bool operator<=(_In_ const _dhorn_tree_const_iterator &itr) const
+        {
+            this->_validate_comparable(itr);
+            return this->_node <= itr._node;
+        }
+
+        bool operator>(_In_ const _dhorn_tree_const_iterator &itr) const
+        {
+            return !(*this <= itr);
+        }
+
+        bool operator>=(_In_ const _dhorn_tree_const_iterator &itr) const
+        {
+            return !(*this < itr);
+        }
+
+        reference operator*(void) const
+        {
+            this->_validate_dereferenceable();
+            return (*this->_node)->value();
+        }
+
+        pointer operator->(void) const
+        {
+            this->_validate_dereferenceable();
+            return &(!this->_node)->value();
+        }
+
+        _dhorn_tree_const_iterator &operator++(void)
+        {
+            this->_validate_dereferenceable();
+            this->_node++;
+            return *this;
+        }
+
+        _dhorn_tree_const_iterator operator++(_In_ int /*unused*/)
+        {
+            this->_validate_dereferenceable();
+            auto node = *this;
+            this->_node++;
+            return node;
+        }
+
+        _dhorn_tree_const_iterator &operator--(void)
+        {
+            this->_node--;
+            this->_validate_dereferenceable();
+            return *this;
+        }
+
+        _dhorn_tree_const_iterator operator--(_In_ int /*unused*/)
+        {
+            auto node = *this;
+            this->_node--;
+            this->_validate_dereferenceable();
+            return node;
+        }
+
+        _dhorn_tree_const_iterator operator+(_In_ size_type amt)
+        {
+            auto node = *this;
+            node += amt;
+            return node;
+        }
+
+        _dhorn_tree_const_iterator &operator+=(_In_ size_type amt)
+        {
+            this->_node += amt;
+            assert(this->_node <= this->_parent->_back);
+            return *this;
+        }
+
+        _dhorn_tree_const_iterator operator-(_In_ size_type amt)
+        {
+            auto node = *this;
+            node -= amt;
+            return node;
+        }
+
+        _dhorn_tree_const_iterator operator-=(_In_ size_type amt)
+        {
+            this->_node -= amt;
+            assert(this->_node >= this->_parent->_front);
+            return *this;
+        }
+
+        reference operator[](_In_ size_type index)
+        {
+            return *(*this + index);
+        }
+
+
+
+    protected:
+
+        void _validate_comparable(_In_ const _dhorn_tree_const_iterator &itr) const
+        {
+            assert(this->_parent);
+            assert(this->_parent == itr._parent);
+        }
+
+        void _validate_dereferenceable(void) const
+        {
+            assert(this->_node);
+            assert(this->_node < this->_parent->_back);
+            assert(this->_node >= this->_parent->_front);
+        }
+
+        const _Tree             *_tree;
+        _dhorn_tree_node<_Tree> *_parent;
+        _dhorn_tree_node<_Tree> **_node;
+    };
+
+    template <typename _Tree>
+    class _dhorn_tree_iterator :
+        public _dhorn_tree_const_iterator<_Tree>
+    {
+    public:
+        using pointer = typename _Tree::pointer;
+        using reference = typename _Tree::reference;
+    };
+
+#pragma endregion
+
+
+
+    /*
      * dhorn::tree
      */
 #pragma region tree
@@ -281,6 +430,7 @@ namespace dhorn
         using _MyType = tree<_Ty, _Alloc>;
         using value_type = _Ty;
         using allocator_type = _Alloc;
+        using size_type = typename allocator_type::size_type;
         using reference = typename allocator_type::reference;
         using const_reference = typename allocator_type::const_reference;
         using pointer = typename allocator_type::pointer;
@@ -290,7 +440,6 @@ namespace dhorn
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using difference_type = typename std::iterator_traits<iterator>::difference_type;
-        using size_type = typename allocator_type::size_type;
 
 
 
