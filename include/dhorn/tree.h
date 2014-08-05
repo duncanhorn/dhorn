@@ -381,6 +381,21 @@ namespace dhorn
 
 
 
+        /*
+         * Tree iterators are special as they themselves are iterable
+         */
+        _dhorn_tree_const_iterator begin(void) const
+        {
+            return _dhorn_tree_const_iterator((*this->_node)->_front, *this->_node, this->_parent);
+        }
+
+        _dhorn_tree_const_iterator end(void) const
+        {
+            return _dhorn_tree_const_iterator((*this->_node)->_back, *this->_node, this->_parent);
+        }
+
+
+
     protected:
 
         void _validate_comparable(_In_ const _dhorn_tree_const_iterator &itr) const
