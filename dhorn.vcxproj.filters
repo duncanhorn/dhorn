@@ -21,5 +21,8 @@
     <ClInclude Include="include\dhorn\tree.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\type_traits.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
