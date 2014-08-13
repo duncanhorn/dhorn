@@ -61,7 +61,7 @@
       <UseFullPaths>true</UseFullPaths>
       <TreatWarningAsError>true</TreatWarningAsError>
       <EnablePREfast>true</EnablePREfast>
-      <DisableSpecificWarnings>4505;4127</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4505;4127;6326</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

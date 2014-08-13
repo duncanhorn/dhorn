@@ -11,6 +11,8 @@
 
 #include "dhorn\tree.h"
 #include "dhorn\type_traits.h"
+#include <type_traits>
+#include <vector>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -22,14 +24,24 @@ namespace dhorn
         {
         public:
             node_test_class(void) :
-                _moved(false)
+                _moved(false),
+                _val{}
+            {
+                instances++;
+                constructed++;
+            }
+
+            node_test_class(int val) :
+                _moved(false),
+                _val(val)
             {
                 instances++;
                 constructed++;
             }
 
             node_test_class(_In_ const node_test_class &other) :
-                _moved(false)
+                _moved(false),
+                _val(other._val)
             {
                 Assert::IsTrue(!other._moved);
 
@@ -39,7 +51,8 @@ namespace dhorn
             }
 
             node_test_class(_In_ node_test_class &&other) :
-                _moved(false)
+                _moved(false),
+                _val(other._val)
             {
                 Assert::IsTrue(!other._moved);
                 other._moved = true;
@@ -71,6 +84,11 @@ namespace dhorn
                 moves++;
 
                 return *this;
+            }
+
+            operator int(void) const
+            {
+                return this->_val;
             }
 
             int doit(void) {}
@@ -114,6 +132,7 @@ namespace dhorn
         private:
 
             bool _moved;
+            int _val;
         };
 
         int node_test_class::instances = 0;
@@ -510,33 +529,30 @@ namespace dhorn
 
             TEST_METHOD(DereferenceTest)
             {
-                dhorn::tree<int> x;
-                x.insert(std::end(x), 8);
-                x.insert(std::end(x), 42);
+                dhorn::tree<std::string> x;
+                x.insert(std::end(x), "foo");
+                x.insert(std::end(x), "bar");
 
                 auto front = std::begin(x);
                 auto cfront = std::cbegin(x);
                 auto rfront = std::rbegin(x);
                 auto crfront = std::crbegin(x);
 
-                Assert::IsTrue(*front == 8);
-                Assert::IsTrue(*cfront == 8);
-                Assert::IsTrue(*rfront == 42);
-                Assert::IsTrue(*crfront == 42);
+                Assert::IsTrue(*front == "foo");
+                Assert::IsTrue(*cfront == "foo");
+                Assert::IsTrue(*rfront == "bar");
+                Assert::IsTrue(*crfront == "bar");
 
                 // Make sure you can assign to non-const iterators and you can't to const iterators
                 Assert::IsTrue(std::is_assignable<decltype(*front), int>::value);
                 Assert::IsTrue(std::is_assignable<decltype(*rfront), int>::value);
+                Assert::IsFalse(std::is_assignable<decltype(*cfront), int>::value);
+                Assert::IsFalse(std::is_assignable<decltype(*crfront), int>::value);
 
-                // There is a bug with Visual Studio's implementation of std::is_assignable that
-                // causes the following to fail even though it should pass.
-                //Assert::IsFalse(std::is_assignable<decltype(*cfront), int>::value);
-                //Assert::IsFalse(std::is_assignable<decltype(*crfront), int>::value);
-
-                *front = 42;
-                *rfront = 8;
-                Assert::IsTrue(*front == 42);
-                Assert::IsTrue(*rfront == 8);
+                *front = "bar";
+                *rfront = "foo";
+                Assert::IsTrue(*front == "bar");
+                Assert::IsTrue(*rfront == "foo");
             }
 
             TEST_METHOD(ArrowOperatorTest)
@@ -558,10 +574,8 @@ namespace dhorn
             template <bool _IsConst, typename _It>
             void _IncrementTest(_In_ _It itr)
             {
-                // Can only assign if non-const iterator. Again, Visual Studio's bug with
-                // is_assignable causes us to be unable to run this test
-                //Assert::IsTrue(std::is_assignable<decltype(*(++itr)), int>::value == !_IsConst);
-                //Assert::IsTrue(std::is_assignable<decltype(*(itr++)), int>::value == !_IsConst);
+                Assert::IsTrue(std::is_assignable<decltype(*(++itr)), std::string>::value == !_IsConst);
+                Assert::IsTrue(std::is_assignable<decltype(*(itr++)), std::string>::value == !_IsConst);
 
                 auto val = *itr;
                 auto x = itr;
@@ -573,9 +587,9 @@ namespace dhorn
 
             TEST_METHOD(IncrementTest)
             {
-                dhorn::tree<int> x;
-                x.insert(std::end(x), 8);
-                x.insert(std::end(x), 42);
+                dhorn::tree<std::string> x;
+                x.insert(std::end(x), "foo");
+                x.insert(std::end(x), "bar");
 
                 auto front = std::begin(x);
                 auto cfront = std::cbegin(x);
@@ -587,6 +601,183 @@ namespace dhorn
                 _IncrementTest<false>(rfront);
                 _IncrementTest<true>(crfront);
             }
+
+            template <bool _IsConst, typename _It>
+            void _DecrementTest(_In_ _It itr)
+            {
+                Assert::IsTrue(std::is_assignable<decltype(*(--itr)), std::string>::value == !_IsConst);
+                Assert::IsTrue(std::is_assignable<decltype(*(itr--)), std::string>::value == !_IsConst);
+
+                // Cannot assign past the end
+                --itr;
+
+                auto val = *itr;
+                auto x = itr;
+                auto y = itr;
+
+                Assert::IsTrue(*(--x) != val);
+                Assert::IsTrue(*(y--) == val);
+            }
+
+            TEST_METHOD(DecrementTest)
+            {
+                dhorn::tree<std::string> x;
+                x.insert(std::end(x), "foo");
+                x.insert(std::end(x), "bar");
+
+                auto back = std::end(x);
+                auto cback = std::cend(x);
+                auto rback = std::rend(x);
+                auto crback = std::crend(x);
+
+                _DecrementTest<false>(back);
+                _DecrementTest<true>(cback);
+                _DecrementTest<false>(rback);
+                _DecrementTest<true>(crback);
+            }
+
+            template <bool _IsConst, typename _It>
+            void _AdditionTest(_In_ _It itr)
+            {
+                Assert::IsTrue(std::is_assignable<decltype(*(itr + 4)), std::string>::value == !_IsConst);
+                Assert::IsTrue(std::is_assignable<decltype(*(itr += 4)), std::string>::value == !_IsConst);
+
+                auto val = (*itr)[0];
+
+                Assert::IsTrue((*(itr + 4))[0] + val == '1' + '5');
+                Assert::IsTrue((*(itr += 4))[0] + val == '1' + '5');
+            }
+
+            TEST_METHOD(AdditionTest)
+            {
+                dhorn::tree<std::string> x;
+                x.insert(std::end(x), "1");
+                x.insert(std::end(x), "2");
+                x.insert(std::end(x), "3");
+                x.insert(std::end(x), "4");
+                x.insert(std::end(x), "5");
+
+                auto front = std::begin(x);
+                auto cfront = std::cbegin(x);
+                auto rfront = std::rbegin(x);
+                auto crfront = std::crbegin(x);
+
+                _AdditionTest<false>(front);
+                _AdditionTest<true>(cfront);
+                _AdditionTest<false>(rfront);
+                _AdditionTest<true>(crfront);
+            }
+
+            template <bool _IsConst, typename _It>
+            void _SubtractionTest(_In_ _It itr)
+            {
+                Assert::IsTrue(std::is_assignable<decltype(*(itr - 5)), std::string>::value == !_IsConst);
+                Assert::IsTrue(std::is_assignable<decltype(*(itr -= 5)), std::string>::value == !_IsConst);
+
+                itr -= 1;
+                auto val = (*itr)[0];
+
+                Assert::IsTrue((*(itr - 4))[0] + val == '1' + '5');
+                Assert::IsTrue((*(itr -= 4))[0] + val == '1' + '5');
+            }
+
+            TEST_METHOD(SubtractionTest)
+            {
+                dhorn::tree<std::string> x;
+                x.insert(std::end(x), "1");
+                x.insert(std::end(x), "2");
+                x.insert(std::end(x), "3");
+                x.insert(std::end(x), "4");
+                x.insert(std::end(x), "5");
+
+                auto back = std::end(x);
+                auto cback = std::cend(x);
+                auto rback = std::rend(x);
+                auto crback = std::crend(x);
+
+                _SubtractionTest<false>(back);
+                _SubtractionTest<true>(cback);
+                _SubtractionTest<false>(rback);
+                _SubtractionTest<true>(crback);
+            }
+
+            template <bool _IsConst, bool _IsReverse, typename _It>
+            void _IndexingTest(_In_ _It itr)
+            {
+                Assert::IsTrue(std::is_assignable<decltype(itr[0]), std::string>::value == !_IsConst);
+
+                for (int i = 1; i <= 5; i++)
+                {
+                    Assert::IsTrue(itr[i - 3][0] - '0' == (_IsReverse ? (6 - i) : i));
+                }
+            }
+
+            TEST_METHOD(IndexingTest)
+            {
+                dhorn::tree<std::string> x;
+                x.insert(std::end(x), "1");
+                x.insert(std::end(x), "2");
+                x.insert(std::end(x), "3");
+                x.insert(std::end(x), "4");
+                x.insert(std::end(x), "5");
+
+                _IndexingTest<false, false>(std::begin(x) + 2);
+                _IndexingTest<true, false>(std::cbegin(x) + 2);
+                _IndexingTest<false, true>(std::rbegin(x) + 2);
+                _IndexingTest<true, true>(std::crbegin(x) + 2);
+            }
+
+            TEST_METHOD(BeginEndTest)
+            {
+                // Run the above tests, but with a second level child
+                dhorn::tree<std::string> x;
+                auto itr = x.insert(std::end(x), "0");
+                x.insert(std::end(itr), "1");
+                x.insert(std::end(itr), "2");
+                x.insert(std::end(itr), "3");
+                x.insert(std::end(itr), "4");
+                x.insert(std::end(itr), "5");
+
+                auto front = std::begin(itr);
+                auto cfront = std::cbegin(itr);
+                auto rfront = std::rbegin(itr);
+                auto crfront = std::crbegin(itr);
+
+                auto back = std::end(itr);
+                auto cback = std::cend(itr);
+                auto rback = std::rend(itr);
+                auto crback = std::crend(itr);
+
+                // Increment test
+                this->_IncrementTest<false>(front);
+                this->_IncrementTest<true>(cfront);
+                this->_IncrementTest<false>(rfront);
+                this->_IncrementTest<true>(crfront);
+
+                // Decrement test
+                this->_DecrementTest<false>(back);
+                this->_DecrementTest<true>(cback);
+                this->_DecrementTest<false>(rback);
+                this->_DecrementTest<true>(crback);
+
+                // Addition test
+                this->_AdditionTest<false>(front);
+                this->_AdditionTest<true>(cfront);
+                this->_AdditionTest<false>(rfront);
+                this->_AdditionTest<true>(crfront);
+
+                // Subtraction test
+                this->_SubtractionTest<false>(back);
+                this->_SubtractionTest<true>(cback);
+                this->_SubtractionTest<false>(rback);
+                this->_SubtractionTest<true>(crback);
+
+                // Indexing test
+                this->_IndexingTest<false, false>(front + 2);
+                this->_IndexingTest<true, false>(cfront + 2);
+                this->_IndexingTest<false, true>(rfront + 2);
+                this->_IndexingTest<true, true>(crfront + 2);
+            }
         };
 
 
@@ -594,6 +785,68 @@ namespace dhorn
         TEST_CLASS(TreeTests)
         {
             using test_type = dhorn::tree<node_test_class>;
+
+            /*
+             * The test tree is generated with 10 children of the sentinel, each containing values
+             * equal to their index (0, 1, ..., 9). The i'th child has i children with values equal
+             * to (0, 1, ..., i - 1). Finally, the fourth child's (index 3) first child (index 0)
+             * has three children with values (0, 1, 2). This gives a final size of 58.
+             */
+            static dhorn::tree<int> get_test_tree(void)
+            {
+                dhorn::tree<int> tree;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    auto itr = tree.insert(std::end(tree), i);
+
+                    for (int j = 0; j < i; j++)
+                    {
+                        tree.insert(std::end(itr), j);
+                    }
+                }
+
+                auto pos = std::begin(tree) + 3;
+                pos = std::begin(pos);
+                for (int i = 0; i < 3; i++)
+                {
+                    tree.insert(std::end(pos), i);
+                }
+
+                return tree;
+            }
+
+            static void verify_test_tree(_In_ const dhorn::tree<int> &tree)
+            {
+                Assert::IsTrue(tree.size() == 58);
+
+                Assert::IsTrue(std::distance(std::begin(tree), std::end(tree)) == 10);
+                for (int i = 0; i < 10; i++)
+                {
+                    auto itr = std::begin(tree) + i;
+                    Assert::IsTrue(*itr == i);
+
+                    Assert::IsTrue(std::distance(std::begin(itr), std::end(itr)) == i);
+                    for (int j = 0; j < i; j++)
+                    {
+                        auto pos = std::begin(itr) + j;
+                        Assert::IsTrue(*pos == j);
+
+                        if (i != 3 || j != 0)
+                        {
+                            Assert::IsTrue(std::distance(std::begin(pos), std::end(pos)) == 0);
+                        }
+                        else
+                        {
+                            Assert::IsTrue(std::distance(std::begin(pos), std::end(pos)) == 3);
+                            for (int k = 0; k < 3; k++)
+                            {
+                                Assert::IsTrue(*(std::begin(pos) + k) == k);
+                            }
+                        }
+                    }
+                }
+            }
 
             TEST_METHOD(DefaultConstructorTest)
             {
@@ -608,31 +861,272 @@ namespace dhorn
 
             TEST_METHOD(CopyConstructorTest)
             {
-                // TODO
+                node_test_class::test([]()
+                {
+                    // Construct a test tree. Note that this will cause moves to occur, but that
+                    // does not matter as this is a tree of ints
+                    auto tree = get_test_tree();
+                    verify_test_tree(tree);
+
+                    dhorn::tree<int> copy(tree);
+                    verify_test_tree(copy);
+
+                    // Construct a tree where the first node has 10 children with a height of
+                    // three. This gives a total of thirty constructed, and 24 moved
+                    test_type x;
+                    auto itr = std::begin(x);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 10; j++)
+                        {
+                            itr = x.insert(itr, node_test_class());
+                            ++itr;
+                        }
+                        itr -= 9;
+                    }
+                    node_test_class::check(30, 30, 0, 30);
+
+                    test_type copy2(x);
+                    node_test_class::check(60, 60, 30, 30);
+                });
             }
 
             TEST_METHOD(MoveConstructorTest)
             {
-                // TODO
+                node_test_class::test([]()
+                {
+                    // Construct a test tree. Note that this will cause moves to occur, but that
+                    // does not matter as this is a tree of ints
+                    auto tree = get_test_tree();
+                    verify_test_tree(tree);
+
+                    dhorn::tree<int> copy(std::move(tree));
+                    verify_test_tree(copy);
+
+                    // Construct a tree where the first node has 10 children with a height of
+                    // three. This gives a total of thirty constructed, and 24 moved
+                    test_type x;
+                    auto itr = std::begin(x);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 10; j++)
+                        {
+                            itr = x.insert(itr, node_test_class());
+                            ++itr;
+                        }
+                        itr -= 9;
+                    }
+                    node_test_class::check(30, 30, 0, 30);
+
+                    test_type copy2(std::move(x));
+                    node_test_class::check(30, 30, 0, 30);
+                });
             }
 
             TEST_METHOD(AssignmentTest)
             {
-                // TODO
+                node_test_class::test([]()
+                {
+                    // Construct a test tree. Note that this will cause moves to occur, but that
+                    // does not matter as this is a tree of ints
+                    auto tree = get_test_tree();
+                    verify_test_tree(tree);
+
+                    // Make sure no optimizations are taking place
+                    dhorn::tree<int> copy;
+                    Assert::IsTrue(copy.size() == 0);
+
+                    copy = tree;
+                    verify_test_tree(copy);
+
+                    // Construct a tree where the first node has 10 children with a height of
+                    // three. This gives a total of thirty constructed, and 24 moved
+                    test_type x;
+                    auto itr = std::begin(x);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 10; j++)
+                        {
+                            itr = x.insert(itr, node_test_class());
+                            ++itr;
+                        }
+                        itr -= 9;
+                    }
+                    node_test_class::check(30, 30, 0, 30);
+
+                    // Make sure no optimizations take place
+                    test_type copy2;
+                    Assert::IsTrue(copy2.size() == 0);
+
+                    copy2 = x;
+                    node_test_class::check(60, 60, 30, 30);
+                });
             }
 
             TEST_METHOD(MoveAssignmentTest)
             {
-                // TODO
+                node_test_class::test([]()
+                {
+                    // Construct a test tree. Note that this will cause moves to occur, but that
+                    // does not matter as this is a tree of ints
+                    auto tree = get_test_tree();
+                    verify_test_tree(tree);
+
+                    // Make sure no optimizations are taking place
+                    dhorn::tree<int> copy;
+                    Assert::IsTrue(copy.size() == 0);
+
+                    copy = std::move(tree);
+                    verify_test_tree(copy);
+
+                    // Construct a tree where the first node has 10 children with a height of
+                    // three. This gives a total of thirty constructed, and 24 moved
+                    test_type x;
+                    auto itr = std::begin(x);
+                    for (int i = 0; i < 3; i++)
+                    {
+                        for (int j = 0; j < 10; j++)
+                        {
+                            itr = x.insert(itr, node_test_class());
+                            ++itr;
+                        }
+                        itr -= 9;
+                    }
+                    node_test_class::check(30, 30, 0, 30);
+
+                    // Make sure no optimizations take place
+                    test_type copy2;
+                    Assert::IsTrue(copy2.size() == 0);
+
+                    copy2 = std::move(x);
+                    node_test_class::check(30, 30, 0, 30);
+                });
             }
 
             TEST_METHOD(IteratorBeginEndTest)
             {
                 // Very simple test. Make sure begin() and end() are equal to or are not equal to
-                // each other
-                dhorn::tree<int> test;
-
+                // each other and that they have the correct values. Iterators were tested in depth in
+                // a separate test
+                dhorn::tree<std::string> test;
                 Assert::IsTrue(test.begin() == test.end());
+
+                test.insert(std::begin(test), "foo");
+                Assert::IsTrue(*std::begin(test) == "foo");
+                Assert::IsTrue(std::begin(test) != std::end(test));
+
+                const auto copy = test;
+                Assert::IsFalse(std::is_assignable<decltype(*std::begin(copy)), std::string>::value);
+                Assert::IsFalse(std::is_assignable<decltype(*std::end(copy)), std::string>::value);
+                Assert::IsTrue(std::begin(copy) != std::end(copy));
+
+                Assert::IsTrue(*test.begin() == *copy.rbegin());
+            }
+
+            TEST_METHOD(SimpleTest)
+            {
+                auto tree = get_test_tree();
+                verify_test_tree(tree);
+            }
+
+            TEST_METHOD(CapacityTest)
+            {
+                // Add breadth and depth and make sure the size updates correctly. Also test empty()
+                dhorn::tree<int> tree;
+                Assert::IsTrue(tree.empty());
+
+                for (size_t i = 0; i < 100; i++)
+                {
+                    tree.insert(std::end(tree), i);
+                    Assert::IsTrue(tree.size() == i + 1);
+                    Assert::IsTrue(!tree.empty());
+                }
+
+                auto itr = std::begin(tree);
+                for (size_t i = 0; i < 100; i++)
+                {
+                    itr = tree.insert(std::end(itr), i);
+                    Assert::IsTrue(tree.size() == i + 101);
+                    Assert::IsTrue(!tree.empty());
+                }
+            }
+
+            TEST_METHOD(InsertTest)
+            {
+                // Insert has been heavily used up until this point. This test mostly makes sure that we can
+                // properly insert at random places in the tree and that we can properly perform a move
+                // insertion
+                node_test_class::test([]()
+                {
+                    test_type x;
+
+                    // Insert such that the tree is { 9, 8, ..., 0 }
+                    for (int i = 0; i < 10; i++)
+                    {
+                        // Insert by copying val
+                        node_test_class val(i);
+                        x.insert(std::begin(x), val);
+                    }
+                    node_test_class::check(10, 20, 10, 0);
+
+                    // Make sure they are in the correct order
+                    int expected = 9;
+                    for (auto &val : x)
+                    {
+                        Assert::IsTrue(val == expected--);
+                    }
+
+                    // Now, move insert such that the order is { 9, ..., 5, 19, 18, ..., 10, 4, ..., 0 }
+                    auto pos = std::begin(x) + 5;
+                    for (int i = 10; i < 20; i++)
+                    {
+                        pos = x.insert(pos, i);
+                    }
+                    node_test_class::check(20, 30, 10, 10);
+
+                    // Make sure the correct order
+                    int index = 0;
+                    for (auto &val : x)
+                    {
+                        expected = (index < 5) ? (9 - index) : (index < 15) ? (24 - index) : (19 - index);
+                        Assert::IsTrue(val == expected);
+                        index++;
+                    }
+                });
+
+                // Test inserting a range of values
+                node_test_class::test([]()
+                {
+                    test_type y;
+                    std::vector<node_test_class> v;
+
+                    // We want to make sure the iterator returned is correct
+                    y.insert(std::end(y), node_test_class(999));
+                    y.insert(std::end(y), node_test_class(999));
+
+                    // populate the vector with values 0, ..., 9. Visual Studio's std::vector starts with a
+                    // size of zero, so we will hit a total of 4 resizes (cost of 25 additional moves)
+                    for (int i = 0; i < 10; i++)
+                    {
+                        v.push_back(node_test_class(i));
+                    }
+                    node_test_class::check(12, 12, 0, 37);
+
+                    auto itr = y.insert(std::begin(y) + 1, std::begin(v), std::end(v));
+                    node_test_class::check(22, 22, 10, 37);
+                    Assert::IsTrue(*itr == 0);
+
+                    for (int i = 1; i <= 10; i++)
+                    {
+                        Assert::IsTrue(*(std::begin(y) + i) == i - 1);
+                    }
+                });
+
+                // Test using an initializer list
+                node_test_class::test([]()
+                {
+
+                });
             }
         };
     }

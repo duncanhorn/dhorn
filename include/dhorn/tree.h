@@ -24,6 +24,9 @@ namespace dhorn
     template <typename _Tree>
     class _dhorn_tree_const_iterator;
 
+    template <typename _Tree>
+    class _dhorn_tree_iterator;
+
 
 
     /*
@@ -237,6 +240,8 @@ namespace dhorn
                 this->_front[i] = this->_alloc.allocate(1);
                 this->_alloc.construct(this->_front[i], *other._front[i]);
             }
+
+            this->_back += other.size();
         }
 
         pnode_pointer _BuySpot(_In_ pnode_pointer pos)
@@ -266,7 +271,7 @@ namespace dhorn
             return pos;
         }
 
-        static const size_type min_capacity = 5;
+        static const size_type min_capacity = 8;
 
         allocator_type _alloc;
         _Array_Alloc   _palloc;
@@ -276,6 +281,7 @@ namespace dhorn
 
         friend class tree<typename _TreeTypes::value_type, typename _TreeTypes::allocator_type>;
         friend class _dhorn_tree_const_iterator<tree<typename _TreeTypes::value_type, typename _TreeTypes::allocator_type>>;
+        friend class _dhorn_tree_iterator<tree<typename _TreeTypes::value_type, typename _TreeTypes::allocator_type>>;
     };
 
     template <typename _TreeTypes>
@@ -382,6 +388,7 @@ namespace dhorn
         using _MyType = _dhorn_tree_const_iterator<_Tree>;
         using _NodePointer = _dhorn_tree_node<typename _Tree::_TreeTypes> **;
         using _ParentPointer = const _dhorn_tree_node<typename _Tree::_TreeTypes, true> *;
+        using _ReverseIterator = typename _Tree::const_reverse_iterator;
 
     public:
         using pointer = typename _Tree::const_pointer;
@@ -492,37 +499,43 @@ namespace dhorn
             return node;
         }
 
-        _MyType operator+(_In_ size_type amt)
+        _MyType operator+(_In_ difference_type amt) const
         {
             auto node = *this;
             node += amt;
             return node;
         }
 
-        _MyType &operator+=(_In_ size_type amt)
+        _MyType &operator+=(_In_ difference_type amt)
         {
             this->_node += amt;
             assert(this->_node <= this->_parent->_back);
             return *this;
         }
 
-        _MyType operator-(_In_ size_type amt)
+        _MyType operator-(_In_ difference_type amt) const
         {
             auto node = *this;
             node -= amt;
             return node;
         }
 
-        _MyType operator-=(_In_ size_type amt)
+        _MyType operator-=(_In_ difference_type amt)
         {
             this->_node -= amt;
             assert(this->_node >= this->_parent->_front);
             return *this;
         }
 
-        reference operator[](_In_ size_type index)
+        reference operator[](_In_ difference_type index) const
         {
             return *(*this + index);
+        }
+
+        difference_type operator-(_In_ _MyType other)
+        {
+            this->_validate_comparable(other);
+            return this->_node - other._node;
         }
 
 
@@ -532,12 +545,44 @@ namespace dhorn
          */
         _MyType begin(void) const
         {
-            return _MyType((*this->_node)->_front, *this->_node, this->_parent);
+            this->_validate_dereferenceable();
+            return _MyType((*this->_node)->_front, *this->_node, this->_tree);
+        }
+
+        _MyType cbegin(void) const
+        {
+            return this->begin();
+        }
+
+        _ReverseIterator rbegin(void) const
+        {
+            return _ReverseIterator(this->end());
+        }
+
+        _ReverseIterator crbegin(void) const
+        {
+            return this->rbegin();
         }
 
         _MyType end(void) const
         {
-            return _MyType((*this->_node)->_back, *this->_node, this->_parent);
+            this->_validate_dereferenceable();
+            return _MyType((*this->_node)->_back, *this->_node, this->_tree);
+        }
+
+        _MyType cend(void) const
+        {
+            return this->end();
+        }
+
+        _ReverseIterator rend(void) const
+        {
+            return _ReverseIterator(this->begin());
+        }
+
+        _ReverseIterator crend(void) const
+        {
+            return this->rend();
         }
 
 
@@ -574,6 +619,8 @@ namespace dhorn
         using _MyBase = _dhorn_tree_const_iterator<_Tree>;
         using _NodePointer = typename _MyBase::_NodePointer;
         using _ParentPointer = typename _MyBase::_ParentPointer;
+        using _ReverseIterator = typename _Tree::reverse_iterator;
+        using _ConstReverseIterator = typename _MyBase::_ReverseIterator;
 
     public:
         using pointer = typename _Tree::pointer;
@@ -644,35 +691,35 @@ namespace dhorn
             return node;
         }
 
-        _MyType operator+(_In_ size_type amt)
+        _MyType operator+(_In_ difference_type amt) const
         {
             auto node = *this;
             node += amt;
             return node;
         }
 
-        _MyType &operator+=(_In_ size_type amt)
+        _MyType &operator+=(_In_ difference_type amt)
         {
             this->_node += amt;
             assert(this->_node <= this->_parent->_back);
             return *this;
         }
 
-        _MyType operator-(_In_ size_type amt)
+        _MyType operator-(_In_ difference_type amt) const
         {
             auto node = *this;
             node -= amt;
             return node;
         }
 
-        _MyType operator-=(_In_ size_type amt)
+        _MyType operator-=(_In_ difference_type amt)
         {
             this->_node -= amt;
             assert(this->_node >= this->_parent->_front);
             return *this;
         }
 
-        reference operator[](_In_ size_type index)
+        reference operator[](_In_ difference_type index) const
         {
             return *(*this + index);
         }
@@ -682,14 +729,46 @@ namespace dhorn
         /*
          * Tree iterators are special as they themselves are iterable
          */
-        _MyType begin(void) const
+        _MyType begin(void)
         {
-            return _MyType((*this->_node)->_front, *this->_node, this->_parent);
+            this->_validate_dereferenceable();
+            return _MyType((*this->_node)->_front, *this->_node, this->_tree);
         }
 
-        _MyType end(void) const
+        _MyBase begin(void) const
         {
-            return _MyType((*this->_node)->_back, *this->_node, this->_parent);
+            return _MyBase::begin();
+        }
+
+        _ReverseIterator rbegin(void)
+        {
+            return _ReverseIterator(this->end());
+        }
+
+        _ConstReverseIterator rbegin(void) const
+        {
+            return _MyBase::rbegin();
+        }
+
+        _MyType end(void)
+        {
+            this->_validate_dereferenceable();
+            return _MyType((*this->_node)->_back, *this->_node, this->_tree);
+        }
+
+        _MyBase end(void) const
+        {
+            return _MyBase::end();
+        }
+
+        _ReverseIterator rend(void)
+        {
+            return _ReverseIterator(this->begin());
+        }
+
+        _ConstReverseIterator rend(void) const
+        {
+            return _MyBase::rend();
         }
     };
 
@@ -737,14 +816,40 @@ namespace dhorn
             // TODO
         }
 
-        tree(_In_ const tree &other)
+        tree(_In_ const _MyType &other) :
+            _size(other._size),
+            _sentinelNode(other._sentinelNode)
         {
-            // TODO
         }
 
-        tree(_Inout_ tree &&other)
+        tree(_Inout_ _MyType &&other) :
+            _size(other._size),
+            _sentinelNode(std::move(other._sentinelNode))
         {
-            // TODO
+        }
+
+
+
+        /*
+         * Assignment Operators
+         */
+        _MyType &operator=(_In_ const _MyType &rhs)
+        {
+            if (this != &rhs)
+            {
+                this->_sentinelNode = rhs._sentinelNode;
+                this->_size = rhs._size;
+            }
+
+            return *this;
+        }
+
+        _MyType &operator=(_Inout_ _MyType &&rhs)
+        {
+            this->_sentinelNode = std::move(rhs._sentinelNode);
+            this->_size = rhs._size;
+
+            return *this;
         }
 
 
@@ -839,13 +944,13 @@ namespace dhorn
          */
         iterator insert(_In_ const_iterator pos, _In_ const value_type &val)
         {
-            auto parent = pos._parent;
+            assert(pos._tree == this);
+            auto parent = const_cast<_dhorn_tree_node<_TreeTypes, true> *>(pos._parent);
             auto loc = pos._node;
 
+            this->_size++;
             loc = parent->insert(loc, val);
-
-
-            // TODO
+            return iterator(loc, parent, this);
         }
 
         iterator insert(_In_ const_iterator pos, _Inout_ value_type &&val)
@@ -854,17 +959,24 @@ namespace dhorn
             auto parent = const_cast<_dhorn_tree_node<_TreeTypes, true> *>(pos._parent);
             auto loc = pos._node;
 
-            loc = parent->insert(loc, val);
+            this->_size++;
+            loc = parent->insert(loc, std::move(val));
             return iterator(loc, parent, this);
         }
 
         template <typename _InputIterator>
         iterator insert(_In_ const_iterator pos, _In_ _InputIterator first, _In_ _InputIterator last)
         {
+            // Cache the index of the first index
+            auto index = pos._node - pos._parent->_front;
+
             std::for_each(first, last, [&](_In_ const value_type &val)
             {
-                // TODO
+                pos = this->insert(pos, val);
+                ++pos;
             });
+
+            return iterator(pos._parent->_front + index, pos._parent, this);
         }
 
         iterator insert(_In_ const_iterator pos, _In_ std::initializer_list<value_type> list)
