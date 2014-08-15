@@ -15,6 +15,10 @@
 #include <cassert>
 #include <set>
 
+#pragma warning(push)
+#pragma warning(disable:4520)
+#pragma warning(disable:4521)
+
 namespace dhorn
 {
     // Forward declare for friend declarations
@@ -187,6 +191,11 @@ namespace dhorn
             return pos;
         }
 
+        void clear(void)
+        {
+            this->_Destroy();
+        }
+
 
 
     private:
@@ -296,8 +305,13 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         _dhorn_tree_node(void) :
-            _MyBase(),
             _value{}
+        {
+        }
+
+        _dhorn_tree_node(_In_ _dhorn_tree_node &other) :
+            _MyBase(other),
+            _value(other._value)
         {
         }
 
@@ -313,15 +327,25 @@ namespace dhorn
         {
         }
 
+        _dhorn_tree_node(_In_ value_type &value) :
+            _value(value)
+        {
+        }
+
         _dhorn_tree_node(_In_ const value_type &value) :
-            _MyBase(),
             _value(value)
         {
         }
 
         _dhorn_tree_node(_Inout_ value_type &&value) :
-            _MyBase(),
             _value(std::move(value))
+        {
+        }
+
+        template <typename... _Args,
+            typename = std::enable_if<std::is_constructible<value_type, _Args...>::value>::type>
+        explicit _dhorn_tree_node(_Inout_ _Args&&... args) :
+            _value(std::forward<_Args>(args)...)
         {
         }
 
@@ -981,7 +1005,7 @@ namespace dhorn
 
         iterator insert(_In_ const_iterator pos, _In_ std::initializer_list<value_type> list)
         {
-            return this->insert(parent, std::begin(list), std::end(list));
+            return this->insert(pos, std::begin(list), std::end(list));
         }
 
         iterator erase(_In_ const_iterator pos)
@@ -991,6 +1015,8 @@ namespace dhorn
 
         iterator erase(_In_ const_iterator first, _In_ const_iterator last)
         {
+            assert(first._parent == last._parent);
+
             // TODO
         }
 
@@ -1007,15 +1033,20 @@ namespace dhorn
 
         void clear(void) _NOEXCEPT
         {
-            // TODO
-
+            this->_sentinelNode.clear();
             this->_size = 0;
         }
 
         template <typename... _Args>
-        iterator emplace(_In_ const_iterator parent, _In_ _Args&&... args)
+        iterator emplace(_In_ const_iterator pos, _In_ _Args&&... args)
         {
-            // TODO
+            assert(pos._tree == this);
+            auto parent = const_cast<_dhorn_tree_node<_TreeTypes, true> *>(pos._parent);
+            auto loc = pos._node;
+
+            this->_size++;
+            loc = parent->emplace(loc, std::forward<_Args>(args)...);
+            return iterator(loc, parent, this);
         }
 
 
@@ -1030,6 +1061,8 @@ namespace dhorn
 
 #pragma endregion
 }
+
+#pragma warning(pop)
 
 
 

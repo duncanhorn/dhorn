@@ -1068,6 +1068,7 @@ namespace dhorn
                         x.insert(std::begin(x), val);
                     }
                     node_test_class::check(10, 20, 10, 0);
+                    Assert::IsTrue(x.size() == 10);
 
                     // Make sure they are in the correct order
                     int expected = 9;
@@ -1083,6 +1084,7 @@ namespace dhorn
                         pos = x.insert(pos, i);
                     }
                     node_test_class::check(20, 30, 10, 10);
+                    Assert::IsTrue(x.size() == 20);
 
                     // Make sure the correct order
                     int index = 0;
@@ -1097,12 +1099,13 @@ namespace dhorn
                 // Test inserting a range of values
                 node_test_class::test([]()
                 {
-                    test_type y;
+                    test_type x;
                     std::vector<node_test_class> v;
 
                     // We want to make sure the iterator returned is correct
-                    y.insert(std::end(y), node_test_class(999));
-                    y.insert(std::end(y), node_test_class(999));
+                    x.insert(std::end(x), node_test_class(999));
+                    x.insert(std::end(x), node_test_class(999));
+                    Assert::IsTrue(x.size() == 2);
 
                     // populate the vector with values 0, ..., 9. Visual Studio's std::vector starts with a
                     // size of zero, so we will hit a total of 4 resizes (cost of 25 additional moves)
@@ -1112,20 +1115,80 @@ namespace dhorn
                     }
                     node_test_class::check(12, 12, 0, 37);
 
-                    auto itr = y.insert(std::begin(y) + 1, std::begin(v), std::end(v));
+                    auto itr = x.insert(std::begin(x) + 1, std::begin(v), std::end(v));
                     node_test_class::check(22, 22, 10, 37);
+                    Assert::IsTrue(x.size() == 12);
                     Assert::IsTrue(*itr == 0);
 
                     for (int i = 1; i <= 10; i++)
                     {
-                        Assert::IsTrue(*(std::begin(y) + i) == i - 1);
+                        Assert::IsTrue(*(std::begin(x) + i) == i - 1);
                     }
                 });
 
                 // Test using an initializer list
                 node_test_class::test([]()
                 {
+                    test_type x;
+                    x.insert(std::end(x),
+                    {
+                        node_test_class(0), node_test_class(1), node_test_class(2),
+                        node_test_class(3), node_test_class(4), node_test_class(5),
+                        node_test_class(6), node_test_class(7), node_test_class(8),
+                    });
 
+                    node_test_class::check(9, 18, 9, 0);
+                    Assert::IsTrue(x.size() == 9);
+
+                    int next = 0;
+                    for (auto &val : x)
+                    {
+                        Assert::IsTrue(val == next++);
+                    }
+
+                    node_test_class::check(9, 18, 9, 0);
+                });
+            }
+
+            TEST_METHOD(ClearTest)
+            {
+                node_test_class::test([]()
+                {
+                    test_type x;
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        auto itr = x.insert(std::end(x), i);
+                        for (int j = 0; j < 10; j++)
+                        {
+                            x.insert(std::end(itr), j);
+                        }
+                    }
+
+                    node_test_class::check(110, 110, 0, 110);
+                    x.clear();
+                    node_test_class::check(0, 110, 0, 110);
+                    Assert::IsTrue(x.size() == 0);
+                });
+            }
+
+            TEST_METHOD(EmplaceTest)
+            {
+                node_test_class::test([]()
+                {
+                    test_type x;
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        auto itr = x.emplace(std::end(x), i);
+                        for (int j = 0; j < 10; j++)
+                        {
+                            x.emplace(std::end(itr), j);
+                        }
+                    }
+
+                    node_test_class::check(110, 110, 0, 0);
+                    Assert::IsTrue(x.size() == 110);
                 });
             }
         };
