@@ -132,6 +132,9 @@ namespace dhorn
 
         _dhorn_tree_node &operator=(_In_ _dhorn_tree_node &&other)
         {
+            assert(this != &other);
+            this->_Destroy();
+
             this->_alloc = std::move(other._alloc);
             this->_palloc = std::move(other._palloc);
             this->_capacity = other._capacity;
@@ -153,6 +156,18 @@ namespace dhorn
         size_type size(void) const _NOEXCEPT
         {
             return this->_back - this->_front;
+        }
+
+        size_type recursive_size(void) _NOEXCEPT
+        {
+            size_type size = this->size();
+
+            for (auto node = this->_front; node != this->_back; ++node)
+            {
+                size += (*node)->recursive_size();
+            }
+
+            return size;
         }
 
 
@@ -177,6 +192,26 @@ namespace dhorn
 
             *pos = this->_alloc.allocate(1);
             this->_alloc.construct(*pos, std::move(val));
+            return pos;
+        }
+
+        pnode_pointer erase(_In_ pnode_pointer pos)
+        {
+            assert(pos >= this->_front && pos < this->_back);
+            node_pointer toDestroy = *pos;
+
+            // Shift all elements down by one
+            for (auto loc = pos + 1; loc != this->_back; ++loc)
+            {
+                *(loc - 1) = *loc;
+            }
+            --this->_back;
+
+            this->_alloc.destroy(toDestroy);
+            this->_alloc.deallocate(toDestroy, 1);
+
+            // Since we never deallocate memory from the containing array, the output pointer (the
+            // successor) is the same as the input
             return pos;
         }
 
@@ -556,7 +591,7 @@ namespace dhorn
             return *(*this + index);
         }
 
-        difference_type operator-(_In_ _MyType other)
+        difference_type operator-(_In_ _MyType other) const
         {
             this->_validate_comparable(other);
             return this->_node - other._node;
@@ -746,6 +781,12 @@ namespace dhorn
         reference operator[](_In_ difference_type index) const
         {
             return *(*this + index);
+        }
+
+        difference_type operator-(_In_ _MyType other) const
+        {
+            this->_validate_comparable(other);
+            return this->_node - other._node;
         }
 
 
@@ -1010,14 +1051,44 @@ namespace dhorn
 
         iterator erase(_In_ const_iterator pos)
         {
-            // TODO
+            assert(pos._tree == this);
+            auto parent = const_cast<_dhorn_tree_node<_TreeTypes, true> *>(pos._parent);
+
+            auto ptr = parent->erase(pos._node);
+            this->_size--;
+
+            return iterator(ptr, pos._parent, this);
         }
 
         iterator erase(_In_ const_iterator first, _In_ const_iterator last)
         {
+            // Both iterators must have the same parent. Otherwise, they are inaccessible from each
+            // other by normal iteration
             assert(first._parent == last._parent);
+            assert(first <= last);
+            auto parent = const_cast<_dhorn_tree_node<_TreeTypes, true> *>(first._parent);
+            auto pos = first._node;
 
-            // TODO
+            // Since calling erase invalidates the iterators, we need to cache the number of
+            // elements that we are removing in total
+            auto count = std::distance(first, last);
+
+            if (first._node == parent->_front && last._node == parent->_back)
+            {
+                this->_size -= parent->recursive_size();
+                parent->clear();
+                pos = parent->_front;
+            }
+            else
+            {
+                for (difference_type i = 0; i < count; i++)
+                {
+                    this->_size -= 1 + (*pos)->recursive_size();
+                    pos = parent->erase(pos);
+                }
+            }
+
+            return iterator(pos, parent, this);
         }
 
         void swap(_Inout_ tree &other)

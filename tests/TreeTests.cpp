@@ -374,7 +374,7 @@ namespace dhorn
                 node_test_class::reset();
                 sentinel_type x, y, z;
                 y = std::move(x);
-                z = std::move(z);
+                z = std::move(y);
                 node_test_class::check(0, 0, 0, 0);
 
                 // Assignment follows the same rules as copy constructing
@@ -792,9 +792,9 @@ namespace dhorn
              * to (0, 1, ..., i - 1). Finally, the fourth child's (index 3) first child (index 0)
              * has three children with values (0, 1, 2). This gives a final size of 58.
              */
-            static dhorn::tree<int> get_test_tree(void)
+            static test_type get_test_tree(void)
             {
-                dhorn::tree<int> tree;
+                test_type tree;
 
                 for (int i = 0; i < 10; i++)
                 {
@@ -816,7 +816,7 @@ namespace dhorn
                 return tree;
             }
 
-            static void verify_test_tree(_In_ const dhorn::tree<int> &tree)
+            static void verify_test_tree(_In_ const test_type &tree)
             {
                 Assert::IsTrue(tree.size() == 58);
 
@@ -868,9 +868,12 @@ namespace dhorn
                     auto tree = get_test_tree();
                     verify_test_tree(tree);
 
-                    dhorn::tree<int> copy(tree);
+                    test_type copy(tree);
                     verify_test_tree(copy);
+                });
 
+                node_test_class::test([]()
+                {
                     // Construct a tree where the first node has 10 children with a height of
                     // three. This gives a total of thirty constructed, and 24 moved
                     test_type x;
@@ -900,9 +903,12 @@ namespace dhorn
                     auto tree = get_test_tree();
                     verify_test_tree(tree);
 
-                    dhorn::tree<int> copy(std::move(tree));
+                    test_type copy(std::move(tree));
                     verify_test_tree(copy);
+                });
 
+                node_test_class::test([]()
+                {
                     // Construct a tree where the first node has 10 children with a height of
                     // three. This gives a total of thirty constructed, and 24 moved
                     test_type x;
@@ -933,12 +939,15 @@ namespace dhorn
                     verify_test_tree(tree);
 
                     // Make sure no optimizations are taking place
-                    dhorn::tree<int> copy;
+                    test_type copy;
                     Assert::IsTrue(copy.size() == 0);
 
                     copy = tree;
                     verify_test_tree(copy);
+                });
 
+                node_test_class::test([]()
+                {
                     // Construct a tree where the first node has 10 children with a height of
                     // three. This gives a total of thirty constructed, and 24 moved
                     test_type x;
@@ -973,12 +982,15 @@ namespace dhorn
                     verify_test_tree(tree);
 
                     // Make sure no optimizations are taking place
-                    dhorn::tree<int> copy;
+                    test_type copy;
                     Assert::IsTrue(copy.size() == 0);
 
                     copy = std::move(tree);
                     verify_test_tree(copy);
+                });
 
+                node_test_class::test([]()
+                {
                     // Construct a tree where the first node has 10 children with a height of
                     // three. This gives a total of thirty constructed, and 24 moved
                     test_type x;
@@ -1190,6 +1202,252 @@ namespace dhorn
                     node_test_class::check(110, 110, 0, 0);
                     Assert::IsTrue(x.size() == 110);
                 });
+            }
+
+            TEST_METHOD(SwapTest)
+            {
+                node_test_class::test([]()
+                {
+                    test_type left, right;
+                    left = get_test_tree();
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        auto pos = right.insert(std::end(right), i);
+                        for (int j = 0; j < 10; j++)
+                        {
+                            right.insert(std::end(pos), j);
+                        }
+                    }
+
+                    // We have:
+                    //      { 58,  58,  0, 58  } for left and
+                    //      { 110, 110, 0, 110 } for right
+                    node_test_class::check(168, 168, 0, 168);
+
+                    left.swap(right);
+
+                    // Should not have caused any moves, copies, etc.
+                    node_test_class::check(168, 168, 0, 168);
+
+                    verify_test_tree(right);
+                    for (int i = 0; i < 10; i++)
+                    {
+                        auto pos = std::begin(left) + i;
+                        Assert::IsTrue(*pos == i);
+                        for (int j = 0; j < 10; j++)
+                        {
+                            auto itr = std::begin(pos) + j;
+                            Assert::IsTrue(*itr == j);
+                        }
+                    }
+
+                    // std::swap should work as well
+                    std::swap(left, right);
+                    node_test_class::check(168, 168, 0, 168);
+
+                    verify_test_tree(left);
+                    for (int i = 0; i < 10; i++)
+                    {
+                        auto pos = std::begin(right) + i;
+                        Assert::IsTrue(*pos == i);
+                        for (int j = 0; j < 10; j++)
+                        {
+                            auto itr = std::begin(pos) + j;
+                            Assert::IsTrue(*itr == j);
+                        }
+                    }
+                });
+            }
+
+            TEST_METHOD(EraseTest)
+            {
+                // Single element erase
+                node_test_class::test([]()
+                {
+                    test_type x;
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        x.insert(std::end(x), i);
+                    }
+
+                    node_test_class::check(10, 10, 0, 10);
+                    Assert::IsTrue(x.size() == 10);
+
+                    // Erase the first element
+                    auto itr = x.erase(std::begin(x));
+                    node_test_class::check(9, 10, 0, 10);
+                    Assert::IsTrue(x.size() == 9);
+                    Assert::IsTrue(*itr == 1);
+                    Assert::IsTrue(itr == std::begin(x));
+                    Assert::IsTrue(std::distance(std::begin(x), std::end(x)) == 9);
+
+                    // Erase the last element
+                    itr = x.erase(std::end(x) - 1);
+                    node_test_class::check(8, 10, 0, 10);
+                    Assert::IsTrue(x.size() == 8);
+                    Assert::IsTrue(itr == std::end(x));
+                    Assert::IsTrue(std::distance(std::begin(x), std::end(x)) == 8);
+
+                    // Check the rest
+                    for (int i = 0; i < 8; i++)
+                    {
+                        itr = std::begin(x) + i;
+                        Assert::IsTrue(*itr == i + 1);
+                    }
+
+                    // Remove from the "middle"
+                    itr = x.erase(std::begin(x) + 2);       // Removing value 3
+                    node_test_class::check(7, 10, 0, 10);
+                    Assert::IsTrue(x.size() == 7);
+                    Assert::IsTrue(*itr == 4);
+                    Assert::IsTrue(itr == std::begin(x) + 2);
+                    Assert::IsTrue(std::distance(std::begin(x), std::end(x)) == 7);
+
+
+                    // Remove the rest
+                    for (int i = 0; i < 7; i++)
+                    {
+                        itr = x.erase(std::begin(x));
+                        node_test_class::check(6 - i, 10, 0, 10);
+                        Assert::IsTrue(x.size() == (size_t)(6 - i));
+                        Assert::IsTrue(itr == std::begin(x));
+                        Assert::IsTrue(std::distance(std::begin(x), std::end(x)) == 6 - i);
+                    }
+                });
+
+                // Remove a range
+                node_test_class::test([]()
+                {
+                    auto x = get_test_tree();
+                    node_test_class::check(58, 58, 0, 58);
+
+                    // 9th index should have 9 children. Remove them all
+                    auto itr = std::begin(x) + 9;
+                    x.erase(std::begin(itr), std::end(itr));
+                    node_test_class::check(49, 58, 0, 58);
+                    Assert::IsTrue(std::begin(itr) == std::end(itr));
+                    Assert::IsTrue(x.size() == 49);
+
+                    // Remove all but the first and last (of 8) children of the 8th index
+                    itr = std::begin(x) + 8;
+                    x.erase(std::begin(itr) + 1, std::end(itr) - 1);
+                    node_test_class::check(43, 58, 0, 58);
+                    Assert::IsTrue(std::begin(itr) != std::end(itr));
+                    Assert::IsTrue(std::distance(std::begin(itr), std::end(itr)) == 2);
+                    Assert::IsTrue(x.size() == 43);
+
+                    // 3rd index has 3 children, the first of which has 3 children
+                    itr = std::begin(x) + 3;
+                    x.erase(std::begin(itr), std::begin(itr) + 2);      // removes 5 nodes in total
+                    node_test_class::check(38, 58, 0, 58);
+                    Assert::IsTrue(std::begin(itr) != std::end(itr));
+                    Assert::IsTrue(*std::begin(itr) == 2);
+                    Assert::IsTrue(std::distance(std::begin(itr), std::end(itr)) == 1);
+                    Assert::IsTrue(x.size() == 38);
+
+                    // Remove the rest
+                    x.erase(std::begin(x), std::end(x));
+                    node_test_class::check(0, 58, 0, 58);
+                    Assert::IsTrue(std::begin(x) == std::end(x));
+                    Assert::IsTrue(x.size() == 0);
+                });
+
+                // Just make sure that erasing a range works with large-ish height
+                node_test_class::test([]()
+                {
+                    auto x = get_test_tree();
+                    node_test_class::check(58, 58, 0, 58);
+
+                    // Remove all children
+                    x.erase(std::begin(x), std::end(x));
+                    node_test_class::check(0, 58, 0, 58);
+                    Assert::IsTrue(std::begin(x) == std::end(x));
+                    Assert::IsTrue(x.size() == 0);
+                });
+            }
+
+            TEST_METHOD(MemoryLeakTest)
+            {
+                // All previous tests should give a good indication of whether or not there are
+                // memory leaks, but don't explicitly test for it. It would be ideal to run all
+                // previous tests without the validity checks, but I'm unsure if that is possible.
+                // Instead, we replicate the situations that are likely to produce memory leaks and
+                // just check those.
+                _CrtMemState startState;
+                _CrtMemCheckpoint(&startState);
+
+                node_test_class::test([]()
+                {
+                    // Simple test. Create a tree, then destroy it
+                    test_type x = get_test_tree();
+                    verify_test_tree(x);
+                });
+
+                node_test_class::test([]()
+                {
+                    // Copy
+                    auto x = get_test_tree();
+                    test_type y(x);
+                    verify_test_tree(x);
+                    verify_test_tree(y);
+                });
+
+                node_test_class::test([]()
+                {
+                    // Move
+                    auto x = get_test_tree();
+                    test_type y(std::move(x));
+                    verify_test_tree(y);
+                });
+
+                node_test_class::test([]()
+                {
+                    // Copy assignment
+                    auto x = get_test_tree();
+                    test_type y;
+
+                    auto itr = y.insert(std::end(y), 0);
+                    itr = y.insert(std::end(itr), 1);
+
+                    Assert::IsTrue(y.size() == 2);
+                    verify_test_tree(x);
+
+                    y = x;
+                    verify_test_tree(x);
+                    verify_test_tree(y);
+                });
+
+                node_test_class::test([]()
+                {
+                    // Move assignment
+                    auto x = get_test_tree();
+                    test_type y;
+
+                    auto itr = y.insert(std::end(y), 0);
+                    itr = y.insert(std::end(itr), 1);
+
+                    Assert::IsTrue(y.size() == 2);
+                    verify_test_tree(x);
+
+                    y = std::move(x);
+                    verify_test_tree(y);
+                });
+
+                node_test_class::test([]()
+                {
+                    // Remove all elements before the tree is destroyed
+                    test_type x = get_test_tree();
+                    x.erase(std::begin(x), std::end(x));
+                });
+
+                // Compare ending state of the heap to the initial state
+                _CrtMemState endState;
+                _CrtMemCheckpoint(&endState);
+
+                _CrtMemState diff;
+                Assert::IsTrue(!_CrtMemDifference(&diff, &startState, &endState));
             }
         };
     }
