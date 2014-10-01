@@ -104,6 +104,7 @@
     </ClCompile>
     <ClCompile Include="D3DVectorTests.cpp" />
     <ClCompile Include="TreeTests.cpp" />
+    <ClCompile Include="WindowsTests.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

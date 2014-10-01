@@ -65,6 +65,48 @@ namespace dhorn
             using ip_addr = in6_addr;
             static const int max_string_len = 46;
         };
+
+
+
+        /*
+         * sockets_string_traits
+         */
+        template <typename _CharT, address_family _Af>
+        struct sockets_string_traits {};
+
+        template <address_family _Af>
+        struct sockets_string_traits<char, _Af>
+        {
+            using _MyTraits = address_family_traits<_Af>;
+            using ip_addr = typename _MyTraits::ip_addr;
+
+            inline static std::string n_to_p(_In_ const ip_addr &addr)
+            {
+                char buff[_MyTraits::max_string_len + 1];
+
+                auto result = InetNtopA(_Af, (PVOID)&addr, buff, sizeof(buff));
+                assert(result);
+
+                return buff;
+            }
+        };
+
+        template <address_family _Af>
+        struct sockets_string_traits<wchar_t, _Af>
+        {
+            using _MyTraits = address_family_traits<_Af>;
+            using ip_addr = typename _MyTraits::ip_addr;
+
+            inline static std::wstring n_to_p(_In_ const ip_addr &addr)
+            {
+                wchar_t buff[_MyTraits::max_string_len + 1];
+
+                auto result = InetNtopW(_Af, (PVOID)&addr, buff, sizeof(buff) / 2);
+                assert(result);
+
+                return buff;
+            }
+        };
     }
 
 
@@ -77,12 +119,14 @@ namespace dhorn
     template <address_family _Af>
     class ip_address
     {
+        using _MyTraits = garbage::address_family_traits<_Af>;
+
     public:
 
         /*
          * Type/Value Definitions
          */
-        using ip_addr = typename garbage::address_family_traits<_Af>::ip_addr;
+        using ip_addr = typename _MyTraits::ip_addr;
         static const address_family family = _Af;
 
 
@@ -178,7 +222,7 @@ namespace dhorn
         template <typename _CharT = char>
         std::basic_string<_CharT> str(void) const
         {
-            return string_converter<_CharT>::to_string(this->_addr);
+            return garbage::sockets_string_traits<_CharT, _Af>::n_to_p(this->_addr);
         }
 
         bool fail(void) const
@@ -217,42 +261,6 @@ namespace dhorn
 
 
 
-        /*
-         * ip_addr to string conversion
-         */
-        template <typename _CharT>
-        struct string_converter {};
-
-        template <>
-        struct string_converter<char>
-        {
-            static std::string to_string(_In_ const ip_addr &addr)
-            {
-                char buff[garbage::address_family_traits<_Af>::max_string_len + 1];
-
-                auto result = InetNtopA(_Af, (PVOID)&addr, buff, sizeof(buff));
-                assert(result);
-
-                return buff;
-            }
-        };
-
-        template <>
-        struct string_converter<wchar_t>
-        {
-            static std::wstring to_string(_In_ const ip_addr &addr)
-            {
-                wchar_t buff[garbage::address_family_traits<_Af>::max_string_len + 1];
-
-                auto result = InetNtopW(_Af, (PVOID)&addr, buff, sizeof(buff) / 2);
-                assert(result);
-
-                return buff;
-            }
-        };
-
-
-
         ip_addr        _addr;
         socket_error_t _error;
         bool           _fail;
@@ -266,21 +274,11 @@ namespace dhorn
 
 
     /*
-     * dhorn::udp_packet
+     *
      */
-#pragma region udp_packet
+#pragma region
 
-    template <typename _CharT>
-    class basic_udp_packet :
-        public std::iostream
-    {
-    public:
 
-    };
-
-    using upd_packet = basic_udp_packet<char>;
-    using wudp_packet = basic_udp_packet<wchar_t>;
 
 #pragma endregion
-
 }

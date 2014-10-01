@@ -7,6 +7,9 @@
     <Filter Include="include\d3d">
       <UniqueIdentifier>{9c283b65-6d25-44e6-a072-b51f51168f40}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\windows">
+      <UniqueIdentifier>{4bda7774-65ee-4685-bb92-1466e1b4b3ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\d3d.h">
@@ -23,6 +26,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\type_traits.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\windows\windows.h">
+      <Filter>include\windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
