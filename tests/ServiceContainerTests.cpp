@@ -261,12 +261,26 @@ namespace dhorn
                 Assert::IsTrue(ptr->val == 8);
                 Assert::IsTrue(x.size() == 1);
 
+                // Cannot find
+                try
+                {
+                    x.find<test_type_1>();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::service_not_published &e)
+                {
+                    Assert::IsTrue(e.what() == std::string("service_not_published : struct dhorn::test_type_1"));
+                }
+
                 // Should be able to add test_type_1 again
                 x.insert(new test_type_1());
                 Assert::IsTrue(x.find<test_type_1>()->val == 8);
                 Assert::IsTrue(x.size() == 2);
                 Assert::IsTrue(x.remove<test_type_1>()->val == 8);
                 Assert::IsTrue(x.size() == 1);
+
+                // Can still find test_type_2
+                Assert::IsTrue(x.find<test_type_2>()->val == 42);
 
                 // Attempting to remove test_type_1 again should give an exception
                 try
