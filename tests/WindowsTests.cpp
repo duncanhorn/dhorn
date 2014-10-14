@@ -9,7 +9,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
-#include "dhorn\windows\windows.h"
+#include "dhorn/windows/windows.h"
 #include <functional>
 #include <vector>
 
@@ -781,6 +781,56 @@ namespace dhorn
                     Assert::IsTrue(strcmp(message, result) == 0);
                 }
 
+                // Try to create bogus file (should throw)
+                try
+                {
+                    {
+                        auto h = dhorn::win32::create_file(L"this\\is\\bogus.txt", GENERIC_READ, 0,
+                            nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL);
+                    }
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::win32::win32_exception &e)
+                {
+                    Assert::IsTrue(e.get_status() == ERROR_PATH_NOT_FOUND);
+                }
+            }
+        };
+
+
+
+        /*
+         * Window Function Tests
+         */
+        TEST_CLASS(WindowFunctionTests)
+        {
+            TEST_METHOD(AdjustWindowRectTest)
+            {
+                // Should be larger than what we provide
+                RECT input{ 0, 0, 100, 100 };
+                RECT output = dhorn::win32::adjust_window_rect(input, WS_OVERLAPPEDWINDOW, false);
+                Assert::IsTrue((output.right - output.left > 100));
+                Assert::IsTrue((output.bottom - output.top) > 100);
+
+                // Test the Ex version
+                output = dhorn::win32::adjust_window_rect(input, WS_OVERLAPPED, false, WS_EX_OVERLAPPEDWINDOW);
+                Assert::IsTrue((output.right - output.left > 100));
+                Assert::IsTrue((output.bottom - output.top) > 100);
+            }
+
+            TEST_METHOD(AllowSetForegroundWindowTest)
+            {
+                // Allowing random pid to set foreground window should cause an exception with
+                // high probability
+                try
+                {
+                    dhorn::win32::allow_set_foreground_window(87322456);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::win32::win32_exception &e)
+                {
+                    Assert::IsTrue(e.get_status() == ERROR_INVALID_PARAMETER);
+                }
             }
         };
     }

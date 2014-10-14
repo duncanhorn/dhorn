@@ -81,6 +81,8 @@
   <ItemGroup>
     <ClInclude Include="include\dhorn\d3d.h" />
     <ClInclude Include="include\dhorn\d3d\vector.h" />
+    <ClInclude Include="include\dhorn\uuid.h" />
+    <ClInclude Include="include\dhorn\service_container.h" />
     <ClInclude Include="include\dhorn\sockets.h" />
     <ClInclude Include="include\dhorn\tree.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
