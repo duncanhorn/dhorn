@@ -85,12 +85,58 @@ namespace dhorn
 
             TEST_METHOD(MoveConstructorTest)
             {
-                // TODO
+                dhorn::service_container x;
+
+                x.insert(new test_type_1());
+                x.insert(new test_type_2());
+                Assert::IsTrue(x.size() == 2);
+
+                dhorn::service_container y(std::move(x));
+                Assert::IsTrue(y.size() == 2);
+
+                // Pointers should still be there
+                Assert::IsTrue(y.find<test_type_1>()->val == 8);
+                Assert::IsTrue(y.find<test_type_2>()->val == 42);
+
+                // Shouldn't be able to find fake_test_type_1
+                try
+                {
+                    y.find<fake_test_type_1>();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::service_not_published &)
+                {
+                }
             }
 
             TEST_METHOD(MoveAssignmentTest)
             {
-                // TODO
+                dhorn::service_container y;
+                {
+                    dhorn::service_container x;
+
+                    x.insert(new test_type_1());
+                    x.insert(new test_type_2());
+                    Assert::IsTrue(x.size() == 2);
+                    Assert::IsTrue(y.empty());
+
+                    y = std::move(x);
+                }
+                Assert::IsTrue(y.size() == 2);
+
+                // Pointers should still be there
+                Assert::IsTrue(y.find<test_type_1>()->val == 8);
+                Assert::IsTrue(y.find<test_type_2>()->val == 42);
+
+                // Shouldn't be able to find fake_test_type_1
+                try
+                {
+                    y.find<fake_test_type_1>();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::service_not_published &)
+                {
+                }
             }
 
             TEST_METHOD(PointerInsertTest)
@@ -187,6 +233,28 @@ namespace dhorn
                 Assert::IsTrue(x.size() == 2);
             }
 
+            TEST_METHOD(AllocateTest)
+            {
+                dhorn::service_container x;
+                Assert::IsTrue(x.size() == 0);
+                Assert::IsTrue(x.empty());
+
+                x.allocate<test_type_1>(std::allocator<test_type_1>());
+                Assert::IsTrue(x.size() == 1);
+                Assert::IsTrue(!x.empty());
+                Assert::IsTrue(x.find<test_type_1>()->val == 8);
+
+                // Cannot add again
+                try
+                {
+                    x.allocate<test_type_1>(std::allocator<test_type_1>());
+                }
+                catch (dhorn::service_published &e)
+                {
+                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::test_type_1"));
+                }
+            }
+
             TEST_METHOD(FindTest)
             {
                 dhorn::service_container x;
@@ -233,7 +301,7 @@ namespace dhorn
                     x.find<fake_test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (std::bad_cast &)
+                catch (dhorn::service_not_published &)
                 {
                 }
             }
@@ -251,7 +319,7 @@ namespace dhorn
                     x.remove<fake_test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (std::bad_cast &)
+                catch (dhorn::service_not_published &)
                 {
                 }
                 Assert::IsTrue(x.size() == 2);
@@ -299,11 +367,73 @@ namespace dhorn
                 {
                     auto ptr2 = x.remove<test_type_2>();
                     Assert::IsTrue(x.size() == 0);
+                    Assert::IsTrue(x.empty());
 
                     tt2 = ptr2.get();
                     Assert::IsTrue(tt2->val == 42);
                 }
                 Assert::IsTrue(tt2->val != 42);
+            }
+
+            TEST_METHOD(MemoryLeakTest)
+            {
+                _CrtMemState start;
+                _CrtMemCheckpoint(&start);
+
+                {
+                    dhorn::service_container x;
+                    auto ptr1 = x.insert(new test_type_1());
+                    auto ptr2 = x.insert(new test_type_2());
+
+                    // Assertions shouldn't cause memory leaks
+                    try
+                    {
+                        auto ptr = x.insert(new test_type_1());
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (dhorn::service_published &)
+                    {
+                    }
+
+                    try
+                    {
+                        auto ptr = x.emplace<test_type_2>();
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (dhorn::service_published &)
+                    {
+                    }
+
+                    try
+                    {
+                        auto ptr = x.allocate<test_type_1>(std::allocator<test_type_1>());
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (dhorn::service_published &)
+                    {
+                    }
+
+                    auto ptr3 = x.remove<test_type_1>();
+                    Assert::IsTrue(ptr3 == ptr1);
+
+                    x.insert(ptr3);
+                    Assert::IsTrue(x.remove<test_type_1>() == ptr1);
+
+                    // Moving shouldn't have any effect on memory
+                    dhorn::service_container y(std::move(x));
+                    y.emplace<test_type_1>();
+                    Assert::IsTrue(y.find<test_type_1>() != ptr1);
+
+                    Assert::IsTrue(y.remove<test_type_2>() == ptr2);
+                    y.allocate<test_type_2>(std::allocator<test_type_2>());
+                    Assert::IsTrue(y.find<test_type_2>() != ptr2);
+                }
+
+                _CrtMemState end;
+                _CrtMemCheckpoint(&end);
+
+                _CrtMemState diff;
+                Assert::IsTrue(!_CrtMemDifference(&diff, &start, &end));
             }
         };
     }
