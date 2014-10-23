@@ -5,9 +5,10 @@
  *
  * Mostly just wraps Win32 functions and "C++-ifys" them, throwing exceptions on failure
  */
+#pragma once
 
 #ifndef WIN32
-static_assert(false, "Cannot include dhorn\windows\windows.h on a non-Windows machine")
+static_assert(false, "Cannot include dhorn/windows/windows.h on a non-Windows machine")
 #endif  /* WIN32 */
 
 #include <algorithm>
@@ -40,6 +41,9 @@ namespace dhorn
         using pid_t = uint32_t;
         using tid_t = uint32_t;
 
+        using brush_handle = HBRUSH;
+        using cursor_handle = HCURSOR;
+        using icon_handle = HICON;
         using instance_handle = HINSTANCE;
         using menu_handle = HMENU;
         using window_handle = HWND;
@@ -124,12 +128,23 @@ namespace dhorn
 
         namespace garbage
         {
+            inline void throw_last_error(void)
+            {
+                auto error = GetLastError();
+                if (error)
+                {
+                    // Many functions expect us to check GetLastError to distinguish between errors
+                    // and other general cases. Just go ahead and always check if we suspect error.
+                    throw win32_exception(error);
+                }
+            }
+
             template <typename Func>
             inline void make_boolean_call(Func &func)
             {
                 if (!func(std::forward<Args>(args)...))
                 {
-                    throw win32_exception(GetLastError());
+                    throw_last_error();
                 }
             }
 
@@ -138,7 +153,7 @@ namespace dhorn
             {
                 if (!func(std::forward<Args>(args)...))
                 {
-                    throw win32_exception(GetLastError());
+                    throw_last_error();
                 }
             }
 
@@ -148,7 +163,7 @@ namespace dhorn
                 HANDLE result = func();
                 if ((result == INVALID_HANDLE_VALUE) || !result)
                 {
-                    throw win32_exception(GetLastError());
+                    throw_last_error();
                 }
 
                 return result;
@@ -160,7 +175,7 @@ namespace dhorn
                 HANDLE result = func(std::forward<Args>(args)...);
                 if ((result == INVALID_HANDLE_VALUE) || !result)
                 {
-                    throw win32_exception(GetLastError());
+                    throw_last_error();
                 }
 
                 return result;
@@ -173,7 +188,7 @@ namespace dhorn
 
                 if (FAILED(hr))
                 {
-                    throw hresult_exception(hr);
+                    throw_last_error();
                 }
             }
 
@@ -184,29 +199,33 @@ namespace dhorn
 
                 if (FAILED(hr))
                 {
-                    throw hresult_exception(hr);
+                    throw_last_error();
                 }
             }
 
-            template <typename ResultType, typename Func>
-            inline ResultType make_call_fail_on_null(Func &func)
+            template <typename ResultType, ResultType Failure = ResultType{}, typename Func>
+            inline ResultType make_call_fail_on_value(Func &func)
             {
                 auto result = func();
-                if (!result)
+                if (result == Failure)
                 {
-                    throw win32_exception(GetLastError());
+                    throw_last_error();
                 }
 
                 return result;
             }
 
-            template <typename ResultType, typename Func, typename... Args>
-            inline ResultType make_call_fail_on_null(Func &func, Args&&... args)
+            template <
+                typename ResultType,
+                ResultType Failure = ResultType{},
+                typename Func,
+                typename... Args>
+            inline ResultType make_call_fail_on_value(Func &func, Args&&... args)
             {
                 auto result = func(std::forward<Args>(args)...);
-                if (!result)
+                if ((result == Failure) && (GetLastError() != 0))
                 {
-                    throw win32_exception(GetLastError());
+                    throw_last_error();
                 }
 
                 return result;
@@ -390,11 +409,19 @@ namespace dhorn
 
 
         /*
-         * Process and Thread Functions
+         * Cursor Functions
          */
-#pragma region Process and Thread
+#pragma region Cursor Functions
 
-        // Add as needed
+        cursor_handle load_cursor(_In_opt_ instance_handle instance, _In_ LPCTSTR name)
+        {
+            return garbage::make_call_fail_on_value<cursor_handle>(LoadCursor, instance, name);
+        }
+
+        cursor_handle load_cursor(_In_opt_ instance_handle instance, _In_ const tstring &name)
+        {
+            return load_cursor(instance, garbage::null_if_empty(name));
+        }
 
 #pragma endregion
 
@@ -408,7 +435,7 @@ namespace dhorn
         template <
             typename ResultHandleTraits = unique_handle_traits,
             typename SourceHandleTraits = unique_handle_traits>
-        basic_handle<HANDLE, ResultHandleTraits> create_file(
+        inline basic_handle<HANDLE, ResultHandleTraits> create_file(
             _In_ const tstring &fileName,
             _In_ uint32_t desiredAccess,
             _In_ uint32_t shareMode,
@@ -420,6 +447,203 @@ namespace dhorn
             return garbage::make_handle_call<ResultHandleTraits>(CreateFile, fileName.c_str(),
                 desiredAccess, shareMode, securityAttributes, creationDisposition,
                 flagsAndAttributes, templateFile);
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Message Functions
+         */
+#pragma region Message Functions
+
+        inline intptr_t dispatch_message(_In_ const MSG &msg)
+        {
+            return DispatchMessage(&msg);
+        }
+
+        inline bool get_message(
+            _Out_ MSG &msg,
+            _In_opt_ window_handle window = 0,
+            _In_opt_ unsigned filterMin = 0,
+            _In_opt_ unsigned filterMax = 0)
+        {
+            return !!garbage::make_call_fail_on_value<int, -1>(
+                GetMessage, &msg, window, filterMin, filterMax);
+        }
+
+        inline bool peek_message(
+            _In_opt_ window_handle window,
+            _In_ unsigned filterMin,
+            _In_ unsigned filterMax,
+            _In_ unsigned remove,
+            _Out_ MSG *result)
+        {
+            return !!PeekMessage(result, window, filterMin, filterMax, remove);
+        }
+
+        inline void post_message(
+            _In_opt_ window_handle window,
+            _In_ unsigned msg,
+            _In_ uintptr_t wparam,
+            _In_ intptr_t lparam)
+        {
+            garbage::make_boolean_call(PostMessage, window, msg, wparam, lparam);
+        }
+
+        inline void post_quit_message(_In_ int exitCode)
+        {
+            PostQuitMessage(exitCode);
+        }
+
+        inline void translate_message(_In_ const MSG &msg)
+        {
+            garbage::make_boolean_call(TranslateMessage, &msg);
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Painting and Drawing Functions
+         */
+#pragma region Painting and Drawing Functions
+
+        inline void update_window(_In_ window_handle window)
+        {
+            garbage::make_boolean_call(UpdateWindow, window);
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Process and Thread Functions
+         */
+#pragma region Process and Thread
+
+        inline tid_t get_current_thread_id(void)
+        {
+            return GetCurrentThreadId();
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Window Class Functions
+         */
+#pragma region Window Class Functions
+
+        inline WNDCLASS get_class_info(
+            _In_opt_ instance_handle instance,
+            _In_ const tstring &className)
+        {
+            WNDCLASS result;
+            garbage::make_boolean_call(GetClassInfo, instance, className.c_str(), &result);
+
+            return result;
+        }
+
+        inline WNDCLASSEX get_class_info_ex(
+            _In_opt_ instance_handle instance,
+            _In_ const tstring &className)
+        {
+            WNDCLASSEX result;
+            garbage::make_boolean_call(GetClassInfoEx, instance, className.c_str(), &result);
+
+            return result;
+        }
+
+        inline uint32_t get_class_long(_In_ window_handle window, _In_ int index)
+        {
+            return garbage::make_call_fail_on_value<uint32_t>(GetClassLong, window, index);
+        }
+
+        inline uintptr_t get_class_long_ptr(_In_ window_handle window, _In_ int index)
+        {
+            return garbage::make_call_fail_on_value<uintptr_t>(GetClassLongPtr, window, index);
+        }
+
+        inline tstring get_class_name(_In_ window_handle window)
+        {
+            // maximum class name is 256 characters
+            TCHAR buffer[257];
+            garbage::make_call_fail_on_value<int>(GetClassName, window, buffer, 257);
+
+            return buffer;
+        }
+
+        inline uint16_t get_class_word(_In_ window_handle window, _In_ int index)
+        {
+            return garbage::make_call_fail_on_value<uint16_t>(GetClassWord, window, index);
+        }
+
+        inline long get_window_long(_In_ window_handle window, _In_ int index)
+        {
+            return garbage::make_call_fail_on_value<long>(GetWindowLong, window, index);
+        }
+
+        inline uintptr_t get_window_long_ptr(_In_ window_handle window, _In_ int index)
+        {
+            return garbage::make_call_fail_on_value<uintptr_t>(GetWindowLongPtr, window, index);
+        }
+
+        inline ATOM register_class(_In_ const WNDCLASS &wndClass)
+        {
+            return garbage::make_call_fail_on_value<ATOM>(RegisterClass, &wndClass);
+        }
+
+        inline ATOM register_class(_In_ const WNDCLASSEX &wndClass)
+        {
+            return garbage::make_call_fail_on_value<ATOM>(RegisterClassEx, &wndClass);
+        }
+
+        inline uint32_t set_class_long(_In_ window_handle window, _In_ int index, _In_ long value)
+        {
+            return garbage::make_call_fail_on_value<uint32_t>(SetClassLong, window, index, value);
+        }
+
+        inline uintptr_t set_class_long_ptr(
+            _In_ window_handle window,
+            _In_ int index,
+            _In_ uintptr_t value)
+        {
+            return garbage::make_call_fail_on_value<uintptr_t>(
+                SetClassLongPtr, window, index, value);
+        }
+
+        inline uint16_t set_class_word(
+            _In_ window_handle window,
+            _In_ int index,
+            _In_ uint16_t value)
+        {
+            return garbage::make_call_fail_on_value<uint16_t>(SetClassWord, window, index, value);
+        }
+
+        inline long set_window_long(_In_ window_handle window, _In_ int index, _In_ long value)
+        {
+            return garbage::make_call_fail_on_value<long>(SetWindowLong, window, index, value);
+        }
+
+        inline uintptr_t set_window_long_ptr(
+            _In_ window_handle window,
+            _In_ int index,
+            _In_ uintptr_t value)
+        {
+            return garbage::make_call_fail_on_value<uintptr_t>(
+                SetWindowLongPtr, window, index, value);
+        }
+
+        inline void unregister_class(
+            _In_ const tstring &className,
+            _In_opt_ instance_handle instance = nullptr)
+        {
+            garbage::make_boolean_call(UnregisterClass, className.c_str(), instance);
         }
 
 #pragma endregion
@@ -522,8 +746,8 @@ namespace dhorn
             auto clsName = garbage::null_if_empty(className);
             auto wndName = garbage::null_if_empty(windowName);
 
-            return garbage::make_call_fail_on_null<HWND>(CreateWindowEx, 0L, clsName, wndName, style, x, y,
-                width, height, parent, menu, instance, param);
+            return garbage::make_call_fail_on_value<HWND>(CreateWindowEx, 0L, clsName, wndName,
+                style, x, y, width, height, parent, menu, instance, param);
         }
 
         inline window_handle create_window(
@@ -540,7 +764,7 @@ namespace dhorn
             auto clsName = garbage::null_if_empty(className);
             auto wndName = garbage::null_if_empty(windowName);
 
-            return garbage::make_call_fail_on_null<HWND>(CreateWindowEx, extendedStyle, clsName, wndName, style,
+            return garbage::make_call_fail_on_value<HWND>(CreateWindowEx, extendedStyle, clsName, wndName, style,
                 x, y, width, height, parent, menu, instance, param);
         }
 
@@ -607,7 +831,7 @@ namespace dhorn
             auto clsName = garbage::null_if_empty(className);
             auto wndName = garbage::null_if_empty(windowName);
 
-            return garbage::make_call_fail_on_null<HWND>(FindWindow, clsName, wndName);
+            return garbage::make_call_fail_on_value<HWND>(FindWindow, clsName, wndName);
         }
 
         inline window_handle find_window(
@@ -619,13 +843,13 @@ namespace dhorn
             auto clsName = garbage::null_if_empty(className);
             auto wndName = garbage::null_if_empty(windowName);
 
-            return garbage::make_call_fail_on_null<HWND>(FindWindowEx, parentWindow, childWindowAfter,
+            return garbage::make_call_fail_on_value<HWND>(FindWindowEx, parentWindow, childWindowAfter,
                 clsName, wndName);
         }
 
         inline window_handle get_ancestor(_In_ window_handle window, _In_ unsigned int flags)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetAncestor, window, flags);
+            return garbage::make_call_fail_on_value<HWND>(GetAncestor, window, flags);
         }
 
         inline RECT get_client_rect(_In_ window_handle window)
@@ -638,28 +862,28 @@ namespace dhorn
 
         inline window_handle get_desktop_window(void)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetDesktopWindow);
+            return garbage::make_call_fail_on_value<HWND>(GetDesktopWindow);
         }
 
         inline window_handle get_foreground_window(void)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetForegroundWindow);
+            return garbage::make_call_fail_on_value<HWND>(GetForegroundWindow);
         }
 
         inline window_handle get_last_active_popup(_In_ window_handle owner)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetLastActivePopup, owner);
+            return garbage::make_call_fail_on_value<HWND>(GetLastActivePopup, owner);
         }
 
         inline window_handle get_next_window(_In_ window_handle window, _In_ unsigned int dir)
         {
             // GetNextWindow is defined to GetWindow (and apparently GetNextWindow isn't available...)
-            return garbage::make_call_fail_on_null<HWND>(GetWindow, window, dir);
+            return garbage::make_call_fail_on_value<HWND>(GetWindow, window, dir);
         }
 
         inline window_handle get_parent(_In_ window_handle child)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetParent, child);
+            return garbage::make_call_fail_on_value<HWND>(GetParent, child);
         }
 
         inline uint32_t get_process_default_layout(void)
@@ -672,7 +896,7 @@ namespace dhorn
 
         inline window_handle get_shell_window(void)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetShellWindow);
+            return garbage::make_call_fail_on_value<HWND>(GetShellWindow);
         }
 
         inline uint32_t get_sys_color(_In_ int index)
@@ -682,12 +906,12 @@ namespace dhorn
 
         inline window_handle get_top_window(_In_opt_ window_handle parentWindow = nullptr)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetTopWindow, parentWindow);
+            return garbage::make_call_fail_on_value<HWND>(GetTopWindow, parentWindow);
         }
 
         inline window_handle get_window(_In_ window_handle window, _In_ unsigned int dir)
         {
-            return garbage::make_call_fail_on_null<HWND>(GetWindow, window, dir);
+            return garbage::make_call_fail_on_value<HWND>(GetWindow, window, dir);
         }
 
         inline RECT get_window_rect(_In_ window_handle window)
@@ -721,22 +945,27 @@ namespace dhorn
             return result;
         }
 
-        uint32_t get_window_thread_process_id(
+        inline uint32_t get_window_thread_process_id(
             _In_ window_handle window,
             _In_opt_ uint32_t *processId = nullptr)
         {
             // uint32_t* is not implicitly castable to DWORD* even though they will be the same
             // size, so we must reinterpret_cast here
-            return garbage::make_call_fail_on_null<uint32_t>(GetWindowThreadProcessId, window,
+            return garbage::make_call_fail_on_value<uint32_t, 0>(GetWindowThreadProcessId, window,
                 reinterpret_cast<DWORD *>(processId));
         }
 
-        std::pair<tid_t, pid_t> get_window_thread_process_id(_In_ window_handle window)
+        inline std::pair<tid_t, pid_t> get_window_thread_process_id(_In_ window_handle window)
         {
             DWORD processId;
             DWORD threadId = GetWindowThreadProcessId(window, &processId);
 
             return std::make_pair(threadId, processId);
+        }
+
+        inline void show_window(_In_ window_handle window, _In_ int cmdShow)
+        {
+            garbage::make_boolean_call(ShowWindow, window, cmdShow);
         }
 
 #pragma endregion
