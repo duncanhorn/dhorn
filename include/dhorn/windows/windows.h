@@ -969,5 +969,23 @@ namespace dhorn
         }
 
 #pragma endregion
+
+
+
+        /*
+         * Window Procedure Functions
+         */
+#pragma region Window Procedure Functions
+
+        inline intptr_t default_window_procedure(
+            _In_ window_handle window,
+            _In_ unsigned message,
+            _In_ uintptr_t wparam,
+            _In_ intptr_t lparam)
+        {
+            return DefWindowProc(window, message, wparam, lparam);
+        }
+
+#pragma endregion
     }
 }

@@ -48,7 +48,7 @@
  *          function returns std::pair<bool, intptr_t> indicating whether the message was handled
  *          or not, and the corresponding status value if handled. The status value is effectively
  *          ignored if the boolean value is false.
- *      -   If the message is still not handled, then DefWindowProc is called.
+ *      -   If the message is still not handled, then default_window_procedure is called.
  *
  * When using dhorn::win32::window as a base class, it is recommended that any overloaded on_*
  * functions be written such that they call the base class' on_* function, except in cases where
@@ -106,6 +106,12 @@ namespace dhorn
                 static_cast<unsigned>(lhs) | static_cast<unsigned>(rhs));
         }
 
+        window_class_style operator&(_In_ window_class_style lhs, _In_ window_class_style rhs)
+        {
+            return static_cast<window_class_style>(
+                static_cast<unsigned>(lhs) & static_cast<unsigned>(rhs));
+        }
+
         enum class system_color : uintptr_t
         {
             scroll_bar              = COLOR_SCROLLBAR,
@@ -161,6 +167,18 @@ namespace dhorn
             visible                 = WS_VISIBLE,
             vertical_scroll         = WS_VSCROLL,
         };
+
+        window_style operator|(_In_ window_style lhs, _In_ window_style rhs)
+        {
+            return static_cast<window_style>(
+                static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+        }
+
+        window_style operator&(_In_ window_style lhs, _In_ window_style rhs)
+        {
+            return static_cast<window_style>(
+                static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+        }
 
         enum class window_message : unsigned
         {
@@ -631,7 +649,7 @@ namespace dhorn
                 _In_ const callback_type &callback) :
                 message(message),
                 repeat_count(repeatCount),
-                eat_key(eatKey),
+                eat_message(eatKey),
                 callback(callback)
             {
             }
@@ -643,7 +661,7 @@ namespace dhorn
                 _Inout_ callback_type &&callback) :
                 message(message),
                 repeat_count(repeatCount),
-                eat_key(eatKey),
+                eat_message(eatKey),
                 callback(std::move(callback))
             {
             }
@@ -655,7 +673,7 @@ namespace dhorn
              */
             window_message message;
             size_t repeat_count;
-            bool eat_key;
+            bool eat_message;
             callback_type callback;
         };
 
@@ -682,8 +700,6 @@ namespace dhorn
              * Private Types
              */
             using CallbackEntryType = std::pair<size_t, callback_handler>;
-
-
 
             struct deferred_invoke_handler
             {
@@ -871,14 +887,8 @@ namespace dhorn
                 cond.wait(guard, [&]() -> bool { return completed; });
             }
 
-            size_t add_callback_handler(_In_ const callback_handler &handler)
+            size_t add_callback_handler(_Inout_ callback_handler &&handler)
             {
-                // Prevent against calling with a repeat_count of zero
-                if (handler.repeat_count == 0)
-                {
-                    throw hresult_exception(E_INVALIDARG);
-                }
-
                 size_t callbackId = ++this->_nextCallbackId;
 
                 // If run() has not been called, then we cannot post to the UI thread. It is then
@@ -888,18 +898,23 @@ namespace dhorn
                 if (this->_threadId)
                 {
                     // Already running; post
-                    this->post_async([this, handler, callbackId]()
+                    this->post_async([this, handler, callbackId]() mutable
                     {
-                        this->AddCallbackHandler(handler, callbackId);
+                        this->AddCallbackHandler(std::move(handler), callbackId);
                     });
                 }
                 else
                 {
                     // Not running; add now
-                    this->AddCallbackHandler(handler, callbackId);
+                    this->AddCallbackHandler(std::move(handler), callbackId);
                 }
 
                 return callbackId;
+            }
+
+            size_t add_callback_handler(_In_ const callback_handler &handler)
+            {
+                return this->add_callback_handler(callback_handler(handler));
             }
 
             size_t add_callback_handler(
@@ -914,6 +929,18 @@ namespace dhorn
                 _Inout_ message_callback_type &&func)
             {
                 return this->add_callback_handler(callback_handler(message, std::move(func)));
+            }
+
+            void on_initialized(_In_ const deferred_callback_type &callback)
+            {
+                // We always get WM_ACTIVATE when the window is first being shown
+                this->add_callback_handler(callback_handler(window_message::activate, 0, false,
+                    [callback](window * /*sender*/, uintptr_t /*wparam*/, intptr_t /*lparam*/) ->
+                    message_result_type
+                {
+                    callback();
+                    return std::make_pair(false, 0);
+                }));
             }
 
 #pragma endregion
@@ -983,7 +1010,10 @@ namespace dhorn
                 {
                     auto &list = list_itr->second;
 
-                    std::find_if(std::rbegin(list), std::rend(list), [&](CallbackEntryType &entry)
+                    // Save the return value so we can save time in the call to list.erase in the
+                    // event that an early handler eats the message
+                    auto itr = std::find_if(std::rbegin(list), std::rend(list),
+                        [&](CallbackEntryType &entry)
                     {
                         auto &handler = entry.second;
                         auto tempResult = handler.callback(this, wparam, lparam);
@@ -993,11 +1023,12 @@ namespace dhorn
                             // Handled
                             result = tempResult;
 
-                            if (handler.repeat_count != callback_handler::repeat_infinite)
+                            if (handler.repeat_count != callback_handler::repeat_infinite &&
+                                handler.repeat_count != 0)
                             {
                                 --handler.repeat_count;
                             }
-                            if (handler.eat_key)
+                            if (handler.eat_message)
                             {
                                 return true;
                             }
@@ -1008,7 +1039,7 @@ namespace dhorn
                     });
 
                     // Need to remove all handlers with a repeat_count of zero
-                    list.erase(std::remove_if(std::begin(list), std::end(list),
+                    list.erase(std::remove_if(itr.base() + 1, std::end(list),
                         [](CallbackEntryType &entry) -> bool
                     {
                         return entry.second.repeat_count == 0;
@@ -1017,7 +1048,7 @@ namespace dhorn
 
                 if (!result.first)
                 {
-                    return DefWindowProc(
+                    return default_window_procedure(
                         this->_window,
                         static_cast<unsigned>(message),
                         wparam,
@@ -1034,7 +1065,7 @@ namespace dhorn
             /*
              * Private/Non-Override-able Message Handling
              */
-            void AddCallbackHandler(_In_ const callback_handler &handler, _In_ size_t callbackId)
+            void AddCallbackHandler(_Inout_ callback_handler &&handler, _In_ size_t callbackId)
             {
                 this->_callbackHandlers[handler.message].emplace_back(callbackId,
                     std::move(handler));
@@ -1093,7 +1124,7 @@ namespace dhorn
                 }
                 else
                 {
-                    return DefWindowProc(window, message, wparam, lparam);
+                    return default_window_procedure(window, message, wparam, lparam);
                 }
             }
 
