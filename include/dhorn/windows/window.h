@@ -100,13 +100,13 @@ namespace dhorn
             drop_shadow             = CS_DROPSHADOW,
         };
 
-        window_class_style operator|(_In_ window_class_style lhs, _In_ window_class_style rhs)
+        inline window_class_style operator|(_In_ window_class_style lhs, _In_ window_class_style rhs)
         {
             return static_cast<window_class_style>(
                 static_cast<unsigned>(lhs) | static_cast<unsigned>(rhs));
         }
 
-        window_class_style operator&(_In_ window_class_style lhs, _In_ window_class_style rhs)
+        inline window_class_style operator&(_In_ window_class_style lhs, _In_ window_class_style rhs)
         {
             return static_cast<window_class_style>(
                 static_cast<unsigned>(lhs) & static_cast<unsigned>(rhs));
@@ -168,13 +168,13 @@ namespace dhorn
             vertical_scroll         = WS_VSCROLL,
         };
 
-        window_style operator|(_In_ window_style lhs, _In_ window_style rhs)
+        inline window_style operator|(_In_ window_style lhs, _In_ window_style rhs)
         {
             return static_cast<window_style>(
                 static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
         }
 
-        window_style operator&(_In_ window_style lhs, _In_ window_style rhs)
+        inline window_style operator&(_In_ window_style lhs, _In_ window_style rhs)
         {
             return static_cast<window_style>(
                 static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));

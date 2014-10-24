@@ -6,7 +6,13 @@
  * Entry for window functional test
  */
 
-#include <dhorn/windows/window.h>
+#include "precomp.h"
+
+#include "globals.h"
+
+// Define globals here
+//dhorn::win32::window globals::g_window;
+//worker globals::g_worker;
 
 int WINAPI wWinMain(
     _In_ dhorn::win32::instance_handle instance,
@@ -14,26 +20,17 @@ int WINAPI wWinMain(
     _In_ wchar_t *cmdLine,
     _In_ int cmdShow)
 {
-    dhorn::win32::window window;
+    // Initialize the window
     dhorn::win32::window_class windowClass(L"Test Window");
-    dhorn::win32::window_options options(L"Test Window");
-
     windowClass.use_defaults();
     windowClass.instance = instance;
 
+    dhorn::win32::window_options options(L"Test Window");
     options.style = dhorn::win32::window_style::overlapped_window;
 
-    dhorn::win32::callback_handler createHandler(dhorn::win32::window_message::key_down, 1, false,
-        [](dhorn::win32::window *sender, uintptr_t, intptr_t) -> std::pair<bool, uintptr_t>
-    {
-        sender->post_async([]()
-        {
-            int x = 1;
-        });
+    // Initialize the worker
+    globals::g_worker.initialize(globals::g_window);
 
-        return std::make_pair(true, 0);
-    });
-    window.add_callback_handler(createHandler);
-
-    window.run(windowClass, options, cmdShow);
+    // Run the application!
+    globals::g_window.run(windowClass, options, cmdShow);
 }

@@ -233,7 +233,7 @@ namespace dhorn
 
 
 
-            const TCHAR *null_if_empty(_In_ const tstring &str)
+            inline const TCHAR *null_if_empty(_In_ const tstring &str)
             {
                 return ((&str == nullptr) || str.empty()) ? nullptr : str.c_str();
             }
@@ -413,12 +413,14 @@ namespace dhorn
          */
 #pragma region Cursor Functions
 
-        cursor_handle load_cursor(_In_opt_ instance_handle instance, _In_ LPCTSTR name)
+        inline cursor_handle load_cursor(_In_opt_ instance_handle instance, _In_ LPCTSTR name)
         {
             return garbage::make_call_fail_on_value<cursor_handle>(LoadCursor, instance, name);
         }
 
-        cursor_handle load_cursor(_In_opt_ instance_handle instance, _In_ const tstring &name)
+        inline cursor_handle load_cursor(
+            _In_opt_ instance_handle instance,
+            _In_ const tstring &name)
         {
             return load_cursor(instance, garbage::null_if_empty(name));
         }
@@ -796,7 +798,9 @@ namespace dhorn
 
         namespace garbage
         {
-            BOOL CALLBACK enum_windows_proc(_In_ window_handle childWindow, _In_ LPARAM param)
+            inline BOOL CALLBACK enum_windows_proc(
+                _In_ window_handle childWindow,
+                _In_ LPARAM param)
             {
                 auto func = reinterpret_cast<std::function<bool(window_handle)> *>(param);
                 return (*func)(childWindow);
