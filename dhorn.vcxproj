@@ -147,13 +147,19 @@
   <ItemGroup>
     <ClInclude Include="include\dhorn\d3d.h" />
     <ClInclude Include="include\dhorn\d3d\vector.h" />
+    <ClInclude Include="include\dhorn\functional.h" />
+    <ClInclude Include="Include\dhorn\math.h" />
+    <ClInclude Include="include\dhorn\raii_object.h" />
     <ClInclude Include="include\dhorn\uuid.h" />
     <ClInclude Include="include\dhorn\service_container.h" />
     <ClInclude Include="include\dhorn\sockets.h" />
     <ClInclude Include="include\dhorn\tree.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
+    <ClInclude Include="include\dhorn\windows\auto_handle.h" />
+    <ClInclude Include="include\dhorn\windows\com_ptr.h" />
     <ClInclude Include="include\dhorn\windows\window.h" />
     <ClInclude Include="include\dhorn\windows\windows.h" />
+    <ClInclude Include="include\dhorn\windows\windows_exception.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

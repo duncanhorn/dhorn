@@ -32,37 +32,6 @@
  *                  not be desirable in some situations.
  *      -   If no handler returns true, then the DefWindowProc is called and its result is reported
  *          to the system.
-
-
-
-
-
-
-
-
- *      -   Depending on the message, window_procedure will call the appropriate on_* function
- *          (e.g. on_key_down). These functions return true if handled, and in cases where the
- *          status returned is important, the function will return std::pair<bool, intptr_t>
- *      -   If no on_* function exists for the message, or if the message is not handled in the
- *          on_* function, window_procedure will then call the virtual function on_message. This
- *          function returns std::pair<bool, intptr_t> indicating whether the message was handled
- *          or not, and the corresponding status value if handled. The status value is effectively
- *          ignored if the boolean value is false.
- *      -   If the message is still not handled, then default_window_procedure is called.
- *
- * When using dhorn::win32::window as a base class, it is recommended that any overloaded on_*
- * functions be written such that they call the base class' on_* function, except in cases where
- * the default functionality is not desired. For example:
- *
- *      virtual bool on_key_pressed(_In_ virtual_key key, _In_ intptr_t lparam)
- *      {
- *          if (window::on_key_pressed(key, lparam)) { return true; }
-            // TODO
- *      }
- *
- * All of the default on_* functions follow the same general behavior. They iterate the list of
- * callback handlers for that message in the opposite order that they were added. When one of the
- * handlers returns 
  */
 #pragma once
 
@@ -73,6 +42,7 @@
 #include <mutex>
 #include <vector>
 
+#include "../raii_object.h"
 #include "windows.h"
 
 namespace dhorn
@@ -729,6 +699,7 @@ namespace dhorn
 
         public:
             window() :
+                _running(false),
                 _nextCallbackId(0),
                 _window(nullptr),
                 _threadId(0)
@@ -786,12 +757,12 @@ namespace dhorn
                 _In_ const window_options &options,
                 _In_ int cmdShow)
             {
-                // The thread we call run on now becomes the UI thread. Assert that it's not set as
-                // run is only allowed to get called once
-                if (this->_threadId)
-                {
-                    throw hresult_exception(E_ILLEGAL_METHOD_CALL);
-                }
+                // Can only call run once
+                this->EnsureWindowUninitialized();
+                raii_object raii([&]() { this->_running = false; });
+                this->_running = true;
+
+                // Calling thread becomes the "owner"/ui thread
                 this->_threadId = get_current_thread_id();
 
                 // Register the class
@@ -814,11 +785,19 @@ namespace dhorn
                     windowClass.instance,                               // Instance Handle
                     this);                                              // lpCreateParams
 
+                if (this->_initializeCallback)
+                {
+                    this->_initializeCallback();
+                }
+
                 // Make the window visible
                 show_window(this->_window, cmdShow);
                 update_window(this->_window);
 
-                return this->message_pump();
+                auto result = this->message_pump();
+
+                this->_running = false;
+                return result;
             }
 
 
@@ -841,6 +820,11 @@ namespace dhorn
             window_handle handle(void) const
             {
                 return this->_window;
+            }
+
+            bool running(void) const
+            {
+                return this->_running;
             }
 
 #pragma endregion
@@ -933,14 +917,8 @@ namespace dhorn
 
             void on_initialized(_In_ const deferred_callback_type &callback)
             {
-                // We always get WM_ACTIVATE when the window is first being shown
-                this->add_callback_handler(callback_handler(window_message::activate, 0, false,
-                    [callback](window * /*sender*/, uintptr_t /*wparam*/, intptr_t /*lparam*/) ->
-                    message_result_type
-                {
-                    callback();
-                    return std::make_pair(false, 0);
-                }));
+                // There can only be one initialize callback
+                this->_initializeCallback = callback;
             }
 
 #pragma endregion
@@ -1023,6 +1001,8 @@ namespace dhorn
                             // Handled
                             result = tempResult;
 
+                            // We use a repeat_count of zero to indicate that the hanler should
+                            // only get run once regardless of if it handles the message or not
                             if (handler.repeat_count != callback_handler::repeat_infinite &&
                                 handler.repeat_count != 0)
                             {
@@ -1034,12 +1014,12 @@ namespace dhorn
                             }
                         }
 
-                        // Continue searching
+                        // Handler did not eat message; continue searching
                         return false;
                     });
 
                     // Need to remove all handlers with a repeat_count of zero
-                    list.erase(std::remove_if(itr.base() + 1, std::end(list),
+                    list.erase(std::remove_if(itr.base(), std::end(list),
                         [](CallbackEntryType &entry) -> bool
                     {
                         return entry.second.repeat_count == 0;
@@ -1061,6 +1041,27 @@ namespace dhorn
 
 
         private:
+
+            /*
+             * Ensuring valid state
+             */
+            void EnsureWindowInitialized(void)
+            {
+                if (!this->_window || !this->_running)
+                {
+                    throw hresult_exception(E_HANDLE);
+                }
+            }
+
+            void EnsureWindowUninitialized(void)
+            {
+                if (this->_window)
+                {
+                    throw hresult_exception(E_ILLEGAL_METHOD_CALL);
+                }
+            }
+
+
 
             /*
              * Private/Non-Override-able Message Handling
@@ -1085,10 +1086,7 @@ namespace dhorn
             void Post(_Inout_ std::unique_ptr<deferred_invoke_handler> &&handler)
             {
                 // Cannot post before the window is created
-                if (this->_window == nullptr)
-                {
-                    throw hresult_exception(E_HANDLE);
-                }
+                this->EnsureWindowInitialized();
 
                 post_message(
                     this->_window,
@@ -1143,6 +1141,8 @@ namespace dhorn
 
 
 
+            volatile bool _running;
+            deferred_callback_type _initializeCallback;
             std::map<window_message, std::vector<CallbackEntryType>> _callbackHandlers;
             std::atomic_size_t _nextCallbackId;
 

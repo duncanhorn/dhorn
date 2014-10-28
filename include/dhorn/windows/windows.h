@@ -13,19 +13,11 @@ static_assert(false, "Cannot include dhorn/windows/windows.h on a non-Windows ma
 
 #include <algorithm>
 #include <cstdint>
-#include <exception>
 #include <functional>
 #include <memory>
+#include <vector>
 
-#if !(defined WIN32_LEAN_AND_MEAN) && !(defined _DHORN_NO_WIN32_LEAN_AND_MEAN)
-#define WIN32_LEAN_AND_MEAN 1
-#endif
-
-#if !(defined NOMINMAX) && !(defined _DHORN_NO_NOMINMAX)
-#define NOMINMAX 1
-#endif
-
-#include <Windows.h>
+#include "windows_exception.h"
 
 namespace dhorn
 {
@@ -41,80 +33,17 @@ namespace dhorn
         using pid_t = uint32_t;
         using tid_t = uint32_t;
 
+        using handle_t = HANDLE;
+        using bitmap_handle = HBITMAP;
         using brush_handle = HBRUSH;
         using cursor_handle = HCURSOR;
+        using device_context_handle = HDC;
         using icon_handle = HICON;
         using instance_handle = HINSTANCE;
         using menu_handle = HMENU;
         using window_handle = HWND;
 
-#pragma endregion
-
-
-
-        /*
-         * Exception Types
-         */
-#pragma region Exceptions
-
-        class windows_exception :
-            public std::exception
-        {
-        public:
-            virtual HRESULT get_hresult(void) const = 0;
-        };
-
-        class hresult_exception final :
-            public windows_exception
-        {
-        public:
-            hresult_exception(_In_ HRESULT hr) :
-                _hr(hr)
-            {
-            }
-
-            virtual const char *what(void)
-            {
-                return "hresult_exception";
-            }
-
-            virtual HRESULT get_hresult(void) const
-            {
-                return this->_hr;
-            }
-
-        private:
-
-            HRESULT _hr;
-        };
-
-        class win32_exception final :
-            public windows_exception
-        {
-        public:
-            win32_exception(_In_ uint32_t status) :
-                _status(status)
-            {
-            }
-
-            virtual const char *what(void)
-            {
-                return "win32_exception";
-            }
-
-            uint32_t get_status(void) const
-            {
-                return this->_status;
-            }
-
-            virtual HRESULT get_hresult(void) const
-            {
-                return HRESULT_FROM_WIN32(this->_status);
-            }
-
-        private:
-            uint32_t _status;
-        };
+        static const handle_t invalid_handle_value = INVALID_HANDLE_VALUE;
 
 #pragma endregion
 
@@ -123,31 +52,8 @@ namespace dhorn
         /*
          * Helpers
          */
-        template <typename HandleType, typename HandleTraits>
-        class basic_handle;
-
         namespace garbage
         {
-            inline void throw_last_error(void)
-            {
-                auto error = GetLastError();
-                if (error)
-                {
-                    // Many functions expect us to check GetLastError to distinguish between errors
-                    // and other general cases. Just go ahead and always check if we suspect error.
-                    throw win32_exception(error);
-                }
-            }
-
-            template <typename Func>
-            inline void make_boolean_call(Func &func)
-            {
-                if (!func(std::forward<Args>(args)...))
-                {
-                    throw_last_error();
-                }
-            }
-
             template <typename Func, typename... Args>
             inline void make_boolean_call(Func &func, Args&&... args)
             {
@@ -157,62 +63,10 @@ namespace dhorn
                 }
             }
 
-            template <typename HandleTraits, typename Func>
-            inline basic_handle<HANDLE, HandleTraits> make_handle_call(Func &func)
-            {
-                HANDLE result = func();
-                if ((result == INVALID_HANDLE_VALUE) || !result)
-                {
-                    throw_last_error();
-                }
-
-                return result;
-            }
-
-            template <typename HandleTraits, typename Func, typename... Args>
-            inline basic_handle<HANDLE, HandleTraits> make_handle_call(Func &func, Args&&... args)
-            {
-                HANDLE result = func(std::forward<Args>(args)...);
-                if ((result == INVALID_HANDLE_VALUE) || !result)
-                {
-                    throw_last_error();
-                }
-
-                return result;
-            }
-
-            template <typename Func>
-            inline void make_hresult_call(Func &func)
-            {
-                HRESULT hr = func();
-
-                if (FAILED(hr))
-                {
-                    throw_last_error();
-                }
-            }
-
             template <typename Func, typename... Args>
             inline void make_hresult_call(Func &func, Args&&... args)
             {
-                HRESULT hr = func(std::forward<Args>(args)...);
-
-                if (FAILED(hr))
-                {
-                    throw_last_error();
-                }
-            }
-
-            template <typename ResultType, ResultType Failure = ResultType{}, typename Func>
-            inline ResultType make_call_fail_on_value(Func &func)
-            {
-                auto result = func();
-                if (result == Failure)
-                {
-                    throw_last_error();
-                }
-
-                return result;
+                throw_if_failed(func(std::forward<Args>(args)...));
             }
 
             template <
@@ -223,7 +77,7 @@ namespace dhorn
             inline ResultType make_call_fail_on_value(Func &func, Args&&... args)
             {
                 auto result = func(std::forward<Args>(args)...);
-                if ((result == Failure) && (GetLastError() != 0))
+                if (result == Failure)
                 {
                     throw_last_error();
                 }
@@ -238,173 +92,6 @@ namespace dhorn
                 return ((&str == nullptr) || str.empty()) ? nullptr : str.c_str();
             }
         }
-
-
-
-        /*
-         * HANDLE Wrapper
-         */
-#pragma region handle
-
-        struct unique_handle_traits
-        {
-            static void close(_In_ HANDLE handle)
-            {
-                // NOTE: It is *okay* to call with INVALID_HANDLE_VALUE
-                if (handle != INVALID_HANDLE_VALUE)
-                {
-                    garbage::make_boolean_call(CloseHandle, handle);
-                }
-            }
-        };
-
-        struct shared_handle_traits :
-            public unique_handle_traits
-        {
-            static HANDLE copy(_In_ HANDLE handle)
-            {
-                // NOTE: It is *okay* to call with INVALID_HANDLE_VALUE
-                if (handle != INVALID_HANDLE_VALUE && handle != nullptr)
-                {
-                    // We only duplicate for current process with same access rights
-                    HANDLE result;
-                    HANDLE processHandle = GetCurrentProcess();
-
-                    garbage::make_boolean_call(
-                        DuplicateHandle,
-                        processHandle,              // Source process
-                        handle,                     // Handle to duplicate
-                        processHandle,              // Destination process
-                        &result,                    // Output handle
-                        0,                          // Ingored (same access rights)
-                        false,                      // Not inheritable
-                        DUPLICATE_SAME_ACCESS);     // Same access rights as source handle
-
-                    return result;
-                }
-
-                return handle;
-            }
-        };
-
-        template <typename HandleType, typename Traits>
-        class basic_handle
-        {
-        public:
-            /*
-             * Constructor(s)/Destructor
-             */
-            basic_handle(void) :
-                _handle(INVALID_HANDLE_VALUE)
-            {
-            }
-
-            basic_handle(_In_opt_ HandleType handle) :
-                _handle(handle)
-            {
-            }
-
-            basic_handle(_In_ const basic_handle &other)
-            {
-                this->_handle = Traits::copy(other._handle);
-            }
-
-            basic_handle(_Inout_ basic_handle &&other) :
-                _handle(other._handle)
-            {
-                other._handle = INVALID_HANDLE_VALUE;
-            }
-
-            ~basic_handle(void)
-            {
-                this->Release();
-            }
-
-
-
-            /*
-             * Operators
-             */
-            basic_handle &operator=(_In_ const basic_handle &other)
-            {
-                if (this != &other)
-                {
-                    this->Release();
-                    this->_handle = Traits::copy(other._handle);
-                }
-
-                return *this;
-            }
-
-            basic_handle &operator=(_Inout_ basic_handle &&other)
-            {
-                this->Release();
-                this->_handle = other._handle;
-                other._handle = INVALID_HANDLE_VALUE;
-
-                return *this;
-            }
-
-            basic_handle &operator=(_In_ HandleType basic_handle)
-            {
-                this->Release();
-                this->_handle = basic_handle;
-
-                return *this;
-            }
-
-            operator HandleType(void)
-            {
-                return this->_handle;
-            }
-
-
-
-            /*
-             * Public functions
-             */
-            bool invalid(void) const
-            {
-                // Null handles have special meaning, but they are assumed to be invalid
-                return this->_handle == INVALID_HANDLE_VALUE || this->_handle == nullptr;
-            }
-
-            void release(void)
-            {
-                this->Release();
-            }
-
-            void swap(_Inout_ basic_handle &other)
-            {
-                auto temp = other._handle;
-                other._handle = this->_handle;
-                this->_handle = temp;
-            }
-
-
-
-        private:
-
-            void Release(void)
-            {
-                auto temp = this->_handle;
-
-                if (!this->invalid())
-                {
-                    this->_handle = INVALID_HANDLE_VALUE;
-                    garbage::make_boolean_call(CloseHandle, temp);
-                }
-            }
-
-
-
-            HandleType _handle;
-        };
-
-        using unique_handle = basic_handle<HANDLE, unique_handle_traits>;
-        using shared_handle = basic_handle<HANDLE, shared_handle_traits>;
-
-#pragma endregion
 
 
 
@@ -430,25 +117,139 @@ namespace dhorn
 
 
         /*
+         * Device Context Functions
+         */
+#pragma region Device Context Functions
+
+        inline void cancel_dc(_In_ device_context_handle hdc)
+        {
+            garbage::make_boolean_call(CancelDC, hdc);
+        }
+
+        inline device_context_handle create_compatible_dc(_In_ device_context_handle hdc)
+        {
+            return
+                garbage::make_call_fail_on_value<device_context_handle>(CreateCompatibleDC, hdc);
+        }
+
+        inline device_context_handle create_dc(
+            _In_opt_ const tstring &driver,
+            _In_ const tstring &device,
+            _In_opt_ const tstring &output,
+            _In_ const DEVMODE *initData)
+        {
+            return garbage::make_call_fail_on_value<device_context_handle>(
+                CreateDC,
+                garbage::null_if_empty(driver),
+                garbage::null_if_empty(device),
+                garbage::null_if_empty(output),
+                initData);
+        }
+
+        inline void delete_dc(_In_ device_context_handle hdc)
+        {
+            garbage::make_boolean_call(DeleteDC, hdc);
+        }
+
+        inline void delete_object(_In_ HGDIOBJ obj)
+        {
+            garbage::make_boolean_call(DeleteObject, obj);
+        }
+
+        inline HGDIOBJ get_current_object(_In_ device_context_handle hdc, _In_ unsigned objectType)
+        {
+            return garbage::make_call_fail_on_value<HGDIOBJ>(GetCurrentObject, hdc, objectType);
+        }
+
+        inline device_context_handle get_dc(_In_ window_handle window)
+        {
+            return garbage::make_call_fail_on_value<device_context_handle>(GetDC, window);
+        }
+
+        inline COLORREF get_dc_brush_color(_In_ device_context_handle hdc)
+        {
+            return garbage::make_call_fail_on_value<COLORREF, CLR_INVALID>(GetDCBrushColor, hdc);
+        }
+
+#pragma endregion
+
+
+
+        /*
          * File Management Functions
          */
 #pragma region File Management
 
-        template <
-            typename ResultHandleTraits = unique_handle_traits,
-            typename SourceHandleTraits = unique_handle_traits>
-        inline basic_handle<HANDLE, ResultHandleTraits> create_file(
+        inline handle_t create_file(
             _In_ const tstring &fileName,
             _In_ uint32_t desiredAccess,
             _In_ uint32_t shareMode,
             _In_opt_ LPSECURITY_ATTRIBUTES securityAttributes,
             _In_ uint32_t creationDisposition,
             _In_ uint32_t flagsAndAttributes,
-            _In_opt_ basic_handle<HANDLE, SourceHandleTraits> templateFile = unique_handle(nullptr))
+            _In_opt_ handle_t templateFile = nullptr)
         {
-            return garbage::make_handle_call<ResultHandleTraits>(CreateFile, fileName.c_str(),
-                desiredAccess, shareMode, securityAttributes, creationDisposition,
-                flagsAndAttributes, templateFile);
+            return garbage::make_call_fail_on_value<handle_t, invalid_handle_value>(
+                CreateFile,
+                garbage::null_if_empty(fileName),
+                desiredAccess,
+                shareMode,
+                securityAttributes,
+                creationDisposition,
+                flagsAndAttributes,
+                templateFile);
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Handle and Object Functions
+         */
+#pragma region Handle and Object Functions
+
+        inline void close_handle(_In_ handle_t handle)
+        {
+            garbage::make_boolean_call(CloseHandle, handle);
+        }
+
+        inline handle_t duplicate_handle(
+            _In_ handle_t sourceProcess,
+            _In_ handle_t sourceHandle,
+            _In_ handle_t targetProcess,
+            _In_ uint32_t desiredAccess,
+            _In_ bool inheritHandle,
+            _In_ uint32_t options)
+        {
+            handle_t result;
+            garbage::make_boolean_call(
+                DuplicateHandle,
+                sourceProcess,
+                sourceHandle,
+                targetProcess,
+                &result,
+                desiredAccess,
+                inheritHandle,
+                options);
+
+            return result;
+        }
+
+        inline uint32_t get_handle_information(_In_ handle_t handle)
+        {
+            DWORD flags;
+            garbage::make_boolean_call(GetHandleInformation, handle, &flags);
+
+            return flags;
+        }
+
+        inline void set_handle_information(
+            _In_ handle_t handle,
+            _In_ uint32_t mask,
+            _In_ uint32_t flags)
+        {
+            garbage::make_boolean_call(SetHandleInformation, handle, mask, flags);
         }
 
 #pragma endregion
@@ -532,6 +333,37 @@ namespace dhorn
             return GetCurrentThreadId();
         }
 
+        inline std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION>
+            get_logical_processor_information(void)
+        {
+            using SLPI = SYSTEM_LOGICAL_PROCESSOR_INFORMATION;
+
+            DWORD length = 0;
+            std::vector<SLPI> result;
+
+            // First attempt. This should fail
+            throw_hr_if_true(
+                !!::GetLogicalProcessorInformation(result.data(), &length),
+                E_UNEXPECTED);
+            expect_error(ERROR_INSUFFICIENT_BUFFER);
+
+            // Now that we know the expected length, we can allocate what we need
+            result.reserve(length / sizeof(SLPI));
+            throw_hr_if_false(result.size() * sizeof(SLPI) == length, E_UNEXPECTED);
+            garbage::make_boolean_call(GetLogicalProcessorInformation, result.data(), &length);
+            throw_hr_if_false(result.size() * sizeof(SLPI) == length, E_UNEXPECTED);
+
+            return result;
+        }
+
+        inline uint32_t get_maximum_processor_count(
+            _In_ uint16_t groupNumber = ALL_PROCESSOR_GROUPS)
+        {
+            return garbage::make_call_fail_on_value<uint32_t>(
+                GetMaximumProcessorCount,
+                groupNumber);
+        }
+
 #pragma endregion
 
 
@@ -546,7 +378,11 @@ namespace dhorn
             _In_ const tstring &className)
         {
             WNDCLASS result;
-            garbage::make_boolean_call(GetClassInfo, instance, className.c_str(), &result);
+            garbage::make_boolean_call(
+                GetClassInfo,
+                instance,
+                garbage::null_if_empty(className),
+                &result);
 
             return result;
         }
@@ -556,7 +392,11 @@ namespace dhorn
             _In_ const tstring &className)
         {
             WNDCLASSEX result;
-            garbage::make_boolean_call(GetClassInfoEx, instance, className.c_str(), &result);
+            garbage::make_boolean_call(
+                GetClassInfoEx,
+                instance,
+                garbage::null_if_empty(className),
+                &result);
 
             return result;
         }
@@ -645,7 +485,10 @@ namespace dhorn
             _In_ const tstring &className,
             _In_opt_ instance_handle instance = nullptr)
         {
-            garbage::make_boolean_call(UnregisterClass, className.c_str(), instance);
+            garbage::make_boolean_call(
+                UnregisterClass,
+                garbage::null_if_empty(className),
+                instance);
         }
 
 #pragma endregion

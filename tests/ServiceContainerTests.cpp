@@ -1,10 +1,10 @@
 /*
-* Duncan Horn
-*
-* WindowsTests
-*
-* Tests for various Win32 functions and wrappers
-*/
+ * Duncan Horn
+ *
+ * WindowsTests
+ *
+ * Tests for various Win32 functions and wrappers
+ */
 
 #include "stdafx.h"
 #include "CppUnitTest.h"

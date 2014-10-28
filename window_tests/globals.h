@@ -5,8 +5,8 @@
  */
 #pragma once
 
-namespace globals
+struct globals
 {
-    dhorn::win32::window g_window;
-    worker g_worker;
-}
+    static dhorn::win32::window g_window;
+    static worker g_worker;
+};
