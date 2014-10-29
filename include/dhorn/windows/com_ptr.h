@@ -104,7 +104,7 @@ namespace dhorn
             /*
              * Operators
              */
-            com_ptr &operator=(_In_ nullptr_t)
+            com_ptr &operator=(_In_ std::nullptr_t)
             {
                 this->Release();
                 return *this;
@@ -199,7 +199,7 @@ namespace dhorn
 
 
 
-            void assign(nullptr_t)
+            void assign(_In_ std::nullptr_t)
             {
                 this->Release();
             }
@@ -213,7 +213,7 @@ namespace dhorn
                 this->Assign(ptr);
             }
 
-            void attach(nullptr_t)
+            void attach(_In_ std::nullptr_t)
             {
                 this->Release();
             }
