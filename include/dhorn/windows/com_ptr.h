@@ -199,6 +199,11 @@ namespace dhorn
 
 
 
+            void assign(nullptr_t)
+            {
+                this->Release();
+            }
+
             template <
                 typename Ty,
                 typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
@@ -208,18 +213,25 @@ namespace dhorn
                 this->Assign(ptr);
             }
 
+            void attach(nullptr_t)
+            {
+                this->Release();
+            }
+
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
+                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
             void attach(_In_opt_ Ty *ptr)
             {
                 this->Release();
-                this->_ptr = ptr;
+                this->Attach(ptr);
             }
 
             interface_type *detach(void)
             {
-                return this->_ptr;
+                auto ptr = this->_ptr;
+                this->_ptr = nullptr;
+                return ptr;
             }
 
             void reset(void)
@@ -239,7 +251,7 @@ namespace dhorn
                 return this->_ptr;
             }
 
-            interface_type **get_address_of(void) const
+            interface_type **get_address_of(void)
             {
                 return &this->_ptr;
             }
@@ -297,36 +309,33 @@ namespace dhorn
                 }
             }
 
-            //template <
-            //    typename Ty,
-            //    typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
-            //    inline void Assign(_Inout_ Ty *&&ptr)
-            //{
-            //    // Easy case: we can just do simple assignment
-            //    assert(!this->_ptr);
-            //    this->_ptr = ptr;
-            //    ptr = nullptr;
-            //}
+            template <
+                typename Ty,
+                typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
+            inline void Attach(_In_opt_ Ty *ptr)
+            {
+                // Easy case: we can just do simple assignment
+                assert(!this->_ptr);
+                this->_ptr = ptr;
+            }
 
-            //template <
-            //    typename Ty,
-            //    typename = typename std::enable_if<!std::is_convertible<Ty *, interface_type *>::value>::type,
-            //    typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
-            //    inline void Assign(_Inout_ Ty *&&ptr)
-            //{
-            //    // More complicated case: we must QI and Release, even if we fail
-            //    assert(!this->_ptr);
-            //    auto temp = ptr;
-            //    ptr = nullptr;
+            template <
+                typename Ty,
+                typename = typename std::enable_if<!std::is_convertible<Ty *, interface_type *>::value>::type,
+                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+            inline void Attach(_In_opt_ Ty *ptr)
+            {
+                // More complicated case: we must QI and Release, even if we fail
+                assert(!this->_ptr);
 
-            //    if (temp)
-            //    {
-            //        HRESULT hr = temp->QueryInterface(IID_PPV_ARGS(&this->_ptr));
-            //        temp->Release();
+                if (ptr)
+                {
+                    HRESULT hr = ptr->QueryInterface(IID_PPV_ARGS(&this->_ptr));
+                    ptr->Release();
 
-            //        throw_if_failed(hr);
-            //    }
-            //}
+                    throw_if_failed(hr);
+                }
+            }
 
 
 
@@ -334,3 +343,18 @@ namespace dhorn
         };
     }
 }
+
+#ifndef _DHORN_NO_STD
+
+namespace std
+{
+    template <typename Ty>
+    inline void swap(
+        _Inout_ dhorn::win32::com_ptr<Ty> &lhs,
+        _Inout_ dhorn::win32::com_ptr<Ty> &rhs)
+    {
+        lhs.swap(rhs);
+    }
+}
+
+#endif  /*_DHORN_NO_STD*/

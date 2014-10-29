@@ -103,7 +103,6 @@ namespace dhorn
             public IFoo
         {
         public:
-
             // IUnknown
             STDMETHODIMP QueryInterface(
                 _In_ REFIID riid,
@@ -121,11 +120,13 @@ namespace dhorn
 
             STDMETHOD_(ULONG, AddRef)(void)
             {
+                Assert::IsFalse(this->_moveOnly);
                 return Base::AddRef();
             }
 
             STDMETHOD_(ULONG, Release)(void)
             {
+                Assert::IsFalse(this->_moveOnly);
                 return Base::Release();
             }
 
@@ -134,6 +135,13 @@ namespace dhorn
             {
                 return Base::RefCount();
             }
+
+            // Other
+            void StartMoveOnly() { this->_moveOnly = true; }
+            void StopMoveOnly() { this->_moveOnly = false; }
+
+        private:
+            bool _moveOnly = false;
         };
 
         class Bar :
@@ -247,8 +255,11 @@ namespace dhorn
 
                 IFoo *pFoo = foobar;
                 IBar *pBar = foobar;
+                IBase *pBase = pFoo;
+                IUnknown *pUnk = pBase;
 
                 {
+                    // Down-casting
                     com_ptr<IFoo> f(foo);
                     Assert::IsTrue(f->RefCount() == 2);
 
@@ -266,6 +277,23 @@ namespace dhorn
 
                     com_ptr<IBase> base(pBar);
                     Assert::IsTrue(base->RefCount() == 5);
+
+                    // Up-casting
+                    com_ptr<IBase> base2(pUnk);
+                    Assert::IsTrue(foobar->RefCount() == 6);
+
+                    com_ptr<IBar> b3(pUnk);
+                    Assert::IsTrue(foobar->RefCount() == 7);
+
+                    com_ptr<IFoo> f3(pBase);
+                    Assert::IsTrue(foobar->RefCount() == 8);
+
+                    // Cross-casting
+                    com_ptr<IFoo> f4(pBar);
+                    Assert::IsTrue(foobar->RefCount() == 9);
+
+                    com_ptr<IBar> b4(pFoo);
+                    Assert::IsTrue(foobar->RefCount() == 10);
                 }
 
                 Assert::IsTrue(foo->RefCount() == 1);
@@ -398,9 +426,11 @@ namespace dhorn
                     com_ptr<IFoo> foo(pFoo);
                     Assert::IsTrue(foo->RefCount() == ++expect);
 
+                    // Cross-cast
                     com_ptr<IBar> bar(foo);
                     Assert::IsTrue(bar->RefCount() == ++expect);
 
+                    // Down-cast/same-cast
                     com_ptr<IFoo> foo2(foo);
                     Assert::IsTrue(foo2->RefCount() == ++expect);
 
@@ -410,6 +440,7 @@ namespace dhorn
                     com_ptr<IUnknown> unk(foo);
                     Assert::IsTrue(foo->RefCount() == ++expect);
 
+                    // Up-cast
                     com_ptr<IFoo> foo3(unk);
                     Assert::IsTrue(foo3->RefCount() == ++expect);
                 }
@@ -421,14 +452,18 @@ namespace dhorn
             TEST_METHOD(InvalidCopyConstructorTest)
             {
                 auto pBase = new Base();
+                auto pFoo = new Foo();
 
                 {
                     com_ptr<IBase> base(pBase);
                     Assert::IsTrue(base->RefCount() == 2);
 
+                    com_ptr<IFoo> foo(pFoo);
+                    Assert::IsTrue(foo->RefCount() == 2);
+
                     try
                     {
-                        com_ptr<IFoo> foo(base);
+                        com_ptr<IFoo> foo2(base);
                         Assert::Fail(L"Expected an exception");
                     }
                     catch (hresult_exception &e)
@@ -447,10 +482,24 @@ namespace dhorn
                         Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
                     }
                     Assert::IsTrue(base->RefCount() == 2);
+
+                    try
+                    {
+                        com_ptr<IBar> bar(foo);
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (hresult_exception &e)
+                    {
+                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
+                    }
+                    Assert::IsTrue(foo->RefCount() == 2);
                 }
 
                 Assert::IsTrue(pBase->RefCount() == 1);
+                Assert::IsTrue(pFoo->RefCount() == 1);
+
                 pBase->Release();
+                pFoo->Release();
             }
 
             TEST_METHOD(NullCopyConstructorTest)
@@ -1235,6 +1284,314 @@ namespace dhorn
                 Assert::IsTrue(pFooBar->RefCount() == 1);
 
                 pFooBar->Release();
+            }
+
+#pragma endregion
+
+
+
+            /*
+             * Other Tests
+             */
+#pragma region Other Tests
+
+            TEST_METHOD(OperatorBoolTest)
+            {
+                // Pretty much already tested this...
+                IFoo *pFoo = new Foo();
+                IBar *pBar = new Bar();
+                IBase *pBase = new Base();
+
+                com_ptr<IBase> base;
+                Assert::IsFalse(base);
+
+                // Assign to all three pointers
+                base = pFoo;
+                Assert::IsTrue(base);
+                Assert::IsTrue(pFoo->RefCount() == 2);
+
+                base = pBar;
+                Assert::IsTrue(base);
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                Assert::IsTrue(pBar->RefCount() == 2);
+
+                base = pBase;
+                Assert::IsTrue(base);
+                Assert::IsTrue(pBar->RefCount() == 1);
+                Assert::IsTrue(pBase->RefCount() == 2);
+
+                // Assigning to null should cause false again
+                base = nullptr;
+                Assert::IsFalse(base);
+
+                // Cleanup
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                Assert::IsTrue(pBar->RefCount() == 1);
+                Assert::IsTrue(pBase->RefCount() == 1);
+
+                pFoo->Release();
+                pBar->Release();
+                pBase->Release();
+            }
+
+            TEST_METHOD(OperatorInterfacePointerTest)
+            {
+                auto pFooBar = new FooBar();
+
+                {
+                    // Should be able to assign com_ptr<IFoo> to IFoo * or any base pointer
+                    com_ptr<IFoo> foo = pFooBar;
+                    IFoo *pFoo = foo;
+                    IBase *pBase = foo;
+                    IUnknown *pUnk = foo;
+                    Assert::IsTrue((pFoo == pBase) && (pBase == pUnk));
+                    Assert::IsTrue(pFooBar->RefCount() == 2);
+
+                    // Should not be able to assign to IBar * (other way around still allowed)
+                    Assert::IsFalse(std::is_assignable<IBar *, com_ptr<IFoo>>::value);
+                    Assert::IsTrue(std::is_assignable<com_ptr<IFoo>, IBar *>::value);
+
+                    // Cannot assign com_ptr<IUnknown> to any derived types
+                    Assert::IsFalse(std::is_assignable<IBase *, com_ptr<IUnknown>>::value);
+                    Assert::IsFalse(std::is_assignable<IFoo *, com_ptr<IUnknown>>::value);
+                    Assert::IsFalse(std::is_assignable<IBar *, com_ptr<IUnknown>>::value);
+                }
+
+                Assert::IsTrue(pFooBar->RefCount() == 1);
+                pFooBar->Release();
+            }
+
+            TEST_METHOD(AssignTest)
+            {
+                IFoo *pFoo = new FooBar();
+                IBar *pBar = new FooBar();
+                IBase *pBase = new Base();
+
+                {
+                    com_ptr<IFoo> foo(pFoo);
+                    Assert::IsTrue(pFoo->RefCount() == 2);
+
+                    foo.assign(pBar);
+                    Assert::IsTrue(pFoo->RefCount() == 1);
+                    Assert::IsTrue(pBar->RefCount() == 2);
+
+                    foo.assign(nullptr);
+                    Assert::IsTrue(pFoo->RefCount() == 1);
+                    Assert::IsTrue(pBar->RefCount() == 1);
+
+                    try
+                    {
+                        foo.assign(pBase);
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (hresult_exception &e)
+                    {
+                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
+                    }
+                }
+
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                Assert::IsTrue(pBar->RefCount() == 1);
+                Assert::IsTrue(pBase->RefCount() == 1);
+
+                pFoo->Release();
+                pBar->Release();
+                pBase->Release();
+            }
+
+            TEST_METHOD(AttachTest)
+            {
+                IFoo *pFoo = new FooBar();
+                IBar *pBar = new FooBar();
+                IBase *pBase = new Base();
+
+                {
+                    com_ptr<IBase> base;
+                    Assert::IsTrue(pFoo->RefCount() == 1);
+                    Assert::IsTrue(pBar->RefCount() == 1);
+
+                    pFoo->AddRef();
+                    base.attach(pFoo);
+                    Assert::IsTrue(pFoo->RefCount() == 2);
+                    Assert::IsTrue(pBar->RefCount() == 1);
+
+                    pBar->AddRef();
+                    base.attach(pBar);
+                    Assert::IsTrue(pFoo->RefCount() == 1);
+                    Assert::IsTrue(pBar->RefCount() == 2);
+
+                    base.attach(nullptr);
+                    Assert::IsTrue(pFoo->RefCount() == 1);
+                    Assert::IsTrue(pBar->RefCount() == 1);
+
+                    // Safe to attach pBar to IFoo
+                    com_ptr<IFoo> foo;
+
+                    pBar->AddRef();
+                    foo.attach(pBar);
+                    Assert::IsTrue(pFoo->RefCount() == 1);
+                    Assert::IsTrue(pBar->RefCount() == 2);
+
+                    // Attach should release, even if there's an exception
+                    try
+                    {
+                        pBase->AddRef();
+                        Assert::IsTrue(pBase->RefCount() == 2);
+
+                        foo.attach(pBase);
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (hresult_exception &e)
+                    {
+                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
+                    }
+                    Assert::IsTrue(pBar->RefCount() == 1);
+                    Assert::IsTrue(pBase->RefCount() == 1);
+                }
+
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                Assert::IsTrue(pBar->RefCount() == 1);
+                Assert::IsTrue(pBase->RefCount() == 1);
+
+                pFoo->Release();
+                pBar->Release();
+                pBase->Release();
+            }
+
+            TEST_METHOD(DetachTest)
+            {
+                IFoo *pFoo = new FooBar();
+
+                {
+                    com_ptr<IFoo> foo(pFoo);
+                    com_ptr<IBar> bar(pFoo);
+                    com_ptr<IBase> base(pFoo);
+                    com_ptr<IUnknown> unk(pFoo);
+
+                    // Make sure we can do proper assignment
+                    IUnknown *pUnk = foo.detach();
+                    IBase *pBase = bar.detach();
+                    pBase = base.detach();
+                    pUnk = unk.detach();
+
+                    Assert::IsTrue(foo.detach() == nullptr);
+                    Assert::IsTrue(bar.detach() == nullptr);
+                    Assert::IsTrue(base.detach() == nullptr);
+                    Assert::IsTrue(unk.detach() == nullptr);
+                }
+
+                Assert::IsTrue(pFoo->RefCount() == 5);
+                pFoo->Release();
+                pFoo->Release();
+                pFoo->Release();
+                pFoo->Release();
+                pFoo->Release();
+            }
+
+            TEST_METHOD(ResetTest)
+            {
+                IFoo *pFoo = new Foo();
+
+                com_ptr<IBase> base(pFoo);
+                Assert::IsTrue(pFoo->RefCount() == 2);
+
+                base.reset();
+                Assert::IsTrue(pFoo->RefCount() == 1);
+
+                base.reset();
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                pFoo->Release();
+            }
+
+            TEST_METHOD(SwapTest)
+            {
+                auto pFoo1 = new Foo();
+                auto pFoo2 = new Foo();
+
+                com_ptr<IFoo> foo1(pFoo1);
+                Assert::IsTrue(pFoo1->RefCount() == 2);
+                Assert::IsTrue(pFoo2->RefCount() == 1);
+
+                {
+                    com_ptr<IFoo> foo2(pFoo2);
+                    Assert::IsTrue(pFoo1->RefCount() == 2);
+                    Assert::IsTrue(pFoo2->RefCount() == 2);
+
+                    pFoo1->StartMoveOnly();
+                    pFoo2->StartMoveOnly();
+
+                    foo1.swap(foo2);
+                    Assert::IsTrue(pFoo1->RefCount() == 2);
+                    Assert::IsTrue(pFoo2->RefCount() == 2);
+
+                    std::swap(foo1, foo2);
+                    std::swap(foo1, foo2);
+
+                    pFoo1->StopMoveOnly();
+                    pFoo2->StopMoveOnly();
+                }
+
+                Assert::IsTrue(pFoo1->RefCount() == 1);
+                Assert::IsTrue(pFoo2->RefCount() == 2);
+
+                pFoo1->Release();
+                pFoo2->Release();
+            }
+
+            TEST_METHOD(GetTest)
+            {
+                IFoo *pFoo = new Foo();
+                com_ptr<IFoo> foo;
+
+                Assert::IsTrue(foo.get() == nullptr);
+
+                foo = pFoo;
+                Assert::IsTrue(pFoo == foo.get());
+
+                foo = nullptr;
+                Assert::IsTrue(foo.get() == nullptr);
+
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                pFoo->Release();
+            }
+
+            TEST_METHOD(GetAddressOfTest)
+            {
+                IFoo *pFoo = new Foo();
+                com_ptr<IFoo> foo;
+
+                auto addr1 = foo.get_address_of();
+                Assert::IsTrue(std::is_same<decltype(addr1), IFoo **>::value);
+
+                foo = pFoo;
+                auto addr2 = foo.get_address_of();
+                Assert::IsTrue(addr1 == addr2);
+
+                foo = nullptr;
+                auto addr3 = foo.get_address_of();
+                Assert::IsTrue(addr2 == addr3);
+
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                pFoo->Release();
+            }
+
+            TEST_METHOD(ReleaseAndGetAddressOfTest)
+            {
+                IFoo *pFoo = new Foo();
+                com_ptr<IFoo> foo(pFoo);
+                Assert::IsTrue(pFoo->RefCount() == 2);
+
+                auto addr1 = foo.release_and_get_address_of();
+                Assert::IsTrue(*addr1 == nullptr);
+                Assert::IsTrue(pFoo->RefCount() == 1);
+
+                auto addr2 = foo.release_and_get_address_of();
+                Assert::IsTrue(*addr2 == nullptr);
+                Assert::IsTrue(addr1 == addr2);
+                Assert::IsTrue(pFoo->RefCount() == 1);
+
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                pFoo->Release();
             }
 
 #pragma endregion
