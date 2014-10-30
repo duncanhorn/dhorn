@@ -18,6 +18,72 @@ namespace dhorn
     namespace win32
     {
         /*
+         * com_ptr_ref
+         */
+        namespace garbage
+        {
+            template <typename ComPtrType>
+            class com_ptr_ref
+            {
+            public:
+                /*
+                 * Types
+                 */
+                using interface_type = typename ComPtrType::interface_type;
+
+
+
+                /*
+                 * Constructor(s)/Destructor
+                 */
+                com_ptr_ref(_In_ ComPtrType *ptr) :
+                    _ptr(ptr)
+                {
+                }
+
+
+
+                /*
+                 * Operators
+                 */
+                //template <
+                //    typename Ty,
+                //    typename = typename std::enable_if<std::is_convertible<interface_type *, Ty *>::value>::type>
+                //operator Ty **(void)
+                //{
+                //    return reinterpret_cast<Ty **>(this->_ptr->release_and_get_address_of());
+                //}
+                operator interface_type **(void)
+                {
+                    return this->_ptr->release_and_get_address_of();
+                }
+
+                operator void **(void)
+                {
+                    return reinterpret_cast<void **>(this->_ptr->release_and_get_address_of());
+                }
+
+                // Used with IID_PPV_ARGS (for __uuidof). Reset is done in operator void **
+                interface_type * operator *(void)
+                {
+                    return this->_ptr->get();
+                }
+
+                operator ComPtrType *(void)
+                {
+                    return this->_ptr;
+                }
+
+
+            private:
+
+                ComPtrType *_ptr;
+            };
+        }
+
+
+
+        /*
          * com_ptr class
          */
         template <typename IFace>
@@ -30,6 +96,8 @@ namespace dhorn
              * Types
              */
             using interface_type = IFace;
+
+
 
             /*
              * Constructor(s)/Destructor
@@ -166,6 +234,11 @@ namespace dhorn
                 return *this;
             }
 
+            garbage::com_ptr_ref<com_ptr> operator&(void)
+            {
+                return garbage::com_ptr_ref<com_ptr>(this);
+            }
+
             //template <
             //    typename Ty,
             //    typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
@@ -260,6 +333,22 @@ namespace dhorn
             {
                 this->Release();
                 return this->get_address_of();
+            }
+
+            template <
+                typename Ty,
+                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+            void copy_to(_Outptr_result_maybenull_ Ty **ptr)
+            {
+                // Must first assign to null in case an exception is thrown
+                *ptr = nullptr;
+                *ptr = com_ptr<Ty>(*this).detach();
+            }
+
+            void copy_to(_In_ REFIID iid, _Outptr_result_maybenull_ void **ptr)
+            {
+                *ptr = nullptr;
+                throw_if_failed(this->_ptr->QueryInterface(iid, ptr));
             }
 
 
@@ -358,3 +447,18 @@ namespace std
 }
 
 #endif  /*_DHORN_NO_STD*/
+
+
+
+#ifndef _DHORN_NO_GLOBAL
+
+// Overload for IID_PPV_ARGS
+template <typename Ty>
+void **IID_PPV_ARGS_Helper(_Inout_ dhorn::win32::garbage::com_ptr_ref<Ty> ptr)
+{
+    static_assert(std::is_base_of<IUnknown, typename Ty::interface_type>::value,
+        "Cannot use IID_PPV_ARGS with a type that does not derive from IUnknown");
+    return ptr;
+}
+
+#endif

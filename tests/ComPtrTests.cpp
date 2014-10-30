@@ -182,6 +182,12 @@ namespace dhorn
             }
         };
 
+        void GetFoo(_In_ REFIID iid, _Outptr_result_maybenull_ void **ppOut)
+        {
+            static IFoo *pFoo = new Foo();
+            com_ptr<IFoo>(pFoo).copy_to(iid, ppOut);
+        }
+
         class FooBar :
             public Base,
             public IFoo,
@@ -1589,6 +1595,162 @@ namespace dhorn
                 Assert::IsTrue(*addr2 == nullptr);
                 Assert::IsTrue(addr1 == addr2);
                 Assert::IsTrue(pFoo->RefCount() == 1);
+
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                pFoo->Release();
+            }
+
+            TEST_METHOD(CopyToTest)
+            {
+                IFoo *pFoo = new Foo();
+
+                {
+                    com_ptr<IBase> base(pFoo);
+
+                    {
+                        // Should be able to same cast
+                        com_ptr<IBase> base2;
+                        base.copy_to(base2.get_address_of());
+
+                        Assert::IsTrue(pFoo->RefCount() == 3);
+                    }
+
+                    {
+                        // Should be able to down-cast
+                        com_ptr<IUnknown> unk;
+                        base.copy_to(unk.get_address_of());
+
+                        Assert::IsTrue(pFoo->RefCount() == 3);
+                    }
+
+                    {
+                        // Should be able to up-cast
+                        com_ptr<IFoo> foo;
+                        base.copy_to(foo.get_address_of());
+
+                        Assert::IsTrue(pFoo->RefCount() == 3);
+                    }
+
+                    // base cannot be up-casted to IBar and IBar should be set to null on failure
+                    IBar *pBar = reinterpret_cast<IBar *>(0xc0ffee);
+                    try
+                    {
+                        base.copy_to(&pBar);
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (hresult_exception &e)
+                    {
+                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
+                        Assert::IsTrue(pFoo->RefCount() == 2);
+                        Assert::IsTrue(pBar == nullptr);
+                    }
+                }
+
+                // Null pointer should be copyable regardless of the type
+                com_ptr<IFoo> foo;
+                com_ptr<IBar> bar;
+
+                foo.copy_to(bar.get_address_of());
+                bar.copy_to(foo.get_address_of());
+
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                pFoo->Release();
+            }
+
+            TEST_METHOD(CopyToIIDTest)
+            {
+                IBase *pBase = static_cast<IFoo *>(new FooBar());
+                IFoo *pFoo = new Foo();
+
+                {
+                    // Can copy pBase to anything
+                    com_ptr<IBase> base(pBase);
+                    com_ptr<IFoo> foo;
+                    com_ptr<IBar> bar;
+                    com_ptr<IBase> base2;
+                    com_ptr<IUnknown> unk;
+
+                    base.copy_to(IID_PPV_ARGS(foo.release_and_get_address_of()));
+                    base.copy_to(IID_PPV_ARGS(bar.release_and_get_address_of()));
+                    base.copy_to(IID_PPV_ARGS(base2.release_and_get_address_of()));
+                    base.copy_to(IID_PPV_ARGS(unk.release_and_get_address_of()));
+                    Assert::IsTrue(pBase->RefCount() == 6);
+
+                    // Can copy pFoo to anything but IBar
+                    base = pFoo;
+
+                    base.copy_to(IID_PPV_ARGS(foo.release_and_get_address_of()));
+                    base.copy_to(IID_PPV_ARGS(base2.release_and_get_address_of()));
+                    base.copy_to(IID_PPV_ARGS(unk.release_and_get_address_of()));
+                    Assert::IsTrue(pFoo->RefCount() == 5);
+
+                    try
+                    {
+                        base.copy_to(IID_PPV_ARGS(bar.release_and_get_address_of()));
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (hresult_exception &e)
+                    {
+                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
+                    }
+
+                    Assert::IsTrue(pBase->RefCount() == 1);
+                    Assert::IsTrue(pFoo->RefCount() == 5);
+                }
+
+                Assert::IsTrue(pBase->RefCount() == 1);
+                Assert::IsTrue(pFoo->RefCount() == 1);
+
+                pBase->Release();
+                pFoo->Release();
+            }
+
+            TEST_METHOD(OperatorAmpersandTest)
+            {
+                IFoo *pFoo = new Foo();
+                com_ptr<IFoo> foo;
+
+                // Can cast to interface_type **, which releases
+                foo = pFoo;
+                Assert::IsTrue(pFoo->RefCount() == 2);
+                IFoo **ppFoo = &foo;
+                Assert::IsTrue(pFoo->RefCount() == 1);
+                UNREFERENCED_PARAMETER(ppFoo);
+
+                // Casting to com_ptr * does not release
+                foo = pFoo;
+                Assert::IsTrue(pFoo->RefCount() == 2);
+                com_ptr<IFoo> *pComPtr = &foo;
+                Assert::IsTrue(pFoo->RefCount() == 2);
+                UNREFERENCED_PARAMETER(pComPtr);
+
+                // Can be used with IID_PPV_ARGS
+                com_ptr<IBar> bar;
+                com_ptr<IBase> base;
+                com_ptr<IUnknown> unk;
+
+                // Should succeed with all but IBase
+                GetFoo(IID_PPV_ARGS(&foo));
+                Assert::IsTrue(pFoo->RefCount() == 1);      // Recall we didn't release earlier
+                Assert::IsTrue(foo->RefCount() == 2);
+
+                GetFoo(IID_PPV_ARGS(&base));
+                Assert::IsTrue(base->RefCount() == 3);
+
+                GetFoo(IID_PPV_ARGS(&unk));
+                Assert::IsTrue(foo->RefCount() == 4);
+
+                // Fails with IBar
+                try
+                {
+                    GetFoo(IID_PPV_ARGS(&bar));
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (hresult_exception &e)
+                {
+                    Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
+                }
+                Assert::IsTrue(foo->RefCount() == 4);
 
                 Assert::IsTrue(pFoo->RefCount() == 1);
                 pFoo->Release();
