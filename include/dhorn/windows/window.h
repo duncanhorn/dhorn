@@ -7,31 +7,26 @@
  *
  * Window messages are handled as follows:
  *
- *      -   Messages that arrive before WM_NCCREATE are processed by DefWindowProc. This behavior
- *          is mostly unavoidable as a majority of the class would have to be re-written for it to
- *          (safely) behave any different.
- *      -   Messages that arrive after WM_NCCREATE are handled by the window_procedure function.
- *          While this function is declared as virtual, it is not recommended that you override
- *          this function as its default behavior should be good enough and gives you a lot free.
- *      -   From here, window_procedure looks up the list of callback handlers for the input
- *          message. If none exist, it moves on to the next step. If handler(s) do exist, the
- *          window_procedure function iterates all handlers invoking their callback function. If
- *          the function returns true, the handler's invoke count is decremented (except when the
- *          count is infinite), and the handler is removed from the list if its invoke count reaces
- *          zero. The window_procedure function then looks at the handler's eat_message flag (note
- *          that this is done only when the handler returns true (handled)). If the flag is set
- *          to true, then the message routing stops there and (true, result) is returned to the
- *          window_procedure. If this flag is set to false, or if the handler does not handle the
- *          message, the process is repeated for the next handler in the list until the end of the
- *          list is reached, or until a handler handles a message and its eat_message flag is set
- *          to true. In the event that multiple handlers handle a request, the result of the LAST
- *          handler to say that it handled a message is reported back to the system.
- *              *   Note that a "transparent" handler can be implemented by handling a message each
- *                  time, but always returning false. It should be noted that if no other handler
- *                  exists to process the message, then DefWindowProc will get called, which may
- *                  not be desirable in some situations.
- *      -   If no handler returns true, then the DefWindowProc is called and its result is reported
- *          to the system.
+ *      -   Messages that arrive before WM_NCCREATE are processed by DefWindowProc. This behavior is mostly unavoidable
+ *          as a majority of the class would have to be re-written for it to (safely) behave any different.
+ *      -   Messages that arrive after WM_NCCREATE are handled by the window_procedure function. While this function is
+ *          declared as virtual, it is not recommended that you override this function as its default behavior should
+ *          be good enough and gives you a lot free.
+ *      -   From here, window_procedure looks up the list of callback handlers for the input message. If none exist, it
+ *          moves on to the next step. If handler(s) do exist, the window_procedure function iterates all handlers
+ *          invoking their callback function. If the function returns true, the handler's invoke count is decremented
+ *          (except when the count is infinite), and the handler is removed from the list if its invoke count reaces
+ *          zero. The window_procedure function then looks at the handler's eat_message flag (note that this is done
+ *          only when the handler returns true (handled)). If the flag is set to true, then the message routing stops
+ *          there and (true, result) is returned to the window_procedure. If this flag is set to false, or if the
+ *          handler does not handle the message, the process is repeated for the next handler in the list until the end
+ *          of the list is reached, or until a handler handles a message and its eat_message flag is set to true. In
+ *          the event that multiple handlers handle a request, the result of the LAST handler to say that it handled a
+ *          message is reported back to the system.
+ *              *   Note that a "transparent" handler can be implemented by handling a message each time, but always
+ *                  returning false. It should be noted that if no other handler exists to process the message, then
+ *                  DefWindowProc will get called, which may not be desirable in some situations.
+ *      -   If no handler returns true, then the DefWindowProc is called and its result is reported to the system.
  */
 #pragma once
 
@@ -72,14 +67,12 @@ namespace dhorn
 
         inline window_class_style operator|(_In_ window_class_style lhs, _In_ window_class_style rhs)
         {
-            return static_cast<window_class_style>(
-                static_cast<unsigned>(lhs) | static_cast<unsigned>(rhs));
+            return static_cast<window_class_style>(static_cast<unsigned>(lhs) | static_cast<unsigned>(rhs));
         }
 
         inline window_class_style operator&(_In_ window_class_style lhs, _In_ window_class_style rhs)
         {
-            return static_cast<window_class_style>(
-                static_cast<unsigned>(lhs) & static_cast<unsigned>(rhs));
+            return static_cast<window_class_style>(static_cast<unsigned>(lhs) & static_cast<unsigned>(rhs));
         }
 
         enum class system_color : uintptr_t
@@ -140,14 +133,12 @@ namespace dhorn
 
         inline window_style operator|(_In_ window_style lhs, _In_ window_style rhs)
         {
-            return static_cast<window_style>(
-                static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
+            return static_cast<window_style>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
         }
 
         inline window_style operator&(_In_ window_style lhs, _In_ window_style rhs)
         {
-            return static_cast<window_style>(
-                static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
+            return static_cast<window_style>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
         }
 
         enum class window_message : unsigned
@@ -517,7 +508,6 @@ namespace dhorn
                 icon{},
                 cursor{},
                 background{},
-                menu_name{},
                 class_name(className),
                 small_icon{}
             {
@@ -525,8 +515,7 @@ namespace dhorn
 
             inline void use_defaults(void)
             {
-                this->style = window_class_style::horizontal_redraw |
-                              window_class_style::vertical_redraw;
+                this->style = window_class_style::horizontal_redraw | window_class_style::vertical_redraw;
                 this->cursor = load_cursor(nullptr, IDC_ARROW);
                 this->background = reinterpret_cast<brush_handle>(system_color::background) + 1;
             }
@@ -602,12 +591,7 @@ namespace dhorn
             /*
              * Construction
              */
-            callback_handler(_In_ window_message message, _In_ const callback_type &callback) :
-                callback_handler(message, repeat_infinite, false, callback)
-            {
-            }
-
-            callback_handler(_In_ window_message message, _Inout_ callback_type &&callback) :
+            callback_handler(_In_ window_message message, _In_ callback_type callback) :
                 callback_handler(message, repeat_infinite, false, std::move(callback))
             {
             }
@@ -615,23 +599,11 @@ namespace dhorn
             callback_handler(
                 _In_ window_message message,
                 _In_ size_t repeatCount,
-                _In_ bool eatKey,
-                _In_ const callback_type &callback) :
+                _In_ bool eatMessage,
+                _In_ callback_type callback) :
                 message(message),
                 repeat_count(repeatCount),
-                eat_message(eatKey),
-                callback(callback)
-            {
-            }
-
-            callback_handler(
-                _In_ window_message message,
-                _In_ size_t repeatCount,
-                _In_ bool eatKey,
-                _Inout_ callback_type &&callback) :
-                message(message),
-                repeat_count(repeatCount),
-                eat_message(eatKey),
+                eat_message(eatMessage),
                 callback(std::move(callback))
             {
             }
@@ -673,12 +645,7 @@ namespace dhorn
 
             struct deferred_invoke_handler
             {
-                deferred_invoke_handler(_In_ const deferred_callback_type &func) :
-                    _func(func)
-                {
-                }
-
-                deferred_invoke_handler(_Inout_ deferred_callback_type &&func) :
+                deferred_invoke_handler(_In_ deferred_callback_type func) :
                     _func(std::move(func))
                 {
                 }
@@ -704,29 +671,25 @@ namespace dhorn
                 _window(nullptr),
                 _threadId(0)
             {
-                // Initialize the default callback handlers. All of them repeat infinitely and
-                // never eat key presses
+                // Initialize the default callback handlers. All of them repeat infinitely and never eat messages
 
                 // Deferred Callback Handler
                 this->add_callback_handler(window_message::deferred_invoke,
-                    [](window *sender, uintptr_t wparam, intptr_t /*lparam*/) ->
-                    message_result_type
+                    [](window *sender, uintptr_t wparam, intptr_t /*lparam*/) -> message_result_type
                 {
                     return sender->OnDeferredCallback(wparam);
                 });
 
                 // WM_DESTROY
                 this->add_callback_handler(window_message::destroy,
-                    [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) ->
-                    message_result_type
+                    [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) -> message_result_type
                 {
                     return std::make_pair(sender->on_destroy(), 0);
                 });
 
                 // WM_KEYDOWN
                 this->add_callback_handler(window_message::key_down,
-                    [](window *sender, uintptr_t wparam, intptr_t lparam) ->
-                    message_result_type
+                    [](window *sender, uintptr_t wparam, intptr_t lparam) -> message_result_type
                 {
                     auto key = static_cast<virtual_key>(wparam);
                     return std::make_pair(sender->on_key_down(key, lparam), 0);
@@ -734,8 +697,7 @@ namespace dhorn
 
                 // WM_KEYUP
                 this->add_callback_handler(window_message::key_up,
-                    [](window *sender, uintptr_t wparam, intptr_t lparam) ->
-                    message_result_type
+                    [](window *sender, uintptr_t wparam, intptr_t lparam) -> message_result_type
                 {
                     auto key = static_cast<virtual_key>(wparam);
                     return std::make_pair(sender->on_key_up(key, lparam), 0);
@@ -743,8 +705,7 @@ namespace dhorn
 
                 // WM_PAINT
                 this->add_callback_handler(window_message::paint,
-                    [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) ->
-                    message_result_type
+                    [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) -> message_result_type
                 {
                     return std::make_pair(sender->on_paint(), 0);
                 });
@@ -752,10 +713,7 @@ namespace dhorn
 
 
 
-            uintptr_t run(
-                _In_ const window_class &windowClass,
-                _In_ const window_options &options,
-                _In_ int cmdShow)
+            uintptr_t run(_In_ const window_class &windowClass, _In_ const window_options &options, _In_ int cmdShow)
             {
                 // Can only call run once
                 this->EnsureWindowUninitialized();
@@ -836,17 +794,9 @@ namespace dhorn
              */
 #pragma region Callbacks
 
-            void post_async(_In_ const deferred_callback_type &func)
+            void post_async(_Inout_ deferred_callback_type func)
             {
-                std::unique_ptr<deferred_invoke_handler> handler(
-                    new deferred_invoke_handler(func));
-                this->Post(std::move(handler));
-            }
-
-            void post_async(_Inout_ deferred_callback_type &&func)
-            {
-                std::unique_ptr<deferred_invoke_handler> handler(
-                    new deferred_invoke_handler(std::move(func)));
+                std::unique_ptr<deferred_invoke_handler> handler(new deferred_invoke_handler(std::move(func)));
                 this->Post(std::move(handler));
             }
 
@@ -871,14 +821,13 @@ namespace dhorn
                 cond.wait(guard, [&]() -> bool { return completed; });
             }
 
-            size_t add_callback_handler(_Inout_ callback_handler &&handler)
+            size_t add_callback_handler(_Inout_ callback_handler handler)
             {
                 size_t callbackId = ++this->_nextCallbackId;
 
-                // If run() has not been called, then we cannot post to the UI thread. It is then
-                // assumed that add_callback_handler is being called by the thread creating the
-                // window. If this is not true, then there could be race conditions for writing
-                // to the map/vectors
+                // If run() has not been called, then we cannot post to the UI thread. It is then assumed that
+                // add_callback_handler is being called by the thread creating the window. If this is not true, then
+                // there could be race conditions for writing to the map/vectors
                 if (this->_threadId)
                 {
                     // Already running; post
@@ -896,29 +845,15 @@ namespace dhorn
                 return callbackId;
             }
 
-            size_t add_callback_handler(_In_ const callback_handler &handler)
-            {
-                return this->add_callback_handler(callback_handler(handler));
-            }
-
-            size_t add_callback_handler(
-                _In_ window_message message,
-                _In_ const message_callback_type &func)
-            {
-                return this->add_callback_handler(callback_handler(message, func));
-            }
-
-            size_t add_callback_handler(
-                _In_ window_message message,
-                _Inout_ message_callback_type &&func)
+            size_t add_callback_handler(_In_ window_message message, _Inout_ message_callback_type func)
             {
                 return this->add_callback_handler(callback_handler(message, std::move(func)));
             }
 
-            void on_initialized(_In_ const deferred_callback_type &callback)
+            void on_initialized(_In_ const deferred_callback_type callback)
             {
                 // There can only be one initialize callback
-                this->_initializeCallback = callback;
+                this->_initializeCallback = std::move(callback);
             }
 
 #pragma endregion
@@ -931,8 +866,8 @@ namespace dhorn
              */
             virtual uintptr_t message_pump()
             {
-                // Default is to use GetMessage. Derived classes can override this functionality
-                // if they wish to use other means (e.g. PeekMessage)
+                // Default is to use GetMessage. Derived classes can override this functionality if they wish to use
+                // other means (e.g. PeekMessage)
                 MSG msg;
                 while (get_message(msg))
                 {
@@ -975,12 +910,9 @@ namespace dhorn
 
 
 
-            virtual intptr_t window_procedure(
-                _In_ window_message message,
-                _In_ uintptr_t wparam,
-                _In_ intptr_t lparam)
+            virtual intptr_t window_procedure(_In_ window_message message, _In_ uintptr_t wparam, _In_ intptr_t lparam)
             {
-                message_result_type result;
+                message_result_type result(false, 0);
 
                 // Check to see if any handlers exist for the message
                 auto list_itr = this->_callbackHandlers.find(message);
@@ -1003,8 +935,7 @@ namespace dhorn
 
                             // We use a repeat_count of zero to indicate that the hanler should
                             // only get run once regardless of if it handles the message or not
-                            if (handler.repeat_count != callback_handler::repeat_infinite &&
-                                handler.repeat_count != 0)
+                            if (handler.repeat_count != callback_handler::repeat_infinite && handler.repeat_count != 0)
                             {
                                 --handler.repeat_count;
                             }
@@ -1019,8 +950,7 @@ namespace dhorn
                     });
 
                     // Need to remove all handlers with a repeat_count of zero
-                    list.erase(std::remove_if(itr.base(), std::end(list),
-                        [](CallbackEntryType &entry) -> bool
+                    list.erase(std::remove_if(itr.base(), std::end(list), [](CallbackEntryType &entry) -> bool
                     {
                         return entry.second.repeat_count == 0;
                     }), std::end(list));
@@ -1028,11 +958,7 @@ namespace dhorn
 
                 if (!result.first)
                 {
-                    return default_window_procedure(
-                        this->_window,
-                        static_cast<unsigned>(message),
-                        wparam,
-                        lparam);
+                    return default_window_procedure(this->_window, static_cast<unsigned>(message), wparam, lparam);
                 }
 
                 return result.second;
@@ -1068,14 +994,12 @@ namespace dhorn
              */
             void AddCallbackHandler(_Inout_ callback_handler &&handler, _In_ size_t callbackId)
             {
-                this->_callbackHandlers[handler.message].emplace_back(callbackId,
-                    std::move(handler));
+                this->_callbackHandlers[handler.message].emplace_back(callbackId, std::move(handler));
             }
 
             message_result_type OnDeferredCallback(_In_ uintptr_t wparam)
             {
-                std::unique_ptr<deferred_invoke_handler> handler(
-                    reinterpret_cast<deferred_invoke_handler *>(wparam));
+                std::unique_ptr<deferred_invoke_handler> handler(reinterpret_cast<deferred_invoke_handler *>(wparam));
 
                 handler->invoke();
 
@@ -1113,10 +1037,8 @@ namespace dhorn
                 if (msg == window_message::create)
                 {
                     CREATESTRUCT *vars = reinterpret_cast<CREATESTRUCT *>(lparam);
-                    set_window_long_ptr(window, GWL_USERDATA,
-                        reinterpret_cast<uintptr_t>(vars->lpCreateParams));
-                    set_window_long_ptr(window, GWL_WNDPROC,
-                        reinterpret_cast<uintptr_t>(initialized_window_procedure));
+                    set_window_long_ptr(window, GWL_USERDATA, reinterpret_cast<uintptr_t>(vars->lpCreateParams));
+                    set_window_long_ptr(window, GWL_WNDPROC, reinterpret_cast<uintptr_t>(initialized_window_procedure));
 
                     return initialized_window_procedure(window, message, wparam, lparam);
                 }
@@ -1132,8 +1054,7 @@ namespace dhorn
                 _In_ WPARAM wparam,
                 _In_ LPARAM lparam)
             {
-                window *ptr =
-                    reinterpret_cast<window *>(get_window_long_ptr(windowHandle, GWL_USERDATA));
+                window *ptr = reinterpret_cast<window *>(get_window_long_ptr(windowHandle, GWL_USERDATA));
                 assert(ptr);
 
                 return ptr->window_procedure(static_cast<window_message>(message), wparam, lparam);

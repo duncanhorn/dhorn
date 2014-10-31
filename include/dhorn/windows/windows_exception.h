@@ -143,9 +143,10 @@ namespace dhorn
         inline void expect_error(_In_ uint32_t expect)
         {
             auto error = ::GetLastError();
+
+            // We don't throw in a non-error case, even if we are expecting an error
             if (error && (error != expect))
             {
-                // We don't throw in a non-error case, even if we are expecting an error
                 throw win32_exception(error);
             }
         }

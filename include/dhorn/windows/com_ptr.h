@@ -46,13 +46,6 @@ namespace dhorn
                 /*
                  * Operators
                  */
-                //template <
-                //    typename Ty,
-                //    typename = typename std::enable_if<std::is_convertible<interface_type *, Ty *>::value>::type>
-                //operator Ty **(void)
-                //{
-                //    return reinterpret_cast<Ty **>(this->_ptr->release_and_get_address_of());
-                //}
                 operator interface_type **(void)
                 {
                     return this->_ptr->release_and_get_address_of();
@@ -73,6 +66,7 @@ namespace dhorn
                 {
                     return this->_ptr;
                 }
+
 
 
             private:
@@ -122,15 +116,6 @@ namespace dhorn
             {
                 this->Assign(ptr);
             }
-
-            //template <
-            //    typename Ty,
-            //    typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
-            //com_ptr(_In_ Ty *&&ptr) :
-            //    com_ptr()
-            //{
-            //    this->Assign(std::move(ptr));
-            //}
 
             com_ptr(_In_ const com_ptr &other) :
                 com_ptr()
@@ -183,8 +168,8 @@ namespace dhorn
                 typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
             com_ptr &operator=(_In_opt_ Ty *ptr)
             {
-                // We cannot call swap() here, because the assignment might throw. In the case that
-                // it does, we would not release as we are expected to do.
+                // We cannot call swap() here, because the assignment might throw. In the case that it does, we would
+                // not release as we are expected to do.
                 this->Release();
                 this->Assign(ptr);
 
@@ -204,8 +189,8 @@ namespace dhorn
             template <typename Ty>
             com_ptr &operator=(_In_ const com_ptr<Ty> &other)
             {
-                // We cannot call swap() here, because the assignment might throw. In the case that
-                // it does, we would not release as we are expected to do.
+                // We cannot call swap() here, because the assignment might throw. In the case that it does, we would
+                // not release as we are expected to do.
                 this->Release();
                 this->Assign(other._ptr);
 
@@ -225,8 +210,8 @@ namespace dhorn
                 typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
             com_ptr &operator=(_Inout_ com_ptr<Ty> &&other)
             {
-                // We do not call swap here as it would require an extra AddRef and release since
-                // we would need to create a separate object
+                // We do not call swap here as it would require an extra AddRef and Release since we would need to
+                // create a separate object
                 this->Release();
                 this->_ptr = other._ptr;
                 other._ptr = nullptr;
@@ -238,17 +223,6 @@ namespace dhorn
             {
                 return garbage::com_ptr_ref<com_ptr>(this);
             }
-
-            //template <
-            //    typename Ty,
-            //    typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
-            //com_ptr &operator=(_In_ Ty *&&ptr)
-            //{
-            //    this->Release();
-            //    this->Assign(std::move(ptr));
-
-            //    return *this;
-            //}
 
             operator bool(void) const
             {
@@ -272,6 +246,9 @@ namespace dhorn
 
 
 
+            /*
+             * Explicit Functions
+             */
             void assign(_In_ std::nullptr_t)
             {
                 this->Release();
@@ -355,6 +332,7 @@ namespace dhorn
 
             template <typename Ty>
             friend class com_ptr;
+
         private:
 
             inline void Release(void)
@@ -433,6 +411,8 @@ namespace dhorn
     }
 }
 
+
+
 #ifndef _DHORN_NO_STD
 
 namespace std
@@ -454,11 +434,11 @@ namespace std
 
 // Overload for IID_PPV_ARGS
 template <typename Ty>
-void **IID_PPV_ARGS_Helper(_Inout_ dhorn::win32::garbage::com_ptr_ref<Ty> ptr)
+void **IID_PPV_ARGS_Helper(_In_ dhorn::win32::garbage::com_ptr_ref<Ty> ptr)
 {
     static_assert(std::is_base_of<IUnknown, typename Ty::interface_type>::value,
         "Cannot use IID_PPV_ARGS with a type that does not derive from IUnknown");
     return ptr;
 }
 
-#endif
+#endif  /* _DHORN_NO_GLOBAL */

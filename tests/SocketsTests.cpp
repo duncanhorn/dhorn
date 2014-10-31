@@ -17,6 +17,9 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 #define TEST_COUNT      100
 
+#pragma warning(push)
+#pragma warning(disable:6387) // We wish to test _In_ parameters with nullptr
+
 bool operator==(_In_ const in6_addr &addr1, _In_ const in6_addr &addr2)
 {
     for (int i = 0; i < 8; i++)
@@ -47,7 +50,6 @@ namespace dhorn
             {
                 dhorn::ipv4_address addr;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
-                Assert::IsFalse(addr.fail());
             }
 
             TEST_METHOD(IpAddrConstructorTest)
@@ -63,18 +65,15 @@ namespace dhorn
 
                     dhorn::ipv4_address ip(addr);
                     Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
-                    Assert::IsFalse(ip.fail());
                 }
 
                 addr.s_addr = 0xFFFFFFFF;
                 dhorn::ipv4_address ip1(addr);
                 Assert::AreEqual(((in_addr)ip1).s_addr, addr.s_addr);
-                Assert::IsFalse(ip1.fail());
 
                 addr.s_addr = 0;
                 dhorn::ipv4_address ip2(addr);
                 Assert::AreEqual(((in_addr)ip2).s_addr, addr.s_addr);
-                Assert::IsFalse(ip2.fail());
             }
 
             TEST_METHOD(StringConstructorTest)
@@ -82,33 +81,40 @@ namespace dhorn
                 std::string ip1 = "0.0.0.0";
                 dhorn::ipv4_address addr1(ip1.c_str());
                 Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
-                Assert::IsFalse(addr1.fail());
 
                 std::string ip2 = "255.255.255.255";
                 dhorn::ipv4_address addr2(ip2.c_str());
                 Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "127.0.0.1";
                 dhorn::ipv4_address addr3(ip3.c_str());
                 Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr3.fail());
 
                 std::string ip4 = "2.0.0.10";
                 dhorn::ipv4_address addr4(ip4.c_str());
                 Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr4.fail());
 
-                std::string ip5 = "foo.bar";
-                dhorn::ipv4_address addr5(ip5.c_str());
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::string ip5 = "foo.bar";
+                    dhorn::ipv4_address addr5(ip5.c_str());
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                dhorn::ipv4_address addr6((char *)nullptr);
-#pragma warning(pop)
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    dhorn::ipv4_address addr6((char *)nullptr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(WStringConstructorTest)
@@ -116,33 +122,40 @@ namespace dhorn
                 std::wstring ip1 = L"0.0.0.0";
                 dhorn::ipv4_address addr1(ip1.c_str());
                 Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
-                Assert::IsFalse(addr1.fail());
 
                 std::wstring ip2 = L"255.255.255.255";
                 dhorn::ipv4_address addr2(ip2.c_str());
                 Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 dhorn::ipv4_address addr3(ip3.c_str());
                 Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr3.fail());
 
                 std::wstring ip4 = L"2.0.0.10";
                 dhorn::ipv4_address addr4(ip4.c_str());
                 Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr4.fail());
 
-                std::wstring ip5 = L"foo.bar";
-                dhorn::ipv4_address addr5(ip5.c_str());
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo.bar";
+                    dhorn::ipv4_address addr5(ip5.c_str());
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                dhorn::ipv4_address addr6((wchar_t *)nullptr);
-#pragma warning(pop)
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    dhorn::ipv4_address addr6((wchar_t *)nullptr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(StdStringConstructorTest)
@@ -150,31 +163,41 @@ namespace dhorn
                 std::string ip1 = "0.0.0.0";
                 dhorn::ipv4_address addr1(ip1);
                 Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
-                Assert::IsFalse(addr1.fail());
 
                 std::string ip2 = "255.255.255.255";
                 dhorn::ipv4_address addr2(ip2);
                 Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "127.0.0.1";
                 dhorn::ipv4_address addr3(ip3);
                 Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr3.fail());
 
                 std::string ip4 = "2.0.0.10";
                 dhorn::ipv4_address addr4(ip4);
                 Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr4.fail());
 
-                std::string ip5 = "foo.bar";
-                dhorn::ipv4_address addr5(ip5);
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::string ip5 = "foo.bar";
+                    dhorn::ipv4_address addr5(ip5);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                std::string ip6;
-                dhorn::ipv4_address addr6(ip6);
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    std::string ip6;
+                    dhorn::ipv4_address addr6(ip6);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
             TEST_METHOD(StdWStringConstructorTest)
@@ -182,31 +205,41 @@ namespace dhorn
                 std::wstring ip1 = L"0.0.0.0";
                 dhorn::ipv4_address addr1(ip1);
                 Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
-                Assert::IsFalse(addr1.fail());
 
                 std::wstring ip2 = L"255.255.255.255";
                 dhorn::ipv4_address addr2(ip2);
                 Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 dhorn::ipv4_address addr3(ip3);
                 Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr3.fail());
 
                 std::wstring ip4 = L"2.0.0.10";
                 dhorn::ipv4_address addr4(ip4);
                 Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr4.fail());
 
-                std::wstring ip5 = L"foo.bar";
-                dhorn::ipv4_address addr5(ip5);
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo.bar";
+                    dhorn::ipv4_address addr5(ip5);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                std::wstring ip6;
-                dhorn::ipv4_address addr6(ip6);
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    std::wstring ip6;
+                    dhorn::ipv4_address addr6(ip6);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
 #pragma endregion
@@ -232,18 +265,15 @@ namespace dhorn
 
                     ip = addr;
                     Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
-                    Assert::IsFalse(ip.fail());
                 }
 
                 addr.s_addr = 0xFFFFFFFF;
                 ip = addr;
                 Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
-                Assert::IsFalse(ip.fail());
 
                 addr.s_addr = 0;
                 ip = addr;
                 Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
-                Assert::IsFalse(ip.fail());
             }
 
             TEST_METHOD(StringAssignmentTest)
@@ -254,33 +284,40 @@ namespace dhorn
                 std::string ip1 = "0.0.0.0";
                 addr = ip1.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
-                Assert::IsFalse(addr.fail());
 
                 std::string ip2 = "255.255.255.255";
                 addr = ip2.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "127.0.0.1";
                 addr = ip3.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr.fail());
 
                 std::string ip4 = "2.0.0.10";
                 addr = ip4.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr.fail());
 
-                std::string ip5 = "foo.bar";
-                addr = ip5.c_str();
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::string ip5 = "foo.bar";
+                    addr = ip5.c_str();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                addr2 = (char *)nullptr;
-#pragma warning(pop)
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    addr2 = (char *)nullptr;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(WStringAssignmentTest)
@@ -291,33 +328,40 @@ namespace dhorn
                 std::wstring ip1 = L"0.0.0.0";
                 addr = ip1.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip2 = L"255.255.255.255";
                 addr = ip2.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 addr = ip3.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip4 = L"2.0.0.10";
                 addr = ip4.c_str();
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr.fail());
 
-                std::wstring ip5 = L"foo.bar";
-                addr = ip5.c_str();
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo.bar";
+                    addr = ip5.c_str();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                addr2 = (wchar_t *)nullptr;
-#pragma warning(pop)
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    addr2 = (wchar_t *)nullptr;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(StdStringAssignmentTest)
@@ -328,30 +372,40 @@ namespace dhorn
                 std::string ip1 = "0.0.0.0";
                 addr = ip1;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
-                Assert::IsFalse(addr.fail());
 
                 std::string ip2 = "255.255.255.255";
                 addr = ip2;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "127.0.0.1";
                 addr = ip3;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr.fail());
 
                 std::string ip4 = "2.0.0.10";
                 addr = ip4;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr.fail());
 
-                std::string ip5 = "foo.bar";
-                addr = ip5;
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::string ip5 = "foo.bar";
+                    addr = ip5;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                addr2 = std::string();
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    addr2 = std::string();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
             TEST_METHOD(StdWStringAssignmentTest)
@@ -362,30 +416,40 @@ namespace dhorn
                 std::wstring ip1 = L"0.0.0.0";
                 addr = ip1;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip2 = L"255.255.255.255";
                 addr = ip2;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 addr = ip3;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip4 = L"2.0.0.10";
                 addr = ip4;
                 Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
-                Assert::IsFalse(addr.fail());
 
-                std::wstring ip5 = L"foo.bar";
-                addr = ip5;
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo.bar";
+                    addr = ip5;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                addr2 = std::wstring();
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    addr2 = std::wstring();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
 #pragma endregion
@@ -554,7 +618,6 @@ namespace dhorn
             {
                 dhorn::ipv6_address addr;
                 Assert::IsTrue((in_addr6)addr == zero());
-                Assert::IsFalse(addr.fail());
             }
 
             TEST_METHOD(IpAddrConstructorTest)
@@ -567,18 +630,15 @@ namespace dhorn
 
                     dhorn::ipv6_address ip(addr);
                     Assert::IsTrue(addr == ip);
-                    Assert::IsFalse(ip.fail());
                 }
 
                 addr = make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
                 dhorn::ipv6_address ip1(addr);
                 Assert::IsTrue(addr == ip1);
-                Assert::IsFalse(ip1.fail());
 
                 addr = zero();
                 dhorn::ipv6_address ip2(addr);
                 Assert::IsTrue(addr == ip2);
-                Assert::IsFalse(ip2.fail());
             }
 
             TEST_METHOD(StringConstructorTest)
@@ -586,33 +646,40 @@ namespace dhorn
                 std::string ip1 = "::";
                 dhorn::ipv6_address addr1(ip1.c_str());
                 Assert::IsTrue(zero() == addr1);
-                Assert::IsFalse(addr1.fail());
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::ipv6_address addr2(ip2.c_str());
                 Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::string ip3 = "::1";
                 dhorn::ipv6_address addr3(ip3.c_str());
                 Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
-                Assert::IsFalse(addr3.fail());
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 dhorn::ipv6_address addr4(ip4.c_str());
                 Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
-                Assert::IsFalse(addr4.fail());
 
-                std::string ip5 = "foo::bar";
-                dhorn::ipv6_address addr5(ip5.c_str());
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::string ip5 = "foo::bar";
+                    dhorn::ipv6_address addr5(ip5.c_str());
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                dhorn::ipv6_address addr6((char *)nullptr);
-#pragma warning(pop)
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    dhorn::ipv6_address addr6((char *)nullptr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(WStringConstructorTest)
@@ -620,33 +687,40 @@ namespace dhorn
                 std::wstring ip1 = L"::";
                 dhorn::ipv6_address addr1(ip1.c_str());
                 Assert::IsTrue(zero() == addr1);
-                Assert::IsFalse(addr1.fail());
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::ipv6_address addr2(ip2.c_str());
                 Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::wstring ip3 = L"::1";
                 dhorn::ipv6_address addr3(ip3.c_str());
                 Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
-                Assert::IsFalse(addr3.fail());
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 dhorn::ipv6_address addr4(ip4.c_str());
                 Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
-                Assert::IsFalse(addr4.fail());
 
-                std::wstring ip5 = L"foo::bar";
-                dhorn::ipv6_address addr5(ip5.c_str());
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo::bar";
+                    dhorn::ipv6_address addr5(ip5.c_str());
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                dhorn::ipv6_address addr6((char *)nullptr);
-#pragma warning(pop)
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    dhorn::ipv6_address addr6((char *)nullptr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(StdStringConstructorTest)
@@ -654,31 +728,41 @@ namespace dhorn
                 std::string ip1 = "::";
                 dhorn::ipv6_address addr1(ip1);
                 Assert::IsTrue(zero() == addr1);
-                Assert::IsFalse(addr1.fail());
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::ipv6_address addr2(ip2);
                 Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::string ip3 = "::1";
                 dhorn::ipv6_address addr3(ip3);
                 Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
-                Assert::IsFalse(addr3.fail());
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 dhorn::ipv6_address addr4(ip4);
                 Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
-                Assert::IsFalse(addr4.fail());
 
-                std::string ip5 = "foo::bar";
-                dhorn::ipv6_address addr5(ip5);
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::string ip5 = "foo::bar";
+                    dhorn::ipv6_address addr5(ip5);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                std::string ip6;
-                dhorn::ipv6_address addr6(ip6);
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    std::string ip6;
+                    dhorn::ipv6_address addr6(ip6);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
             TEST_METHOD(StdWStringConstructorTest)
@@ -686,31 +770,41 @@ namespace dhorn
                 std::wstring ip1 = L"::";
                 dhorn::ipv6_address addr1(ip1);
                 Assert::IsTrue(zero() == addr1);
-                Assert::IsFalse(addr1.fail());
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::ipv6_address addr2(ip2);
                 Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
-                Assert::IsFalse(addr2.fail());
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::wstring ip3 = L"::1";
                 dhorn::ipv6_address addr3(ip3);
                 Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
-                Assert::IsFalse(addr3.fail());
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 dhorn::ipv6_address addr4(ip4);
                 Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
-                Assert::IsFalse(addr4.fail());
 
-                std::wstring ip5 = L"foo::bar";
-                dhorn::ipv6_address addr5(ip5);
-                Assert::IsTrue(addr5.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo::bar";
+                    dhorn::ipv6_address addr5(ip5);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                std::wstring ip6;
-                dhorn::ipv6_address addr6(ip6);
-                Assert::IsTrue(addr6.fail());
+                try
+                {
+                    std::wstring ip6;
+                    dhorn::ipv6_address addr6(ip6);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
 #pragma endregion
@@ -733,18 +827,15 @@ namespace dhorn
 
                     ip = addr;
                     Assert::IsTrue(ip == addr);
-                    Assert::IsFalse(ip.fail());
                 }
 
                 addr = make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
                 ip = addr;
                 Assert::IsTrue(ip == addr);
-                Assert::IsFalse(ip.fail());
 
                 addr = zero();
                 ip = addr;
                 Assert::IsTrue(ip == addr);
-                Assert::IsFalse(ip.fail());
             }
 
             TEST_METHOD(StringAssignmentTest)
@@ -755,33 +846,40 @@ namespace dhorn
                 std::string ip1 = "::";
                 addr = ip1.c_str();
                 Assert::IsTrue(addr == zero());
-                Assert::IsFalse(addr.fail());
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2.c_str();
                 Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "::1";
                 addr = ip3.c_str();
                 Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
-                Assert::IsFalse(addr.fail());
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 addr = ip4.c_str();
                 Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
-                Assert::IsFalse(addr.fail());
 
-                std::string ip5 = "foo::bar";
-                addr = ip5.c_str();
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::string ip5 = "foo::bar";
+                    addr = ip5.c_str();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                addr2 = (char *)nullptr;
-#pragma warning(pop)
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    addr2 = (char *)nullptr;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(WStringAssignmentTest)
@@ -792,33 +890,40 @@ namespace dhorn
                 std::wstring ip1 = L"::";
                 addr = ip1.c_str();
                 Assert::IsTrue(addr == zero());
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2.c_str();
                 Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"::1";
                 addr = ip3.c_str();
                 Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 addr = ip4.c_str();
                 Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
-                Assert::IsFalse(addr.fail());
 
-                std::wstring ip5 = L"foo::bar";
-                addr = ip5.c_str();
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo::bar";
+                    addr = ip5.c_str();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-#pragma warning(push)
-#pragma warning(disable:6387)
-                addr2 = (wchar_t *)nullptr;
-#pragma warning(pop)
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    addr2 = (wchar_t *)nullptr;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                }
             }
 
             TEST_METHOD(StdStringAssignmentTest)
@@ -829,31 +934,41 @@ namespace dhorn
                 std::string ip1 = "::";
                 addr = ip1;
                 Assert::IsTrue(addr == zero());
-                Assert::IsFalse(addr.fail());
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2;
                 Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "::1";
                 addr = ip3;
                 Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
-                Assert::IsFalse(addr.fail());
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 addr = ip4;
                 Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
-                Assert::IsFalse(addr.fail());
 
-                std::string ip5 = "foo::bar";
-                addr = ip5;
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::string ip5 = "foo::bar";
+                    addr = ip5;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                std::string ip6;
-                addr2 = ip6;
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    std::string ip6;
+                    addr2 = ip6;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
             TEST_METHOD(StdWStringAssignmentTest)
@@ -864,31 +979,41 @@ namespace dhorn
                 std::wstring ip1 = L"::";
                 addr = ip1;
                 Assert::IsTrue(addr == zero());
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2;
                 Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
-                Assert::IsFalse(addr.fail());
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"::1";
                 addr = ip3;
                 Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
-                Assert::IsFalse(addr.fail());
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 addr = ip4;
                 Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
-                Assert::IsFalse(addr.fail());
 
-                std::wstring ip5 = L"foo::bar";
-                addr = ip5;
-                Assert::IsTrue(addr.fail());
+                try
+                {
+                    std::wstring ip5 = L"foo::bar";
+                    addr = ip5;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
 
-                std::wstring ip6;
-                addr2 = ip6;
-                Assert::IsTrue(addr2.fail());
+                try
+                {
+                    std::wstring ip6;
+                    addr2 = ip6;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                }
             }
 
 #pragma endregion
@@ -1005,3 +1130,5 @@ namespace dhorn
         };
     }
 }
+
+#pragma warning(pop)

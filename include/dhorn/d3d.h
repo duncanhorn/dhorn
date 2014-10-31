@@ -3,10 +3,9 @@
  *
  * Duncan Horn
  *
- * Includes many useful classes and functions for using the DirectX library. This file is simply
- * a front for including other files, though it is not recommended that clients #include those
- * files directly as many of them rely on the inclusion of other files that are #include'd from
- * d3d.h such as Windows.h, xnamath.h, etc.
+ * Includes many useful classes and functions for using the DirectX library. This file is simply a front for including
+ * other files, though it is not recommended that clients #include those files directly as many of them rely on the
+ * inclusion of other files that are #include'd from d3d.h such as Windows.h, xnamath.h, etc.
  */
 #pragma once
 

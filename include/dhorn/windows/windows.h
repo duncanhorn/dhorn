@@ -28,6 +28,10 @@ namespace dhorn
          */
 #pragma region Type Declarations
 
+        static_assert(sizeof(DWORD) == sizeof(uint32_t), "DWORD must be 32 bits");
+        static_assert(sizeof(WPARAM) == sizeof(uintptr_t), "WPARAM must be the size of a pointer");
+        static_assert(sizeof(LPARAM) == sizeof(intptr_t), "LPARAM must be the size of a pointer");
+
         using tstring = std::basic_string<TCHAR>;
 
         using pid_t = uint32_t;
@@ -69,11 +73,7 @@ namespace dhorn
                 throw_if_failed(func(std::forward<Args>(args)...));
             }
 
-            template <
-                typename ResultType,
-                ResultType Failure = ResultType{},
-                typename Func,
-                typename... Args>
+            template <typename ResultType, ResultType Failure = ResultType{}, typename Func, typename... Args>
             inline ResultType make_call_fail_on_value(Func &func, Args&&... args)
             {
                 auto result = func(std::forward<Args>(args)...);
@@ -105,9 +105,7 @@ namespace dhorn
             return garbage::make_call_fail_on_value<cursor_handle>(LoadCursor, instance, name);
         }
 
-        inline cursor_handle load_cursor(
-            _In_opt_ instance_handle instance,
-            _In_ const tstring &name)
+        inline cursor_handle load_cursor(_In_opt_ instance_handle instance, _In_ const tstring &name)
         {
             return load_cursor(instance, garbage::null_if_empty(name));
         }
@@ -128,8 +126,7 @@ namespace dhorn
 
         inline device_context_handle create_compatible_dc(_In_ device_context_handle hdc)
         {
-            return
-                garbage::make_call_fail_on_value<device_context_handle>(CreateCompatibleDC, hdc);
+            return garbage::make_call_fail_on_value<device_context_handle>(CreateCompatibleDC, hdc);
         }
 
         inline device_context_handle create_dc(
@@ -244,10 +241,7 @@ namespace dhorn
             return flags;
         }
 
-        inline void set_handle_information(
-            _In_ handle_t handle,
-            _In_ uint32_t mask,
-            _In_ uint32_t flags)
+        inline void set_handle_information(_In_ handle_t handle, _In_ uint32_t mask, _In_ uint32_t flags)
         {
             garbage::make_boolean_call(SetHandleInformation, handle, mask, flags);
         }
@@ -268,12 +262,11 @@ namespace dhorn
 
         inline bool get_message(
             _Out_ MSG &msg,
-            _In_opt_ window_handle window = 0,
+            _In_opt_ window_handle window = nullptr,
             _In_opt_ unsigned filterMin = 0,
             _In_opt_ unsigned filterMax = 0)
         {
-            return !!garbage::make_call_fail_on_value<int, -1>(
-                GetMessage, &msg, window, filterMin, filterMax);
+            return !!garbage::make_call_fail_on_value<int, -1>(GetMessage, &msg, window, filterMin, filterMax);
         }
 
         inline bool peek_message(
@@ -333,8 +326,7 @@ namespace dhorn
             return GetCurrentThreadId();
         }
 
-        inline std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION>
-            get_logical_processor_information(void)
+        inline std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> get_logical_processor_information(void)
         {
             using SLPI = SYSTEM_LOGICAL_PROCESSOR_INFORMATION;
 
@@ -342,9 +334,7 @@ namespace dhorn
             std::vector<SLPI> result;
 
             // First attempt. This should fail
-            throw_hr_if_true(
-                !!::GetLogicalProcessorInformation(result.data(), &length),
-                E_UNEXPECTED);
+            throw_hr_if_true(!!::GetLogicalProcessorInformation(result.data(), &length), E_UNEXPECTED);
             expect_error(ERROR_INSUFFICIENT_BUFFER);
 
             // Now that we know the expected length, we can allocate what we need
@@ -356,12 +346,9 @@ namespace dhorn
             return result;
         }
 
-        inline uint32_t get_maximum_processor_count(
-            _In_ uint16_t groupNumber = ALL_PROCESSOR_GROUPS)
+        inline uint32_t get_maximum_processor_count(_In_ uint16_t groupNumber = ALL_PROCESSOR_GROUPS)
         {
-            return garbage::make_call_fail_on_value<uint32_t>(
-                GetMaximumProcessorCount,
-                groupNumber);
+            return garbage::make_call_fail_on_value<uint32_t>(GetMaximumProcessorCount, groupNumber);
         }
 
 #pragma endregion
@@ -373,30 +360,18 @@ namespace dhorn
          */
 #pragma region Window Class Functions
 
-        inline WNDCLASS get_class_info(
-            _In_opt_ instance_handle instance,
-            _In_ const tstring &className)
+        inline WNDCLASS get_class_info(_In_opt_ instance_handle instance, _In_ const tstring &className)
         {
             WNDCLASS result;
-            garbage::make_boolean_call(
-                GetClassInfo,
-                instance,
-                garbage::null_if_empty(className),
-                &result);
+            garbage::make_boolean_call(GetClassInfo, instance, garbage::null_if_empty(className), &result);
 
             return result;
         }
 
-        inline WNDCLASSEX get_class_info_ex(
-            _In_opt_ instance_handle instance,
-            _In_ const tstring &className)
+        inline WNDCLASSEX get_class_info_ex(_In_opt_ instance_handle instance, _In_ const tstring &className)
         {
             WNDCLASSEX result;
-            garbage::make_boolean_call(
-                GetClassInfoEx,
-                instance,
-                garbage::null_if_empty(className),
-                &result);
+            garbage::make_boolean_call(GetClassInfoEx, instance, garbage::null_if_empty(className), &result);
 
             return result;
         }
@@ -413,7 +388,7 @@ namespace dhorn
 
         inline tstring get_class_name(_In_ window_handle window)
         {
-            // maximum class name is 256 characters
+            // maximum class name is 256 characters (as per MSDN)
             TCHAR buffer[257];
             garbage::make_call_fail_on_value<int>(GetClassName, window, buffer, 257);
 
@@ -450,19 +425,12 @@ namespace dhorn
             return garbage::make_call_fail_on_value<uint32_t>(SetClassLong, window, index, value);
         }
 
-        inline uintptr_t set_class_long_ptr(
-            _In_ window_handle window,
-            _In_ int index,
-            _In_ uintptr_t value)
+        inline uintptr_t set_class_long_ptr(_In_ window_handle window, _In_ int index, _In_ uintptr_t value)
         {
-            return garbage::make_call_fail_on_value<uintptr_t>(
-                SetClassLongPtr, window, index, value);
+            return garbage::make_call_fail_on_value<uintptr_t>(SetClassLongPtr, window, index, value);
         }
 
-        inline uint16_t set_class_word(
-            _In_ window_handle window,
-            _In_ int index,
-            _In_ uint16_t value)
+        inline uint16_t set_class_word(_In_ window_handle window, _In_ int index, _In_ uint16_t value)
         {
             return garbage::make_call_fail_on_value<uint16_t>(SetClassWord, window, index, value);
         }
@@ -472,23 +440,14 @@ namespace dhorn
             return garbage::make_call_fail_on_value<long>(SetWindowLong, window, index, value);
         }
 
-        inline uintptr_t set_window_long_ptr(
-            _In_ window_handle window,
-            _In_ int index,
-            _In_ uintptr_t value)
+        inline uintptr_t set_window_long_ptr(_In_ window_handle window, _In_ int index, _In_ uintptr_t value)
         {
-            return garbage::make_call_fail_on_value<uintptr_t>(
-                SetWindowLongPtr, window, index, value);
+            return garbage::make_call_fail_on_value<uintptr_t>(SetWindowLongPtr, window, index, value);
         }
 
-        inline void unregister_class(
-            _In_ const tstring &className,
-            _In_opt_ instance_handle instance = nullptr)
+        inline void unregister_class(_In_ const tstring &className, _In_opt_ instance_handle instance = nullptr)
         {
-            garbage::make_boolean_call(
-                UnregisterClass,
-                garbage::null_if_empty(className),
-                instance);
+            garbage::make_boolean_call(UnregisterClass, garbage::null_if_empty(className), instance);
         }
 
 #pragma endregion
@@ -500,10 +459,7 @@ namespace dhorn
          */
 #pragma region Window Functions
 
-        inline RECT adjust_window_rect(
-            _In_ const RECT &inputRect,
-            _In_ uint32_t style,
-            _In_ bool hasMenu)
+        inline RECT adjust_window_rect(_In_ const RECT &inputRect, _In_ uint32_t style, _In_ bool hasMenu)
         {
             RECT result = inputRect;
             garbage::make_boolean_call(AdjustWindowRect, &result, style, hasMenu);
@@ -528,10 +484,7 @@ namespace dhorn
             garbage::make_boolean_call(AllowSetForegroundWindow, processId);
         }
 
-        inline void animate_window(
-            _In_ window_handle window,
-            _In_ uint32_t duration,
-            _In_ uint32_t flags)
+        inline void animate_window(_In_ window_handle window, _In_ uint32_t duration, _In_ uint32_t flags)
         {
             garbage::make_boolean_call(AnimateWindow, window, duration, flags);
         }
@@ -552,8 +505,13 @@ namespace dhorn
             _In_ unsigned int flags)
         {
             RECT result;
-            garbage::make_boolean_call(CalculatePopupWindowPosition, &anchorPoint, &windowSize,
-                flags, nullptr, &result);
+            garbage::make_boolean_call(
+                CalculatePopupWindowPosition,
+                &anchorPoint,
+                &windowSize,
+                flags,
+                nullptr,
+                &result);
 
             return result;
         }
@@ -567,8 +525,13 @@ namespace dhorn
             RECT result;
 
             // The exclude rectangle is marked as _In_, but is non-const. Thus, the const_cast
-            garbage::make_boolean_call(CalculatePopupWindowPosition, &anchorPoint, &windowSize,
-                flags, const_cast<RECT *>(&exclude), &result);
+            garbage::make_boolean_call(
+                CalculatePopupWindowPosition,
+                &anchorPoint,
+                &windowSize,
+                flags,
+                const_cast<RECT *>(&exclude),
+                &result);
 
             return result;
         }
@@ -582,7 +545,10 @@ namespace dhorn
             _In_opt_ const tstring &className,
             _In_opt_ const tstring &windowName,
             _In_ uint32_t style,
-            _In_ int x, _In_ int y, _In_ int width, _In_ int height,
+            _In_ int x = CW_USEDEFAULT,
+            _In_ int y = CW_USEDEFAULT,
+            _In_ int width = CW_USEDEFAULT,
+            _In_ int height = CW_USEDEFAULT,
             _In_opt_ window_handle parent = nullptr,
             _In_opt_ menu_handle menu = nullptr,
             _In_opt_ instance_handle instance = nullptr,
@@ -591,8 +557,20 @@ namespace dhorn
             auto clsName = garbage::null_if_empty(className);
             auto wndName = garbage::null_if_empty(windowName);
 
-            return garbage::make_call_fail_on_value<HWND>(CreateWindowEx, 0L, clsName, wndName,
-                style, x, y, width, height, parent, menu, instance, param);
+            return garbage::make_call_fail_on_value<HWND>(
+                CreateWindowEx,
+                0L,
+                clsName,
+                wndName,
+                style,
+                x,
+                y,
+                width,
+                height,
+                parent,
+                menu,
+                instance,
+                param);
         }
 
         inline window_handle create_window(
@@ -600,7 +578,10 @@ namespace dhorn
             _In_opt_ const tstring &className,
             _In_opt_ const tstring &windowName,
             _In_ uint32_t style,
-            _In_ int x, _In_ int y, _In_ int width, _In_ int height,
+            _In_ int x = CW_USEDEFAULT,
+            _In_ int y = CW_USEDEFAULT,
+            _In_ int width = CW_USEDEFAULT,
+            _In_ int height = CW_USEDEFAULT,
             _In_opt_ window_handle parent = nullptr,
             _In_opt_ menu_handle menu = nullptr,
             _In_opt_ instance_handle instance = nullptr,
@@ -609,8 +590,20 @@ namespace dhorn
             auto clsName = garbage::null_if_empty(className);
             auto wndName = garbage::null_if_empty(windowName);
 
-            return garbage::make_call_fail_on_value<HWND>(CreateWindowEx, extendedStyle, clsName, wndName, style,
-                x, y, width, height, parent, menu, instance, param);
+            return garbage::make_call_fail_on_value<HWND>(
+                CreateWindowEx,
+                extendedStyle,
+                clsName,
+                wndName,
+                style,
+                x,
+                y,
+                width,
+                height,
+                parent,
+                menu,
+                instance,
+                param);
         }
 
         inline void destroy_window(_In_ window_handle window)
@@ -618,18 +611,12 @@ namespace dhorn
             garbage::make_boolean_call(DestroyWindow, window);
         }
 
-        inline void enum_child_windows(
-            _In_ window_handle parentWindow,
-            _In_ WNDENUMPROC func,
-            _In_ intptr_t param)
+        inline void enum_child_windows(_In_ window_handle parentWindow, _In_ WNDENUMPROC func, _In_ intptr_t param)
         {
             garbage::make_boolean_call(EnumChildWindows, parentWindow, func, param);
         }
 
-        inline void enum_thread_windows(
-            _In_ tid_t threadId,
-            _In_ WNDENUMPROC func,
-            _In_ intptr_t param)
+        inline void enum_thread_windows(_In_ tid_t threadId, _In_ WNDENUMPROC func, _In_ intptr_t param)
         {
             garbage::make_boolean_call(EnumThreadWindows, threadId, func, param);
         }
@@ -641,29 +628,21 @@ namespace dhorn
 
         namespace garbage
         {
-            inline BOOL CALLBACK enum_windows_proc(
-                _In_ window_handle childWindow,
-                _In_ LPARAM param)
+            inline BOOL CALLBACK enum_windows_proc(_In_ window_handle childWindow, _In_ LPARAM param)
             {
                 auto func = reinterpret_cast<std::function<bool(window_handle)> *>(param);
                 return (*func)(childWindow);
             }
         }
 
-        inline void enum_cild_windows(
-            _In_ window_handle parentWindow,
-            _In_ std::function<bool(window_handle)> func)
+        inline void enum_cild_windows(_In_ window_handle parentWindow, _In_ std::function<bool(window_handle)> func)
         {
-            enum_child_windows(parentWindow, garbage::enum_windows_proc,
-                reinterpret_cast<LPARAM>(&func));
+            enum_child_windows(parentWindow, garbage::enum_windows_proc, reinterpret_cast<LPARAM>(&func));
         }
 
-        inline void enum_thread_windows(
-            _In_ tid_t threadId,
-            _In_ std::function<bool(window_handle)> func)
+        inline void enum_thread_windows(_In_ tid_t threadId, _In_ std::function<bool(window_handle)> func)
         {
-            enum_thread_windows(threadId, garbage::enum_windows_proc,
-                reinterpret_cast<LPARAM>(&func));
+            enum_thread_windows(threadId, garbage::enum_windows_proc, reinterpret_cast<LPARAM>(&func));
         }
 
         inline void enum_windows(_In_ std::function<bool(window_handle)> func)
@@ -690,8 +669,12 @@ namespace dhorn
             auto clsName = garbage::null_if_empty(className);
             auto wndName = garbage::null_if_empty(windowName);
 
-            return garbage::make_call_fail_on_value<HWND>(FindWindowEx, parentWindow, childWindowAfter,
-                clsName, wndName);
+            return garbage::make_call_fail_on_value<HWND>(
+                FindWindowEx,
+                parentWindow,
+                childWindowAfter,
+                clsName,
+                wndName);
         }
 
         inline window_handle get_ancestor(_In_ window_handle window, _In_ unsigned int flags)
@@ -724,7 +707,7 @@ namespace dhorn
 
         inline window_handle get_next_window(_In_ window_handle window, _In_ unsigned int dir)
         {
-            // GetNextWindow is defined to GetWindow (and apparently GetNextWindow isn't available...)
+            // GetNextWindow is defined to GetWindow (and apparently GetNextWindow gives errors...)
             return garbage::make_call_fail_on_value<HWND>(GetWindow, window, dir);
         }
 
@@ -792,13 +775,13 @@ namespace dhorn
             return result;
         }
 
-        inline uint32_t get_window_thread_process_id(
-            _In_ window_handle window,
-            _In_opt_ uint32_t *processId = nullptr)
+        inline uint32_t get_window_thread_process_id(_In_ window_handle window, _In_opt_ uint32_t *processId = nullptr)
         {
             // uint32_t* is not implicitly castable to DWORD* even though they will be the same
             // size, so we must reinterpret_cast here
-            return garbage::make_call_fail_on_value<uint32_t, 0>(GetWindowThreadProcessId, window,
+            return garbage::make_call_fail_on_value<uint32_t, 0>(
+                GetWindowThreadProcessId,
+                window,
                 reinterpret_cast<DWORD *>(processId));
         }
 

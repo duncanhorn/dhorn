@@ -117,6 +117,8 @@ namespace dhorn
         std::string _message;
     };
 
+
+
     class service_published :
         public service_exception
     {
@@ -126,6 +128,8 @@ namespace dhorn
         {
         }
     };
+
+
 
     class service_not_published :
         public service_exception
@@ -297,7 +301,8 @@ namespace dhorn
         template <typename Ty>
         const std::shared_ptr<Ty> &Insert(_In_ const std::shared_ptr<Ty> &ptr)
         {
-            auto result = this->_map.insert(std::make_pair(service_type_traits<Ty>::id(),
+            auto result = this->_map.insert(std::make_pair(
+                service_type_traits<Ty>::id(),
                 StorageType(new garbage::service_derived<Ty>(ptr))));
 
             if (!result.second)

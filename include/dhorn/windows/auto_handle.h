@@ -115,9 +115,7 @@ namespace dhorn
 
             auto_handle &operator=(_In_ handle_type handle)
             {
-                this->Destroy();
-                this->_handle = handle;
-
+                this->assign(handle);
                 return *this;
             }
 
@@ -128,7 +126,7 @@ namespace dhorn
 
             operator bool(void) const
             {
-                return (this->_handle != traits_type::invalid());
+                return this->valid();
             }
 
 
@@ -157,7 +155,8 @@ namespace dhorn
 
             void assign(_In_ handle_type handle)
             {
-                *this = handle;
+                this->Destroy();
+                this->_handle = handle;
             }
 
             handle_type get(void) const
@@ -167,16 +166,16 @@ namespace dhorn
 
             bool valid(void) const
             {
-                return static_cast<bool>(*this);
+                return (this->_handle != traits_type::invalid());
             }
 
 
 
         private:
 
-            void Destroy(void)
+            inline void Destroy(void)
             {
-                if (*this)
+                if (this->valid())
                 {
                     DestroyFunc(this->_handle);
                     this->_handle = traits_type::invalid();
@@ -398,10 +397,7 @@ namespace dhorn
             {
             }
 
-            auto_shared_handle(_In_ const auto_shared_handle &other) :
-                _handle(other._handle)
-            {
-            }
+            auto_shared_handle(_In_ const auto_shared_handle &other) = default;
 
             auto_shared_handle(_Inout_ auto_shared_handle &&other) :
                 _handle(std::move(other._handle))
@@ -413,28 +409,17 @@ namespace dhorn
             /*
              * Operators
              */
-            auto_shared_handle &operator=(_In_ const auto_shared_handle &other)
-            {
-                if (this != &other)
-                {
-                    this->_handle = other._handle;
-                }
-
-                return *this;
-            }
+            auto_shared_handle &operator=(_In_ const auto_shared_handle &other) = default;
 
             auto_shared_handle &operator=(_Inout_ auto_shared_handle &&other)
             {
-                assert(this != &other);
                 this->swap(other);
-
                 return *this;
             }
 
             auto_shared_handle &operator=(_In_ handle_type handle)
             {
-                this->_handle = handle;
-
+                this->assign(handle);
                 return *this;
             }
 
@@ -445,7 +430,7 @@ namespace dhorn
 
             operator bool(void) const
             {
-                return (this->_handle.get() != traits_type::invalid());
+                return this->valid();
             }
 
 
@@ -465,12 +450,12 @@ namespace dhorn
 
             void assign(_In_ handle_type handle)
             {
-                *this = handle;
+                this->_handle = handle;
             }
 
             bool valid(void) const
             {
-                return static_cast<bool>(*this);
+                return (this->_handle.get() != traits_type::invalid());
             }
 
 

@@ -33,11 +33,65 @@ namespace dhorn
      */
     using socket_error_t = int;
 
-    enum address_family
+    enum class address_family : int
     {
-        af_inet     = AF_INET,
-        af_inet6    = AF_INET6
+        inet    = AF_INET,
+        inet6   = AF_INET6
     };
+
+
+
+    /*
+     * socket_exception
+     */
+#pragma region socket_exception
+
+    class socket_exception :
+        public std::exception
+    {
+    public:
+        socket_exception(_In_ socket_error_t error) :
+            _error(error)
+        {
+        }
+
+        virtual char *what(void)
+        {
+            return "socket_exception";
+        }
+
+        socket_error_t get_error(void)
+        {
+            return this->_error;
+        }
+
+    private:
+
+        socket_error_t _error;
+    };
+
+    namespace garbage
+    {
+        inline void wsa_throw_last_error(void)
+        {
+            auto error = WSAGetLastError();
+            if (error)
+            {
+                throw socket_exception(error);
+            }
+        }
+
+        template <typename Ty>
+        inline void wsa_throw_if_null(_In_ Ty *ptr)
+        {
+            if (!ptr)
+            {
+                wsa_throw_last_error();
+            }
+        }
+    }
+
+#pragma endregion
 
 
 
@@ -49,20 +103,22 @@ namespace dhorn
         /*
          * address_family_traits
          */
-        template <address_family _Af>
-        struct address_family_traits {};
+        template <address_family Family>
+        struct address_family_traits;
 
         template <>
-        struct address_family_traits<af_inet>
+        struct address_family_traits<address_family::inet>
         {
             using ip_addr = in_addr;
+            static const address_family family = address_family::inet;
             static const int max_string_len = 16;
         };
 
         template <>
-        struct address_family_traits<af_inet6>
+        struct address_family_traits<address_family::inet6>
         {
             using ip_addr = in6_addr;
+            static const address_family family = address_family::inet6;
             static const int max_string_len = 46;
         };
 
@@ -71,38 +127,38 @@ namespace dhorn
         /*
          * sockets_string_traits
          */
-        template <typename _CharT, address_family _Af>
-        struct sockets_string_traits {};
+        template <typename CharType, address_family Family>
+        struct sockets_string_traits;
 
-        template <address_family _Af>
-        struct sockets_string_traits<char, _Af>
+        template <address_family Family>
+        struct sockets_string_traits<char, Family>
         {
-            using _MyTraits = address_family_traits<_Af>;
-            using ip_addr = typename _MyTraits::ip_addr;
+            using MyTraits = address_family_traits<Family>;
+            using ip_addr = typename MyTraits::ip_addr;
 
             inline static std::string n_to_p(_In_ const ip_addr &addr)
             {
-                char buff[_MyTraits::max_string_len + 1];
+                char buff[MyTraits::max_string_len + 1];
 
-                auto result = InetNtopA(_Af, (PVOID)&addr, buff, sizeof(buff));
-                assert(result);
+                auto result = InetNtopA(static_cast<int>(Family), (PVOID)&addr, buff, sizeof(buff));
+                garbage::wsa_throw_if_null(result);
 
                 return buff;
             }
         };
 
-        template <address_family _Af>
-        struct sockets_string_traits<wchar_t, _Af>
+        template <address_family Family>
+        struct sockets_string_traits<wchar_t, Family>
         {
-            using _MyTraits = address_family_traits<_Af>;
-            using ip_addr = typename _MyTraits::ip_addr;
+            using MyTraits = address_family_traits<Family>;
+            using ip_addr = typename MyTraits::ip_addr;
 
             inline static std::wstring n_to_p(_In_ const ip_addr &addr)
             {
-                wchar_t buff[_MyTraits::max_string_len + 1];
+                wchar_t buff[MyTraits::max_string_len + 1];
 
-                auto result = InetNtopW(_Af, (PVOID)&addr, buff, sizeof(buff) / 2);
-                assert(result);
+                auto result = InetNtopW(static_cast<int>(Family), (PVOID)&addr, buff, sizeof(buff) / 2);
+                garbage::wsa_throw_if_null(result);
 
                 return buff;
             }
@@ -116,53 +172,44 @@ namespace dhorn
      */
 #pragma region ip_address
 
-    template <address_family _Af>
+    template <address_family Family>
     class ip_address
     {
-        using _MyTraits = garbage::address_family_traits<_Af>;
+        using MyTraits = garbage::address_family_traits<Family>;
 
     public:
 
         /*
          * Type/Value Definitions
          */
-        using ip_addr = typename _MyTraits::ip_addr;
-        static const address_family family = _Af;
+        using ip_addr = typename MyTraits::ip_addr;
+        static const address_family family = Family;
 
 
 
         /*
          * Constructor(s)/Destructor
          */
-
         ip_address(void) :
-            _addr{},
-            _error(0),
-            _fail(false)
+            _addr{}
         {
         }
 
         ip_address(_In_ const ip_addr &ip) :
-            _addr(ip),
-            _error(0),
-            _fail(false)
+            _addr(ip)
         {
         }
 
-        template <typename _CharT>
-        ip_address(_In_ const _CharT *ip) :
-            _error(0),
-            _fail(false)
+        template <typename CharType>
+        ip_address(_In_ const CharType *ip)
         {
-            this->_Set(ip);
+            this->Set(ip);
         }
 
-        template <typename _CharT>
-        ip_address(_In_ const std::basic_string<_CharT> &ip) :
-            _error(0),
-            _fail(false)
+        template <typename CharType>
+        ip_address(_In_ const std::basic_string<CharType> &ip)
         {
-            this->_Set(ip.c_str());
+            this->Set(ip.c_str());
         }
 
 
@@ -170,24 +217,23 @@ namespace dhorn
         /*
          * Assignment Operators
          */
-
         ip_address &operator=(_In_ const ip_addr &ip)
         {
             this->_addr = ip;
             return *this;
         }
 
-        template <typename _CharT>
-        ip_address &operator=(_In_ const _CharT *ip)
+        template <typename CharType>
+        ip_address &operator=(_In_ const CharType *ip)
         {
-            this->_Set(ip);
+            this->Set(ip);
             return *this;
         }
 
-        template <typename _CharT>
-        ip_address &operator=(_In_ const std::basic_string<_CharT> &ip)
+        template <typename CharType>
+        ip_address &operator=(_In_ const std::basic_string<CharType> &ip)
         {
-            this->_Set(ip.c_str());
+            this->Set(ip.c_str());
             return *this;
         }
 
@@ -196,16 +242,15 @@ namespace dhorn
         /*
          * Type Conversion Operators
          */
-
         operator const ip_addr &(void) const
         {
             return this->_addr;
         }
 
-        template <typename _CharT>
-        operator std::basic_string<_CharT>(void) const
+        template <typename CharType>
+        operator std::basic_string<CharType>(void) const
         {
-            return this->str<_CharT>();
+            return this->str<CharType>();
         }
 
 
@@ -213,61 +258,56 @@ namespace dhorn
         /*
          * Public Functions
          */
-
         const ip_addr &addr(void) const
         {
             return this->_addr;
         }
 
-        template <typename _CharT = char>
-        std::basic_string<_CharT> str(void) const
+        template <typename CharType = char>
+        std::basic_string<CharType> str(void) const
         {
-            return garbage::sockets_string_traits<_CharT, _Af>::n_to_p(this->_addr);
-        }
-
-        bool fail(void) const
-        {
-            return this->_fail;
-        }
-
-        socket_error_t error(void) const
-        {
-            return this->_error;
+            return garbage::sockets_string_traits<CharType, Family>::n_to_p(this->_addr);
         }
 
 
 
     private:
 
-        void _Set(_In_ const char *ip)
+        void Set(_In_ const char *ip)
         {
-            auto result = InetPtonA(_Af, ip, &this->_addr);
-            if (result != 1)
+            auto result = InetPtonA(static_cast<int>(Family), ip, &this->_addr);
+            if (result == 0)
             {
-                this->_error = WSAGetLastError();
-                this->_fail = true;
+                // Result of an invalid pointer. WSAGetLastError will give us zero, so provide our own error code
+                throw socket_exception(WSA_INVALID_PARAMETER);
+            }
+            else if (result == -1)
+            {
+                garbage::wsa_throw_last_error();
             }
         }
 
-        void _Set(_In_ const wchar_t *ip)
+        void Set(_In_ const wchar_t *ip)
         {
-            auto result = InetPtonW(_Af, ip, &this->_addr);
-            if (result != 1)
+            auto result = InetPtonW(static_cast<int>(Family), ip, &this->_addr);
+            if (result == 0)
             {
-                this->_error = WSAGetLastError();
-                this->_fail = true;
+                // Result of an invalid pointer. WSAGetLastError will give us zero, so provide our own error code
+                throw socket_exception(WSA_INVALID_PARAMETER);
+            }
+            else if (result == -1)
+            {
+                garbage::wsa_throw_last_error();
             }
         }
 
 
 
-        ip_addr        _addr;
-        socket_error_t _error;
-        bool           _fail;
+        ip_addr _addr;
     };
 
-    using ipv4_address = ip_address<af_inet>;
-    using ipv6_address = ip_address<af_inet6>;
+    using ipv4_address = ip_address<address_family::inet>;
+    using ipv6_address = ip_address<address_family::inet6>;
 
 #pragma endregion
 

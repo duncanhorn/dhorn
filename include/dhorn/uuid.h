@@ -3,10 +3,9 @@
  *
  * uuid.h
  *
- * A simple UUID implementation. It is important to note that this IS different than Windows' GUID
- * implementation in terms of byte order; uuids are in network-byte-order. The total number of bits
- * is the same however, so the two types CAN be converted; they'll just represent different uuids,
- * though the internal data will remain the same.
+ * A simple UUID implementation. It is important to note that this IS different than Windows' GUID implementation in
+ * terms of byte order; uuids are in network-byte-order. The total number of bits is the same however, so the two types
+ * CAN be converted; they'll just represent different uuids, though the internal data will remain the same.
  */
 #pragma once
 
@@ -59,7 +58,7 @@ namespace dhorn
         {
         }
 
-        template <size_t N, typename = std::enable_if<N == 16>::type>
+        template <size_t N, typename = typename std::enable_if<N == 16>::type>
         uuid(_In_ const uint8_t (&arr)[N])
         {
             const uint32_t *target = reinterpret_cast<const uint32_t *>(arr);
@@ -70,7 +69,7 @@ namespace dhorn
             }
         }
 
-        template <size_t N, typename = std::enable_if<N == 4>::type>
+        template <size_t N, typename = typename std::enable_if<N == 4>::type>
         uuid(_In_ const uint32_t (&arr)[N])
         {
             for (size_t i = 0; i < 4; i++)
@@ -79,9 +78,8 @@ namespace dhorn
             }
         }
 
-        // We can't use std::initializer_list because we accept two separate types that can't
-        // easily be differentiated in client code, and we are very strict on the size of the
-        // initialization list we accept
+        // We can't use std::initializer_list because we accept two separate types that can't easily be differentiated
+        // in client code, and we are very strict on the size of the initialization list we accept
         uuid(_In_ uint8_t val0,  _In_ uint8_t val1,  _In_ uint8_t val2,  _In_ uint8_t val3,
              _In_ uint8_t val4,  _In_ uint8_t val5,  _In_ uint8_t val6,  _In_ uint8_t val7,
              _In_ uint8_t val8,  _In_ uint8_t val9,  _In_ uint8_t val10, _In_ uint8_t val11,
@@ -89,8 +87,7 @@ namespace dhorn
 //             data{ val0, val1, val2,  val3,  val4,  val5,  val6,  val7,
 //                   val8, val9, val10, val11, val12, val13, val14, val15 }
         {
-            // TODO: switch to std::array once C++14 is adopted and the duplicated braces are no
-            // longer needed
+            // TODO: switch to std::array once C++14 is adopted and the duplicated braces are no longer needed
             this->data[0]  = val0;  this->data[1]  = val1;  this->data[2]  = val2;
             this->data[3]  = val3;  this->data[4]  = val4;  this->data[5]  = val5;
             this->data[6]  = val6;  this->data[7]  = val7;  this->data[8]  = val8;
