@@ -7,6 +7,6 @@
 
 struct globals
 {
-    static dhorn::win32::window g_window;
-    static worker g_worker;
+    static dhorn::win32::window window;
+    static worker worker;
 };

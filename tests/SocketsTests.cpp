@@ -52,6 +52,17 @@ namespace dhorn
                 Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
             }
 
+            TEST_METHOD(CreateTypeConstructorTest)
+            {
+                // Simple test: value is zero
+                dhorn::ipv4_address ip(0);
+                Assert::AreEqual(((in_addr)ip).s_addr, 0ul);
+
+                // More complicated case: must reverse byte order
+                dhorn::ipv4_address ip2(0x00c0ffee);
+                Assert::AreEqual(((in_addr)ip2).s_addr, 0xeeffc000ul);
+            }
+
             TEST_METHOD(IpAddrConstructorTest)
             {
                 in_addr addr;
@@ -86,7 +97,7 @@ namespace dhorn
                 dhorn::ipv4_address addr2(ip2.c_str());
                 Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
 
-                // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
+                // Note: on x86/amd64 machines, the ip address should be stored in "reverse" (network-byte-order)
                 std::string ip3 = "127.0.0.1";
                 dhorn::ipv4_address addr3(ip3.c_str());
                 Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
@@ -250,6 +261,17 @@ namespace dhorn
              * Assignment Tests
              */
 #pragma region Assignment Tests
+
+            TEST_METHOD(CreateTypeAssignmentTest)
+            {
+                dhorn::ipv4_address ip;
+
+                ip = 0;
+                Assert::AreEqual(((in_addr)ip).s_addr, 0ul);
+
+                ip = 0x00c0ffee;
+                Assert::AreEqual(((in_addr)ip).s_addr, 0xeeffc000ul);
+            }
 
             TEST_METHOD(IpAddrAssignmentTest)
             {
@@ -620,6 +642,19 @@ namespace dhorn
                 Assert::IsTrue((in_addr6)addr == zero());
             }
 
+            TEST_METHOD(CreateTypeConstructorTest)
+            {
+                uint8_t val[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                                  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+
+                dhorn::ipv6_address ip(val);
+
+                for (size_t i = 0; i < 16; i++)
+                {
+                    Assert::AreEqual(val[i], ip.addr().s6_addr[i]);
+                }
+            }
+
             TEST_METHOD(IpAddrConstructorTest)
             {
                 in_addr6 addr;
@@ -815,6 +850,20 @@ namespace dhorn
              * Assignment Tests
              */
 #pragma region Assignment Tests
+
+            TEST_METHOD(CreateTypeAssignmentTest)
+            {
+                uint8_t val[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                                  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+
+                dhorn::ipv6_address ip;
+                ip = val;
+
+                for (size_t i = 0; i < 16; i++)
+                {
+                    Assert::AreEqual(val[i], ip.addr().s6_addr[i]);
+                }
+            }
 
             TEST_METHOD(IpAddrAssignmentTest)
             {

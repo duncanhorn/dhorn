@@ -229,6 +229,25 @@ namespace dhorn
                 return this->_ptr != nullptr;
             }
 
+            bool operator==(_In_ const com_ptr &other)
+            {
+                return this->_ptr == other._ptr;
+            }
+
+            bool operator<(_In_ const com_ptr &other)
+            {
+                return this->_ptr < other._ptr;
+            }
+
+            bool operator>(_In_ const com_ptr &other)
+            {
+                return this->_ptr > other._ptr;
+            }
+
+            bool operator!=(_In_ const com_ptr &other) { return !(*this == other); }
+            bool operator<=(_In_ const com_ptr &other) { return !(*this > other); }
+            bool operator>=(_In_ const com_ptr &other) { return !(*this < other); }
+
             operator interface_type *(void) const
             {
                 return this->_ptr;

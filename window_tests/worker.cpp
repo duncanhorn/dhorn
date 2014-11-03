@@ -32,7 +32,7 @@ worker::~worker(void)
 void worker::start(void)
 {
     // Register callback handlers
-    globals::g_window.add_callback_handler(window_message::paint,
+    globals::window.add_callback_handler(window_message::paint,
         dhorn::bind_member_function(&worker::on_paint, this));
 
     // Initialize the number of threads executing since the update function assums that the thread
@@ -59,7 +59,7 @@ void worker::exit(void)
 
 void worker::thread_proc(void)
 {
-    while (globals::g_window.running())
+    while (globals::window.running())
     {
         using PointType = std::pair<size_t, size_t>;
         std::shared_ptr<std::vector<PointType>> updatedPoints =
@@ -97,7 +97,7 @@ void worker::thread_proc(void)
 
         if (!this->_sizeUpdatePending && !updatedPoints->empty())
         {
-            globals::g_window.post_async([updatedPoints]()
+            globals::window.post_async([updatedPoints]()
             {
                 // TODO: update bitmap
             });

@@ -3,7 +3,8 @@
  *
  * windows_exception.h
  *
- * 
+ * Exception wrappers for Windows error codes. Some exceptions (e.g. sockets) are defined outside of the win32
+ * namespace/folder, and thus don't derive from dhorn::win32::windows_exception, so that should be kept in mind.
  */
 #pragma once
 

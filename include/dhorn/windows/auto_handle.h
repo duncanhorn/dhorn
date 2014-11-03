@@ -129,6 +129,25 @@ namespace dhorn
                 return this->valid();
             }
 
+            bool operator==(_In_ const auto_handle &other)
+            {
+                return this->_handle == other._handle;
+            }
+
+            bool operator<(_In_ const auto_handle &other)
+            {
+                return this->_handle < other._handle;
+            }
+
+            bool operator>(_In_ const auto_handle &other)
+            {
+                return this->_handle > other._handle;
+            }
+
+            bool operator!=(_In_ const auto_handle &other) { return !(*this == other); }
+            bool operator<=(_In_ const auto_handle &other) { return !(*this > other); }
+            bool operator>=(_In_ const auto_handle &other) { return !(*this < other); }
+
 
 
             /*
