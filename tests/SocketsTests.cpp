@@ -87,6 +87,28 @@ namespace dhorn
                 Assert::AreEqual(((in_addr)ip2).s_addr, addr.s_addr);
             }
 
+            TEST_METHOD(SockAddrConstructorTest)
+            {
+                // Can successfully construct with valid sockaddr_in
+                sockaddr_in addr;
+                addr.sin_family = AF_INET;
+                addr.sin_addr.s_addr = htonl(0x7F000001ul);
+
+                dhorn::ipv4_address ip(addr);
+                Assert::IsTrue(((in_addr)ip).s_addr == 0x0100007Ful);
+
+                // Cannot construct if family is AF_INET6
+                try
+                {
+                    addr.sin_family = AF_INET6;
+                    dhorn::ipv4_address ip2(addr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &)
+                {
+                }
+            }
+
             TEST_METHOD(StringConstructorTest)
             {
                 std::string ip1 = "0.0.0.0";
@@ -296,6 +318,29 @@ namespace dhorn
                 addr.s_addr = 0;
                 ip = addr;
                 Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
+            }
+
+            TEST_METHOD(SockAddrAssignmentTest)
+            {
+                // Can successfully construct with valid sockaddr_in
+                dhorn::ipv4_address ip;
+                sockaddr_in addr;
+                addr.sin_family = AF_INET;
+                addr.sin_addr.s_addr = htonl(0x7F000001ul);
+
+                ip = addr;
+                Assert::IsTrue(((in_addr)ip).s_addr == 0x0100007Ful);
+
+                // Cannot construct if family is AF_INET6
+                try
+                {
+                    addr.sin_family = AF_INET6;
+                    ip = addr;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &)
+                {
+                }
             }
 
             TEST_METHOD(StringAssignmentTest)
@@ -676,6 +721,28 @@ namespace dhorn
                 Assert::IsTrue(addr == ip2);
             }
 
+            TEST_METHOD(SockAddrConstructorTest)
+            {
+                // Can successfully construct with valid sockaddr_in6
+                sockaddr_in6 addr;
+                addr.sin6_family = AF_INET6;
+                addr.sin6_addr = make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb);
+
+                dhorn::ipv6_address ip(addr);
+                Assert::IsTrue((in6_addr)ip == addr.sin6_addr);
+
+                // Cannot construct if family is AF_INET
+                try
+                {
+                    addr.sin6_family = AF_INET;
+                    dhorn::ipv6_address ip2(addr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &)
+                {
+                }
+            }
+
             TEST_METHOD(StringConstructorTest)
             {
                 std::string ip1 = "::";
@@ -885,6 +952,29 @@ namespace dhorn
                 addr = zero();
                 ip = addr;
                 Assert::IsTrue(ip == addr);
+            }
+
+            TEST_METHOD(SockAddrAssignmentTest)
+            {
+                // Can successfully construct with valid sockaddr_in6
+                dhorn::ipv6_address ip;
+                sockaddr_in6 addr;
+                addr.sin6_family = AF_INET6;
+                addr.sin6_addr = make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb);
+
+                ip = addr;
+                Assert::IsTrue((in6_addr)ip == addr.sin6_addr);
+
+                // Cannot construct if family is AF_INET
+                try
+                {
+                    addr.sin6_family = AF_INET;
+                    ip = addr;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &)
+                {
+                }
             }
 
             TEST_METHOD(StringAssignmentTest)
@@ -1176,6 +1266,42 @@ namespace dhorn
             }
 
 #pragma endregion
+        };
+
+
+
+        TEST_CLASS(SocketBaseTests)
+        {
+
+
+            TEST_METHOD(DefaultConstructorTest)
+            {
+                // Default constructor has socket with value dhorn::invalid_socket
+                dhorn::garbage::socket_base sock;
+                Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+            }
+
+            TEST_METHOD(SocketConstuctorTest)
+            {
+                // Constructing with invalid socket should not cause issues
+                dhorn::garbage::socket_base sock(dhorn::invalid_socket);
+                Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+
+                // Construct with pre-made socket. Since we're not testing the close() function right now, we'll get an
+                // exception. We don't necessarily care what the exception is, and that's okay since that's not the
+                // point here. In fact, we don't necessarily care whether or not an exception is thrown
+                try
+                {
+                    auto rawSocket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+                    Assert::IsTrue(rawSocket != dhorn::invalid_socket);
+
+                    dhorn::garbage::socket_base sock2(rawSocket);
+                    Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                }
+                catch (dhorn::socket_exception &)
+                {
+                }
+            }
         };
     }
 }

@@ -125,6 +125,22 @@ namespace dhorn
         raw_ip_packets                          = IPPROTO_RAW,
     };
 
+    enum class message_flags : int
+    {
+        dont_route  = MSG_DONTROUTE,
+        out_of_band = MSG_OOB,
+    };
+
+    message_flags operator|(_In_ message_flags lhs, _In_ message_flags rhs)
+    {
+        return static_cast<message_flags>(static_cast<int>(lhs) | static_cast<int>(rhs));
+    }
+
+    message_flags operator&(_In_ message_flags lhs, _In_ message_flags rhs)
+    {
+        return static_cast<message_flags>(static_cast<int>(lhs) & static_cast<int>(rhs));
+    }
+
 #pragma endregion
 
 
@@ -224,9 +240,16 @@ namespace dhorn
         struct address_family_traits<address_family::internetwork_version_4>
         {
             using ip_addr = in_addr;
+            using sock_addr = sockaddr_in;
             using create_type = unsigned long;
             static const address_family family = address_family::internetwork_version_4;
             static const int max_string_len = 16;
+
+            static inline const ip_addr &create(_In_ const sock_addr &addr)
+            {
+                garbage::wsa_throw_if_false(addr.sin_family == static_cast<int>(family), WSAEINVAL);
+                return addr.sin_addr;
+            }
 
             static inline ip_addr create(_In_ create_type val)
             {
@@ -240,9 +263,16 @@ namespace dhorn
         struct address_family_traits<address_family::internetwork_version_6>
         {
             using ip_addr = in6_addr;
+            using sock_addr = sockaddr_in6;
             using create_type = uint8_t[16];
             static const address_family family = address_family::internetwork_version_6;
             static const int max_string_len = 46;
+
+            static inline const ip_addr &create(_In_ const sock_addr &addr)
+            {
+                garbage::wsa_throw_if_false(addr.sin6_family == static_cast<int>(family), WSAEINVAL);
+                return addr.sin6_addr;
+            }
 
             static inline ip_addr create(_In_ const create_type &val)
             {
@@ -314,6 +344,7 @@ namespace dhorn
          * Type/Value Definitions
          */
         using ip_addr = typename MyTraits::ip_addr;
+        using sock_addr = typename MyTraits::sock_addr;
         static const address_family family = Family;
 
 
@@ -333,6 +364,11 @@ namespace dhorn
 
         ip_address(_In_ const ip_addr &ip) :
             _addr(ip)
+        {
+        }
+
+        ip_address(_In_ const sock_addr &addr) :
+            _addr(MyTraits::create(addr))
         {
         }
 
@@ -362,6 +398,12 @@ namespace dhorn
         ip_address &operator=(_In_ const ip_addr &ip)
         {
             this->_addr = ip;
+            return *this;
+        }
+
+        ip_address &operator=(_In_ const typename MyTraits::sock_addr &addr)
+        {
+            this->_addr = MyTraits::create(addr);
             return *this;
         }
 
@@ -456,16 +498,14 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
+        socket_address(void) :
+            _ipv6Addr{}         // Zero initialize the largest struct in the union
+        {
+        }
+
         socket_address(_In_ const ipv4_address &addr, _In_ uint16_t port)
         {
-            this->_ipv4Addr =
-            {
-                static_cast<int>(ipv4_address::family),     // sin_family
-                htons(port),                                // sin_port
-                addr                                        // sin_addr
-            };
-
-            this->_size = sizeof(this->_ipv4Addr);
+            this->assign(addr, port);
         }
 
         socket_address(
@@ -474,16 +514,7 @@ namespace dhorn
             _In_ uint32_t flowInfo,
             _In_ uint32_t scopeId)
         {
-            this->_ipv6Addr =
-            {
-                static_cast<int>(ipv6_address::family),     // sin6_family
-                htons(port),                                // sin6_port
-                flowInfo,                                   // sin6_flowinfo
-                addr,                                       // sin6_addr
-                { scopeId }                                 // sin6_scope_id
-            };
-
-            this->_size = sizeof(this->_ipv6Addr);
+            this->assign(addr, port, flowInfo, scopeId);
         }
 
 
@@ -492,6 +523,11 @@ namespace dhorn
          * Operators
          */
         operator const sockaddr *(void) const
+        {
+            return &this->_addr;
+        }
+
+        operator sockaddr *(void)
         {
             return &this->_addr;
         }
@@ -562,6 +598,23 @@ namespace dhorn
             return this->_size;
         }
 
+        address_family family(void) const
+        {
+            return static_cast<address_family>(this->_addr.sa_family);
+        }
+
+        ipv4_address as_ipv4(void) const
+        {
+            // Throws if sin_famliy does not equal AF_INET
+            return this->_ipv4Addr;
+        }
+
+        ipv6_address as_ipv6(void) const
+        {
+            // Throws if sin6_family does not equal AF_INET6
+            return this->_ipv6Addr;
+        }
+
 
 
     private:
@@ -620,11 +673,60 @@ namespace dhorn
             socket_base(void) :
                 _socket(invalid_socket)
             {
-                // Under the C++ standard, the construction of static function variables is not thread safe, so the
-                // constructor technically can get called more than once here. In the unlikely event that this does
-                // happen, we'll just end up calling WSAStartup more than once while only making one call to
+                // Under the C++ standard, the construction of static function variables is not guaranteed to be thread
+                // safe, so the constructor technically can get called more than once here. In the unlikely event that
+                // this does happen, we'll just end up calling WSAStartup more than once while only making one call to
                 // WSACleanup. Since the system will re-claim our resources, we just ignore the possibility
                 static const socket_initializer _init;
+            }
+
+            socket_base(socket_t sock) :
+                socket_base()
+            {
+                this->_socket = sock;
+            }
+
+            socket_base(_Inout_ socket_base &&other) :
+                socket_base()
+            {
+                this->swap(other);
+            }
+
+            ~socket_base(void)
+            {
+                this->Destroy();
+            }
+
+            // Cannot copy
+            socket_base(_In_ const socket_base &other) = delete;
+            socket_base &operator=(_In_ const socket_base &other) = delete;
+
+
+
+            /*
+             * Operators
+             */
+            socket_base &operator=(_Inout_ socket_base &&other)
+            {
+                if (this != &other)
+                {
+                    this->swap(other);
+                }
+
+                return *this;
+            }
+
+            socket_base &operator=(_In_ socket_t sock)
+            {
+                this->Destroy();
+                this->_socket = sock;
+
+                return *this;
+            }
+
+            operator socket_t(void) const
+            {
+                return this->_socket;
             }
 
 
@@ -632,6 +734,47 @@ namespace dhorn
             /*
              * Socket functions
              */
+            std::pair<socket_t, socket_address> accept()
+            {
+                // We assume the size of sockaddr_in6 since that's the largest member of socket_address
+                socket_address addr;
+                int size = sizeof(sockaddr_in6);
+
+                auto result = ::accept(this->_socket, addr, &size);
+                if (result == invalid_socket)
+                {
+                    if (this->_socket != invalid_socket)
+                    {
+                        this->close();
+                    }
+
+                    wsa_throw_last_error();
+                }
+
+                return std::make_pair(result, addr);
+            }
+
+            void bind(_In_ const socket_address &addr)
+            {
+                this->InvokeCloseOnError(::bind, this->_socket, addr, addr.size());
+            }
+
+            void close(void)
+            {
+                wsa_throw_if_error(::closesocket(this->_socket));
+                this->_socket = invalid_socket;
+            }
+
+            void connect(_In_ const socket_address &addr)
+            {
+                this->InvokeCloseOnError(::connect, this->_socket, addr, addr.size());
+            }
+
+            void listen(_In_ int backlog)
+            {
+                this->InvokeCloseOnError(::listen, this->_socket, backlog);
+            }
+
             void open(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol)
             {
                 wsa_throw_if_false(this->_socket == invalid_socket, WSAEISCONN);
@@ -643,16 +786,69 @@ namespace dhorn
                 }
             }
 
-            void bind(_In_ const socket_address &addr)
+            socket_error_t receive(
+                _Out_writes_bytes_to_(length, return) void *buffer,
+                _In_ int length,
+                _In_ message_flags flags)
             {
-                wsa_throw_if_error(::bind(this->_socket, addr, addr.size()));
+                auto buff = static_cast<char *>(buffer);
+                return this->InvokeCloseOnError(::recv, this->_socket, buff, length, static_cast<int>(flags));
+            }
+
+            socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ int length, _In_ message_flags flags)
+            {
+                auto buff = static_cast<const char *>(buffer);
+                return this->InvokeCloseOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
+            }
+
+
+
+            /*
+             * Other functions
+             */
+            void swap(_Inout_ socket_base &other)
+            {
+                auto temp = this->_socket;
+                this->_socket = other._socket;
+                other._socket = temp;
             }
 
 
 
         protected:
 
-            //socket_address _addr;
+            // Invokes a function and closes the socket (if it's open) on failure. The destructor would otherwise take
+            // care of closing the socket for us, but it would also throw another exception, which we don't want
+            template <typename Func, typename... Args>
+            inline socket_error_t InvokeCloseOnError(_In_ Func &func, _In_ Args&&... args)
+            {
+                auto result = func(std::forward<Args>(args)...);
+                if (result == socket_error)
+                {
+                    if (this->_socket != invalid_socket)
+                    {
+                        this->close();
+                    }
+
+                    wsa_throw_last_error();
+                }
+
+                return result;
+            }
+
+            void Destroy(void)
+            {
+                // If the socket isn't already closed, we throw an exception (similar to std::thread if join or detach
+                // has not been called). However, in order to leave the program in a good state, we go ahead and close
+                // the socket for the user. Note that this function is called by the destructor, so we cannot rely on
+                // the destructor doing the cleanup in such situations.
+                if (this->_socket != invalid_socket)
+                {
+                    this->close();
+                    throw socket_exception(WSAEFAULT);
+                }
+            }
+
             socket_t _socket;
         };
     }
