@@ -127,19 +127,88 @@ namespace dhorn
 
     enum class message_flags : int
     {
-        dont_route  = MSG_DONTROUTE,
-        out_of_band = MSG_OOB,
+        dont_route      = MSG_DONTROUTE,
+        interrupt       = MSG_INTERRUPT,
+        out_of_band     = MSG_OOB,
+        partial         = MSG_PARTIAL,
+        peek            = MSG_PEEK,
+        push_immediate  = MSG_PUSH_IMMEDIATE,
+        wait_all        = MSG_WAITALL,
     };
 
-    message_flags operator|(_In_ message_flags lhs, _In_ message_flags rhs)
+    enum class shutdown_options : int
+    {
+        send    = SD_SEND,
+        receive = SD_RECEIVE,
+        both    = SD_BOTH,
+    };
+
+    inline message_flags operator|(_In_ message_flags lhs, _In_ message_flags rhs)
     {
         return static_cast<message_flags>(static_cast<int>(lhs) | static_cast<int>(rhs));
     }
 
-    message_flags operator&(_In_ message_flags lhs, _In_ message_flags rhs)
+    inline message_flags operator&(_In_ message_flags lhs, _In_ message_flags rhs)
     {
         return static_cast<message_flags>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
+
+    enum class socket_level : int
+    {
+        socket  = SOL_SOCKET,
+    };
+
+    enum class socket_option : int
+    {
+        debug_info                      = SO_DEBUG,
+        listening                       = SO_ACCEPTCONN,
+        reuse_address                   = SO_REUSEADDR,
+        keep_alive                      = SO_KEEPALIVE,
+        dont_route                      = SO_DONTROUTE,
+        broadcast                       = SO_BROADCAST,
+        use_loopback                    = SO_USELOOPBACK,
+        linger_on_close                 = SO_LINGER,
+        oob_inline                      = SO_OOBINLINE,
+        dont_linger_on_close            = SO_DONTLINGER,
+        exclusive_address_use           = SO_EXCLUSIVEADDRUSE,
+
+        send_buffer_size                = SO_SNDBUF,
+        receive_buffer_size             = SO_RCVBUF,
+        send_low_water_mark             = SO_SNDLOWAT,
+        receive_low_water_mark          = SO_RCVLOWAT,
+        send_timeout                    = SO_SNDTIMEO,
+        receive_timeout                 = SO_RCVTIMEO,
+        error_status                    = SO_ERROR,
+        socket_type                     = SO_TYPE,
+
+        group_id                        = SO_GROUP_ID,
+        group_priority                  = SO_GROUP_PRIORITY,
+        max_message_size                = SO_MAX_MSG_SIZE,
+        protocol_info_ansi              = SO_PROTOCOL_INFOA,
+        protocol_info_wide              = SO_PROTOCOL_INFOW,
+        protocol_info                   = SO_PROTOCOL_INFO,
+        service_provider_config_info    = PVD_CONFIG,
+        conditional_accept              = SO_CONDITIONAL_ACCEPT,
+    };
+
+    inline socket_option operator|(_In_ socket_option lhs, _In_ socket_option rhs)
+    {
+        return static_cast<socket_option>(static_cast<int>(lhs) | static_cast<int>(rhs));
+    }
+
+    inline socket_option operator&(_In_ socket_option lhs, _In_ socket_option rhs)
+    {
+        return static_cast<socket_option>(static_cast<int>(lhs) & static_cast<int>(rhs));
+    }
+
+    /*
+    * WinSock 2 extension -- new options
+    */
+#define PVD_CONFIG        0x3001       /* configuration info for service provider */
+#define SO_CONDITIONAL_ACCEPT 0x3002   /* enable true conditional accept: */
+    /*  connection is not ack-ed to the */
+    /*  other side until conditional */
+    /*  function returns CF_ACCEPT */
 
 #pragma endregion
 
@@ -522,12 +591,12 @@ namespace dhorn
         /*
          * Operators
          */
-        operator const sockaddr *(void) const
+        operator sockaddr *(void)
         {
             return &this->_addr;
         }
 
-        operator sockaddr *(void)
+        operator const sockaddr *(void) const
         {
             return &this->_addr;
         }
@@ -598,6 +667,25 @@ namespace dhorn
             return this->_size;
         }
 
+        size_t reset_size(void)
+        {
+            switch (static_cast<address_family>(this->_ipv4Addr.sin_family))
+            {
+            case address_family::internetwork_version_4:
+                this->_size = sizeof(this->_ipv4Addr);
+                break;
+
+            case address_family::internetwork_version_6:
+                this->_size = sizeof(this->_ipv6Addr);
+                break;
+
+            default:
+                // Unknown
+                this->_size = 0;
+                break;
+            }
+        }
+
         address_family family(void) const
         {
             return static_cast<address_family>(this->_addr.sa_family);
@@ -659,199 +747,284 @@ namespace dhorn
             }
         };
 
+    }
+
+
+    /*
+     * Base socket class
+     */
+    class socket_base
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        socket_base(void) :
+            _socket(invalid_socket)
+        {
+            // Under the C++ standard, the construction of static function variables is not guaranteed to be thread
+            // safe, so the constructor technically can get called more than once here. In the unlikely event that
+            // this does happen, we'll just end up calling WSAStartup more than once while only making one call to
+            // WSACleanup. Since the system will re-claim our resources, we just ignore the possibility
+            static const garbage::socket_initializer _init;
+        }
+
+        socket_base(socket_t sock) :
+            socket_base()
+        {
+            this->_socket = sock;
+        }
+
+        socket_base(_Inout_ socket_base &&other) :
+            socket_base()
+        {
+            this->swap(other);
+        }
+
+        ~socket_base(void)
+        {
+            this->Destroy();
+        }
+
+        // Cannot copy
+        socket_base(_In_ const socket_base &other) = delete;
+        socket_base &operator=(_In_ const socket_base &other) = delete;
+
 
 
         /*
-         * Base socket class
+         * Operators
          */
-        class socket_base
+        socket_base &operator=(_Inout_ socket_base &&other)
         {
-        public:
-            /*
-             * Constructor(s)/Destructor
-             */
-            socket_base(void) :
-                _socket(invalid_socket)
+            this->swap(other);
+            return *this;
+        }
+
+        socket_base &operator=(_In_ socket_t sock)
+        {
+            this->Destroy();
+            this->_socket = sock;
+
+            return *this;
+        }
+
+        operator socket_t(void) const
+        {
+            return this->_socket;
+        }
+
+        operator bool(void) const
+        {
+            return this->_socket != invalid_socket;
+        }
+
+
+
+        /*
+         * Socket functions
+         */
+        socket_t accept(_Inout_ socket_address &addr)
+        {
+            // We assume the size of sockaddr_in6 since that's the largest member of socket_address
+            int size = sizeof(sockaddr_in6);
+
+            auto result = ::accept(this->_socket, addr, &size);
+            if (result == invalid_socket)
             {
-                // Under the C++ standard, the construction of static function variables is not guaranteed to be thread
-                // safe, so the constructor technically can get called more than once here. In the unlikely event that
-                // this does happen, we'll just end up calling WSAStartup more than once while only making one call to
-                // WSACleanup. Since the system will re-claim our resources, we just ignore the possibility
-                static const socket_initializer _init;
+                garbage::wsa_throw_last_error();
             }
 
-            socket_base(socket_t sock) :
-                socket_base()
+            addr.reset_size();
+            return result;
+        }
+
+        void bind(_In_ const socket_address &addr)
+        {
+            this->InvokeThrowOnError(::bind, this->_socket, addr, addr.size());
+        }
+
+        void close(void)
+        {
+            this->InvokeThrowOnError(::closesocket, this->_socket);
+            this->_socket = invalid_socket;
+        }
+
+        void connect(_In_ const socket_address &addr)
+        {
+            this->InvokeThrowOnError(::connect, this->_socket, addr, addr.size());
+        }
+
+        socket_address get_peer_name(void)
+        {
+            // We assume the size of sockaddr_in6 since that's the largest member of socket_address
+            socket_address result;
+            int size = sizeof(sockaddr_in6);
+
+            this->InvokeThrowOnError(::getpeername, this->_socket, result, &size);
+
+            // Reset the socket_address size and assert that its size is the expected size
+            result.reset_size();
+            assert(result.size() == static_cast<size_t>(size));
+
+            return result;
+        }
+
+        socket_address get_socket_name(void)
+        {
+            // We assume the size of sockaddr_in6 since that's the largest member of socket_address
+            socket_address result;
+            int size = sizeof(sockaddr_in6);
+
+            this->InvokeThrowOnError(::getsockname, this->_socket, result, &size);
+
+            // Reset the socket_address size and assert that its size is the expected size
+            result.reset_size();
+            assert(result.size() == static_cast<size_t>(size));
+
+            return result;
+        }
+
+        template <typename Ty>
+        Ty get_socket_option(_In_ socket_option opt)
+        {
+            Ty value;
+            int len = static_cast<int>(sizeof(Ty));
+
+            this->InvokeThrowOnError(::getsockopt, socket_level::socket, opt, &val, &len);
+
+            return value;
+        }
+
+        void listen(_In_ int backlog)
+        {
+            this->InvokeThrowOnError(::listen, this->_socket, backlog);
+        }
+
+        void open(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol)
+        {
+            garbage::wsa_throw_if_false(this->_socket == invalid_socket, WSAEISCONN);
+
+            this->_socket = socket(static_cast<int>(family), static_cast<int>(type), static_cast<int>(protocol));
+            if (this->_socket == invalid_socket)
             {
-                this->_socket = sock;
+                garbage::wsa_throw_last_error();
+            }
+        }
+
+        socket_error_t receive(
+            _Out_writes_bytes_to_(length, return) void *buffer,
+            _In_ int length,
+            _In_ message_flags flags)
+        {
+            auto buff = static_cast<char *>(buffer);
+            return this->InvokeThrowOnError(::recv, this->_socket, buff, length, static_cast<int>(flags));
+        }
+
+        socket_error_t receive_from(
+            _Out_writes_bytes_to_(length, return) void *buffer,
+            _In_ int length,
+            _In_ message_flags flags,
+            _Out_ socket_address &addr)
+        {
+            // We assume the size of sockaddr_in6 since that's the largest member of socket_address
+            int size = sizeof(sockaddr_in6);
+
+            auto result = this->InvokeThrowOnError(
+                ::recvfrom,
+                this->_socket,
+                static_cast<char *>(buffer),
+                length,
+                static_cast<int>(flags),
+                addr,
+                &size);
+
+            // Reset the socket_address size and assert that its size is the expected size
+            addr.reset_size();
+            assert(addr.size() == static_cast<size_t>(size));
+
+            return result;
+        }
+
+        socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ int length, _In_ message_flags flags)
+        {
+            auto buff = static_cast<const char *>(buffer);
+            return this->InvokeThrowOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
+        }
+
+        socket_error_t send_to(
+            _In_reads_bytes_(length) const void *buffer,
+            _In_ int length,
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            return this->InvokeThrowOnError(
+                ::sendto,
+                this->_socket,
+                static_cast<const char *>(buffer),
+                length,
+                static_cast<int>(flags),
+                addr,
+                addr.size());
+        }
+
+        void shutdown(_In_ shutdown_options options)
+        {
+            this->InvokeThrowOnError(::shutdown, this->_socket, static_cast<int>(options));
+        }
+
+
+
+        /*
+         * Other functions
+         */
+        void swap(_Inout_ socket_base &other)
+        {
+            auto temp = this->_socket;
+            this->_socket = other._socket;
+            other._socket = temp;
+        }
+
+        socket_t detach(void)
+        {
+            auto value = this->_socket;
+            this->_socket = invalid_socket;
+            return value;
+        }
+
+
+
+    protected:
+
+        // Invokes a function and closes the socket (if it's open) on failure. The destructor would otherwise take
+        // care of closing the socket for us, but it would also throw another exception, which we don't want
+        template <typename Func, typename... Args>
+        inline socket_error_t InvokeThrowOnError(_In_ Func &func, _In_ Args&&... args)
+        {
+            auto result = func(std::forward<Args>(args)...);
+            if (result == socket_error)
+            {
+                garbage::wsa_throw_last_error();
             }
 
-            socket_base(_Inout_ socket_base &&other) :
-                socket_base()
+            return result;
+        }
+
+        void Destroy(void)
+        {
+            // If the socket isn't already closed, we throw an exception (similar to std::thread if join or detach
+            // has not been called). However, in order to leave the program in a good state, we go ahead and close
+            // the socket for the user. Note that this function is called by the destructor, so we cannot rely on
+            // the destructor doing the cleanup in such situations.
+            if (this->_socket != invalid_socket)
             {
-                this->swap(other);
+                this->close();
+                throw socket_exception(WSAEFAULT);
             }
+        }
 
-            ~socket_base(void)
-            {
-                this->Destroy();
-            }
-
-            // Cannot copy
-            socket_base(_In_ const socket_base &other) = delete;
-            socket_base &operator=(_In_ const socket_base &other) = delete;
-
-
-
-            /*
-             * Operators
-             */
-            socket_base &operator=(_Inout_ socket_base &&other)
-            {
-                if (this != &other)
-                {
-                    this->swap(other);
-                }
-
-                return *this;
-            }
-
-            socket_base &operator=(_In_ socket_t sock)
-            {
-                this->Destroy();
-                this->_socket = sock;
-
-                return *this;
-            }
-
-            operator socket_t(void) const
-            {
-                return this->_socket;
-            }
-
-
-
-            /*
-             * Socket functions
-             */
-            std::pair<socket_t, socket_address> accept()
-            {
-                // We assume the size of sockaddr_in6 since that's the largest member of socket_address
-                socket_address addr;
-                int size = sizeof(sockaddr_in6);
-
-                auto result = ::accept(this->_socket, addr, &size);
-                if (result == invalid_socket)
-                {
-                    if (this->_socket != invalid_socket)
-                    {
-                        this->close();
-                    }
-
-                    wsa_throw_last_error();
-                }
-
-                return std::make_pair(result, addr);
-            }
-
-            void bind(_In_ const socket_address &addr)
-            {
-                this->InvokeCloseOnError(::bind, this->_socket, addr, addr.size());
-            }
-
-            void close(void)
-            {
-                wsa_throw_if_error(::closesocket(this->_socket));
-                this->_socket = invalid_socket;
-            }
-
-            void connect(_In_ const socket_address &addr)
-            {
-                this->InvokeCloseOnError(::connect, this->_socket, addr, addr.size());
-            }
-
-            void listen(_In_ int backlog)
-            {
-                this->InvokeCloseOnError(::listen, this->_socket, backlog);
-            }
-
-            void open(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol)
-            {
-                wsa_throw_if_false(this->_socket == invalid_socket, WSAEISCONN);
-
-                this->_socket = socket(static_cast<int>(family), static_cast<int>(type), static_cast<int>(protocol));
-                if (this->_socket == invalid_socket)
-                {
-                    wsa_throw_last_error();
-                }
-            }
-
-            socket_error_t receive(
-                _Out_writes_bytes_to_(length, return) void *buffer,
-                _In_ int length,
-                _In_ message_flags flags)
-            {
-                auto buff = static_cast<char *>(buffer);
-                return this->InvokeCloseOnError(::recv, this->_socket, buff, length, static_cast<int>(flags));
-            }
-
-            socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ int length, _In_ message_flags flags)
-            {
-                auto buff = static_cast<const char *>(buffer);
-                return this->InvokeCloseOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
-            }
-
-
-
-            /*
-             * Other functions
-             */
-            void swap(_Inout_ socket_base &other)
-            {
-                auto temp = this->_socket;
-                this->_socket = other._socket;
-                other._socket = temp;
-            }
-
-
-
-        protected:
-
-            // Invokes a function and closes the socket (if it's open) on failure. The destructor would otherwise take
-            // care of closing the socket for us, but it would also throw another exception, which we don't want
-            template <typename Func, typename... Args>
-            inline socket_error_t InvokeCloseOnError(_In_ Func &func, _In_ Args&&... args)
-            {
-                auto result = func(std::forward<Args>(args)...);
-                if (result == socket_error)
-                {
-                    if (this->_socket != invalid_socket)
-                    {
-                        this->close();
-                    }
-
-                    wsa_throw_last_error();
-                }
-
-                return result;
-            }
-
-            void Destroy(void)
-            {
-                // If the socket isn't already closed, we throw an exception (similar to std::thread if join or detach
-                // has not been called). However, in order to leave the program in a good state, we go ahead and close
-                // the socket for the user. Note that this function is called by the destructor, so we cannot rely on
-                // the destructor doing the cleanup in such situations.
-                if (this->_socket != invalid_socket)
-                {
-                    this->close();
-                    throw socket_exception(WSAEFAULT);
-                }
-            }
-
-            socket_t _socket;
-        };
-    }
+        socket_t _socket;
+    };
 
 
 

@@ -1272,35 +1272,221 @@ namespace dhorn
 
         TEST_CLASS(SocketBaseTests)
         {
+            template <typename Func>
+            void ExecuteSocketTest(_In_ const Func &func, _In_ bool closeSocket = true)
+            {
+                // Construct a socket. This is the one that we'll be using for the test
+                dhorn::socket_t rawSocket = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+                Assert::IsTrue(rawSocket != dhorn::invalid_socket);
 
+                func(rawSocket);
+
+                if (closeSocket)
+                {
+                    // Close the socket; don't care if this fails
+                    ::closesocket(rawSocket);
+                }
+            }
 
             TEST_METHOD(DefaultConstructorTest)
             {
                 // Default constructor has socket with value dhorn::invalid_socket
-                dhorn::garbage::socket_base sock;
+                dhorn::socket_base sock;
                 Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
             }
 
             TEST_METHOD(SocketConstuctorTest)
             {
-                // Constructing with invalid socket should not cause issues
-                dhorn::garbage::socket_base sock(dhorn::invalid_socket);
-                Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+                ExecuteSocketTest([](dhorn::socket_t rawSocket)
+                {
+                    // Constructing with invalid socket should not cause issues
+                    dhorn::socket_base sock(dhorn::invalid_socket);
+                    Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
 
-                // Construct with pre-made socket. Since we're not testing the close() function right now, we'll get an
-                // exception. We don't necessarily care what the exception is, and that's okay since that's not the
-                // point here. In fact, we don't necessarily care whether or not an exception is thrown
+                    // Construct with pre-made socket. Since we're not testing the close() function right now, we'll
+                    // get an exception. We don't necessarily care what the exception is, and that's okay since that's
+                    // not the point here. In fact, we don't necessarily care whether or not an exception is thrown
+                    try
+                    {
+                        dhorn::socket_base sock2(rawSocket);
+                        Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                    }
+                    catch (dhorn::socket_exception &/*ignored*/)
+                    {
+                    }
+                });
+            }
+
+            TEST_METHOD(MoveConstructorTest)
+            {
+                ExecuteSocketTest([](dhorn::socket_t rawSocket)
+                {
+                    dhorn::socket_base sock(rawSocket);
+
+                    // Move to a new socket. This should throw an exception when the destructor is run. Just like before,
+                    // we do not care what the exception is, nor do we really care if one is thrown. Just catch and ignore
+                    // the exception if it does occur
+                    try
+                    {
+                        dhorn::socket_base sock2(std::move(sock));
+                        Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+                        Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                    }
+                    catch (dhorn::socket_exception &/*ignored*/)
+                    {
+                    }
+
+                    // Moving an invalid socket shouldn't give any errors, etc.
+                    dhorn::socket_base sock2(std::move(sock));
+                    Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+                    Assert::IsTrue(static_cast<SOCKET>(sock2) == dhorn::invalid_socket);
+                });
+            }
+
+            TEST_METHOD(DestructorTest)
+            {
+                ExecuteSocketTest([](dhorn::socket_t rawSocket)
+                {
+                    // We only care that we get an exception for the destructor test
+                    try
+                    {
+                        {
+                            dhorn::socket_base sock(rawSocket);
+                            (void)sock;
+                        }
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (dhorn::socket_exception &e)
+                    {
+                        Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    }
+                });
+            }
+
+            TEST_METHOD(MoveAssignmentTest)
+            {
+                ExecuteSocketTest([](dhorn::socket_t rawSocket)
+                {
+                    dhorn::socket_base sock(rawSocket);
+
+                    // Move to a new socket. This should throw an exception when the destructor is run. Just like before,
+                    // we do not care what the exception is, nor do we really care if one is thrown. Just catch and ignore
+                    // the exception if it does occur
+                    try
+                    {
+                        dhorn::socket_base sock2;
+                        Assert::IsTrue(static_cast<SOCKET>(sock2) == dhorn::invalid_socket); // don't inline
+
+                        sock2 = std::move(sock);
+                        Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+                        Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                    }
+                    catch (dhorn::socket_exception &/*ignored*/)
+                    {
+                    }
+
+                    // Moving an invalid socket shouldn't give any errors, etc.
+                    dhorn::socket_base sock2(std::move(sock));
+                    Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+                    Assert::IsTrue(static_cast<SOCKET>(sock2) == dhorn::invalid_socket);
+                });
+            }
+
+            TEST_METHOD(SocketAssignmentTest)
+            {
+                ExecuteSocketTest([](dhorn::socket_t rawSocket)
+                {
+                    // Yet again, we expect, but do not check for, an exception during the destructor
+                    try
+                    {
+                        dhorn::socket_base sock;
+                        Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
+
+                        sock = rawSocket;
+                        Assert::IsTrue(static_cast<SOCKET>(sock) == rawSocket);
+                    }
+                    catch (dhorn::socket_exception &/*ignored*/)
+                    {
+                    }
+                });
+            }
+
+            TEST_METHOD(OperatorBoolTest)
+            {
+                ExecuteSocketTest([](dhorn::socket_t rawSocket)
+                {
+                    // Yet again, we expect, but do not check for, an exception during the destructor
+                    try
+                    {
+                        dhorn::socket_base sock;
+                        Assert::IsFalse(sock);
+
+                        sock = rawSocket;
+                        Assert::IsTrue(sock);
+                    }
+                    catch (dhorn::socket_exception &/*ignored*/)
+                    {
+                    }
+                });
+            }
+
+            TEST_METHOD(BindTest)
+            {
+                dhorn::socket_address testAddr(dhorn::ipv4_address(dhorn::any_address), 1337);
+                dhorn::socket_address testAddr2(dhorn::ipv4_address(dhorn::any_address), 1338);
+
+                // Bind should fail on invalid socket with WSAENOTSOCK
                 try
                 {
-                    auto rawSocket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-                    Assert::IsTrue(rawSocket != dhorn::invalid_socket);
-
-                    dhorn::garbage::socket_base sock2(rawSocket);
-                    Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                    dhorn::socket_base sock;
+                    sock.bind(testAddr);
+                    Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::socket_exception &)
+                catch (dhorn::socket_exception &e)
                 {
+                    Assert::IsTrue(e.get_error() == WSAENOTSOCK);
                 }
+
+                // Bind should succeed if the socket is created with IPPROTO_TCP
+                auto rawSock = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+                Assert::IsTrue(rawSock != dhorn::invalid_socket);
+
+                dhorn::socket_base sock(rawSock);
+                sock.bind(testAddr);
+
+                try
+                {
+                    // Expect an exception if we call bind twice (with a different address)
+                    sock.bind(testAddr2);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::IsTrue(e.get_error() == WSAEINVAL);
+                }
+
+                sock.detach();
+                ::closesocket(rawSock);
+
+                // ExecuteSocketTest gives us a socket created with IPPROTO_UDP
+                ExecuteSocketTest([&](dhorn::socket_t rawSocket)
+                {
+                    dhorn::socket_base sock(rawSocket);
+                    sock.bind(testAddr);
+
+                    try
+                    {
+                        // Expect an exception if we call bind twice (with a different address)
+                        sock.bind(testAddr2);
+                        Assert::Fail(L"Expected an exception");
+                    }
+                    catch (dhorn::socket_exception &e)
+                    {
+                        Assert::IsTrue(e.get_error() == WSAEINVAL);
+                    }
+
+                    sock.detach();
+                });
             }
         };
     }
