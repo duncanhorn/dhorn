@@ -57,7 +57,7 @@ namespace dhorn
                 }
 
                 // Used with IID_PPV_ARGS (for __uuidof). Reset is done in operator void **
-                interface_type * operator *(void)
+                interface_type *operator *(void)
                 {
                     return this->_ptr->get();
                 }
