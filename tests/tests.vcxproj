@@ -103,6 +103,7 @@
   <ItemGroup>
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
+    <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />
     <ClCompile Include="SocketsTests.cpp" />
     <ClCompile Include="stdafx.cpp">

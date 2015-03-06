@@ -37,12 +37,7 @@ namespace dhorn
         public:
             service_derived(void) = default;
 
-            service_derived(_In_ const std::shared_ptr<Ty> &ptr) :
-                _ptr(ptr)
-            {
-            }
-
-            service_derived(_Inout_ std::shared_ptr<Ty> &&ptr) :
+            service_derived(_Inout_ std::shared_ptr<Ty> ptr) :
                 _ptr(std::move(ptr))
             {
             }
@@ -52,12 +47,6 @@ namespace dhorn
             {
             }
 
-            service_derived &operator=(_Inout_ service_derived &&other)
-            {
-                this->_ptr = std::move(other._ptr);
-                return *this;
-            }
-
 
 
             // Cannot copy
@@ -65,6 +54,15 @@ namespace dhorn
             service_derived &operator=(_In_ const service_derived &) = delete;
 
 
+
+            /*
+             * Assignment
+             */
+            service_derived &operator=(_Inout_ service_derived &&other)
+            {
+                this->_ptr = std::move(other._ptr);
+                return *this;
+            }
 
             service_derived &operator=(_In_ const std::shared_ptr<Ty> &other)
             {
@@ -78,6 +76,11 @@ namespace dhorn
                 return *this;
             }
 
+
+
+            /*
+             * Public Functions
+             */
             const std::shared_ptr<Ty> &get(void) const
             {
                 return this->_ptr;
@@ -146,7 +149,7 @@ namespace dhorn
 
 
     /*
-     * service_type_traits
+     * service_type_traits (TODO: provide some defaults)
      */
     template <typename Ty>
     struct service_type_traits {};

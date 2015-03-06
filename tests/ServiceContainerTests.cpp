@@ -378,6 +378,7 @@ namespace dhorn
             TEST_METHOD(MemoryLeakTest)
             {
                 _CrtMemState start;
+                UNREFERENCED_PARAMETER(start);
                 _CrtMemCheckpoint(&start);
 
                 {
@@ -430,9 +431,11 @@ namespace dhorn
                 }
 
                 _CrtMemState end;
+                UNREFERENCED_PARAMETER(end);
                 _CrtMemCheckpoint(&end);
 
                 _CrtMemState diff;
+                UNREFERENCED_PARAMETER(diff);
                 Assert::IsTrue(!_CrtMemDifference(&diff, &start, &end));
             }
         };

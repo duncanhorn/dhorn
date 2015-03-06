@@ -149,6 +149,7 @@
     <ClInclude Include="include\dhorn\d3d\vector.h" />
     <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="Include\dhorn\math.h" />
+    <ClInclude Include="include\dhorn\message_queue.h" />
     <ClInclude Include="include\dhorn\raii_object.h" />
     <ClInclude Include="include\dhorn\uuid.h" />
     <ClInclude Include="include\dhorn\service_container.h" />

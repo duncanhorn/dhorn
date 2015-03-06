@@ -1376,6 +1376,7 @@ namespace dhorn
                 // Instead, we replicate the situations that are likely to produce memory leaks and
                 // just check those.
                 _CrtMemState startState;
+                (void)startState;
                 _CrtMemCheckpoint(&startState);
 
                 node_test_class::test([]()
@@ -1444,9 +1445,11 @@ namespace dhorn
 
                 // Compare ending state of the heap to the initial state
                 _CrtMemState endState;
+                (void)endState;
                 _CrtMemCheckpoint(&endState);
 
                 _CrtMemState diff;
+                (void)diff;
                 Assert::IsTrue(!_CrtMemDifference(&diff, &startState, &endState));
             }
         };
