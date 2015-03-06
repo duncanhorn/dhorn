@@ -3,7 +3,7 @@
  *
  * MessageQueueTests.cpp
  *
- * Tests for message_queue
+ * Tests for message_queue<void(void)>
  */
 
 #include "stdafx.h"
@@ -27,15 +27,16 @@ namespace dhorn
             TEST_METHOD(SingleThreadTest)
             {
                 const size_t testCount = 100;
-                dhorn::message_queue msgQueue;
+                dhorn::message_queue<int(int, int)> msgQueue;
                 int x = 0;
 
                 // Insert data
                 for (size_t i = 0; i < testCount; ++i)
                 {
-                    msgQueue.push_back([&]()
+                    msgQueue.push_back([&](int a, int b) -> int
                     {
                         ++x;
+                        return a + b;
                     });
                 }
 
@@ -45,7 +46,7 @@ namespace dhorn
                 int localCount = 0;
                 for (size_t i = 0; i < testCount; ++i)
                 {
-                    msgQueue.pop_front()();
+                    Assert::IsTrue(msgQueue.pop_front()(i, 1) == static_cast<int>(i + 1));
                     Assert::IsTrue(x == ++localCount);
                 }
             }
@@ -53,7 +54,7 @@ namespace dhorn
             TEST_METHOD(SingleProducerSingleConsumerTest)
             {
                 const size_t testCount = 100;
-                dhorn::message_queue msgQueue;
+                dhorn::message_queue<void(void)> msgQueue;
                 int x = 0;
 
                 std::thread producer([&]()
@@ -82,7 +83,7 @@ namespace dhorn
             {
                 const size_t testCount = 1000;
                 const size_t producerCount = 20;
-                dhorn::message_queue msgQueue;
+                dhorn::message_queue<void(void)> msgQueue;
                 int counts[producerCount] = {};
 
                 std::vector<std::thread> producers;
@@ -122,7 +123,7 @@ namespace dhorn
                 const size_t testCount = 5000;
                 const size_t consumerCount = 20;
                 static_assert(testCount % consumerCount == 0, "Must be divisible");
-                dhorn::message_queue msgQueue;
+                dhorn::message_queue<void(void)> msgQueue;
                 std::atomic_int x{};
 
                 std::vector<std::thread> consumers;
@@ -157,7 +158,7 @@ namespace dhorn
                 const size_t testCount = 1000;
                 const size_t producerCount = 20;
                 const size_t consumerCount = 20;
-                dhorn::message_queue msgQueue;
+                dhorn::message_queue<void(void)> msgQueue;
                 std::atomic_int counts[producerCount] = {};
                 std::atomic_int x{};
 
@@ -207,7 +208,7 @@ namespace dhorn
             TEST_METHOD(TryPopFrontTest)
             {
                 const size_t testCount = 100;
-                dhorn::message_queue msgQueue;
+                dhorn::message_queue<void(void)> msgQueue;
                 int x = 0;
 
                 // Insert data
