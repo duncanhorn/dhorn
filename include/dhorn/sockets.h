@@ -136,13 +136,6 @@ namespace dhorn
         wait_all        = MSG_WAITALL,
     };
 
-    enum class shutdown_options : int
-    {
-        send    = SD_SEND,
-        receive = SD_RECEIVE,
-        both    = SD_BOTH,
-    };
-
     inline message_flags operator|(_In_ message_flags lhs, _In_ message_flags rhs)
     {
         return static_cast<message_flags>(static_cast<int>(lhs) | static_cast<int>(rhs));
@@ -152,6 +145,13 @@ namespace dhorn
     {
         return static_cast<message_flags>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
+
+    enum class shutdown_options : int
+    {
+        send    = SD_SEND,
+        receive = SD_RECEIVE,
+        both    = SD_BOTH,
+    };
 
     enum class socket_level : int
     {
@@ -200,15 +200,6 @@ namespace dhorn
     {
         return static_cast<socket_option>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
-
-    /*
-    * WinSock 2 extension -- new options
-    */
-#define PVD_CONFIG        0x3001       /* configuration info for service provider */
-#define SO_CONDITIONAL_ACCEPT 0x3002   /* enable true conditional accept: */
-    /*  connection is not ack-ed to the */
-    /*  other side until conditional */
-    /*  function returns CF_ACCEPT */
 
 #pragma endregion
 
@@ -561,6 +552,8 @@ namespace dhorn
     /*
      * socket_address
      */
+#pragma region socket_address
+
     class socket_address final
     {
     public:
@@ -717,11 +710,15 @@ namespace dhorn
         size_t _size;
     };
 
+#pragma endregion
+
 
 
     /*
      * socket_base
      */
+#pragma region socket_base
+
     namespace garbage
     {
         /*
@@ -1025,6 +1022,8 @@ namespace dhorn
 
         socket_t _socket;
     };
+
+#pragma endregion
 
 
 
