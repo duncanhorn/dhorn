@@ -58,28 +58,66 @@ namespace dhorn
             this->_messageQueue.push_back(func);
         }
 
-        template <typename Func>
+        template <typename Func, typename ResultType = decltype(std::declval<Func>()())>
         auto submit_for_result(_In_ Func func) ->
-            std::future<decltype(std::declval<Func>()())>
+            std::future<ResultType>
         {
-            using ResultType = decltype(std::declval<Func>()());
-
-            //std::packaged_task<ResultType(void)> task(func);
-            //auto future = task.get_future();
-
-            //this->_messageQueue.push_back(std::move(task));
-
-            //return future;
-
-            std::promise<ResultType> promise;
-            auto future = promise.get_future();
+            auto promise = std::make_shared<std::promise<ResultType>>();
+            auto future = promise->get_future();
 
             this->_messageQueue.push_back([promise, func]()
             {
-                promise.set_value(func());
+                promise->set_value(func());
             });
 
             return future;
+        }
+
+        void barrier(void)
+        {
+            // Blocks all threads in the thread pool until all have reached the barrier.
+            size_t reached_barrier = 0;
+            size_t passed_barrier = 0;
+            std::mutex mutex;
+            std::condition_variable allReached;
+            std::condition_variable allPassed;
+
+            { // Acquire _barrierLock
+                // Only one thread can execute barrier() at a time
+                std::lock_guard<std::mutex> guard(this->_barrierLock);
+
+                for (size_t i = 0; i < this->_threadPool.size(); ++i)
+                {
+                    this->submit([&]()
+                    {
+                        std::unique_lock<std::mutex> lock(mutex);
+                        ++reached_barrier;
+                        if (reached_barrier == this->_threadPool.size())
+                        {
+                            allReached.notify_all();
+                        }
+                        else
+                        {
+                            allReached.wait(lock);
+                        }
+
+                        ++passed_barrier;
+                        if (passed_barrier == this->_threadPool.size())
+                        {
+                            allPassed.notify_all();
+                        }
+                    });
+                }
+
+                // Wait for completion
+                { // Acquire mutex
+                    std::unique_lock<std::mutex> lock(mutex);
+                    while (passed_barrier != this->_threadPool.size())
+                    {
+                        allPassed.wait(lock);
+                    }
+                } // Release mutex
+            } // Release _barrierLock
         }
 
 
@@ -123,6 +161,8 @@ namespace dhorn
         std::vector<std::thread> _threadPool;
         message_queue<void(void)> _messageQueue;
         bool _running;
+
+        std::mutex _barrierLock;
     };
 
 #pragma endregion
