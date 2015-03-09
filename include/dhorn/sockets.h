@@ -45,6 +45,7 @@ namespace dhorn
     // translation to network-byte-order when these values are used by the implementation.
     static const uint32_t any_address = INADDR_ANY;
     static const uint32_t loopback_address = INADDR_LOOPBACK;
+    static const uint32_t local_host = INADDR_LOOPBACK;
     static const uint32_t broadcast_address = INADDR_BROADCAST;
     static const uint32_t invalid_address = INADDR_NONE;
 #endif  /*WIN32*/
@@ -624,6 +625,21 @@ namespace dhorn
             return this->_ipv6Addr;
         }
 
+        bool operator==(_In_ const socket_address &other) const
+        {
+            if (this->_size != other._size)
+            {
+                return false;
+            }
+
+            return std::memcmp(&this->_addr, &other._addr, this->_size) == 0;
+        }
+
+        bool operator!=(_In_ const socket_address &other) const
+        {
+            return !(*this == other);
+        }
+
 
 
         /*
@@ -677,6 +693,8 @@ namespace dhorn
                 this->_size = 0;
                 break;
             }
+
+            return this->_size;
         }
 
         address_family family(void) const
@@ -766,6 +784,12 @@ namespace dhorn
             static const garbage::socket_initializer _init;
         }
 
+        socket_base(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol) :
+            socket_base()
+        {
+            this->open(family, type, protocol);
+        }
+
         socket_base(socket_t sock) :
             socket_base()
         {
@@ -800,7 +824,7 @@ namespace dhorn
 
         socket_base &operator=(_In_ socket_t sock)
         {
-            this->Destroy();
+            this->Destroy(); // Throws if the socket is still open. This is desired
             this->_socket = sock;
 
             return *this;
@@ -821,7 +845,7 @@ namespace dhorn
         /*
          * Socket functions
          */
-        socket_t accept(_Inout_ socket_address &addr)
+        socket_base accept(_Inout_ socket_address &addr)
         {
             // We assume the size of sockaddr_in6 since that's the largest member of socket_address
             int size = sizeof(sockaddr_in6);
@@ -883,12 +907,18 @@ namespace dhorn
         }
 
         template <typename Ty>
-        Ty get_socket_option(_In_ socket_option opt)
+        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
         {
             Ty value;
-            int len = static_cast<int>(sizeof(Ty));
+            int len = static_cast<int>(sizeof(value));
 
-            this->InvokeThrowOnError(::getsockopt, socket_level::socket, opt, &val, &len);
+            this->InvokeThrowOnError(
+                ::getsockopt,
+                this->_socket,
+                static_cast<int>(level),
+                static_cast<int>(opt),
+                reinterpret_cast<char *>(&value),
+                &len);
 
             return value;
         }
@@ -963,6 +993,18 @@ namespace dhorn
                 static_cast<int>(flags),
                 addr,
                 addr.size());
+        }
+
+        template <typename Ty>
+        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        {
+            this->InvokeThrowOnError(
+                ::setsockopt,
+                this->_socket,
+                static_cast<int>(level),
+                static_cast<int>(opt),
+                reinterpret_cast<const char *>(&val),
+                sizeof(val));
         }
 
         void shutdown(_In_ shutdown_options options)

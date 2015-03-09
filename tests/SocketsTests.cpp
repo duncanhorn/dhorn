@@ -8,7 +8,9 @@
 
 #include "stdafx.h"
 #include "CppUnitTest.h"
+
 #include <string>
+#include <thread>
 #include <vector>
 
 #include "dhorn/sockets.h"
@@ -1288,6 +1290,19 @@ namespace dhorn
                 }
             }
 
+            TEST_CLASS_INITIALIZE(Initialize)
+            {
+                // Make sure ws2_32.dll is loaded before any test runs
+                WSADATA data;
+                auto result = WSAStartup(MAKEWORD(2, 2), &data);
+
+                // If the dll load fails, we cannot call WSAGetLastError
+                if (result)
+                {
+                    throw socket_exception(result);
+                }
+            }
+
             TEST_METHOD(DefaultConstructorTest)
             {
                 // Default constructor has socket with value dhorn::invalid_socket
@@ -1303,9 +1318,9 @@ namespace dhorn
                     dhorn::socket_base sock(dhorn::invalid_socket);
                     Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::invalid_socket);
 
-                    // Construct with pre-made socket. Since we're not testing the close() function right now, we'll
-                    // get an exception. We don't necessarily care what the exception is, and that's okay since that's
-                    // not the point here. In fact, we don't necessarily care whether or not an exception is thrown
+                    // Construct with pre-made socket. Since we're not testing the close function right now, we'll get
+                    // an exception. We don't necessarily care what the exception is, and that's okay since that's not
+                    // the point here. In fact, we don't necessarily care whether or not an exception is thrown
                     try
                     {
                         dhorn::socket_base sock2(rawSocket);
@@ -1323,9 +1338,9 @@ namespace dhorn
                 {
                     dhorn::socket_base sock(rawSocket);
 
-                    // Move to a new socket. This should throw an exception when the destructor is run. Just like before,
-                    // we do not care what the exception is, nor do we really care if one is thrown. Just catch and ignore
-                    // the exception if it does occur
+                    // Move to a new socket. This should throw an exception when the destructor is run. Just like
+                    // before, we do not care what the exception is, nor do we really care if one is thrown. Just catch
+                    // and ignore the exception if it does occur
                     try
                     {
                         dhorn::socket_base sock2(std::move(sock));
@@ -1369,9 +1384,9 @@ namespace dhorn
                 {
                     dhorn::socket_base sock(rawSocket);
 
-                    // Move to a new socket. This should throw an exception when the destructor is run. Just like before,
-                    // we do not care what the exception is, nor do we really care if one is thrown. Just catch and ignore
-                    // the exception if it does occur
+                    // Move to a new socket. This should throw an exception when the destructor is run. Just like
+                    // before, we do not care what the exception is, nor do we really care if one is thrown. Just catch
+                    // and ignore the exception if it does occur
                     try
                     {
                         dhorn::socket_base sock2;
@@ -1396,7 +1411,7 @@ namespace dhorn
             {
                 ExecuteSocketTest([](dhorn::socket_t rawSocket)
                 {
-                    // Yet again, we expect, but do not check for, an exception during the destructor
+                    // Yet again, we expect, but do not check for, an exception in the destructor
                     try
                     {
                         dhorn::socket_base sock;
@@ -1428,6 +1443,132 @@ namespace dhorn
                     {
                     }
                 });
+            }
+
+            TEST_METHOD(OpenConstructorTest)
+            {
+                // Creating a "normal" TCP or UDP socket should not fail
+                dhorn::socket_base tcpSocket(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::stream,
+                    dhorn::ip_protocol::transmission_control_protocol);
+                Assert::AreNotEqual(static_cast<SOCKET>(tcpSocket), dhorn::invalid_socket);
+
+                dhorn::socket_base udpSocket(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::datagram,
+                    dhorn::ip_protocol::user_datagram_protocol);
+                Assert::AreNotEqual(static_cast<SOCKET>(udpSocket), dhorn::invalid_socket);
+
+                // Close the sockets ourselves; We're not testing the close function yet
+                ::closesocket(tcpSocket.detach());
+                ::closesocket(udpSocket.detach());
+
+                // TCP/UDP mis-match should throw
+                try
+                {
+                    dhorn::socket_base sock(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::stream,
+                        dhorn::ip_protocol::user_datagram_protocol);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                }
+
+                try
+                {
+                    dhorn::socket_base sock(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::datagram,
+                        dhorn::ip_protocol::transmission_control_protocol);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                }
+            }
+
+            TEST_METHOD(OpenTest)
+            {
+                dhorn::socket_base tcpSocket;
+                dhorn::socket_base udpSocket;
+
+                // Creating a "normal" TCP or UDP socket should not fail
+                tcpSocket.open(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::stream,
+                    dhorn::ip_protocol::transmission_control_protocol);
+                Assert::AreNotEqual(static_cast<SOCKET>(tcpSocket), dhorn::invalid_socket);
+
+                udpSocket.open(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::datagram,
+                    dhorn::ip_protocol::user_datagram_protocol);
+                Assert::AreNotEqual(static_cast<SOCKET>(udpSocket), dhorn::invalid_socket);
+
+                // Calling open on a socket already in use should throw and leave the socket in a correct state
+                try
+                {
+                    tcpSocket.open(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::stream,
+                        dhorn::ip_protocol::transmission_control_protocol);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAEISCONN), e.get_error());
+                }
+
+                // Close the sockets ourselves; We're not testing the close function yet
+                ::closesocket(tcpSocket.detach());
+                ::closesocket(udpSocket.detach());
+
+                // TCP/UDP mis-match should throw
+                try
+                {
+                    tcpSocket.open(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::stream,
+                        dhorn::ip_protocol::user_datagram_protocol);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                }
+
+                try
+                {
+                    udpSocket.open(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::datagram,
+                        dhorn::ip_protocol::transmission_control_protocol);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                }
+            }
+
+            TEST_METHOD(CloseTest)
+            {
+                ExecuteSocketTest([](socket_t rawSocket)
+                {
+                    dhorn::socket_base sock(rawSocket);
+                    Assert::AreEqual(rawSocket, static_cast<SOCKET>(sock));
+
+                    sock.close();
+                    Assert::AreEqual(dhorn::invalid_socket, static_cast<SOCKET>(sock));
+
+                    // Calling closesocket should fail since the socket is already closed
+                    Assert::AreNotEqual(0, ::closesocket(rawSocket));
+                }, false /*don't close*/);
             }
 
             TEST_METHOD(BindTest)
@@ -1465,8 +1606,7 @@ namespace dhorn
                     Assert::IsTrue(e.get_error() == WSAEINVAL);
                 }
 
-                sock.detach();
-                ::closesocket(rawSock);
+                sock.close();
 
                 // ExecuteSocketTest gives us a socket created with IPPROTO_UDP
                 ExecuteSocketTest([&](dhorn::socket_t rawSocket)
@@ -1485,8 +1625,168 @@ namespace dhorn
                         Assert::IsTrue(e.get_error() == WSAEINVAL);
                     }
 
-                    sock.detach();
+                    sock.detach(); // Let ExecuteSocketTest close the socket
                 });
+            }
+
+            TEST_METHOD(GetSocketNameTest)
+            {
+                dhorn::socket_address testAddr(dhorn::ipv4_address(dhorn::any_address), 1337);
+                dhorn::socket_base sock(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::datagram,
+                    dhorn::ip_protocol::user_datagram_protocol);
+
+                // Calling get_socket_name on a non-bound socket should throw
+                try
+                {
+                    sock.get_socket_name();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAEINVAL), e.get_error());
+                }
+
+                // Bind against the test socket_address
+                sock.bind(testAddr);
+
+                // Make sure that the address is the same
+                auto addr = sock.get_socket_name();
+                Assert::IsTrue(addr == testAddr);
+
+                sock.close();
+            }
+
+            TEST_METHOD(SocketOptionTest)
+            {
+                dhorn::socket_address testAddr(dhorn::ipv4_address(dhorn::any_address), 1337);
+                dhorn::socket_base sock;
+
+                // Set/get socket option should fail on an invalid socket
+                try
+                {
+                    sock.set_socket_option(dhorn::socket_level::socket, dhorn::socket_option::debug_info, true);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAENOTSOCK), e.get_error());
+                }
+
+                try
+                {
+                    bool val = sock.get_socket_option<bool>(
+                        dhorn::socket_level::socket,
+                        dhorn::socket_option::debug_info);
+                    (void)val;
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::socket_exception &e)
+                {
+                    Assert::AreEqual(static_cast<int>(WSAENOTSOCK), e.get_error());
+                }
+
+                sock.open(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::datagram,
+                    dhorn::ip_protocol::user_datagram_protocol);
+
+                // It is expected that we bind the socket before getting/setting options on it
+                sock.bind(testAddr);
+
+                // Verify that the value is false first (otherwise we're testing nothing...)
+                bool val = sock.get_socket_option<bool>(dhorn::socket_level::socket, dhorn::socket_option::debug_info);
+                Assert::IsFalse(val);
+
+                sock.set_socket_option(dhorn::socket_level::socket, dhorn::socket_option::debug_info, true);
+                val = sock.get_socket_option<bool>(dhorn::socket_level::socket, dhorn::socket_option::debug_info);
+                Assert::IsTrue(val);
+
+                sock.close();
+            }
+
+            TEST_METHOD(ListenConnectAcceptTest)
+            {
+                dhorn::socket_address serverAddress(dhorn::ipv4_address(dhorn::local_host), 1337);
+                dhorn::socket_base server(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::stream,
+                    dhorn::ip_protocol::transmission_control_protocol);
+                server.bind(serverAddress);
+
+                // Make sure the server is listening before we kick off the client thread
+                server.listen(5);
+
+                bool succeeded = false;
+                std::thread clientThread([&]()
+                {
+                    dhorn::socket_address addr(dhorn::ipv4_address(dhorn::loopback_address), 1337);
+                    dhorn::socket_base client(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::stream,
+                        dhorn::ip_protocol::transmission_control_protocol);
+
+                    client.connect(addr);
+
+                    // If client didn't throw, the connection succeeded
+                    succeeded = true;
+                    client.close();
+                });
+
+                dhorn::socket_address clientAddress;
+                auto clientSocket = server.accept(clientAddress);
+                clientSocket.close(); // We just test connection; no messages need to be sent
+
+                clientThread.join();
+                Assert::IsTrue(succeeded);
+
+                server.close();
+            }
+
+            TEST_METHOD(GetPeerNameTest)
+            {
+                dhorn::socket_address serverAddress(dhorn::ipv4_address(dhorn::any_address), 1337);
+                dhorn::socket_base server(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::stream,
+                    dhorn::ip_protocol::transmission_control_protocol);
+                server.bind(serverAddress);
+
+                // Make sure the server is listening before we kick off the client thread
+                server.listen(5);
+
+                std::thread clientThread([&]()
+                {
+                    dhorn::socket_address addr(dhorn::ipv4_address(dhorn::local_host), 1337);
+                    dhorn::socket_base client(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::stream,
+                        dhorn::ip_protocol::transmission_control_protocol);
+
+                    client.connect(addr);
+
+                    // We can't predict the address of what we're connected to, but we can assert that it gave us a
+                    // valid value
+                    auto peerName = client.get_peer_name();
+                    Assert::IsTrue(peerName.size() > 0);
+
+                    client.close();
+                });
+
+                dhorn::socket_address clientAddress;
+                auto clientSocket = server.accept(clientAddress);
+                auto peerName = clientSocket.get_peer_name();
+                Assert::IsTrue(peerName.size() > 0);
+                clientSocket.close(); // We just test connection; no messages need to be sent
+
+                clientThread.join();
+                server.close();
+            }
+
+            TEST_METHOD(ReceiveTest)
+            {
+                // TODO
             }
         };
     }
