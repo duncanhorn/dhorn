@@ -128,6 +128,7 @@ namespace dhorn
 
     enum class message_flags : int
     {
+        none            = 0,
         dont_route      = MSG_DONTROUTE,
         interrupt       = MSG_INTERRUPT,
         out_of_band     = MSG_OOB,
@@ -201,6 +202,18 @@ namespace dhorn
     {
         return static_cast<socket_option>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
+
+    enum class io_control_command : unsigned long
+    {
+        available_bytes     = FIONREAD,
+        blocking            = FIONBIO,
+        asynchronous        = FIOASYNC,
+        set_high_watermark  = SIOCSHIWAT,
+        get_high_watermark  = SIOCGHIWAT,
+        set_low_watermark   = SIOCSLOWAT,
+        get_low_watermark   = SIOCGLOWAT,
+        at_oob_mark         = SIOCATMARK,
+    };
 
 #pragma endregion
 
@@ -923,6 +936,14 @@ namespace dhorn
             return value;
         }
 
+        unsigned long io_control(
+            _In_ io_control_command cmd,
+            _In_opt_ unsigned long value = 0)
+        {
+            this->InvokeThrowOnError(::ioctlsocket, this->_socket, static_cast<long>(cmd), &value);
+            return value;
+        }
+
         void listen(_In_ int backlog)
         {
             this->InvokeThrowOnError(::listen, this->_socket, backlog);
@@ -946,6 +967,31 @@ namespace dhorn
         {
             auto buff = static_cast<char *>(buffer);
             return this->InvokeThrowOnError(::recv, this->_socket, buff, length, static_cast<int>(flags));
+        }
+
+        template <typename Itr>
+        Itr receive(_In_ const Itr &front, _In_ const Itr &back, _In_ message_flags flags)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we use std::vector for the call to ::recv
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(std::distance(front, back));
+
+            auto len = this->receive(static_cast<void *>(&buffer[0]), buffer.size(), flags);
+            auto itr = front;
+            for (int i = 0; i < len; ++i)
+            {
+                *itr = buffer[i];
+                ++itr;
+            }
+
+            return itr;
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t receive(_Out_ Ty(&buffer)[len], _In_ message_flags flags)
+        {
+            return this->receive(static_cast<void *>(buffer), len * sizeof(Ty), flags);
         }
 
         socket_error_t receive_from(
@@ -973,15 +1019,61 @@ namespace dhorn
             return result;
         }
 
-        socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ int length, _In_ message_flags flags)
+        template <typename Itr>
+        Itr receive_from(
+            _In_ const Itr &front,
+            _In_ const Itr &back,
+            _In_ message_flags flags,
+            _Out_ socket_address &addr)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we use std::vector for the call to ::recvfrom
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(std::distance(front, back));
+
+            auto len = this->receive_from(static_cast<void *>(&buffer[0]), buffer.size(), flags, addr);
+            auto itr = front;
+            for (int i = 0; i < len; ++i)
+            {
+                *itr = buffer[i];
+                ++itr;
+            }
+
+            return itr;
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t receive_from(_Out_ Ty(&buffer)[len], _In_ message_flags flags, _Out_ socket_address &addr)
+        {
+            return this->receive_from(static_cast<void *>(buffer), len * sizeof(Ty), flags, addr);
+        }
+
+        socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ size_t length, _In_ message_flags flags)
         {
             auto buff = static_cast<const char *>(buffer);
             return this->InvokeThrowOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
         }
 
+        template <typename Itr>
+        socket_error_t send(_In_ const Itr &front, _In_ const Itr &back, _In_ message_flags flags)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we transfer the contents to std::vector
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(front, back);
+
+            return this->send(static_cast<const void *>(&buffer[0]), buffer.size(), flags);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags)
+        {
+            return this->send(static_cast<const void *>(buffer), len * sizeof(Ty), flags);
+        }
+
         socket_error_t send_to(
             _In_reads_bytes_(length) const void *buffer,
-            _In_ int length,
+            _In_ size_t length,
             _In_ message_flags flags,
             _In_ const socket_address &addr)
         {
@@ -993,6 +1085,30 @@ namespace dhorn
                 static_cast<int>(flags),
                 addr,
                 addr.size());
+        }
+
+        template <typename Itr>
+        socket_error_t send_to(
+            _In_ const Itr &front,
+            _In_ const Itr &back,
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we transfer the contents to std::vector
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(front, back);
+
+            return this->send_to(static_cast<const void *>(&buffer[0]), buffer.size(), flags, addr);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t send_to(
+            _In_ const Ty(&buffer)[len],
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            return this->send_to(static_cast<const void *>(buffer), len * sizeof(Ty), flags, addr);
         }
 
         template <typename Ty>

@@ -1290,6 +1290,45 @@ namespace dhorn
                 }
             }
 
+            template <typename ServerFunc, typename ClientFunc>
+            void ExecuteServerTest(
+                _In_ const dhorn::socket_address &serverAddress,
+                _In_ const ServerFunc &serverFunc,
+                _In_ const ClientFunc &clientFunc)
+            {
+                dhorn::socket_base server(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::stream,
+                    dhorn::ip_protocol::transmission_control_protocol);
+                server.bind(serverAddress);
+
+                // Make sure the server is listening before we kick off the client thread
+                server.listen(5);
+
+                std::thread clientThread([&]()
+                {
+                    dhorn::socket_address addr(dhorn::ipv4_address(dhorn::local_host), 1337);// TODO: port
+                    dhorn::socket_base client(
+                        dhorn::address_family::internetwork_version_4,
+                        dhorn::socket_type::stream,
+                        dhorn::ip_protocol::transmission_control_protocol);
+
+                    client.connect(addr);
+                    clientFunc(client);
+
+                    client.close();
+                });
+
+                dhorn::socket_address clientAddress;
+                auto clientSocket = server.accept(clientAddress);
+
+                serverFunc(server, clientSocket);
+
+                clientThread.join();
+                clientSocket.close();
+                server.close();
+            }
+
             TEST_CLASS_INITIALIZE(Initialize)
             {
                 // Make sure ws2_32.dll is loaded before any test runs
@@ -1709,84 +1748,135 @@ namespace dhorn
             TEST_METHOD(ListenConnectAcceptTest)
             {
                 dhorn::socket_address serverAddress(dhorn::ipv4_address(dhorn::local_host), 1337);
-                dhorn::socket_base server(
-                    dhorn::address_family::internetwork_version_4,
-                    dhorn::socket_type::stream,
-                    dhorn::ip_protocol::transmission_control_protocol);
-                server.bind(serverAddress);
-
-                // Make sure the server is listening before we kick off the client thread
-                server.listen(5);
 
                 bool succeeded = false;
-                std::thread clientThread([&]()
+                ExecuteServerTest(
+                    serverAddress,
+                    [&](dhorn::socket_base& /*serverSocket*/, dhorn::socket_base& /*connectedSocket*/)
                 {
-                    dhorn::socket_address addr(dhorn::ipv4_address(dhorn::loopback_address), 1337);
-                    dhorn::socket_base client(
-                        dhorn::address_family::internetwork_version_4,
-                        dhorn::socket_type::stream,
-                        dhorn::ip_protocol::transmission_control_protocol);
-
-                    client.connect(addr);
-
+                    // No messages need to be sent; we just test connection
+                },
+                    [&](dhorn::socket_base& /*clientSocket*/)
+                {
                     // If client didn't throw, the connection succeeded
                     succeeded = true;
-                    client.close();
                 });
 
-                dhorn::socket_address clientAddress;
-                auto clientSocket = server.accept(clientAddress);
-                clientSocket.close(); // We just test connection; no messages need to be sent
-
-                clientThread.join();
                 Assert::IsTrue(succeeded);
-
-                server.close();
             }
 
             TEST_METHOD(GetPeerNameTest)
             {
                 dhorn::socket_address serverAddress(dhorn::ipv4_address(dhorn::any_address), 1337);
-                dhorn::socket_base server(
-                    dhorn::address_family::internetwork_version_4,
-                    dhorn::socket_type::stream,
-                    dhorn::ip_protocol::transmission_control_protocol);
-                server.bind(serverAddress);
 
-                // Make sure the server is listening before we kick off the client thread
-                server.listen(5);
-
-                std::thread clientThread([&]()
+                ExecuteServerTest(
+                    serverAddress,
+                    [&](dhorn::socket_base& /*serverSocket*/, dhorn::socket_base& connectedSocket)
                 {
-                    dhorn::socket_address addr(dhorn::ipv4_address(dhorn::local_host), 1337);
-                    dhorn::socket_base client(
-                        dhorn::address_family::internetwork_version_4,
-                        dhorn::socket_type::stream,
-                        dhorn::ip_protocol::transmission_control_protocol);
-
-                    client.connect(addr);
-
+                    auto peerName = connectedSocket.get_peer_name();
+                    Assert::IsTrue(peerName.size() > 0);
+                },
+                    [&](dhorn::socket_base& clientSocket)
+                {
                     // We can't predict the address of what we're connected to, but we can assert that it gave us a
                     // valid value
-                    auto peerName = client.get_peer_name();
+                    auto peerName = clientSocket.get_peer_name();
                     Assert::IsTrue(peerName.size() > 0);
-
-                    client.close();
                 });
-
-                dhorn::socket_address clientAddress;
-                auto clientSocket = server.accept(clientAddress);
-                auto peerName = clientSocket.get_peer_name();
-                Assert::IsTrue(peerName.size() > 0);
-                clientSocket.close(); // We just test connection; no messages need to be sent
-
-                clientThread.join();
-                server.close();
             }
 
-            TEST_METHOD(ReceiveTest)
+            TEST_METHOD(SendReceiveTest)
             {
-                // TODO
+                dhorn::socket_address serverAddress(dhorn::ipv4_address(dhorn::any_address), 1337);
+
+                ExecuteServerTest(
+                    serverAddress,
+                    [&](dhorn::socket_base& /*serverSocket*/, dhorn::socket_base& connectedSocket)
+                {
+                    // Receive using a pointer to a buffer
+                    char buffer[4] = {};
+                    auto len = connectedSocket.receive(buffer, 3, dhorn::message_flags::none);
+                    Assert::IsTrue(len == 3);
+                    Assert::IsTrue(strcmp(buffer, "foo") == 0);
+
+                    // Send using iterators
+                    const char sendBuff[] = "bar";
+                    len = connectedSocket.send(std::begin(sendBuff), std::end(sendBuff), dhorn::message_flags::none);
+                    Assert::IsTrue(len == 4);
+
+                    // Receive using an array
+                    len = connectedSocket.receive(buffer, dhorn::message_flags::none);
+                    Assert::IsTrue(len == 4);
+                    Assert::IsTrue(strcmp(buffer, "car") == 0);
+                },
+                    [&](dhorn::socket_base& clientSocket)
+                {
+                    // Send using a pointer to a buffer
+                    auto len = clientSocket.send("foo", 3, dhorn::message_flags::none);
+                    Assert::IsTrue(len == 3);
+
+                    // Receive using iterators
+                    char buffer[4] = {};
+                    auto itr = clientSocket.receive(std::begin(buffer), std::end(buffer), dhorn::message_flags::none);
+                    Assert::IsTrue(std::distance(std::begin(buffer), itr) == 4);
+                    Assert::IsTrue(strcmp(buffer, "bar") == 0);
+
+                    // Send using an array
+                    const char sendBuff[] = "car";
+                    len = clientSocket.send(sendBuff, dhorn::message_flags::none);
+                });
+            }
+
+            TEST_METHOD(SendToReceiveFromTest)
+            {
+                dhorn::socket_base sock1(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::datagram,
+                    dhorn::ip_protocol::user_datagram_protocol);
+                dhorn::socket_base sock2(
+                    dhorn::address_family::internetwork_version_4,
+                    dhorn::socket_type::datagram,
+                    dhorn::ip_protocol::user_datagram_protocol);
+
+                sock1.bind(dhorn::socket_address(dhorn::ipv4_address(dhorn::any_address), 1337));
+                sock2.bind(dhorn::socket_address(dhorn::ipv4_address(dhorn::any_address), 1338));
+
+                // Send "foo" using a pointer to a buffer
+                dhorn::socket_address dest2(dhorn::ipv4_address(dhorn::local_host), 1338);
+                auto len = sock1.send_to("foo", 3, dhorn::message_flags::none, dest2);
+                Assert::IsTrue(len == 3);
+
+                // Receive using a pointer to a buffer
+                char buffer[4] = {};
+                dhorn::socket_address dest1; // Should pick up the correct destination address
+                len = sock2.receive_from(buffer, 3, dhorn::message_flags::none, dest1);
+                Assert::IsTrue(len == 3);
+                Assert::IsTrue(strcmp(buffer, "foo") == 0);
+
+
+                // Send "bar" using iterators
+                const char sendBuff[] = "bar";
+                len = sock2.send_to(std::begin(sendBuff), std::end(sendBuff), dhorn::message_flags::none, dest1);
+                Assert::IsTrue(len == 4);
+
+                // Receive using iterators
+                auto itr = sock1.receive_from(std::begin(buffer), std::end(buffer), dhorn::message_flags::none, dest2);
+                Assert::IsTrue(std::distance(std::begin(buffer), itr) == 4);
+                Assert::IsTrue(strcmp(buffer, "bar") == 0);
+
+
+                // Send "car" using an array
+                const char sendBuff2[] = "car";
+                len = sock1.send_to(sendBuff2, dhorn::message_flags::none, dest2);
+                Assert::IsTrue(len == 4);
+
+                // Receive using an array
+                sock2.receive_from(buffer, dhorn::message_flags::none, dest1);
+                Assert::IsTrue(len == 4);
+                Assert::IsTrue(strcmp(buffer, "car") == 0);
+
+                sock1.close();
+                sock2.close();
             }
         };
     }
