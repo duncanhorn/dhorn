@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <sstream>
 
@@ -40,6 +41,8 @@ namespace dhorn
 
     static const socket_t invalid_socket = INVALID_SOCKET;
     static const socket_error_t socket_error = SOCKET_ERROR;
+
+    static const size_t max_message_size = SO_MAX_MSG_SIZE;
 
     // Not defined using htonl since all values exposed to client code should be in host-byte-order. We do the
     // translation to network-byte-order when these values are used by the implementation.
@@ -1188,15 +1191,72 @@ namespace dhorn
     /*
      * udp_socket
      */
+#pragma region udp_socket
+
+    template <typename Ty>
+    struct udp_packet final
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        udp_packet(_In_ size_t bufferLength) :
+            _bufferLength(bufferLength),
+            _dataLength(0)
+        {
+            this->_buffer.reset(new Ty[this->_bufferLength]);
+        }
+
+
+
+        /*
+         * Public Functions
+         */
+        size_t size(void) const
+        {
+            return this->_dataLength;
+        }
+
+        const std::unique_ptr<Ty[]> &buffer(void) const
+        {
+            return this->_buffer;
+        }
+
+        const socket_address &addr(void) const
+        {
+            return this->_addr;
+        }
+
+
+
+    private:
+
+        std::unique_ptr<Ty[]> _buffer;
+        size_t _bufferLength;
+        size_t _dataLength;
+        socket_address _addr;
+
+        friend class udp_socket;
+    };
+
     class udp_socket final
     {
     public:
         /*
          * Constructor(s)/Destructor
          */
+        udp_socket(_In_ size_t internalBufferSize = max_message_size) :
+            _internalBufferSize(internalBufferSize)
+        {
+            this->_internalBuffer.reset(new char[this->_internalBufferSize]);
+        }
 
 
     private:
 
+        std::unique_ptr<char[]> _internalBuffer;
+        size_t _internalBufferSize;
     };
+
+#pragma endregion
 }
