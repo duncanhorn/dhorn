@@ -1193,18 +1193,16 @@ namespace dhorn
      */
 #pragma region udp_socket
 
-    template <typename Ty>
+    template <typename Ty = char>
     struct udp_packet final
     {
     public:
         /*
          * Constructor(s)/Destructor
          */
-        udp_packet(_In_ size_t bufferLength) :
-            _bufferLength(bufferLength),
-            _dataLength(0)
+        udp_packet(_In_ size_t capacity)
         {
-            this->_buffer.reset(new Ty[this->_bufferLength]);
+            this->reset(capacity);
         }
 
         // Visual Studio won't auto generate move constructors/assignment operators...
@@ -1224,6 +1222,18 @@ namespace dhorn
         /*
          * Public Functions
          */
+        void reset(_In_ size_t capacity)
+        {
+            this->_dataLength = 0;
+            this->_bufferLength = capacity;
+            this->_buffer.reset(new Ty[this->_bufferLength]);
+        }
+
+        size_t capacity(void) const
+        {
+            return this->_bufferLength;
+        }
+
         size_t size(void) const
         {
             return this->_dataLength;
@@ -1239,16 +1249,32 @@ namespace dhorn
             return this->_addr;
         }
 
-        template <typename Itr>
-        void set(_In_ Itr front, _In_ Itr back)
+        void set_addr(_In_ const socket_address &addr)
         {
+            this->_addr = addr;
+        }
+
+        void set_data(_In_ Ty *buffer, _In_ size_t size)
+        {
+            this->set_data(buffer, buffer + size);
+        }
+
+        template <typename Itr>
+        void set_data(_In_ Itr front, _In_ Itr back)
+        {
+            this->_dataLength = 0; // Expect the worst
             size_t size = std::distance(front, back);
             if (size > this->_bufferLength)
             {
                 throw std::out_of_range("Cannot assign data to udp_socket with a length longer than the buffer");
             }
 
-            std::copy(front, back, &this->_buffer[0]);
+            for (size_t i = 0; front != back; ++front, ++i)
+            {
+                this->_buffer[i] = *front;
+            }
+
+            this->_dataLength = size;
         }
 
         void swap(_Inout_ udp_packet &other)
@@ -1280,12 +1306,11 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        udp_socket()
-        {
-        }
-
-        udp_socket(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol) :
-            _baseSocket(family, type, protocol)
+        udp_socket() :
+            _baseSocket(
+                address_family::internetwork_version_4,
+                socket_type::datagram,
+                ip_protocol::user_datagram_protocol)
         {
         }
 
@@ -1342,11 +1367,6 @@ namespace dhorn
             _In_opt_ unsigned long value = 0)
         {
             return this->_baseSocket.io_control(cmd, value);
-        }
-
-        void open(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol)
-        {
-            this->_baseSocket.open(family, type, protocol);
         }
 
         socket_error_t receive(
@@ -1427,7 +1447,7 @@ namespace dhorn
                 reinterpret_cast<void *>(packet._buffer.get()),
                 packet._dataLength,
                 flags,
-                packet._buffer);
+                packet._addr);
         }
 
         template <typename Ty>
@@ -1445,6 +1465,26 @@ namespace dhorn
         {
             this->_baseSocket.swap(other._baseSocket);
         }
+
+
+
+    private:
+
+        socket_base _baseSocket;
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * tcp_socket AND server_socket
+     */
+#pragma region tcp_socket
+
+    class tcp_socket final
+    {
+    public:
 
 
 

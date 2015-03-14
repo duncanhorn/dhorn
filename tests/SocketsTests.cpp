@@ -1879,6 +1879,151 @@ namespace dhorn
                 sock2.close();
             }
         };
+
+
+
+        TEST_CLASS(UdpPacketTests)
+        {
+            TEST_METHOD(CapacityTest)
+            {
+                dhorn::udp_packet<int> packet(100);
+                Assert::AreEqual(static_cast<size_t>(100), packet.capacity());
+            }
+
+            TEST_METHOD(InitialSizeTest)
+            {
+                // Size is tested more completely in the SetDataTest
+                dhorn::udp_packet<int> packet(100);
+                Assert::AreEqual(static_cast<size_t>(0), packet.size());
+            }
+
+            TEST_METHOD(SetDataTest)
+            {
+                dhorn::udp_packet<char> packet(100);
+
+                char vals[101];
+                for (char i = 0; i < 101; ++i)
+                {
+                    vals[i] = i;
+                }
+
+                // Test setting with the maximum amount
+                packet.set_data(std::begin(vals), std::begin(vals) + 100);
+                Assert::AreEqual(static_cast<size_t>(100), packet.size());
+                Assert::IsTrue(std::equal(
+                    std::begin(vals),
+                    std::begin(vals) + 100,
+                    stdext::checked_array_iterator<char *>(packet.buffer().get(), 100)));
+
+                // Now set with half the amount
+                packet.set_data(std::begin(vals) + 50, std::begin(vals) + 100);
+                Assert::AreEqual(static_cast<size_t>(50), packet.size());
+                Assert::IsTrue(std::equal(
+                    std::begin(vals) + 50,
+                    std::begin(vals) + 100,
+                    stdext::checked_array_iterator<char *>(packet.buffer().get(), 50)));
+
+                // Setting with more than the maximum amount should throw
+                try
+                {
+                    packet.set_data(std::begin(vals), std::end(vals));
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (std::out_of_range &)
+                {
+                }
+            }
+
+            TEST_METHOD(SwapTest)
+            {
+                dhorn::udp_packet<int> packet1(10);
+                dhorn::udp_packet<int> packet2(20);
+
+                std::vector<int> vals1 = { 0, 1, 2, 3, 4 };
+                std::vector<int> vals2 = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+                packet1.set_data(std::begin(vals1), std::end(vals1));
+                packet2.set_data(std::begin(vals2), std::end(vals2));
+
+                auto checkFunc = [&](_In_ const dhorn::udp_packet<int> &p1, _In_ const dhorn::udp_packet<int> &p2)
+                {
+                    Assert::AreEqual(static_cast<size_t>(5), p1.size());
+                    Assert::AreEqual(static_cast<size_t>(10), p1.capacity());
+                    Assert::IsTrue(std::equal(
+                        std::begin(vals1),
+                        std::end(vals1),
+                        stdext::checked_array_iterator<int *>(p1.buffer().get(), 10)));
+
+                    Assert::AreEqual(static_cast<size_t>(10), p2.size());
+                    Assert::AreEqual(static_cast<size_t>(20), p2.capacity());
+                    Assert::IsTrue(std::equal(
+                        std::begin(vals2),
+                        std::end(vals2),
+                        stdext::checked_array_iterator<int *>(p2.buffer().get(), 20)));
+                };
+
+                checkFunc(packet1, packet2);
+
+                // Check using swap member function
+                packet1.swap(packet2);
+                checkFunc(packet2, packet1);
+
+                // Check using std::swap
+                std::swap(packet1, packet2);
+                checkFunc(packet1, packet2);
+            }
+        };
+
+
+
+        TEST_CLASS(UdpSocketTests)
+        {
+            TEST_CLASS_INITIALIZE(Initialize)
+            {
+                // Make sure ws2_32.dll is loaded before any test runs
+                WSADATA data;
+                auto result = WSAStartup(MAKEWORD(2, 2), &data);
+
+                // If the dll load fails, we cannot call WSAGetLastError
+                if (result)
+                {
+                    throw socket_exception(result);
+                }
+            }
+
+            // Since all other socket functions just forward to the underlying socket_base, we won't re-test them
+            TEST_METHOD(SendReceiveWithPacketTest)
+            {
+                dhorn::udp_socket sock1;
+                dhorn::udp_socket sock2;
+
+                // Bind at least one socket to a known port
+                dhorn::socket_address addr(dhorn::ipv4_address(dhorn::any_address), 1337);
+                sock2.bind(addr);
+
+                // Form the udp_packet
+                dhorn::udp_packet<char> packet1(4);
+                packet1.set_data("foo", 4);
+                packet1.set_addr(dhorn::socket_address(dhorn::ipv4_address(dhorn::local_host), 1337));
+
+                // Send/receive the packet
+                sock1.send(packet1);
+                dhorn::udp_packet<char> packet2(4);
+                sock2.receive(packet2);
+                Assert::AreEqual(static_cast<size_t>(4), packet2.size());
+                Assert::AreEqual(0, strcmp("foo", packet2.buffer().get()));
+
+                // Send the next udp_packet re-using the socket_address information from the receive
+                packet2.set_data("bar", 4);
+                sock2.send(packet2);
+                sock1.receive(packet1);
+                Assert::AreEqual(static_cast<size_t>(4), packet1.size());
+                Assert::AreEqual(0, strcmp("bar", packet1.buffer().get()));
+
+                sock1.close();
+                sock2.close();
+            }
+        };
     }
 }
 
