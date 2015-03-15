@@ -1126,7 +1126,7 @@ namespace dhorn
                 sizeof(val));
         }
 
-        void shutdown(_In_ shutdown_options options)
+        void shutdown(_In_ shutdown_options options = shutdown_options::both)
         {
             this->InvokeThrowOnError(::shutdown, this->_socket, static_cast<int>(options));
         }
@@ -1216,6 +1216,10 @@ namespace dhorn
             this->swap(other);
             return *this;
         }
+
+        // Cannot copy
+        udp_packet(_In_ const udp_packet &) = delete;
+        udp_packet &operator=(_In_ const udp_packet &) = delete;
 
 
 
@@ -1485,6 +1489,244 @@ namespace dhorn
     class tcp_socket final
     {
     public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        tcp_socket(void) :
+            _baseSocket(
+                address_family::internetwork_version_4,
+                socket_type::stream,
+                ip_protocol::transmission_control_protocol)
+        {
+        }
+
+        tcp_socket(_In_ socket_t sock) :
+            _baseSocket(sock)
+        {
+        }
+
+        tcp_socket(_Inout_ tcp_socket &&other) :
+            _baseSocket(std::move(other._baseSocket))
+        {
+        }
+
+        // Cannot copy
+        tcp_socket(_In_ const tcp_socket &other) = delete;
+        tcp_socket&operator=(_In_ const tcp_socket &other) = delete;
+
+
+
+        /*
+         * Socket Functions
+         */
+        void bind(_In_ const socket_address &addr)
+        {
+            // Needed...?
+            this->_baseSocket.bind(addr);
+        }
+
+        void close(void)
+        {
+            this->_baseSocket.close();
+        }
+
+        void connect(_In_ const socket_address &addr)
+        {
+            this->_baseSocket.connect(addr);
+        }
+
+        socket_address get_peer_name(void)
+        {
+            return this->_baseSocket.get_peer_name();
+        }
+
+        socket_address get_socket_name(void)
+        {
+            return this->_baseSocket.get_socket_name();
+        }
+
+        template <typename Ty>
+        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        {
+            return this->_baseSocket.get_socket_option<Ty>(level, opt);
+        }
+
+        unsigned long io_control(
+            _In_ io_control_command cmd,
+            _In_opt_ unsigned long value = 0)
+        {
+            return this->_baseSocket.io_control(cmd, value);
+        }
+
+        socket_error_t receive(
+            _Out_writes_bytes_to_(length, return) void *buffer,
+            _In_ int length,
+            _In_ message_flags flags)
+        {
+            return this->_baseSocket.receive(buffer, length, flags);
+        }
+
+        template <typename Itr>
+        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags)
+        {
+            return this->_baseSocket.receive<Itr>(front, back, flags);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t receive(_Out_ Ty(&buffer)[len], _In_ message_flags flags)
+        {
+            return this->_baseSocket.receive<Ty, len>(buffer, flags);
+        }
+
+        socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ size_t length, _In_ message_flags flags)
+        {
+            return this->_baseSocket.send(buffer, length, flags);
+        }
+
+        template <typename Itr>
+        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags)
+        {
+            return this->_baseSocket.send<Itr>(front, back, flags);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t send(_In_ const Ty(&buffer)[len], _In_ message_flags flags)
+        {
+            return this->_baseSocket.send<Ty, len>(buffer, flags);
+        }
+
+        template <typename Ty>
+        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        {
+            this->_baseSocket.set_socket_option<Ty>(level, opt, val);
+        }
+
+        void shutdown(_In_ shutdown_options options = shutdown_options::both)
+        {
+            this->_baseSocket.shutdown(options);
+        }
+
+
+
+        /*
+         * Other Functions
+         */
+        void swap(_Inout_ tcp_socket &other)
+        {
+            this->_baseSocket.swap(other._baseSocket);
+        }
+
+
+
+    private:
+
+        socket_base _baseSocket;
+    };
+
+#pragma endregion
+
+
+
+#pragma region server_socket
+
+    class server_socket final
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        server_socket(void) :
+            _baseSocket(
+            address_family::internetwork_version_4,
+            socket_type::stream,
+            ip_protocol::transmission_control_protocol)
+        {
+        }
+
+        server_socket(_In_ socket_t sock) :
+            _baseSocket(sock)
+        {
+        }
+
+        server_socket(_Inout_ server_socket &&other) :
+            _baseSocket(std::move(other._baseSocket))
+        {
+        }
+
+        // Cannot copy
+        server_socket(_In_ const server_socket &other) = delete;
+        server_socket &operator=(_In_ const server_socket &other) = delete;
+
+
+
+        /*
+         * Operators
+         */
+        server_socket &operator=(_Inout_ server_socket &&other)
+        {
+            this->swap(other);
+            return *this;
+        }
+
+
+
+        /*
+         * Socket Functions
+         */
+        tcp_socket accept(_Inout_ socket_address &addr)
+        {
+            auto socket = this->_baseSocket.accept(addr);
+            return tcp_socket(socket.detach()); // "Promote" as tcp_socket
+        }
+
+        void bind(_In_ const socket_address &addr)
+        {
+            this->_baseSocket.bind(addr);
+        }
+
+        void close(void)
+        {
+            this->_baseSocket.close();
+        }
+
+        // TODO: get_peer_name/get_socket_name
+
+        template <typename Ty>
+        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        {
+            // TODO: needed...?
+            return this->_baseSocket.get_socket_option<Ty>(level, opt);
+        }
+
+        unsigned long io_control(
+            _In_ io_control_command cmd,
+            _In_opt_ unsigned long value = 0)
+        {
+            // TODO: needed...?
+            return this->_baseSocket.io_control(cmd, value);
+        }
+
+        void listen(_In_ int backlog)
+        {
+            this->_baseSocket.listen(backlog);
+        }
+
+        template <typename Ty>
+        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        {
+            // TODO: needed...?
+            this->_baseSocket.set_socket_option<Ty>(level, opt, val);
+        }
+
+
+
+        /*
+         * Other Functions
+         */
+        void swap(_Inout_ server_socket &other)
+        {
+            this->_baseSocket.swap(other._baseSocket);
+        }
 
 
 
@@ -1515,6 +1757,16 @@ namespace std
     }
 
     void swap(_Inout_ dhorn::udp_socket &lhs, _Inout_ dhorn::udp_socket &rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    void swap(_Inout_ dhorn::tcp_socket &lhs, _Inout_ dhorn::tcp_socket &rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    void swap(_Inout_ dhorn::server_socket &lhs, _Inout_ dhorn::server_socket &rhs)
     {
         lhs.swap(rhs);
     }
