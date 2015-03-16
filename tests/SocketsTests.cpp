@@ -2024,6 +2024,79 @@ namespace dhorn
                 sock2.close();
             }
         };
+
+
+
+        TEST_CLASS(TcpSocketsTests)
+        {
+            TEST_CLASS_INITIALIZE(Initialize)
+            {
+                // Make sure ws2_32.dll is loaded before any test runs
+                WSADATA data;
+                auto result = WSAStartup(MAKEWORD(2, 2), &data);
+
+                // If the dll load fails, we cannot call WSAGetLastError
+                if (result)
+                {
+                    throw socket_exception(result);
+                }
+            }
+
+            TEST_METHOD(SimpleClientServerTest)
+            {
+                // Create the server
+                dhorn::socket_address serverAddr(dhorn::ipv4_address(dhorn::any_address), 1337);
+                dhorn::server_socket server;
+                server.bind(serverAddr);
+                server.listen(5);
+
+                // This is the data that will be sent and received
+                std::vector<int> data = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+                // Start the client thread and connect to the server
+                std::thread clientThread([&data]()
+                {
+                    dhorn::tcp_socket client;
+                    dhorn::socket_address addr(dhorn::ipv4_address(dhorn::local_host), 1337);
+                    client.connect(addr);
+
+                    // On connection, we let the server send us the data first
+                    std::vector<int> recData(data.size() * 2);
+                    auto itr = client.receive(std::begin(recData), std::end(recData));
+                    recData.erase(itr, std::end(recData));
+                    Assert::AreEqual(data.size(), recData.size());
+                    Assert::IsTrue(std::equal(std::begin(data), std::end(data), std::begin(recData)));
+
+                    // Send the data back (in reverse order)
+                    client.send(data.rbegin(), data.rend());
+
+                    client.shutdown(dhorn::shutdown_options::send);
+                    client.close();
+                });
+
+                // Accept the incoming socket and send the data
+                dhorn::socket_address clientAddr;
+                auto sock = server.accept(clientAddr);
+                sock.send(std::begin(data), std::end(data));
+
+                // Now receive the data back (in reverse order)
+                std::vector<int> recData(data.size());
+                auto itr = sock.receive(std::begin(recData), std::end(recData));
+                recData.erase(itr, std::end(recData));
+                Assert::AreEqual(data.size(), recData.size());
+                for (size_t i = 0; i < data.size(); ++i)
+                {
+                    Assert::AreEqual(recData[recData.size() - i - 1], data[i]);
+                }
+
+                // Close the connected client
+                sock.shutdown(dhorn::shutdown_options::send);
+                sock.close();
+
+                clientThread.join();
+                server.close();
+            }
+        };
     }
 }
 

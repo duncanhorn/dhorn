@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <sstream>
 
@@ -363,13 +364,13 @@ namespace dhorn
 
 
         /*
-         * sockets_string_traits
+         * socket_string_traits
          */
         template <typename CharType, address_family Family>
-        struct sockets_string_traits;
+        struct socket_string_traits;
 
         template <address_family Family>
-        struct sockets_string_traits<char, Family>
+        struct socket_string_traits<char, Family>
         {
             using MyTraits = address_family_traits<Family>;
             using ip_addr = typename MyTraits::ip_addr;
@@ -378,7 +379,11 @@ namespace dhorn
             {
                 char buff[MyTraits::max_string_len + 1];
 
-                auto result = InetNtopA(static_cast<int>(Family), (PVOID)&addr, buff, sizeof(buff));
+                auto result = InetNtopA(
+                    static_cast<int>(Family),
+                    reinterpret_cast<PVOID>(const_cast<ip_addr *>(&addr)),
+                    buff,
+                    sizeof(buff));
                 garbage::wsa_throw_if_null(result);
 
                 return buff;
@@ -386,7 +391,7 @@ namespace dhorn
         };
 
         template <address_family Family>
-        struct sockets_string_traits<wchar_t, Family>
+        struct socket_string_traits<wchar_t, Family>
         {
             using MyTraits = address_family_traits<Family>;
             using ip_addr = typename MyTraits::ip_addr;
@@ -395,7 +400,11 @@ namespace dhorn
             {
                 wchar_t buff[MyTraits::max_string_len + 1];
 
-                auto result = InetNtopW(static_cast<int>(Family), (PVOID)&addr, buff, sizeof(buff) / 2);
+                auto result = InetNtopW(
+                    static_cast<int>(Family),
+                    reinterpret_cast<PVOID>(const_cast<ip_addr *>(&addr)),
+                    buff,
+                    sizeof(buff) / 2);
                 garbage::wsa_throw_if_null(result);
 
                 return buff;
@@ -527,7 +536,7 @@ namespace dhorn
         template <typename CharType = char>
         std::basic_string<CharType> str(void) const
         {
-            return garbage::sockets_string_traits<CharType, Family>::n_to_p(this->_addr);
+            return garbage::socket_string_traits<CharType, Family>::n_to_p(this->_addr);
         }
 
 
@@ -966,21 +975,24 @@ namespace dhorn
         socket_error_t receive(
             _Out_writes_bytes_to_(length, return) void *buffer,
             _In_ int length,
-            _In_ message_flags flags)
+            _In_ message_flags flags = message_flags::none)
         {
             auto buff = static_cast<char *>(buffer);
             return this->InvokeThrowOnError(::recv, this->_socket, buff, length, static_cast<int>(flags));
         }
 
         template <typename Itr>
-        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags)
+        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
         {
             // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
             // they are random access iterators. Hence, we use std::vector for the call to ::recv
             using value_type = typename std::iterator_traits<Itr>::value_type;
             std::vector<value_type> buffer(std::distance(front, back));
 
-            auto len = this->receive(static_cast<void *>(&buffer[0]), buffer.size(), flags);
+            auto len = this->receive(static_cast<void *>(buffer.data()), buffer.size() * sizeof(value_type), flags);
+            assert(len % sizeof(value_type) == 0);
+            len /= sizeof(value_type);
+
             auto itr = front;
             for (int i = 0; i < len; ++i)
             {
@@ -992,7 +1004,7 @@ namespace dhorn
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive(_Out_ Ty(&buffer)[len], _In_ message_flags flags)
+        socket_error_t receive(_Out_ Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
         {
             return this->receive(static_cast<void *>(buffer), len * sizeof(Ty), flags);
         }
@@ -1034,7 +1046,12 @@ namespace dhorn
             using value_type = typename std::iterator_traits<Itr>::value_type;
             std::vector<value_type> buffer(std::distance(front, back));
 
-            auto len = this->receive_from(static_cast<void *>(&buffer[0]), buffer.size(), flags, addr);
+            auto len = this->receive_from(
+                static_cast<void *>(buffer.data()),
+                buffer.size() * sizeof(value_type),
+                flags,
+                addr);
+
             auto itr = front;
             for (int i = 0; i < len; ++i)
             {
@@ -1051,25 +1068,28 @@ namespace dhorn
             return this->receive_from(static_cast<void *>(buffer), len * sizeof(Ty), flags, addr);
         }
 
-        socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ size_t length, _In_ message_flags flags)
+        socket_error_t send(
+            _In_reads_bytes_(length) const void *buffer,
+            _In_ size_t length,
+            _In_ message_flags flags = message_flags::none)
         {
             auto buff = static_cast<const char *>(buffer);
             return this->InvokeThrowOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
         }
 
         template <typename Itr>
-        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags)
+        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
         {
             // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
             // they are random access iterators. Hence, we transfer the contents to std::vector
             using value_type = typename std::iterator_traits<Itr>::value_type;
             std::vector<value_type> buffer(front, back);
 
-            return this->send(static_cast<const void *>(&buffer[0]), buffer.size(), flags);
+            return this->send(static_cast<const void *>(&buffer[0]), buffer.size() * sizeof(value_type), flags);
         }
 
         template <typename Ty, size_t len>
-        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags)
+        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
         {
             return this->send(static_cast<const void *>(buffer), len * sizeof(Ty), flags);
         }
@@ -1102,7 +1122,11 @@ namespace dhorn
             using value_type = typename std::iterator_traits<Itr>::value_type;
             std::vector<value_type> buffer(front, back);
 
-            return this->send_to(static_cast<const void *>(&buffer[0]), buffer.size(), flags, addr);
+            return this->send_to(
+                static_cast<const void *>(&buffer[0]),
+                buffer.size() * sizeof(value_type),
+                flags,
+                addr);
         }
 
         template <typename Ty, size_t len>
@@ -1304,7 +1328,7 @@ namespace dhorn
         friend class udp_socket;
     };
 
-    class udp_socket final
+    class udp_socket
     {
     public:
         /*
@@ -1482,7 +1506,7 @@ namespace dhorn
 
 
     /*
-     * tcp_socket AND server_socket
+     * tcp_socket
      */
 #pragma region tcp_socket
 
@@ -1561,36 +1585,39 @@ namespace dhorn
         socket_error_t receive(
             _Out_writes_bytes_to_(length, return) void *buffer,
             _In_ int length,
-            _In_ message_flags flags)
+            _In_ message_flags flags = message_flags::none)
         {
             return this->_baseSocket.receive(buffer, length, flags);
         }
 
         template <typename Itr>
-        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags)
+        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
         {
             return this->_baseSocket.receive<Itr>(front, back, flags);
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive(_Out_ Ty(&buffer)[len], _In_ message_flags flags)
+        socket_error_t receive(_Out_ Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
         {
             return this->_baseSocket.receive<Ty, len>(buffer, flags);
         }
 
-        socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ size_t length, _In_ message_flags flags)
+        socket_error_t send(
+            _In_reads_bytes_(length) const void *buffer,
+            _In_ size_t length,
+            _In_ message_flags flags = message_flags::none)
         {
             return this->_baseSocket.send(buffer, length, flags);
         }
 
         template <typename Itr>
-        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags)
+        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
         {
             return this->_baseSocket.send<Itr>(front, back, flags);
         }
 
         template <typename Ty, size_t len>
-        socket_error_t send(_In_ const Ty(&buffer)[len], _In_ message_flags flags)
+        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
         {
             return this->_baseSocket.send<Ty, len>(buffer, flags);
         }
@@ -1627,6 +1654,9 @@ namespace dhorn
 
 
 
+    /*
+     * server_socket
+     */
 #pragma region server_socket
 
     class server_socket final
@@ -1734,6 +1764,43 @@ namespace dhorn
 
         socket_base _baseSocket;
     };
+
+#pragma endregion
+
+
+
+    /*
+     * Other Socket Functions
+     */
+#pragma region Other Functions
+
+    namespace garbage
+    {
+        inline void create_fd_set(_In_ const std::set<socket_t> &sockets, _Inout_ fd_set &fdSet)
+        {
+            FD_ZERO(&fdSet);
+
+#ifdef WIN32
+            wsa_throw_if_false(sockets.size() <= FD_SETSIZE, WSAEINVAL);
+
+            size_t i = 0;
+            fdSet.fd_count = sockets.size();
+#else
+            static_assert(false, "Don't know how to get the size of fd_set with your compiler");
+#endif
+
+            for (auto sock : sockets)
+            {
+#ifdef WIN32
+                // For WinSock, we know that fd_set is simply just an array of sockets. Thus, we can optimize this
+                // operation since there are no duplicates in std::set
+                fdSet.fd_array[i++] = sock;
+#else
+                FD_SET(sock, &fdSet);
+#endif
+            }
+        }
+    }
 
 #pragma endregion
 }
