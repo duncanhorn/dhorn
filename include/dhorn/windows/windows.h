@@ -42,9 +42,11 @@ namespace dhorn
         using brush_handle = HBRUSH;
         using cursor_handle = HCURSOR;
         using device_context_handle = HDC;
+        using gdi_object_handle = HGDIOBJ;
         using icon_handle = HICON;
         using instance_handle = HINSTANCE;
         using menu_handle = HMENU;
+        using module_handle = HMODULE;
         using window_handle = HWND;
 
         static const handle_t invalid_handle_value = INVALID_HANDLE_VALUE;
@@ -110,6 +112,11 @@ namespace dhorn
             return load_cursor(instance, garbage::null_if_empty(name));
         }
 
+        inline void destroy_cursor(_In_ cursor_handle cursor)
+        {
+            garbage::make_boolean_call(::DestroyCursor, cursor);
+        }
+
 #pragma endregion
 
 
@@ -121,12 +128,12 @@ namespace dhorn
 
         inline void cancel_dc(_In_ device_context_handle hdc)
         {
-            garbage::make_boolean_call(CancelDC, hdc);
+            garbage::make_boolean_call(::CancelDC, hdc);
         }
 
         inline device_context_handle create_compatible_dc(_In_ device_context_handle hdc)
         {
-            return garbage::make_call_fail_on_value<device_context_handle>(CreateCompatibleDC, hdc);
+            return garbage::make_call_fail_on_value<device_context_handle>(::CreateCompatibleDC, hdc);
         }
 
         inline device_context_handle create_dc(
@@ -136,7 +143,7 @@ namespace dhorn
             _In_ const DEVMODE *initData)
         {
             return garbage::make_call_fail_on_value<device_context_handle>(
-                CreateDC,
+                ::CreateDC,
                 garbage::null_if_empty(driver),
                 garbage::null_if_empty(device),
                 garbage::null_if_empty(output),
@@ -145,27 +152,46 @@ namespace dhorn
 
         inline void delete_dc(_In_ device_context_handle hdc)
         {
-            garbage::make_boolean_call(DeleteDC, hdc);
+            garbage::make_boolean_call(::DeleteDC, hdc);
         }
 
-        inline void delete_object(_In_ HGDIOBJ obj)
+        inline void delete_object(_In_ gdi_object_handle obj)
         {
-            garbage::make_boolean_call(DeleteObject, obj);
+            garbage::make_boolean_call(::DeleteObject, obj);
         }
 
-        inline HGDIOBJ get_current_object(_In_ device_context_handle hdc, _In_ unsigned objectType)
+        inline gdi_object_handle get_current_object(_In_ device_context_handle hdc, _In_ unsigned objectType)
         {
-            return garbage::make_call_fail_on_value<HGDIOBJ>(GetCurrentObject, hdc, objectType);
+            return garbage::make_call_fail_on_value<gdi_object_handle>(::GetCurrentObject, hdc, objectType);
         }
 
-        inline device_context_handle get_dc(_In_ window_handle window)
+        inline device_context_handle get_dc(_In_ window_handle window = nullptr)
         {
-            return garbage::make_call_fail_on_value<device_context_handle>(GetDC, window);
+            return garbage::make_call_fail_on_value<device_context_handle>(::GetDC, window);
         }
 
         inline COLORREF get_dc_brush_color(_In_ device_context_handle hdc)
         {
-            return garbage::make_call_fail_on_value<COLORREF, CLR_INVALID>(GetDCBrushColor, hdc);
+            return garbage::make_call_fail_on_value<COLORREF, CLR_INVALID>(::GetDCBrushColor, hdc);
+        }
+
+        inline void release_dc(_In_ device_context_handle hdc, _In_opt_ window_handle window = nullptr)
+        {
+            return garbage::make_boolean_call(::ReleaseDC, window, hdc);
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Dynamic-Link Library Functions
+         */
+#pragma region Dynamic-Link Library Functions
+
+        inline void free_library(_In_ module_handle handle)
+        {
+            garbage::make_boolean_call(::FreeLibrary, handle);
         }
 
 #pragma endregion
@@ -244,6 +270,34 @@ namespace dhorn
         inline void set_handle_information(_In_ handle_t handle, _In_ uint32_t mask, _In_ uint32_t flags)
         {
             garbage::make_boolean_call(SetHandleInformation, handle, mask, flags);
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Icon Functions
+         */
+#pragma region Icon Functions
+
+        inline void destroy_icon(_In_ icon_handle icon)
+        {
+            garbage::make_boolean_call(::DestroyIcon, icon);
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Menu Functions
+         */
+#pragma region Menu Functions
+
+        inline void destroy_menu(_In_ menu_handle menu)
+        {
+            garbage::make_boolean_call(::DestroyMenu, menu);
         }
 
 #pragma endregion
@@ -596,10 +650,8 @@ namespace dhorn
                 clsName,
                 wndName,
                 style,
-                x,
-                y,
-                width,
-                height,
+                x, y,
+                width, height,
                 parent,
                 menu,
                 instance,

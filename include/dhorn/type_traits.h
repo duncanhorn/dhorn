@@ -81,4 +81,34 @@ namespace dhorn
     };
 
 #pragma endregion
+
+
+
+    /*
+     * array_traits
+     */
+#pragma region array_traits
+
+    template <typename Ty>
+    struct array_traits
+    {
+        static const bool is_array = false;
+    };
+
+    template <typename Ty>
+    struct array_traits<Ty[]>
+    {
+        static const bool is_array = true;
+        using value_type = Ty;
+    };
+
+    template <typename Ty, size_t Size>
+    struct array_traits<Ty[Size]>
+    {
+        static const bool is_array = true;
+        using value_type = Ty;
+        static const size_t size = Size;
+    };
+
+#pragma endregion
 }

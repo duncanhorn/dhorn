@@ -113,6 +113,7 @@
     <ClCompile Include="D3DVectorTests.cpp" />
     <ClCompile Include="TaskPoolTests.cpp" />
     <ClCompile Include="TreeTests.cpp" />
+    <ClCompile Include="UniqueAnyTests.cpp" />
     <ClCompile Include="UUIDTests.cpp" />
     <ClCompile Include="WindowsTests.cpp" />
   </ItemGroup>

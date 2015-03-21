@@ -63,5 +63,8 @@
     <ClInclude Include="include\dhorn\task_pool.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\unique_any.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
