@@ -147,6 +147,11 @@ namespace dhorn
             return val;
         }
 
+        void reset(void)
+        {
+            this->Destroy();
+        }
+
         void reset(_In_ storage_type val)
         {
             *this = std::move(val);
@@ -166,6 +171,7 @@ namespace dhorn
             if (this->_value != Traits::invalid())
             {
                 DestroyType()(this->_value);
+                this->_value = Traits::invalid();
             }
         }
 
