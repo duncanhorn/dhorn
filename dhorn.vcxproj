@@ -158,7 +158,6 @@
     <ClInclude Include="include\dhorn\sockets.h" />
     <ClInclude Include="include\dhorn\tree.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
-    <ClInclude Include="include\dhorn\windows\auto_handle.h" />
     <ClInclude Include="include\dhorn\windows\com_ptr.h" />
     <ClInclude Include="include\dhorn\windows\window.h" />
     <ClInclude Include="include\dhorn\windows\windows.h" />

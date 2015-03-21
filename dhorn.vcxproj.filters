@@ -48,9 +48,6 @@
     <ClInclude Include="include\dhorn\windows\windows_exception.h">
       <Filter>include\windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\windows\auto_handle.h">
-      <Filter>include\windows</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\windows\com_ptr.h">
       <Filter>include\windows</Filter>
     </ClInclude>
