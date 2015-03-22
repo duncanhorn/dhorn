@@ -63,5 +63,8 @@
     <ClInclude Include="include\dhorn\unique_any.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\event_source.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

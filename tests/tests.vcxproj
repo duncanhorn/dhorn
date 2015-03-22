@@ -102,6 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComPtrTests.cpp" />
+    <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />
