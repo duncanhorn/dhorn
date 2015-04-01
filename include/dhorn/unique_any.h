@@ -14,7 +14,7 @@
 #include <memory>
 #include <type_traits>
 
-#if (defined WIN32) && (!defined _DHORN_NO_WINDOWS_H)
+#ifdef WIN32
 #include "windows/windows.h"
 #endif
 
@@ -323,10 +323,7 @@ namespace dhorn
 
 namespace std
 {
-    template <
-        typename Ty,
-        typename DestroyType,
-        typename Traits>
+    template <typename Ty, typename DestroyType, typename Traits>
     void swap(
         _Inout_ dhorn::unique_any<Ty, DestroyType, Traits> &lhs,
         _Inout_ dhorn::unique_any<Ty, DestroyType, Traits> &rhs)

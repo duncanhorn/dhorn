@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\dhorn\auto_event_cookie.h" />
     <ClInclude Include="include\dhorn\d3d.h" />
     <ClInclude Include="include\dhorn\d3d\vector.h" />
     <ClInclude Include="include\dhorn\event_source.h" />

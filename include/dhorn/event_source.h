@@ -3,13 +3,15 @@
  *
  * Duncan Horn
  *
- * Represents a source of event firing in event-driven scenarios.
+ * Represents a source of event firing in event-driven scenarios. Note that the event_source maintains order of what's
+ * inserted and will fire events in the same order that they are added to the event_source
  */
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <functional>
-#include <list>
+#include <map>
 #include <utility>
 
 namespace dhorn
@@ -33,8 +35,7 @@ namespace dhorn
     class event_source final
     {
         using event_function = std::function<EventFuncType>;
-        using element_type = std::pair<event_cookie, event_function>;
-        using storage_type = std::list<element_type>;
+        using storage_type = std::map<event_cookie, event_function>;
 
     public:
 
@@ -55,7 +56,7 @@ namespace dhorn
 
         event_source(_Inout_ event_source &&other) :
             _eventTargets(std::move(other._eventTargets)),
-            _nextEventCookie(invalid_event_cookie)
+            _nextEventCookie(other._nextEventCookie)
         {
         }
 
@@ -66,11 +67,24 @@ namespace dhorn
 
 
         /*
+         * Operators
+         */
+        event_source &operator=(_Inout_ event_source &&other)
+        {
+            this->_eventTargets = std::move(other._eventTargets);
+            this->_nextEventCookie = other._nextEventCookie;
+        }
+
+
+
+        /*
          * Public Functions
          */
         event_cookie add(_In_ event_function func)
         {
-            this->_eventTargets.emplace_back(++this->_nextEventCookie, std::move(func));
+            auto itr = this->_eventTargets.emplace(++this->_nextEventCookie, std::move(func));
+            assert(itr.second);
+
             return this->_nextEventCookie;
         }
 
@@ -81,14 +95,22 @@ namespace dhorn
 
         void invoke_one(void) const
         {
-            this->_eventTargets.front().second();
+            auto itr = std::begin(this->_eventTargets);
+            if (itr != std::end(this->_eventTargets))
+            {
+                itr->second();
+            }
         }
 
         template <typename ResultFunc>
         void invoke_one(_In_ const ResultFunc &func) const
         {
             // Allow callers to handle failures
-            func(this->_eventTargets.front().second());
+            auto itr = std::begin(this->_eventTargets);
+            if (itr != std::end(this->_eventTargets))
+            {
+                func(itr->second());
+            }
         }
 
         void invoke_all(void) const
@@ -114,17 +136,18 @@ namespace dhorn
             return this->_eventTargets.size();
         }
 
+        bool empty(void) const
+        {
+            return this->_eventTargets.empty();
+        }
+
 
 
     private:
 
         typename storage_type::const_iterator FindEvent(_In_ event_cookie cookie) const
         {
-            auto itr = std::find_if(std::begin(this->_eventTargets), std::end(this->_eventTargets),
-                [&](_In_ const element_type &val) -> bool
-            {
-                return val.first == cookie;
-            });
+            auto itr = this->_eventTargets.find(cookie);
 
             if (itr == std::end(this->_eventTargets))
             {

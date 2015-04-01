@@ -66,5 +66,8 @@
     <ClInclude Include="include\dhorn\event_source.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\auto_event_cookie.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

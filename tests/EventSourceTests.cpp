@@ -9,6 +9,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
+#include "dhorn/auto_event_cookie.h"
 #include "dhorn/event_source.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -58,7 +59,7 @@ namespace dhorn
                 source.add([&]() { ++x; });
                 source.add([&]() { x += 2; });
 
-                source.invoke_one(); // Invokes first
+                source.invoke_one(); // Invokes first added
                 Assert::AreEqual(1, x);
             }
 
@@ -70,7 +71,7 @@ namespace dhorn
                 source.add([&]() -> int { ++x; return x; });
                 source.add([&]() -> int { x += 2; return x; });
 
-                source.invoke_one([&](int val) { Assert::AreEqual(1, val); }); // Invokes first
+                source.invoke_one([&](int val) { Assert::AreEqual(1, val); }); // Invokes first added
                 Assert::AreEqual(1, x);
             }
 
@@ -96,6 +97,51 @@ namespace dhorn
 
                 source.invoke_all([&](int val) { Assert::AreEqual(x, val); });
                 Assert::AreEqual(3, x);
+            }
+        };
+
+
+
+        TEST_CLASS(AutoEventCookieTests)
+        {
+            TEST_METHOD(DefaultConstructionTest)
+            {
+                // Should not throw/AV when empty
+                dhorn::auto_event_cookie cookie;
+            }
+
+            TEST_METHOD(EventCookieConstuctionTest)
+            {
+                dhorn::event_source<void(void)> source;
+                {
+                    dhorn::auto_event_cookie cookie(source.add([]() {}), [&](dhorn::event_cookie cookie)
+                    {
+                        source.remove(cookie);
+                    });
+
+                    Assert::AreEqual(static_cast<size_t>(1), source.size());
+                }
+
+                // Destructor should have removed
+                Assert::AreEqual(static_cast<size_t>(0), source.size());
+            }
+
+            TEST_METHOD(EventCookieMoveConstructionTest)
+            {
+                dhorn::event_source<void(void)> source;
+                {
+                    dhorn::auto_event_cookie cookie(source.add([]() {}), [&](dhorn::event_cookie cookie)
+                    {
+                        source.remove(cookie);
+                    });
+                    Assert::AreEqual(static_cast<size_t>(1), source.size());
+
+                    dhorn::auto_event_cookie cookie2(std::move(cookie));
+                    Assert::AreEqual(dhorn::invalid_event_cookie, static_cast<dhorn::event_cookie>(cookie));
+                }
+
+                // Destructor should have removed
+                Assert::AreEqual(static_cast<size_t>(0), source.size());
             }
         };
     }
