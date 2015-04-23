@@ -8,7 +8,6 @@
 
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include <DirectXMath.h>
 
 #include "dhorn/d3d.h"
 

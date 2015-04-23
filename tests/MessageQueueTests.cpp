@@ -150,7 +150,7 @@ namespace dhorn
                 {
                     thread.join();
                 }
-                Assert::IsTrue(x == testCount);
+                Assert::IsTrue(static_cast<size_t>(x) == testCount);
             }
 
             TEST_METHOD(MultipleProducersMultipleConsumersTest)
@@ -199,7 +199,7 @@ namespace dhorn
                 for (auto &thread : producers)
                 {
                     thread.join();
-                    Assert::IsTrue(counts[index++] == testCount);
+                    Assert::IsTrue(static_cast<size_t>(counts[index++]) == testCount);
                 }
 
                 Assert::IsTrue(x == (testCount * producerCount));

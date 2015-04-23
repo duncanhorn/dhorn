@@ -14,8 +14,11 @@ static_assert(false, "ERROR: DirectX not supported on non-Windows operating syst
 #endif  /* WIN32 */
 
 /* Windows/DirectX library includes */
+#pragma warning(push)
+#pragma warning(disable:4838)
 #include <Windows.h>
 #include <DirectXMath.h>
+#pragma warning(pop)
 
 
 

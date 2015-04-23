@@ -25,11 +25,9 @@ namespace dhorn
     template <>
     struct service_type_traits<test_type_1>
     {
-        /*constexpr*/ inline static const dhorn::uuid &id(void)
+        /*constexpr*/ inline static const dhorn::uuid id(void)
         {
-            static const dhorn::uuid id{ 0x7c026cbf, 0x3df9, 0x4a70,
-                { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
-            return id;
+            return { 0x7c026cbf, 0x3df9, 0x4a70, { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
         }
     };
 
@@ -42,11 +40,9 @@ namespace dhorn
     template <>
     struct service_type_traits<fake_test_type_1>
     {
-        /*constexpr*/ inline static const dhorn::uuid &id(void)
+        /*constexpr*/ inline static const dhorn::uuid id(void)
         {
-            static const dhorn::uuid id{ 0x7c026cbf, 0x3df9, 0x4a70,
-                { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
-            return id;
+            return { 0x7c026cbf, 0x3df9, 0x4a70, { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
         }
     };
 
@@ -62,11 +58,9 @@ namespace dhorn
     template <>
     struct service_type_traits<test_type_2>
     {
-        /*constexpr*/ inline static const dhorn::uuid &id(void)
+        /*constexpr*/ inline static const dhorn::uuid id(void)
         {
-            static const dhorn::uuid id{ 0xa8582c22, 0xf943, 0x426d,
-                { 0x93, 0x21, 0x76, 0xd, 0x78, 0xc0, 0x4, 0x2 } };
-            return id;
+            return { 0xa8582c22, 0xf943, 0x426d, { 0x93, 0x21, 0x76, 0xd, 0x78, 0xc0, 0x4, 0x2 } };
         }
     };
 

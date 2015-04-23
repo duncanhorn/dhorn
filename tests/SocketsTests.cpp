@@ -1913,7 +1913,7 @@ namespace dhorn
                 Assert::IsTrue(std::equal(
                     std::begin(vals),
                     std::begin(vals) + 100,
-                    stdext::checked_array_iterator<char *>(packet.buffer().get(), 100)));
+                    packet.buffer().get()));
 
                 // Now set with half the amount
                 packet.set_data(std::begin(vals) + 50, std::begin(vals) + 100);
@@ -1921,7 +1921,7 @@ namespace dhorn
                 Assert::IsTrue(std::equal(
                     std::begin(vals) + 50,
                     std::begin(vals) + 100,
-                    stdext::checked_array_iterator<char *>(packet.buffer().get(), 50)));
+                    packet.buffer().get()));
 
                 // Setting with more than the maximum amount should throw
                 try
@@ -1952,14 +1952,14 @@ namespace dhorn
                     Assert::IsTrue(std::equal(
                         std::begin(vals1),
                         std::end(vals1),
-                        stdext::checked_array_iterator<int *>(p1.buffer().get(), 10)));
+                        p1.buffer().get()));
 
                     Assert::AreEqual(static_cast<size_t>(10), p2.size());
                     Assert::AreEqual(static_cast<size_t>(20), p2.capacity());
                     Assert::IsTrue(std::equal(
                         std::begin(vals2),
                         std::end(vals2),
-                        stdext::checked_array_iterator<int *>(p2.buffer().get(), 20)));
+                        p2.buffer().get()));
                 };
 
                 checkFunc(packet1, packet2);
