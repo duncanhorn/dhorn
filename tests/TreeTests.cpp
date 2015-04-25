@@ -7,7 +7,6 @@
  */
 
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
 #include "dhorn/tree.h"
 #include "dhorn/type_traits.h"

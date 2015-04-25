@@ -7,7 +7,6 @@
  */
 
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
 #include "dhorn/unique_any.h"
 #include "dhorn/windows/windows.h"

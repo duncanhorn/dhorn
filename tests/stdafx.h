@@ -1,8 +1,10 @@
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
 //
-
+// Duncan Horn
+//
+// stdafx.h
+//
+// Unit tests for dhorn header files
+//
 #pragma once
 
 #define _SCL_SECURE_NO_WARNINGS

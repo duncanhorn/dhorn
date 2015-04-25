@@ -7,7 +7,6 @@
  */
 
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
 #include "dhorn/auto_event_cookie.h"
 #include "dhorn/event_source.h"
