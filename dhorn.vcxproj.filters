@@ -69,5 +69,8 @@
     <ClInclude Include="include\dhorn\auto_event_cookie.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\socket_stream.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

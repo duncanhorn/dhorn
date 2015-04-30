@@ -153,6 +153,7 @@
     <ClInclude Include="Include\dhorn\math.h" />
     <ClInclude Include="include\dhorn\message_queue.h" />
     <ClInclude Include="include\dhorn\raii_object.h" />
+    <ClInclude Include="include\dhorn\socket_stream.h" />
     <ClInclude Include="include\dhorn\task_pool.h" />
     <ClInclude Include="include\dhorn\unique_any.h" />
     <ClInclude Include="include\dhorn\uuid.h" />

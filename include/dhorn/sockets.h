@@ -1812,28 +1812,28 @@ namespace dhorn
 namespace std
 {
     // Overload of std::swap for the socket types
-    void swap(_Inout_ dhorn::socket_base &lhs, _Inout_ dhorn::socket_base &rhs)
+    inline void swap(_Inout_ dhorn::socket_base &lhs, _Inout_ dhorn::socket_base &rhs)
     {
         lhs.swap(rhs);
     }
 
     template <typename Ty>
-    void swap(_Inout_ dhorn::udp_packet<Ty> &lhs, _Inout_ dhorn::udp_packet<Ty> &rhs)
+    inline void swap(_Inout_ dhorn::udp_packet<Ty> &lhs, _Inout_ dhorn::udp_packet<Ty> &rhs)
     {
         lhs.swap(rhs);
     }
 
-    void swap(_Inout_ dhorn::udp_socket &lhs, _Inout_ dhorn::udp_socket &rhs)
+    inline void swap(_Inout_ dhorn::udp_socket &lhs, _Inout_ dhorn::udp_socket &rhs)
     {
         lhs.swap(rhs);
     }
 
-    void swap(_Inout_ dhorn::tcp_socket &lhs, _Inout_ dhorn::tcp_socket &rhs)
+    inline void swap(_Inout_ dhorn::tcp_socket &lhs, _Inout_ dhorn::tcp_socket &rhs)
     {
         lhs.swap(rhs);
     }
 
-    void swap(_Inout_ dhorn::server_socket &lhs, _Inout_ dhorn::server_socket &rhs)
+    inline void swap(_Inout_ dhorn::server_socket &lhs, _Inout_ dhorn::server_socket &rhs)
     {
         lhs.swap(rhs);
     }
