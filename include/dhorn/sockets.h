@@ -1004,7 +1004,9 @@ namespace dhorn
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive(_Out_ Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
+        socket_error_t receive(
+            _Out_writes_bytes_to_(len, return) Ty (&buffer)[len],
+            _In_ message_flags flags = message_flags::none)
         {
             return this->receive(static_cast<void *>(buffer), len * sizeof(Ty), flags);
         }
@@ -1063,7 +1065,10 @@ namespace dhorn
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive_from(_Out_ Ty(&buffer)[len], _In_ message_flags flags, _Out_ socket_address &addr)
+        socket_error_t receive_from(
+            _Out_writes_bytes_to_(len, return) Ty(&buffer)[len],
+            _In_ message_flags flags,
+            _Out_ socket_address &addr)
         {
             return this->receive_from(static_cast<void *>(buffer), len * sizeof(Ty), flags, addr);
         }
