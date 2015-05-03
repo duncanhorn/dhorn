@@ -75,7 +75,7 @@ namespace dhorn
                 });
             }
 
-            TEST_METHOD(SimpleStringOutputTest)
+            TEST_METHOD(SimpleStringInputTest)
             {
                 static const std::string str = "this is a basic string test!";
                 static const std::vector<std::string> words = { "this", "is", "a", "basic", "string", "test!" };
@@ -105,7 +105,42 @@ namespace dhorn
                 });
             }
 
-            TEST_METHOD(SimpleIntegerTest)
+            TEST_METHOD(SimpleStringOutputTest)
+            {
+                static const std::string str = "this is a basic string test!";
+                static const std::vector<std::string> words = { "this", "is", "a", "basic", "string", "test!" };
+
+                RunSingleClientServerTest([&](dhorn::tcp_socket &server)
+                {
+                    dhorn::socket_streambuf buf(&server);
+                    std::iostream stream(&buf);
+
+                    const char *pre = "";
+                    for (auto &word : words)
+                    {
+                        stream << pre << word;
+                        stream.flush();
+
+                        pre = " ";
+                    }
+                },
+                    [&](dhorn::tcp_socket &client)
+                {
+                    std::string sentence;
+                    char buffer[100];
+
+                    while (sentence.length() < str.length())
+                    {
+                        auto len = client.receive(buffer);
+                        buffer[len] = '\0';
+                        sentence += buffer;
+                    }
+
+                    Assert::IsTrue(sentence == str);
+                });
+            }
+
+            TEST_METHOD(SimpleIntegerInputTest)
             {
                 static const std::string str = "3 7 24 72 3 4624 42 8";
                 static const std::vector<int> values = { 3, 7, 24, 72, 3, 4624, 42, 8 };
@@ -132,6 +167,41 @@ namespace dhorn
                     {
                         Assert::IsTrue(data[i] == values[i]);
                     }
+                });
+            }
+
+            TEST_METHOD(SimpleIntegerOutputTest)
+            {
+                static const std::string str = "3 7 24 72 3 4624 42 8";
+                static const std::vector<int> values = { 3, 7, 24, 72, 3, 4624, 42, 8 };
+
+                RunSingleClientServerTest([&](dhorn::tcp_socket &server)
+                {
+                    dhorn::socket_streambuf buf(&server);
+                    std::iostream stream(&buf);
+
+                    char *pre = "";
+                    for (auto &val : values)
+                    {
+                        stream << pre << val;
+                        stream.flush();
+
+                        pre = " ";
+                    }
+                },
+                    [&](dhorn::tcp_socket &client)
+                {
+                    std::string output;
+                    char buffer[100];
+
+                    while (output.size() < str.length())
+                    {
+                        auto len = client.receive(buffer);
+                        buffer[len] = '\0';
+                        output += buffer;
+                    }
+
+                    Assert::IsTrue(output == str);
                 });
             }
         };
