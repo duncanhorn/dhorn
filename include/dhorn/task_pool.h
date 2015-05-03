@@ -16,9 +16,6 @@
 
 namespace dhorn
 {
-
-
-
     /*
      * task_pool
      */
@@ -55,7 +52,7 @@ namespace dhorn
         template <typename Func>
         void submit(_In_ Func func)
         {
-            this->_messageQueue.push_back(func);
+            this->_messageQueue.push_back(std::move(func));
         }
 
         template <typename Func, typename ResultType = decltype(std::declval<Func>()())>
@@ -65,7 +62,7 @@ namespace dhorn
             auto promise = std::make_shared<std::promise<ResultType>>();
             auto future = promise->get_future();
 
-            this->_messageQueue.push_back([promise, func]()
+            this->_messageQueue.push_back([promise = std::move(promise), func = std::move(func)]()
             {
                 promise->set_value(func());
             });
@@ -83,7 +80,7 @@ namespace dhorn
             std::condition_variable allPassed;
 
             { // Acquire _barrierLock
-                // Only one thread can execute barrier() at a time
+                // Only one thread can execute barrier() at a time. Otherwise, we can very easliy get deadlock
                 std::lock_guard<std::mutex> guard(this->_barrierLock);
 
                 for (size_t i = 0; i < this->_threadPool.size(); ++i)
@@ -112,10 +109,10 @@ namespace dhorn
                 // Wait for completion
                 { // Acquire mutex
                     std::unique_lock<std::mutex> lock(mutex);
-                    while (passed_barrier != this->_threadPool.size())
+                    allPassed.wait(lock, [&]() -> bool
                     {
-                        allPassed.wait(lock);
-                    }
+                        return passed_barrier == this->_threadPool.size();
+                    });
                 } // Release mutex
             } // Release _barrierLock
         }

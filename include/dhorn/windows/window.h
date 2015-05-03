@@ -37,7 +37,7 @@
 #include <mutex>
 #include <vector>
 
-#include "../raii_object.h"
+#include "../scope_exit.h"
 #include "windows.h"
 
 namespace dhorn
@@ -674,40 +674,19 @@ namespace dhorn
                 // Initialize the default callback handlers. All of them repeat infinitely and never eat messages
 
                 // Deferred Callback Handler
-                this->add_callback_handler(window_message::deferred_invoke,
+                this->add_callback_handler(
+                    window_message::deferred_invoke,
                     [](window *sender, uintptr_t wparam, intptr_t /*lparam*/) -> message_result_type
                 {
                     return sender->OnDeferredCallback(wparam);
                 });
 
                 // WM_DESTROY
-                this->add_callback_handler(window_message::destroy,
+                this->add_callback_handler(
+                    window_message::destroy,
                     [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) -> message_result_type
                 {
                     return std::make_pair(sender->on_destroy(), 0);
-                });
-
-                // WM_KEYDOWN
-                this->add_callback_handler(window_message::key_down,
-                    [](window *sender, uintptr_t wparam, intptr_t lparam) -> message_result_type
-                {
-                    auto key = static_cast<virtual_key>(wparam);
-                    return std::make_pair(sender->on_key_down(key, lparam), 0);
-                });
-
-                // WM_KEYUP
-                this->add_callback_handler(window_message::key_up,
-                    [](window *sender, uintptr_t wparam, intptr_t lparam) -> message_result_type
-                {
-                    auto key = static_cast<virtual_key>(wparam);
-                    return std::make_pair(sender->on_key_up(key, lparam), 0);
-                });
-
-                // WM_PAINT
-                this->add_callback_handler(window_message::paint,
-                    [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) -> message_result_type
-                {
-                    return std::make_pair(sender->on_paint(), 0);
                 });
             }
 
@@ -717,7 +696,7 @@ namespace dhorn
             {
                 // Can only call run once
                 this->EnsureWindowUninitialized();
-                raii_object raii([&]() { this->_running = false; });
+                scope_exit cleanup([&]() { this->_running = false; });
                 this->_running = true;
 
                 // Calling thread becomes the "owner"/ui thread
@@ -752,10 +731,7 @@ namespace dhorn
                 show_window(this->_window, cmdShow);
                 update_window(this->_window);
 
-                auto result = this->message_pump();
-
-                this->_running = false;
-                return result;
+                return this->message_pump();
             }
 
 
@@ -831,9 +807,9 @@ namespace dhorn
                 if (this->_threadId)
                 {
                     // Already running; post
-                    this->post_async([this, handler, callbackId]() mutable
+                    this->post_async([this, callback = std::move(handler), callbackId]() mutable
                     {
-                        this->AddCallbackHandler(std::move(handler), callbackId);
+                        this->AddCallbackHandler(std::move(callback), callbackId);
                     });
                 }
                 else
@@ -891,21 +867,6 @@ namespace dhorn
                 return true;
             }
 
-            virtual bool on_key_down(_In_ virtual_key key, _In_ intptr_t lparam)
-            {
-                return false;
-            }
-
-            virtual bool on_key_up(_In_ virtual_key key, _In_ intptr_t lparam)
-            {
-                return false;
-            }
-
-            virtual bool on_paint()
-            {
-                return false;
-            }
-
 #pragma endregion
 
 
@@ -920,10 +881,9 @@ namespace dhorn
                 {
                     auto &list = list_itr->second;
 
-                    // Save the return value so we can save time in the call to list.erase in the
-                    // event that an early handler eats the message
-                    auto itr = std::find_if(std::rbegin(list), std::rend(list),
-                        [&](CallbackEntryType &entry)
+                    // Save the return value so we can save time in the call to list.erase in the event that an early
+                    // handler eats the message
+                    auto itr = std::find_if(std::rbegin(list), std::rend(list), [&](CallbackEntryType &entry)
                     {
                         auto &handler = entry.second;
                         auto tempResult = handler.callback(this, wparam, lparam);
@@ -1007,7 +967,7 @@ namespace dhorn
                 return std::make_pair(true, 0);
             }
 
-            void Post(_Inout_ std::unique_ptr<deferred_invoke_handler> &&handler)
+            void Post(_Inout_ std::unique_ptr<deferred_invoke_handler> handler)
             {
                 // Cannot post before the window is created
                 this->EnsureWindowInitialized();
@@ -1062,7 +1022,7 @@ namespace dhorn
 
 
 
-            volatile bool _running;
+            bool _running;
             deferred_callback_type _initializeCallback;
             std::map<window_message, std::vector<CallbackEntryType>> _callbackHandlers;
             std::atomic_size_t _nextCallbackId;

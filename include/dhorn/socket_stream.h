@@ -136,7 +136,7 @@ namespace dhorn
         size_t SendBufferSize = 2048,
         typename SocketStorageType = tcp_socket *>
     class basic_socket_stream final :
-        std::basic_iostream<CharT, CharTraits>
+        public std::basic_iostream<CharT, CharTraits>
     {
         using BufferType =
             basic_socket_streambuf<CharT, CharTraits, ReceiveBufferSize, SendBufferSize, SocketStorageType>;

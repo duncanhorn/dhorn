@@ -347,9 +347,10 @@ namespace dhorn
             PostQuitMessage(exitCode);
         }
 
-        inline void translate_message(_In_ const MSG &msg)
+        inline bool translate_message(_In_ const MSG &msg)
         {
-            garbage::make_boolean_call(TranslateMessage, &msg);
+            // TranslateMessage does not fail
+            return !!::TranslateMessage(&msg);
         }
 
 #pragma endregion

@@ -50,7 +50,7 @@ namespace dhorn
         template <typename Ty>
         struct unique_any_traits
         {
-            static const/*expr*/ Ty invalid(void)
+            static constexpr Ty invalid(void)
             {
                 return Ty{};
             }

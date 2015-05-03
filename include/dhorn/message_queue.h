@@ -12,7 +12,7 @@
 #include <functional>
 #include <mutex>
 
-#include "raii_object.h"
+#include "scope_exit.h"
 
 namespace dhorn
 {
@@ -190,7 +190,7 @@ namespace dhorn
                 }// Release _backMutex
             } // Release _frontMutex
 
-            dhorn::raii_object destroy([&]()
+            scope_exit destroy([&]()
             {
                 pNode->next = nullptr;
                 delete pNode;

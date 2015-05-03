@@ -42,9 +42,6 @@
     <ClInclude Include="include\dhorn\functional.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\raii_object.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\windows\windows_exception.h">
       <Filter>include\windows</Filter>
     </ClInclude>
@@ -70,6 +67,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\socket_stream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\scope_exit.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
