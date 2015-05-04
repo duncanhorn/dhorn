@@ -10,6 +10,8 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <memory>
+#include <set>
 #include <string>
 #include <sstream>
 
@@ -41,10 +43,13 @@ namespace dhorn
     static const socket_t invalid_socket = INVALID_SOCKET;
     static const socket_error_t socket_error = SOCKET_ERROR;
 
+    static const size_t max_message_size = SO_MAX_MSG_SIZE;
+
     // Not defined using htonl since all values exposed to client code should be in host-byte-order. We do the
     // translation to network-byte-order when these values are used by the implementation.
     static const uint32_t any_address = INADDR_ANY;
     static const uint32_t loopback_address = INADDR_LOOPBACK;
+    static const uint32_t local_host = INADDR_LOOPBACK;
     static const uint32_t broadcast_address = INADDR_BROADCAST;
     static const uint32_t invalid_address = INADDR_NONE;
 #endif  /*WIN32*/
@@ -127,6 +132,7 @@ namespace dhorn
 
     enum class message_flags : int
     {
+        none            = 0,
         dont_route      = MSG_DONTROUTE,
         interrupt       = MSG_INTERRUPT,
         out_of_band     = MSG_OOB,
@@ -134,13 +140,6 @@ namespace dhorn
         peek            = MSG_PEEK,
         push_immediate  = MSG_PUSH_IMMEDIATE,
         wait_all        = MSG_WAITALL,
-    };
-
-    enum class shutdown_options : int
-    {
-        send    = SD_SEND,
-        receive = SD_RECEIVE,
-        both    = SD_BOTH,
     };
 
     inline message_flags operator|(_In_ message_flags lhs, _In_ message_flags rhs)
@@ -152,6 +151,13 @@ namespace dhorn
     {
         return static_cast<message_flags>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
+
+    enum class shutdown_options : int
+    {
+        send    = SD_SEND,
+        receive = SD_RECEIVE,
+        both    = SD_BOTH,
+    };
 
     enum class socket_level : int
     {
@@ -201,14 +207,17 @@ namespace dhorn
         return static_cast<socket_option>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
 
-    /*
-    * WinSock 2 extension -- new options
-    */
-#define PVD_CONFIG        0x3001       /* configuration info for service provider */
-#define SO_CONDITIONAL_ACCEPT 0x3002   /* enable true conditional accept: */
-    /*  connection is not ack-ed to the */
-    /*  other side until conditional */
-    /*  function returns CF_ACCEPT */
+    enum class io_control_command : unsigned long
+    {
+        available_bytes     = FIONREAD,
+        blocking            = FIONBIO,
+        asynchronous        = FIOASYNC,
+        set_high_watermark  = SIOCSHIWAT,
+        get_high_watermark  = SIOCGHIWAT,
+        set_low_watermark   = SIOCSLOWAT,
+        get_low_watermark   = SIOCGLOWAT,
+        at_oob_mark         = SIOCATMARK,
+    };
 
 #pragma endregion
 
@@ -355,13 +364,13 @@ namespace dhorn
 
 
         /*
-         * sockets_string_traits
+         * socket_string_traits
          */
         template <typename CharType, address_family Family>
-        struct sockets_string_traits;
+        struct socket_string_traits;
 
         template <address_family Family>
-        struct sockets_string_traits<char, Family>
+        struct socket_string_traits<char, Family>
         {
             using MyTraits = address_family_traits<Family>;
             using ip_addr = typename MyTraits::ip_addr;
@@ -370,7 +379,11 @@ namespace dhorn
             {
                 char buff[MyTraits::max_string_len + 1];
 
-                auto result = InetNtopA(static_cast<int>(Family), (PVOID)&addr, buff, sizeof(buff));
+                auto result = InetNtopA(
+                    static_cast<int>(Family),
+                    reinterpret_cast<PVOID>(const_cast<ip_addr *>(&addr)),
+                    buff,
+                    sizeof(buff));
                 garbage::wsa_throw_if_null(result);
 
                 return buff;
@@ -378,7 +391,7 @@ namespace dhorn
         };
 
         template <address_family Family>
-        struct sockets_string_traits<wchar_t, Family>
+        struct socket_string_traits<wchar_t, Family>
         {
             using MyTraits = address_family_traits<Family>;
             using ip_addr = typename MyTraits::ip_addr;
@@ -387,7 +400,11 @@ namespace dhorn
             {
                 wchar_t buff[MyTraits::max_string_len + 1];
 
-                auto result = InetNtopW(static_cast<int>(Family), (PVOID)&addr, buff, sizeof(buff) / 2);
+                auto result = InetNtopW(
+                    static_cast<int>(Family),
+                    reinterpret_cast<PVOID>(const_cast<ip_addr *>(&addr)),
+                    buff,
+                    sizeof(buff) / 2);
                 garbage::wsa_throw_if_null(result);
 
                 return buff;
@@ -519,7 +536,7 @@ namespace dhorn
         template <typename CharType = char>
         std::basic_string<CharType> str(void) const
         {
-            return garbage::sockets_string_traits<CharType, Family>::n_to_p(this->_addr);
+            return garbage::socket_string_traits<CharType, Family>::n_to_p(this->_addr);
         }
 
 
@@ -561,6 +578,8 @@ namespace dhorn
     /*
      * socket_address
      */
+#pragma region socket_address
+
     class socket_address final
     {
     public:
@@ -631,6 +650,21 @@ namespace dhorn
             return this->_ipv6Addr;
         }
 
+        bool operator==(_In_ const socket_address &other) const
+        {
+            if (this->_size != other._size)
+            {
+                return false;
+            }
+
+            return std::memcmp(&this->_addr, &other._addr, this->_size) == 0;
+        }
+
+        bool operator!=(_In_ const socket_address &other) const
+        {
+            return !(*this == other);
+        }
+
 
 
         /*
@@ -684,6 +718,8 @@ namespace dhorn
                 this->_size = 0;
                 break;
             }
+
+            return this->_size;
         }
 
         address_family family(void) const
@@ -717,11 +753,15 @@ namespace dhorn
         size_t _size;
     };
 
+#pragma endregion
+
 
 
     /*
      * socket_base
      */
+#pragma region socket_base
+
     namespace garbage
     {
         /*
@@ -769,7 +809,13 @@ namespace dhorn
             static const garbage::socket_initializer _init;
         }
 
-        socket_base(socket_t sock) :
+        socket_base(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol) :
+            socket_base()
+        {
+            this->open(family, type, protocol);
+        }
+
+        socket_base(_In_ socket_t sock) :
             socket_base()
         {
             this->_socket = sock;
@@ -803,7 +849,7 @@ namespace dhorn
 
         socket_base &operator=(_In_ socket_t sock)
         {
-            this->Destroy();
+            this->Destroy(); // Throws if the socket is still open. This is desired
             this->_socket = sock;
 
             return *this;
@@ -824,7 +870,7 @@ namespace dhorn
         /*
          * Socket functions
          */
-        socket_t accept(_Inout_ socket_address &addr)
+        socket_base accept(_Inout_ socket_address &addr)
         {
             // We assume the size of sockaddr_in6 since that's the largest member of socket_address
             int size = sizeof(sockaddr_in6);
@@ -886,13 +932,27 @@ namespace dhorn
         }
 
         template <typename Ty>
-        Ty get_socket_option(_In_ socket_option opt)
+        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
         {
             Ty value;
-            int len = static_cast<int>(sizeof(Ty));
+            int len = static_cast<int>(sizeof(value));
 
-            this->InvokeThrowOnError(::getsockopt, socket_level::socket, opt, &val, &len);
+            this->InvokeThrowOnError(
+                ::getsockopt,
+                this->_socket,
+                static_cast<int>(level),
+                static_cast<int>(opt),
+                reinterpret_cast<char *>(&value),
+                &len);
 
+            return value;
+        }
+
+        unsigned long io_control(
+            _In_ io_control_command cmd,
+            _In_opt_ unsigned long value = 0)
+        {
+            this->InvokeThrowOnError(::ioctlsocket, this->_socket, static_cast<long>(cmd), &value);
             return value;
         }
 
@@ -915,10 +975,40 @@ namespace dhorn
         socket_error_t receive(
             _Out_writes_bytes_to_(length, return) void *buffer,
             _In_ int length,
-            _In_ message_flags flags)
+            _In_ message_flags flags = message_flags::none)
         {
             auto buff = static_cast<char *>(buffer);
             return this->InvokeThrowOnError(::recv, this->_socket, buff, length, static_cast<int>(flags));
+        }
+
+        template <typename Itr>
+        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we use std::vector for the call to ::recv
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(std::distance(front, back));
+
+            auto len = this->receive(static_cast<void *>(buffer.data()), buffer.size() * sizeof(value_type), flags);
+            assert(len % sizeof(value_type) == 0);
+            len /= sizeof(value_type);
+
+            auto itr = front;
+            for (int i = 0; i < len; ++i)
+            {
+                *itr = buffer[i];
+                ++itr;
+            }
+
+            return itr;
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t receive(
+            _Out_writes_bytes_to_(len, return) Ty (&buffer)[len],
+            _In_ message_flags flags = message_flags::none)
+        {
+            return this->receive(static_cast<void *>(buffer), len * sizeof(Ty), flags);
         }
 
         socket_error_t receive_from(
@@ -946,15 +1036,72 @@ namespace dhorn
             return result;
         }
 
-        socket_error_t send(_In_reads_bytes_(length) const void *buffer, _In_ int length, _In_ message_flags flags)
+        template <typename Itr>
+        Itr receive_from(
+            _In_ Itr front,
+            _In_ Itr back,
+            _In_ message_flags flags,
+            _Out_ socket_address &addr)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we use std::vector for the call to ::recvfrom
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(std::distance(front, back));
+
+            auto len = this->receive_from(
+                static_cast<void *>(buffer.data()),
+                buffer.size() * sizeof(value_type),
+                flags,
+                addr);
+
+            auto itr = front;
+            for (int i = 0; i < len; ++i)
+            {
+                *itr = buffer[i];
+                ++itr;
+            }
+
+            return itr;
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t receive_from(
+            _Out_writes_bytes_to_(len, return) Ty (&buffer)[len],
+            _In_ message_flags flags,
+            _Out_ socket_address &addr)
+        {
+            return this->receive_from(static_cast<void *>(buffer), len * sizeof(Ty), flags, addr);
+        }
+
+        socket_error_t send(
+            _In_reads_bytes_(length) const void *buffer,
+            _In_ size_t length,
+            _In_ message_flags flags = message_flags::none)
         {
             auto buff = static_cast<const char *>(buffer);
             return this->InvokeThrowOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
         }
 
+        template <typename Itr>
+        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we transfer the contents to std::vector
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(front, back);
+
+            return this->send(static_cast<const void *>(&buffer[0]), buffer.size() * sizeof(value_type), flags);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
+        {
+            return this->send(static_cast<const void *>(buffer), len * sizeof(Ty), flags);
+        }
+
         socket_error_t send_to(
             _In_reads_bytes_(length) const void *buffer,
-            _In_ int length,
+            _In_ size_t length,
             _In_ message_flags flags,
             _In_ const socket_address &addr)
         {
@@ -968,7 +1115,47 @@ namespace dhorn
                 addr.size());
         }
 
-        void shutdown(_In_ shutdown_options options)
+        template <typename Itr>
+        socket_error_t send_to(
+            _In_ Itr front,
+            _In_ Itr back,
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
+            // they are random access iterators. Hence, we transfer the contents to std::vector
+            using value_type = typename std::iterator_traits<Itr>::value_type;
+            std::vector<value_type> buffer(front, back);
+
+            return this->send_to(
+                static_cast<const void *>(&buffer[0]),
+                buffer.size() * sizeof(value_type),
+                flags,
+                addr);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t send_to(
+            _In_ const Ty(&buffer)[len],
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            return this->send_to(static_cast<const void *>(buffer), len * sizeof(Ty), flags, addr);
+        }
+
+        template <typename Ty>
+        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        {
+            this->InvokeThrowOnError(
+                ::setsockopt,
+                this->_socket,
+                static_cast<int>(level),
+                static_cast<int>(opt),
+                reinterpret_cast<const char *>(&val),
+                sizeof(val));
+        }
+
+        void shutdown(_In_ shutdown_options options = shutdown_options::both)
         {
             this->InvokeThrowOnError(::shutdown, this->_socket, static_cast<int>(options));
         }
@@ -1026,20 +1213,635 @@ namespace dhorn
         socket_t _socket;
     };
 
+#pragma endregion
+
 
 
     /*
      * udp_socket
      */
-    class udp_socket final
+#pragma region udp_socket
+
+    template <typename Ty = char>
+    struct udp_packet final
     {
     public:
         /*
          * Constructor(s)/Destructor
          */
+        udp_packet(_In_ size_t capacity)
+        {
+            this->reset(capacity);
+        }
+
+        // Visual Studio won't auto generate move constructors/assignment operators...
+        udp_packet(_Inout_ udp_packet &&other)
+        {
+            this->swap(other);
+        }
+
+        udp_packet &operator=(_Inout_ udp_packet &&other)
+        {
+            this->swap(other);
+            return *this;
+        }
+
+        // Cannot copy
+        udp_packet(_In_ const udp_packet &) = delete;
+        udp_packet &operator=(_In_ const udp_packet &) = delete;
+
+
+
+        /*
+         * Public Functions
+         */
+        void reset(_In_ size_t capacity)
+        {
+            this->_dataLength = 0;
+            this->_bufferLength = capacity;
+            this->_buffer.reset(new Ty[this->_bufferLength]);
+        }
+
+        size_t capacity(void) const
+        {
+            return this->_bufferLength;
+        }
+
+        size_t size(void) const
+        {
+            return this->_dataLength;
+        }
+
+        const std::unique_ptr<Ty[]> &buffer(void) const
+        {
+            return this->_buffer;
+        }
+
+        const socket_address &addr(void) const
+        {
+            return this->_addr;
+        }
+
+        void set_addr(_In_ const socket_address &addr)
+        {
+            this->_addr = addr;
+        }
+
+        void set_data(_In_ Ty *buffer, _In_ size_t size)
+        {
+            this->set_data(buffer, buffer + size);
+        }
+
+        template <typename Itr>
+        void set_data(_In_ Itr front, _In_ Itr back)
+        {
+            this->_dataLength = 0; // Expect the worst
+            size_t size = std::distance(front, back);
+            if (size > this->_bufferLength)
+            {
+                throw std::out_of_range("Cannot assign data to udp_socket with a length longer than the buffer");
+            }
+
+            for (size_t i = 0; front != back; ++front, ++i)
+            {
+                this->_buffer[i] = *front;
+            }
+
+            this->_dataLength = size;
+        }
+
+        void swap(_Inout_ udp_packet &other)
+        {
+            // Swap the buffers
+            this->_buffer.swap(other._buffer);
+
+            // Swap the remaining data
+            std::swap(this->_bufferLength, other._bufferLength);
+            std::swap(this->_dataLength, other._dataLength);
+            std::swap(this->_addr, other._addr);
+        }
+
 
 
     private:
 
+        std::unique_ptr<Ty[]> _buffer;
+        size_t _bufferLength;
+        size_t _dataLength;
+        socket_address _addr;
+
+        friend class udp_socket;
     };
+
+    class udp_socket
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        udp_socket() :
+            _baseSocket(
+                address_family::internetwork_version_4,
+                socket_type::datagram,
+                ip_protocol::user_datagram_protocol)
+        {
+        }
+
+        udp_socket(_In_ socket_t sock) :
+            _baseSocket(sock)
+        {
+        }
+
+        udp_socket(_Inout_ udp_socket &&other) :
+            _baseSocket(std::move(other._baseSocket))
+        {
+        }
+
+        // Cannot copy
+        udp_socket(_In_ const udp_socket &) = delete;
+        udp_socket &operator=(_In_ const udp_socket &) = delete;
+
+
+
+        /*
+         * Operators
+         */
+        udp_socket &operator=(_Inout_ udp_socket &&other)
+        {
+            this->swap(other);
+            return *this;
+        }
+
+
+
+        /*
+         * Socket Functions
+         */
+        void bind(_In_ const socket_address &addr)
+        {
+            this->_baseSocket.bind(addr);
+        }
+
+        void close(void)
+        {
+            this->_baseSocket.close();
+        }
+
+        // TODO: get_peer_name/get_socket_name??
+
+        template <typename Ty>
+        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        {
+            return this->_baseSocket.get_socket_name<Ty>(level, opt);
+        }
+
+        unsigned long io_control(
+            _In_ io_control_command cmd,
+            _In_opt_ unsigned long value = 0)
+        {
+            return this->_baseSocket.io_control(cmd, value);
+        }
+
+        socket_error_t receive(
+            _Out_writes_bytes_to_(length, return) void *buffer,
+            _In_ int length,
+            _In_ message_flags flags,
+            _Out_ socket_address &addr)
+        {
+            return this->_baseSocket.receive_from(buffer, length, flags, addr);
+        }
+
+        template <typename Itr>
+        Itr receive(
+            _In_ Itr front,
+            _In_ Itr back,
+            _In_ message_flags flags,
+            _Out_ socket_address &addr)
+        {
+            return this->_baseSocket.receive_from<Itr>(front, back, flags, addr);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t receive(_Out_ Ty(&buffer)[len], _In_ message_flags flags, _Out_ socket_address &addr)
+        {
+            return this->_baseSocket.receive_from<Ty, len>(buffer, flags, addr);
+        }
+
+        template <typename Ty>
+        void receive(
+            _Inout_ udp_packet<Ty> &packet,
+            _In_opt_ message_flags flags = message_flags::none)
+        {
+            auto length = this->_baseSocket.receive_from(
+                reinterpret_cast<void *>(packet._buffer.get()),
+                packet._bufferLength * sizeof(Ty),
+                flags,
+                packet._addr);
+
+            assert(length % sizeof(Ty) == 0);
+            packet._dataLength = length / sizeof(Ty);
+        }
+
+        socket_error_t send(
+            _In_reads_bytes_(length) const void *buffer,
+            _In_ size_t length,
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            return this->_baseSocket.send_to(buffer, length, flags, addr);
+        }
+
+        template <typename Itr>
+        socket_error_t send(
+            _In_ Itr front,
+            _In_ Itr back,
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            return this->_baseSocket.send_to<Itr>(front, back, flags, addr);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t send(
+            _In_ const Ty(&buffer)[len],
+            _In_ message_flags flags,
+            _In_ const socket_address &addr)
+        {
+            return this->_baseSocket.send_to<Ty, len>(buffer, flags, addr);
+        }
+
+        template <typename Ty>
+        socket_error_t send(
+            _In_ const udp_packet<Ty> &packet,
+            _In_opt_ message_flags flags = message_flags::none)
+        {
+            // TODO: Fail if we don't send all bytes? The design is that most callers shouldn't need to check this...
+            return this->_baseSocket.send_to(
+                reinterpret_cast<void *>(packet._buffer.get()),
+                packet._dataLength,
+                flags,
+                packet._addr);
+        }
+
+        template <typename Ty>
+        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        {
+            this->_baseSocket.set_socket_option<Ty>(level, opt, val);
+        }
+
+
+
+        /*
+         * Other Functions
+         */
+        void swap(_Inout_ udp_socket &other)
+        {
+            this->_baseSocket.swap(other._baseSocket);
+        }
+
+
+
+    private:
+
+        socket_base _baseSocket;
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * tcp_socket
+     */
+#pragma region tcp_socket
+
+    class tcp_socket final
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        tcp_socket(void) :
+            _baseSocket(
+                address_family::internetwork_version_4,
+                socket_type::stream,
+                ip_protocol::transmission_control_protocol)
+        {
+        }
+
+        tcp_socket(_In_ socket_t sock) :
+            _baseSocket(sock)
+        {
+        }
+
+        tcp_socket(_Inout_ tcp_socket &&other) :
+            _baseSocket(std::move(other._baseSocket))
+        {
+        }
+
+        // Cannot copy
+        tcp_socket(_In_ const tcp_socket &other) = delete;
+        tcp_socket&operator=(_In_ const tcp_socket &other) = delete;
+
+
+
+        /*
+         * Socket Functions
+         */
+        void bind(_In_ const socket_address &addr)
+        {
+            // Needed...?
+            this->_baseSocket.bind(addr);
+        }
+
+        void close(void)
+        {
+            this->_baseSocket.close();
+        }
+
+        void connect(_In_ const socket_address &addr)
+        {
+            this->_baseSocket.connect(addr);
+        }
+
+        socket_address get_peer_name(void)
+        {
+            return this->_baseSocket.get_peer_name();
+        }
+
+        socket_address get_socket_name(void)
+        {
+            return this->_baseSocket.get_socket_name();
+        }
+
+        template <typename Ty>
+        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        {
+            return this->_baseSocket.get_socket_option<Ty>(level, opt);
+        }
+
+        unsigned long io_control(
+            _In_ io_control_command cmd,
+            _In_opt_ unsigned long value = 0)
+        {
+            return this->_baseSocket.io_control(cmd, value);
+        }
+
+        socket_error_t receive(
+            _Out_writes_bytes_to_(length, return) void *buffer,
+            _In_ int length,
+            _In_ message_flags flags = message_flags::none)
+        {
+            return this->_baseSocket.receive(buffer, length, flags);
+        }
+
+        template <typename Itr>
+        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        {
+            return this->_baseSocket.receive<Itr>(front, back, flags);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t receive(_Out_ Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
+        {
+            return this->_baseSocket.receive<Ty, len>(buffer, flags);
+        }
+
+        socket_error_t send(
+            _In_reads_bytes_(length) const void *buffer,
+            _In_ size_t length,
+            _In_ message_flags flags = message_flags::none)
+        {
+            return this->_baseSocket.send(buffer, length, flags);
+        }
+
+        template <typename Itr>
+        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        {
+            return this->_baseSocket.send<Itr>(front, back, flags);
+        }
+
+        template <typename Ty, size_t len>
+        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
+        {
+            return this->_baseSocket.send<Ty, len>(buffer, flags);
+        }
+
+        template <typename Ty>
+        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        {
+            this->_baseSocket.set_socket_option<Ty>(level, opt, val);
+        }
+
+        void shutdown(_In_ shutdown_options options = shutdown_options::both)
+        {
+            this->_baseSocket.shutdown(options);
+        }
+
+
+
+        /*
+         * Other Functions
+         */
+        void swap(_Inout_ tcp_socket &other)
+        {
+            this->_baseSocket.swap(other._baseSocket);
+        }
+
+
+
+    private:
+
+        socket_base _baseSocket;
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * server_socket
+     */
+#pragma region server_socket
+
+    class server_socket final
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        server_socket(void) :
+            _baseSocket(
+            address_family::internetwork_version_4,
+            socket_type::stream,
+            ip_protocol::transmission_control_protocol)
+        {
+        }
+
+        server_socket(_In_ socket_t sock) :
+            _baseSocket(sock)
+        {
+        }
+
+        server_socket(_Inout_ server_socket &&other) :
+            _baseSocket(std::move(other._baseSocket))
+        {
+        }
+
+        // Cannot copy
+        server_socket(_In_ const server_socket &other) = delete;
+        server_socket &operator=(_In_ const server_socket &other) = delete;
+
+
+
+        /*
+         * Operators
+         */
+        server_socket &operator=(_Inout_ server_socket &&other)
+        {
+            this->swap(other);
+            return *this;
+        }
+
+
+
+        /*
+         * Socket Functions
+         */
+        tcp_socket accept(_Inout_ socket_address &addr)
+        {
+            auto socket = this->_baseSocket.accept(addr);
+            return tcp_socket(socket.detach()); // "Promote" as tcp_socket
+        }
+
+        void bind(_In_ const socket_address &addr)
+        {
+            this->_baseSocket.bind(addr);
+        }
+
+        void close(void)
+        {
+            this->_baseSocket.close();
+        }
+
+        // TODO: get_peer_name/get_socket_name
+
+        template <typename Ty>
+        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        {
+            // TODO: needed...?
+            return this->_baseSocket.get_socket_option<Ty>(level, opt);
+        }
+
+        unsigned long io_control(
+            _In_ io_control_command cmd,
+            _In_opt_ unsigned long value = 0)
+        {
+            // TODO: needed...?
+            return this->_baseSocket.io_control(cmd, value);
+        }
+
+        void listen(_In_ int backlog)
+        {
+            this->_baseSocket.listen(backlog);
+        }
+
+        template <typename Ty>
+        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        {
+            // TODO: needed...?
+            this->_baseSocket.set_socket_option<Ty>(level, opt, val);
+        }
+
+
+
+        /*
+         * Other Functions
+         */
+        void swap(_Inout_ server_socket &other)
+        {
+            this->_baseSocket.swap(other._baseSocket);
+        }
+
+
+
+    private:
+
+        socket_base _baseSocket;
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * Other Socket Functions
+     */
+#pragma region Other Functions
+
+    namespace garbage
+    {
+        inline void create_fd_set(_In_ const std::set<socket_t> &sockets, _Inout_ fd_set &fdSet)
+        {
+            FD_ZERO(&fdSet);
+
+#ifdef WIN32
+            wsa_throw_if_false(sockets.size() <= FD_SETSIZE, WSAEINVAL);
+
+            size_t i = 0;
+            fdSet.fd_count = sockets.size();
+#else
+            static_assert(false, "Don't know how to get the size of fd_set with your compiler");
+#endif
+
+            for (auto sock : sockets)
+            {
+#ifdef WIN32
+                // For WinSock, we know that fd_set is simply just an array of sockets. Thus, we can optimize this
+                // operation since there are no duplicates in std::set
+                fdSet.fd_array[i++] = sock;
+#else
+                FD_SET(sock, &fdSet);
+#endif
+            }
+        }
+    }
+
+#pragma endregion
 }
+
+
+
+#ifndef _DHORN_NO_STD
+
+namespace std
+{
+    // Overload of std::swap for the socket types
+    inline void swap(_Inout_ dhorn::socket_base &lhs, _Inout_ dhorn::socket_base &rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    template <typename Ty>
+    inline void swap(_Inout_ dhorn::udp_packet<Ty> &lhs, _Inout_ dhorn::udp_packet<Ty> &rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    inline void swap(_Inout_ dhorn::udp_socket &lhs, _Inout_ dhorn::udp_socket &rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    inline void swap(_Inout_ dhorn::tcp_socket &lhs, _Inout_ dhorn::tcp_socket &rhs)
+    {
+        lhs.swap(rhs);
+    }
+
+    inline void swap(_Inout_ dhorn::server_socket &lhs, _Inout_ dhorn::server_socket &rhs)
+    {
+        lhs.swap(rhs);
+    }
+}
+
+#endif

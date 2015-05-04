@@ -650,6 +650,7 @@ namespace dhorn
 
         void _validate_comparable(_In_ const _MyType &itr) const
         {
+            (void)itr;
             assert(this->_tree);
             assert(this->_tree == itr._tree);
         }

@@ -7,7 +7,6 @@
  */
 
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
 #include "dhorn/windows/com_ptr.h"
 

@@ -1,12 +1,12 @@
 /*
  * Duncan Horn
  *
- * raii_object.h
+ * scope_exit.h
  *
  * Simple way to declare an object whose destructor functionality you can define. E.g. if you are needing to set some
  * variable at the end of a function regardless of whether or not there was an exception, then you could do:
  *
- *  dhorn::raii_object raii([&]() { this->_updating = false; });
+ *  dhorn::scope_exit cleanup([&]() { this->_updating = false; });
  */
 #pragma once
 
@@ -15,17 +15,17 @@
 namespace dhorn
 {
     /*
-     * raii_object
+     * scope_exit
      */
-    class raii_object
+    class scope_exit
     {
     public:
-        raii_object(_In_ std::function<void(void)> func) :
+        scope_exit(_In_ std::function<void(void)> func) :
             _func(func)
         {
         }
 
-        ~raii_object(void)
+        ~scope_exit(void)
         {
             if (this->_func)
             {

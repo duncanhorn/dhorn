@@ -8,8 +8,6 @@
  */
 #pragma once
 
-#include <exception>
-
 #if !(defined WIN32_LEAN_AND_MEAN) && !(defined _DHORN_NO_WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN 1
 #endif
@@ -17,6 +15,8 @@
 #if !(defined NOMINMAX) && !(defined _DHORN_NO_NOMINMAX)
 #define NOMINMAX 1
 #endif
+
+#include <exception>
 
 #include <Windows.h>
 

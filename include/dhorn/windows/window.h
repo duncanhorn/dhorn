@@ -15,7 +15,7 @@
  *      -   From here, window_procedure looks up the list of callback handlers for the input message. If none exist, it
  *          moves on to the next step. If handler(s) do exist, the window_procedure function iterates all handlers
  *          invoking their callback function. If the function returns true, the handler's invoke count is decremented
- *          (except when the count is infinite), and the handler is removed from the list if its invoke count reaces
+ *          (except when the count is infinite), and the handler is removed from the list if its invoke count reaches
  *          zero. The window_procedure function then looks at the handler's eat_message flag (note that this is done
  *          only when the handler returns true (handled)). If the flag is set to true, then the message routing stops
  *          there and (true, result) is returned to the window_procedure. If this flag is set to false, or if the
@@ -37,7 +37,7 @@
 #include <mutex>
 #include <vector>
 
-#include "../raii_object.h"
+#include "../scope_exit.h"
 #include "windows.h"
 
 namespace dhorn
@@ -405,30 +405,30 @@ namespace dhorn
             subtract                = VK_SUBTRACT,
             decimal                 = VK_DECIMAL,
             divide                  = VK_DIVIDE,
-            function_1              = VK_F1,
-            function_2              = VK_F2,
-            function_3              = VK_F3,
-            function_4              = VK_F4,
-            function_5              = VK_F5,
-            function_6              = VK_F6,
-            function_7              = VK_F7,
-            function_8              = VK_F8,
-            function_9              = VK_F9,
-            function_10             = VK_F10,
-            function_11             = VK_F11,
-            function_12             = VK_F12,
-            function_13             = VK_F13,
-            function_14             = VK_F14,
-            function_15             = VK_F15,
-            function_16             = VK_F16,
-            function_17             = VK_F17,
-            function_18             = VK_F18,
-            function_19             = VK_F19,
-            function_20             = VK_F20,
-            function_21             = VK_F21,
-            function_22             = VK_F22,
-            function_23             = VK_F23,
-            function_24             = VK_F24,
+            f1                      = VK_F1,
+            f2                      = VK_F2,
+            f3                      = VK_F3,
+            f4                      = VK_F4,
+            f5                      = VK_F5,
+            f6                      = VK_F6,
+            f7                      = VK_F7,
+            f8                      = VK_F8,
+            f9                      = VK_F9,
+            f10                     = VK_F10,
+            f11                     = VK_F11,
+            f12                     = VK_F12,
+            f13                     = VK_F13,
+            f14                     = VK_F14,
+            f15                     = VK_F15,
+            f16                     = VK_F16,
+            f17                     = VK_F17,
+            f18                     = VK_F18,
+            f19                     = VK_F19,
+            f20                     = VK_F20,
+            f21                     = VK_F21,
+            f22                     = VK_F22,
+            f23                     = VK_F23,
+            f24                     = VK_F24,
             num_lock                = VK_NUMLOCK,
             scroll_lock             = VK_SCROLL,
             left_shift              = VK_LSHIFT,
@@ -674,40 +674,19 @@ namespace dhorn
                 // Initialize the default callback handlers. All of them repeat infinitely and never eat messages
 
                 // Deferred Callback Handler
-                this->add_callback_handler(window_message::deferred_invoke,
+                this->add_callback_handler(
+                    window_message::deferred_invoke,
                     [](window *sender, uintptr_t wparam, intptr_t /*lparam*/) -> message_result_type
                 {
                     return sender->OnDeferredCallback(wparam);
                 });
 
                 // WM_DESTROY
-                this->add_callback_handler(window_message::destroy,
+                this->add_callback_handler(
+                    window_message::destroy,
                     [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) -> message_result_type
                 {
                     return std::make_pair(sender->on_destroy(), 0);
-                });
-
-                // WM_KEYDOWN
-                this->add_callback_handler(window_message::key_down,
-                    [](window *sender, uintptr_t wparam, intptr_t lparam) -> message_result_type
-                {
-                    auto key = static_cast<virtual_key>(wparam);
-                    return std::make_pair(sender->on_key_down(key, lparam), 0);
-                });
-
-                // WM_KEYUP
-                this->add_callback_handler(window_message::key_up,
-                    [](window *sender, uintptr_t wparam, intptr_t lparam) -> message_result_type
-                {
-                    auto key = static_cast<virtual_key>(wparam);
-                    return std::make_pair(sender->on_key_up(key, lparam), 0);
-                });
-
-                // WM_PAINT
-                this->add_callback_handler(window_message::paint,
-                    [](window *sender, uintptr_t /*wparam*/, intptr_t /*lparam*/) -> message_result_type
-                {
-                    return std::make_pair(sender->on_paint(), 0);
                 });
             }
 
@@ -717,7 +696,7 @@ namespace dhorn
             {
                 // Can only call run once
                 this->EnsureWindowUninitialized();
-                raii_object raii([&]() { this->_running = false; });
+                scope_exit cleanup([&]() { this->_running = false; });
                 this->_running = true;
 
                 // Calling thread becomes the "owner"/ui thread
@@ -752,10 +731,7 @@ namespace dhorn
                 show_window(this->_window, cmdShow);
                 update_window(this->_window);
 
-                auto result = this->message_pump();
-
-                this->_running = false;
-                return result;
+                return this->message_pump();
             }
 
 
@@ -831,9 +807,9 @@ namespace dhorn
                 if (this->_threadId)
                 {
                     // Already running; post
-                    this->post_async([this, handler, callbackId]() mutable
+                    this->post_async([this, callback = std::move(handler), callbackId]() mutable
                     {
-                        this->AddCallbackHandler(std::move(handler), callbackId);
+                        this->AddCallbackHandler(std::move(callback), callbackId);
                     });
                 }
                 else
@@ -891,21 +867,6 @@ namespace dhorn
                 return true;
             }
 
-            virtual bool on_key_down(_In_ virtual_key key, _In_ intptr_t lparam)
-            {
-                return false;
-            }
-
-            virtual bool on_key_up(_In_ virtual_key key, _In_ intptr_t lparam)
-            {
-                return false;
-            }
-
-            virtual bool on_paint()
-            {
-                return false;
-            }
-
 #pragma endregion
 
 
@@ -920,10 +881,9 @@ namespace dhorn
                 {
                     auto &list = list_itr->second;
 
-                    // Save the return value so we can save time in the call to list.erase in the
-                    // event that an early handler eats the message
-                    auto itr = std::find_if(std::rbegin(list), std::rend(list),
-                        [&](CallbackEntryType &entry)
+                    // Save the return value so we can save time in the call to list.erase in the event that an early
+                    // handler eats the message
+                    auto itr = std::find_if(std::rbegin(list), std::rend(list), [&](CallbackEntryType &entry)
                     {
                         auto &handler = entry.second;
                         auto tempResult = handler.callback(this, wparam, lparam);
@@ -1007,7 +967,7 @@ namespace dhorn
                 return std::make_pair(true, 0);
             }
 
-            void Post(_Inout_ std::unique_ptr<deferred_invoke_handler> &&handler)
+            void Post(_Inout_ std::unique_ptr<deferred_invoke_handler> handler)
             {
                 // Cannot post before the window is created
                 this->EnsureWindowInitialized();
@@ -1062,7 +1022,7 @@ namespace dhorn
 
 
 
-            volatile bool _running;
+            bool _running;
             deferred_callback_type _initializeCallback;
             std::map<window_message, std::vector<CallbackEntryType>> _callbackHandlers;
             std::atomic_size_t _nextCallbackId;
