@@ -48,28 +48,31 @@
     <ClInclude Include="include\dhorn\windows\com_ptr.h">
       <Filter>include\windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\message_queue.h">
+    <ClInclude Include="include\dhorn\utf_string.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\auto_event_cookie.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\event_source.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="Include\dhorn\math.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\message_queue.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\scope_exit.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\socket_stream.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\task_pool.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\unique_any.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\event_source.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\auto_event_cookie.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\socket_stream.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\scope_exit.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
