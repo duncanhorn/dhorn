@@ -14,7 +14,7 @@ namespace dhorn
     /*
      * UTF Encoding
      */
-    enum utf_encoding
+    enum class utf_encoding
     {
         utf_8 = 8,
         utf_16 = 16,
@@ -54,6 +54,8 @@ namespace dhorn
             return this->_badValue;
         }
 
+
+
     private:
 
         utf_encoding _encoding;
@@ -76,6 +78,7 @@ namespace dhorn
         struct utf_traits<utf_encoding::utf_8>
         {
             static const utf_encoding encoding = utf_encoding::utf_8;
+            using value_type = unsigned char;
 
             static inline char32_t next(_In_ const unsigned char *pos, _Out_opt_ const unsigned char **output)
             {
@@ -87,11 +90,12 @@ namespace dhorn
                 }
 
                 unsigned char mask = 0xFF >> bytes;
-                char32_t val = *pos & mask;
+                char32_t val = 0;
 
-                for (size_t i = 1; i < bytes; ++i)
+                for (size_t i = 0; i < bytes; ++i)
                 {
-                    val = (val << 6) | (pos[i] & 0x3F);
+                    val = (val << 6) | (pos[i] & mask);
+                    mask = 0x3F;
                 }
 
                 if (output)
@@ -105,9 +109,9 @@ namespace dhorn
             static inline unsigned char *write(_In_ char32_t val, _Out_ unsigned char *pos)
             {
                 size_t bytes =
-                    (val & 0x00FFFF) ? 4 :
-                    (val & 0x0007FF) ? 3 :
-                    (val & 0x00007F) ? 2 : 1;
+                    (val & 0xFF0000) ? 4 :
+                    (val & 0xFFF800) ? 3 :
+                    (val & 0xFFFF80) ? 2 : 1;
 
                 if (val > 0x10FFFF)
                 {
@@ -120,18 +124,17 @@ namespace dhorn
 
                 for (size_t i = 0; i < bytes; ++i)
                 {
-                    *pos = ((val >> shift) & 0xFF) | mask;
+                    *pos = ((val >> shift) & (~mask >> 1)) | mask;
 
-                    mask = 0xC0;
+                    mask = 0x80;
                     ++pos;
-
-                    // TODO
+                    shift -= 6;
                 }
 
                 return pos;
             }
 
-            static inline size_t size(_In_ unsigned char val)
+            static inline constexpr size_t size(_In_ unsigned char val)
             {
                 // Ignore checking for 10xxxxxx since there's no point in doing it here
                 return
@@ -141,6 +144,12 @@ namespace dhorn
                     ((val & 0xF8) == 0xF0) ? 4 : 0;
             }
         };
+
+
+
+        /*
+         * Traits Type Definitions
+         */
         using utf8_traits = utf_traits<utf_encoding::utf_8>;
 
 #pragma endregion
@@ -156,7 +165,10 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            utf_string_const_iterator(_In_ const unsigned char *front, _In_ const unsigned char *back, _In_ const unsigned char *pos) :
+            utf_string_const_iterator(
+                _In_ const unsigned char *front,
+                _In_ const unsigned char *back,
+                _In_ const unsigned char *pos) :
                 _front(front),
                 _back(back),
                 _pos(pos)
@@ -182,6 +194,14 @@ namespace dhorn
     class utf_string
     {
     public:
+
+        /*
+         * Public Type Definitions
+         */
+        using value_type = typename Traits::value_type;
+
+
+
         /*
          * Constructor(s)/Destructor
          */
@@ -190,6 +210,12 @@ namespace dhorn
             _back(nullptr)
         {
         }
+
+        ~utf_string(void)
+        {
+            this->Destroy();
+        }
+
 
 
     private:
@@ -202,9 +228,11 @@ namespace dhorn
             this->_back = nullptr;
         }
 
-        unsigned char *_front;
-        unsigned char *_back;
+        value_type *_front;
+        value_type *_back;
     };
+
+
 
     /*
      * Type Definitions

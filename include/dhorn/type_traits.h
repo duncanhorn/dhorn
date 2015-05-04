@@ -111,4 +111,15 @@ namespace dhorn
     };
 
 #pragma endregion
+
+
+
+    /*
+     * array_size
+     */
+    template <typename Ty, size_t size>
+    inline constexpr size_t array_size(_In_ const Ty(&)[size])
+    {
+        return size;
+    }
 }
