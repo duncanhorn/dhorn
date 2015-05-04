@@ -291,7 +291,7 @@ namespace dhorn
         template <typename HandleType>
         struct null_handle_traits
         {
-            static const/*expr*/ HandleType invalid(void)
+            static constexpr HandleType invalid(void)
             {
                 return nullptr;
             }
