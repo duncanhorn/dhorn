@@ -55,5 +55,8 @@
     <ClInclude Include="include\dhorn\windows\com_ptr.h">
       <Filter>include\windows</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\utf_string.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
