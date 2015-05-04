@@ -211,6 +211,17 @@ namespace dhorn
         {
         }
 
+        utf_string(_In_ const value_type *str)
+        {
+            this->Create(str);
+        }
+
+        template <typename Itr>
+        utf_string(_In_ Itr front, _In_ Itr back)
+        {
+            this->Create(front, back);
+        }
+
         ~utf_string(void)
         {
             this->Destroy();
@@ -220,7 +231,21 @@ namespace dhorn
 
     private:
 
-        void Destroy(void)
+        void Create(_In_ const value_type *str)
+        {
+            // TODO
+            (void)str;
+        }
+
+        template <typename Itr>
+        void Create(_In_ Itr front, _In_ Itr back)
+        {
+            // TODO
+            (void)front;
+            (void)back;
+        }
+
+        inline void Destroy(void)
         {
             delete[] this->_front;
 
