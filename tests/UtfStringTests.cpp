@@ -54,14 +54,14 @@ namespace dhorn
 
                 for (size_t i = 0; i < array_size(bytes); ++i)
                 {
-                    Assert::IsTrue(traits_type::next(bytes[i], nullptr) == vals[i]);
+                    Assert::IsTrue(traits_type::next(reinterpret_cast<char *>(bytes[i]), nullptr) == vals[i]);
                 }
 
                 unsigned char invalid[] = { 0xF8 };
 
                 try
                 {
-                    traits_type::next(invalid, nullptr);
+                    traits_type::next(reinterpret_cast<char *>(invalid), nullptr);
                     Assert::Fail(L"Expected an exception");
                 }
                 catch (dhorn::bad_utf_encoding &e)
