@@ -71,6 +71,15 @@ namespace dhorn
         /*
          * Declare read functions outside of traits for cross consumption
          */
+        inline void verify_character(_In_ utf_encoding encoding, _In_ char32_t val)
+        {
+            if (((val > 0x0000D7FF) && (val < 0x0000E000)) ||
+                (val > 0x0010FFFF))
+            {
+                throw bad_utf_encoding(encoding, val);
+            }
+        }
+
 #pragma region utf-8
 
         inline constexpr size_t size_utf8(_In_ char ch)
@@ -90,9 +99,9 @@ namespace dhorn
         inline constexpr size_t size_utf8(_In_ char32_t val)
         {
             return
-                (val & 0xFF0000) ? 4 :
-                (val & 0xFFF800) ? 3 :
-                (val & 0xFFFF80) ? 2 : 1;
+                (val & 0x00FF0000) ? 4 :
+                (val & 0x00FFF800) ? 3 :
+                (val & 0x00FFFF80) ? 2 : 1;
         }
 
         inline char32_t read_utf8(_In_ const char *str, _Out_opt_ const char **result)
@@ -109,6 +118,11 @@ namespace dhorn
             // TODO: Figure out how much of a performance benefit there is to hard-code this
             for (size_t i = 0; i < size; ++i)
             {
+                if ((i > 0) && ((*str & 0xC0) != 0x80))
+                {
+                    throw bad_utf_encoding(utf_encoding::utf_8, *str);
+                }
+
                 val = (val << 6) | (*str & mask);
                 ++str;
                 mask = 0x3F;
@@ -137,12 +151,49 @@ namespace dhorn
                 ((static_cast<uint16_t>(ch) & 0xFC00) == 0xDC00) ? 0 : 1;
         }
 
+        inline constexpr size_t size_utf16(_In_ char32_t ch)
+        {
+            // 0x000000 to 0x00D7FF:    1 character (2 bytes)
+            // 0x00D800 to 0x00DC00:    INVALID
+            // 0x00E000 to 0x00FFFF:    1 character (2 bytes)
+            // 0x010000 to 0x10FFFF:    2 characters (4 bytes)
+            // >= 0x110000:             INVALID
+            // For simplicity - and the ability to use constexpr - we ignore the invalid cases here and let callers
+            // ensure validity
+            return (ch & 0xFFFF0000) ? 2 : 1;
+        }
+
         inline char32_t read_utf16(_In_ const char16_t *str, _Out_opt_ const char16_t **result)
         {
-            // TODO
-            (void)str;
-            (void)result;
-            return 0;
+            auto size = size_utf16(*str);
+
+            if (size == 0)
+            {
+                throw bad_utf_encoding(utf_encoding::utf_16, *str);
+            }
+
+            char32_t val;
+            if (size == 1)
+            {
+                val = *str;
+            }
+            else // size == 2
+            {
+                val = (*str & 0x03FF) << 10;
+                val |= (str[1] & 0x03FF);
+
+                if ((str[1] & 0xFC00) != 0xDC00)
+                {
+                    throw bad_utf_encoding(utf_encoding::utf_16, str[1]);
+                }
+            }
+
+            if (result)
+            {
+                *result = str + size;
+            }
+
+            return val;
         }
 
 #pragma endregion
@@ -163,19 +214,20 @@ namespace dhorn
             static const utf_encoding encoding = utf_encoding::utf_8;
             using value_type = char;
 
-            static inline char32_t next(_In_ const char *pos, _Out_opt_ const char **output)
+            static inline constexpr size_t size(_In_ value_type val)
+            {
+                return size_utf8(val);
+            }
+
+            static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
             {
                 return read_utf8(pos, output);
             }
 
-            static inline unsigned char *write(_In_ char32_t val, _Out_ unsigned char *pos)
+            static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
             {
                 size_t bytes = size_utf8(val);
-
-                if (val > 0x10FFFF)
-                {
-                    throw bad_utf_encoding(encoding, val);
-                }
+                verify_character(utf_encoding::utf_8, val);
 
                 static const unsigned char masks[] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0 };
                 unsigned char mask = masks[bytes];
@@ -193,23 +245,54 @@ namespace dhorn
                 return pos;
             }
 
-            static inline constexpr size_t size(_In_ char val)
+            //static inline std::pair<value_type *, value_type *> create(_In_ const char *str)
+            //{
+            //    // If the input is a char * string, then we assume either (1) it's a normal ANSI string, or (2) it's
+            //    // already a utf-8 string. In either case, this is just a memcpy.
+            //    auto len = strlen(str);
+            //    std::unique_ptr<value_type[]> ptr(new value_type[len + 1]);
+
+            //    memcpy(ptr.get(), str, len);
+            //    ptr[len] = '\0';
+
+            //    auto front = ptr.release();
+            //    return std::make_pair(front, front + len);
+            //}
+        };
+
+        template <>
+        struct utf_traits<utf_encoding::utf_16>
+        {
+            static const utf_encoding encoding = utf_encoding::utf_16;
+            using value_type = char16_t;
+
+            static inline constexpr size_t size(_In_ value_type val)
             {
-                return size_utf8(val);
+                return size_utf16(val);
             }
 
-            static inline std::pair<value_type *, value_type *> create(_In_ const char *str)
+            static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
             {
-                // If the input is a char * string, then we assume either (1) it's a normal ANSI string, or (2) it's
-                // already a utf-8 string. In either case, this is just a memcpy.
-                auto len = strlen(str);
-                std::unique_ptr<value_type[]> ptr(new value_type[len + 1]);
+                return read_utf16(pos, output);
+            }
 
-                memcpy(ptr.get(), str, len);
-                ptr[len] = '\0';
+            static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
+            {
+                size_t bytes = size_utf16(val);
+                verify_character(utf_encoding::utf_16, val);
 
-                auto front = ptr.release();
-                return std::make_pair(front, front + len);
+                if (bytes == 1)
+                {
+                    *pos = val & 0x0000FFFF;
+                }
+                else // bytes == 2
+                {
+                    // high bytes go first
+                    pos[0] = 0x0000D800 | ((val >> 10) & 0x03FF);
+                    pos[1] = 0x0000DC00 | (val & 0x03FF);
+                }
+
+                return pos + bytes;
             }
         };
 
@@ -219,6 +302,7 @@ namespace dhorn
          * Traits Type Definitions
          */
         using utf8_traits = utf_traits<utf_encoding::utf_8>;
+        using utf16_traits = utf_traits<utf_encoding::utf_16>;
 
 #pragma endregion
 

@@ -27,17 +27,10 @@ namespace dhorn
 
             TEST_METHOD(SizeTest)
             {
-                unsigned char bytes_1[] = { 0x7F };
-                unsigned char bytes_2[] = { 0xDF, 0xBF };
-                unsigned char bytes_3[] = { 0xEF, 0xBF, 0xBF };
-                unsigned char bytes_4[] = { 0xF7, 0xBF, 0xBF, 0xBF };
-                unsigned char invalid[] = { 0xF8 };
-
-                Assert::AreEqual(traits_type::size(*bytes_1), 1u);
-                Assert::AreEqual(traits_type::size(*bytes_2), 2u);
-                Assert::AreEqual(traits_type::size(*bytes_3), 3u);
-                Assert::AreEqual(traits_type::size(*bytes_4), 4u);
-                Assert::AreEqual(traits_type::size(*invalid), 0u);
+                Assert::AreEqual(1u, traits_type::size(*u8"\u007F"));
+                Assert::AreEqual(2u, traits_type::size(*u8"\u07FF"));
+                Assert::AreEqual(3u, traits_type::size(*u8"\uFFFF"));
+                Assert::AreEqual(4u, traits_type::size(*u8"\U0010FFFF"));
             }
 
             TEST_METHOD(NextTest)
@@ -85,14 +78,14 @@ namespace dhorn
                 for (size_t i = 0; i < array_size(bytes); ++i)
                 {
                     unsigned char buffer[4] = {};
-                    traits_type::write(vals[i], buffer);
+                    traits_type::write(vals[i], reinterpret_cast<char *>(buffer));
 
                     Assert::IsTrue(std::equal(buffer, buffer + 4, bytes[i]));
                 }
 
                 try
                 {
-                    unsigned char buffer[4];
+                    char buffer[4];
                     traits_type::write(0x1FFFFFu, buffer);
                     Assert::Fail(L"Expected an exception");
                 }
@@ -101,6 +94,26 @@ namespace dhorn
                     Assert::IsTrue(e.bad_value() == 0x1FFFFFu);
                 }
             }
+        };
+
+
+
+        /*
+         * utf16_traits Tests
+         */
+        TEST_CLASS(Utf16TraitsTests)
+        {
+            using traits_type = dhorn::garbage::utf16_traits;
+
+            TEST_METHOD(SizeTest)
+            {
+                Assert::AreEqual(1u, traits_type::size(*u"\uD7FF"));
+                Assert::AreEqual(1u, traits_type::size(*u"\uE000"));
+                Assert::AreEqual(1u, traits_type::size(*u"\uFFFF"));
+                Assert::AreEqual(2u, traits_type::size(*u"\U00010000"));
+                Assert::AreEqual(2u, traits_type::size(*u"\U0010FFFF"));
+            }
+
         };
     }
 }
