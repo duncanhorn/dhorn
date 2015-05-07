@@ -181,6 +181,7 @@ namespace dhorn
             {
                 val = (*str & 0x03FF) << 10;
                 val |= (str[1] & 0x03FF);
+                val += 0x00010000;
 
                 if ((str[1] & 0xFC00) != 0xDC00)
                 {

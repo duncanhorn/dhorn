@@ -35,23 +35,20 @@ namespace dhorn
 
             TEST_METHOD(NextTest)
             {
-                unsigned char bytes[][4] =
+                std::pair<char *, char32_t> vals[] =
                 {
-                    { 0x7F, 0x00, 0x00, 0x00 },
-                    { 0xDF, 0xBF, 0x00, 0x00 },
-                    { 0xEF, 0xBF, 0xBF, 0x00 },
-                    { 0xF4, 0x8F, 0xBF, 0xBF }
+                    { u8"\u007F", 0x007F },
+                    { u8"\u07FF", 0x07FF },
+                    { u8"\uFFFF", 0x0000FFFF },
+                    { u8"\U0010FFFF", 0x0010FFFF }
                 };
 
-                char32_t vals[] = { 0x7Fu, 0x7FFu, 0xFFFFu, 0x10FFFFu };
-
-                for (size_t i = 0; i < array_size(bytes); ++i)
+                for (auto &pair : vals)
                 {
-                    Assert::IsTrue(traits_type::next(reinterpret_cast<char *>(bytes[i]), nullptr) == vals[i]);
+                    Assert::IsTrue(traits_type::next(pair.first, nullptr) == pair.second);
                 }
 
                 unsigned char invalid[] = { 0xF8 };
-
                 try
                 {
                     traits_type::next(reinterpret_cast<char *>(invalid), nullptr);
@@ -65,22 +62,20 @@ namespace dhorn
 
             TEST_METHOD(WriteTest)
             {
-                unsigned char bytes[][4] =
+                std::pair<char *, char32_t> vals[] =
                 {
-                    { 0x7F, 0x00, 0x00, 0x00 },
-                    { 0xDF, 0xBF, 0x00, 0x00 },
-                    { 0xEF, 0xBF, 0xBF, 0x00 },
-                    { 0xF4, 0x8F, 0xBF, 0xBF }
+                    { u8"\u007F\0\0\0", 0x007F },
+                    { u8"\u07FF\0\0", 0x07FF },
+                    { u8"\uFFFF\0", 0x0000FFFF },
+                    { u8"\U0010FFFF", 0x0010FFFF }
                 };
 
-                char32_t vals[] = { 0x7Fu, 0x7FFu, 0xFFFFu, 0x10FFFFu };
-
-                for (size_t i = 0; i < array_size(bytes); ++i)
+                for (auto &pair : vals)
                 {
-                    unsigned char buffer[4] = {};
-                    traits_type::write(vals[i], reinterpret_cast<char *>(buffer));
+                    char buffer[4] = {};
+                    traits_type::write(pair.second, buffer);
 
-                    Assert::IsTrue(std::equal(buffer, buffer + 4, bytes[i]));
+                    Assert::IsTrue(std::equal(buffer, buffer + 4, pair.first));
                 }
 
                 try
@@ -114,6 +109,32 @@ namespace dhorn
                 Assert::AreEqual(2u, traits_type::size(*u"\U0010FFFF"));
             }
 
+            TEST_METHOD(NextTest)
+            {
+                std::pair<char16_t *, char32_t> vals[] =
+                {
+                    { u"\uD7FF", 0x0000D7FF },
+                    { u"\uE000", 0x0000E000 },
+                    { u"\uFFFF", 0x0000FFFF },
+                    { u"\U0010FFFF", 0x0010FFFF }
+                };
+
+                for (auto &pair : vals)
+                {
+                    Assert::IsTrue(traits_type::next(pair.first, nullptr) == pair.second);
+                }
+
+                //unsigned char invalid[] = { 0xF8 };
+                //try
+                //{
+                //    traits_type::next(reinterpret_cast<char *>(invalid), nullptr);
+                //    Assert::Fail(L"Expected an exception");
+                //}
+                //catch (dhorn::bad_utf_encoding &e)
+                //{
+                //    Assert::IsTrue(e.bad_value() == 0xF8u);
+                //}
+            }
         };
     }
 }
