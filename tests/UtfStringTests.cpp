@@ -124,16 +124,46 @@ namespace dhorn
                     Assert::IsTrue(traits_type::next(pair.first, nullptr) == pair.second);
                 }
 
-                //unsigned char invalid[] = { 0xF8 };
-                //try
-                //{
-                //    traits_type::next(reinterpret_cast<char *>(invalid), nullptr);
-                //    Assert::Fail(L"Expected an exception");
-                //}
-                //catch (dhorn::bad_utf_encoding &e)
-                //{
-                //    Assert::IsTrue(e.bad_value() == 0xF8u);
-                //}
+                char16_t invalid[] = { 0xDC00 };
+                try
+                {
+                    traits_type::next(invalid, nullptr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::bad_utf_encoding &e)
+                {
+                    Assert::IsTrue(e.bad_value() == 0xDC00u);
+                }
+            }
+
+            TEST_METHOD(WriteTest)
+            {
+                std::pair<char16_t *, char32_t> vals[] =
+                {
+                    { u"\uD7FF\0", 0x0000D7FF },
+                    { u"\uE000\0", 0x0000E000 },
+                    { u"\uFFFF\0", 0x0000FFFF },
+                    { u"\U0010FFFF", 0x0010FFFF }
+                };
+
+                for (auto &pair : vals)
+                {
+                    char16_t buffer[2] = {};
+                    traits_type::write(pair.second, buffer);
+
+                    Assert::IsTrue(std::equal(buffer, buffer + 2, pair.first));
+                }
+
+                try
+                {
+                    char16_t buffer[2];
+                    traits_type::write(0x1FFFFFu, buffer);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::bad_utf_encoding &e)
+                {
+                    Assert::IsTrue(e.bad_value() == 0x1FFFFFu);
+                }
             }
         };
     }

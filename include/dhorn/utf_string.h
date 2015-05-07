@@ -289,6 +289,7 @@ namespace dhorn
                 else // bytes == 2
                 {
                     // high bytes go first
+                    val -= 0x00010000;
                     pos[0] = 0x0000D800 | ((val >> 10) & 0x03FF);
                     pos[1] = 0x0000DC00 | (val & 0x03FF);
                 }
