@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#include <cstdint>
+#include <cassert>
 #include <string>
 #include <memory>
 
@@ -247,20 +247,6 @@ namespace dhorn
 
                 return pos;
             }
-
-            //static inline std::pair<value_type *, value_type *> create(_In_ const char *str)
-            //{
-            //    // If the input is a char * string, then we assume either (1) it's a normal ANSI string, or (2) it's
-            //    // already a utf-8 string. In either case, this is just a memcpy.
-            //    auto len = strlen(str);
-            //    std::unique_ptr<value_type[]> ptr(new value_type[len + 1]);
-
-            //    memcpy(ptr.get(), str, len);
-            //    ptr[len] = '\0';
-
-            //    auto front = ptr.release();
-            //    return std::make_pair(front, front + len);
-            //}
         };
 
 
@@ -319,6 +305,7 @@ namespace dhorn
             {
                 // Need to read the value before writing to output since we don't know if output == &pos
                 char32_t val = *pos;
+                verify_character(utf_encoding::utf_32, val);
 
                 if (output)
                 {
@@ -330,6 +317,7 @@ namespace dhorn
 
             static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
             {
+                verify_character(utf_encoding::utf_32, val);
                 *pos = val;
 
                 return pos + 1;
@@ -344,6 +332,39 @@ namespace dhorn
         using utf8_traits = utf_traits<utf_encoding::utf_8>;
         using utf16_traits = utf_traits<utf_encoding::utf_16>;
         using utf32_traits = utf_traits<utf_encoding::utf_32>;
+
+#pragma endregion
+
+
+
+        /*
+         * Convert character type -> encoding
+         */
+#pragma region utf_encoding_from_char
+
+        template <typename CharT>
+        struct utf_encoding_from_char;
+
+        template <>
+        struct utf_encoding_from_char<char>
+        {
+            static const utf_encoding value = utf_encoding::utf_8;
+            using traits_type = utf_traits<value>;
+        };
+
+        template <>
+        struct utf_encoding_from_char<char16_t>
+        {
+            static const utf_encoding value = utf_encoding::utf_16;
+            using traits_type = utf_traits<value>;
+        };
+
+        template <>
+        struct utf_encoding_from_char<char32_t>
+        {
+            static const utf_encoding value = utf_encoding::utf_32;
+            using traits_type = utf_traits<value>;
+        };
 
 #pragma endregion
 
@@ -399,12 +420,15 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         utf_string(void) :
+            _length(0)
             _front(nullptr),
-            _back(nullptr)
+            _back(nullptr),
+            _bounds(nullptr)
         {
         }
 
-        utf_string(_In_ const value_type *str)
+        template <typename CharType>
+        utf_string(_In_ const CharType *str)
         {
             this->Create(str);
         }
@@ -422,12 +446,43 @@ namespace dhorn
 
 
 
+        /*
+         * Public "string-like" functions
+         */
+        size_t length(void) const
+        {
+            return this->_length;
+        }
+
+
+
     private:
 
-        void Create(_In_ const value_type *str)
+        static const size_t max_char_size = sizeof(char32_t) / sizeof(value_type);
+
+        template <typename CharT>
+        static inline constexpr size_t MaxRequiredBufferSize(_In_ size_t bufferLen)
         {
-            // TODO
-            (void)str;
+            return bufferLen * ((sizeof(value_type) > sizeof(CharT)) ? 1 : (sizeof(CharT) / sizeof(value_type)));
+        }
+
+        //template <typename CharT>
+        //static inline size_t StringBufferLen(_In_ const CharT *str)
+        //{
+        //    // Computes the buffer length. I.e. the maximum string size
+        //    size_t len = 0;
+        //    while (str[len])
+        //    {
+        //        ++len;
+        //    }
+
+        //    return len;
+        //}
+
+        template <typename CharT>
+        void Create(_In_ const CharT *str)
+        {
+            using their_traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
         }
 
         template <typename Itr>
@@ -446,8 +501,55 @@ namespace dhorn
             this->_back = nullptr;
         }
 
-        value_type *_front;
-        value_type *_back;
+        inline void PushBack(_In_ char32_t ch)
+        {
+            // Determine if we need to resize
+            if ((this->_back + max_char_size) >= this->_bounds)
+            {
+                this->Resize();
+            }
+
+            // Increase length after the write in case an exception is thrown
+            this->_back = Traits::write(ch, this->_back);
+            ++this->_length;
+            assert(this->_back < this->_bounds);
+        }
+
+        inline void Resize(void)
+        {
+            size_t capacity = Capacity();
+            size_t bufferSize = BufferSize();
+            capacity = capacity ? (capacity * 2) : 8;
+            assert(capacity >= (bufferSize + max_char_size + 1));
+
+            // Don't copy the null character since this->_front is null on creation
+            std::unique_ptr<value_type[]> buffer(new value_type[capacity]);
+            memcpy(buffer.get(), this->_front, bufferSize * sizeof(value_type));
+            buffer.get()[bufferSize] = '\0';
+
+            delete[] this->_front;
+            this->_front = buffer.release();
+            this->_back = this->_front + bufferSize;
+            this->_bounds = this->_front + capacity;
+        }
+
+        inline size_t BufferSize(void)
+        {
+            // Size (in units of value_type) of the buffer *NOT* inluding the null character. I.e. the size that we
+            // need to copy on resize
+            return (this->_back - this->_front);
+        }
+
+        inline size_t Capacity(void)
+        {
+            // Size of our internal buffer
+            return (this->_bounds - this->_front);
+        }
+
+        size_t _length;
+        value_type *_front;     // Always points at first character
+        value_type *_back;      // Always points at the null character
+        value_type *_bounds;    // Always points one past the last location we can write to
     };
 
 

@@ -166,5 +166,88 @@ namespace dhorn
                 }
             }
         };
+
+
+
+        /*
+         * utf32_traits Tests
+         */
+        TEST_CLASS(Utf32TraitsTests)
+        {
+            using traits_type = dhorn::garbage::utf32_traits;
+
+            TEST_METHOD(SizeTest)
+            {
+                Assert::AreEqual(1u, traits_type::size(*U"\uD7FF"));
+                Assert::AreEqual(1u, traits_type::size(*U"\uE000"));
+                Assert::AreEqual(1u, traits_type::size(*U"\uFFFF"));
+                Assert::AreEqual(1u, traits_type::size(*U"\U00010000"));
+                Assert::AreEqual(1u, traits_type::size(*U"\U0010FFFF"));
+            }
+
+            TEST_METHOD(NextTest)
+            {
+                std::pair<char32_t *, char32_t> vals[] =
+                {
+                    { U"\uD7FF", 0x0000D7FF },
+                    { U"\uE000", 0x0000E000 },
+                    { U"\uFFFF", 0x0000FFFF },
+                    { U"\U0010FFFF", 0x0010FFFF }
+                };
+
+                for (auto &pair : vals)
+                {
+                    Assert::IsTrue(traits_type::next(pair.first, nullptr) == pair.second);
+                }
+
+                char32_t invalid[] = { 0x110000 };
+                try
+                {
+                    traits_type::next(invalid, nullptr);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::bad_utf_encoding &e)
+                {
+                    Assert::IsTrue(e.bad_value() == 0x110000u);
+                }
+            }
+
+            TEST_METHOD(WriteTest)
+            {
+                std::pair<char32_t *, char32_t> vals[] =
+                {
+                    { U"\uD7FF\0", 0x0000D7FF },
+                    { U"\uE000\0", 0x0000E000 },
+                    { U"\uFFFF\0", 0x0000FFFF },
+                    { U"\U0010FFFF", 0x0010FFFF }
+                };
+
+                for (auto &pair : vals)
+                {
+                    char32_t buffer[1] = {};
+                    traits_type::write(pair.second, buffer);
+
+                    Assert::IsTrue(std::equal(buffer, buffer + 1, pair.first));
+                }
+
+                try
+                {
+                    char32_t buffer[1];
+                    traits_type::write(0x1FFFFFu, buffer);
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (dhorn::bad_utf_encoding &e)
+                {
+                    Assert::IsTrue(e.bad_value() == 0x1FFFFFu);
+                }
+            }
+        };
+
+
+
+        TEST_CLASS(Utf8StringTests)
+        {
+            using string_type = dhorn::utf8_string;
+        };
     }
 }
