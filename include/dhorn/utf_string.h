@@ -209,6 +209,8 @@ namespace dhorn
         template <utf_encoding Encoding>
         struct utf_traits;
 
+
+
         template <>
         struct utf_traits<utf_encoding::utf_8>
         {
@@ -261,6 +263,8 @@ namespace dhorn
             //}
         };
 
+
+
         template <>
         struct utf_traits<utf_encoding::utf_16>
         {
@@ -300,11 +304,46 @@ namespace dhorn
 
 
 
+        template <>
+        struct utf_traits<utf_encoding::utf_32>
+        {
+            static const utf_encoding encoding = utf_encoding::utf_32;
+            using value_type = char32_t;
+
+            static inline constexpr size_t size(_In_ value_type /*val*/)
+            {
+                return 1;
+            }
+
+            static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
+            {
+                // Need to read the value before writing to output since we don't know if output == &pos
+                char32_t val = *pos;
+
+                if (output)
+                {
+                    *output = pos + 1;
+                }
+
+                return val;
+            }
+
+            static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
+            {
+                *pos = val;
+
+                return pos + 1;
+            }
+        };
+
+
+
         /*
          * Traits Type Definitions
          */
         using utf8_traits = utf_traits<utf_encoding::utf_8>;
         using utf16_traits = utf_traits<utf_encoding::utf_16>;
+        using utf32_traits = utf_traits<utf_encoding::utf_32>;
 
 #pragma endregion
 
@@ -417,6 +456,8 @@ namespace dhorn
      * Type Definitions
      */
     using utf8_string = utf_string<garbage::utf8_traits>;
+    using utf16_string = utf_string<garbage::utf16_traits>;
+    using utf32_string = utf_string<garbage::utf32_traits>;
 
 #pragma endregion
 }
