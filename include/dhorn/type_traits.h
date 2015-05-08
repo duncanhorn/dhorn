@@ -5,6 +5,7 @@
  *
  * Definitions that should be in type_traits, but aren't
  */
+#pragma once
 
 #include <type_traits>
 

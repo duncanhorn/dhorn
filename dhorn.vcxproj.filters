@@ -75,5 +75,8 @@
     <ClInclude Include="include\dhorn\unique_any.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\algorithm.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
