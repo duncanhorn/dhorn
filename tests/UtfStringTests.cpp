@@ -248,6 +248,42 @@ namespace dhorn
         TEST_CLASS(Utf8StringTests)
         {
             using string_type = dhorn::utf8_string;
+
+            TEST_METHOD(DefaultConstructorTest)
+            {
+                string_type str;
+
+                Assert::AreEqual(0u, str.length());
+                Assert::AreEqual(0u, str.size());
+            }
+
+            TEST_METHOD(Utf8StringConstructorTest)
+            {
+                char buff1[] = u8"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(sizeof(buff1) - 1, str1.length());
+                Assert::AreEqual(sizeof(buff1) - 1, str1.size());
+                Assert::AreEqual(sizeof(buff1) - 1, strlen(str1.c_str()));
+                Assert::AreEqual(0, strcmp(buff1, str1.c_str()));
+
+                char buff2[] = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(sizeof(buff2) - 7, str2.length());
+                Assert::AreEqual(sizeof(buff2) - 1, str2.size());
+                Assert::AreEqual(sizeof(buff2) - 1, strlen(str2.c_str()));
+                Assert::AreEqual(0, strcmp(buff2, str2.c_str()));
+            }
+
+            TEST_METHOD(IteratorConstructorTest)
+            {
+                // We aren't testing the validity of the utf_string::iterator yet, so we have to rely on std::string
+                // here
+                std::string s = "This is a string";
+                string_type str(std::begin(s), std::end(s));
+                Assert::IsTrue(s == str.c_str());
+                Assert::AreEqual(s.length(), str.length());
+                Assert::AreEqual(s.length(), str.size());
+            }
         };
     }
 }

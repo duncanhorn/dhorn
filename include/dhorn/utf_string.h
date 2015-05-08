@@ -11,6 +11,8 @@
 #include <string>
 #include <memory>
 
+#include "algorithm.h"
+
 namespace dhorn
 {
     /*
@@ -420,7 +422,7 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         utf_string(void) :
-            _length(0)
+            _length(0),
             _front(nullptr),
             _back(nullptr),
             _bounds(nullptr)
@@ -428,13 +430,15 @@ namespace dhorn
         }
 
         template <typename CharType>
-        utf_string(_In_ const CharType *str)
+        utf_string(_In_ const CharType *str) :
+            utf_string()
         {
             this->Create(str);
         }
 
         template <typename Itr>
-        utf_string(_In_ Itr front, _In_ Itr back)
+        utf_string(_In_ Itr front, _In_ Itr back) :
+            utf_string()
         {
             this->Create(front, back);
         }
@@ -451,7 +455,19 @@ namespace dhorn
          */
         size_t length(void) const
         {
+            // Length of the string
             return this->_length;
+        }
+
+        size_t size(void) const
+        {
+            // Size of the string buffer (minus the null character)
+            return BufferSize();
+        }
+
+        const value_type *c_str(void) const
+        {
+            return this->_front;
         }
 
 
@@ -461,36 +477,29 @@ namespace dhorn
         static const size_t max_char_size = sizeof(char32_t) / sizeof(value_type);
 
         template <typename CharT>
-        static inline constexpr size_t MaxRequiredBufferSize(_In_ size_t bufferLen)
-        {
-            return bufferLen * ((sizeof(value_type) > sizeof(CharT)) ? 1 : (sizeof(CharT) / sizeof(value_type)));
-        }
-
-        //template <typename CharT>
-        //static inline size_t StringBufferLen(_In_ const CharT *str)
-        //{
-        //    // Computes the buffer length. I.e. the maximum string size
-        //    size_t len = 0;
-        //    while (str[len])
-        //    {
-        //        ++len;
-        //    }
-
-        //    return len;
-        //}
-
-        template <typename CharT>
         void Create(_In_ const CharT *str)
         {
             using their_traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
+
+            while (*str)
+            {
+                this->InternalPushBack(their_traits::next(str, &str));
+            }
+
+            *this->_back = '\0';
         }
 
         template <typename Itr>
         void Create(_In_ Itr front, _In_ Itr back)
         {
-            // TODO
-            (void)front;
-            (void)back;
+            // It's assumed that dereferencing an iterator gives the full character, and that incrementing the iterator
+            // moves to the next character
+            for (; front != back; ++front)
+            {
+                this->InternalPushBack(*front);
+            }
+
+            *this->_back = '\0';
         }
 
         inline void Destroy(void)
@@ -499,9 +508,10 @@ namespace dhorn
 
             this->_front = nullptr;
             this->_back = nullptr;
+            this->_bounds = nullptr;
         }
 
-        inline void PushBack(_In_ char32_t ch)
+        inline void InternalPushBack(_In_ char32_t ch)
         {
             // Determine if we need to resize
             if ((this->_back + max_char_size) >= this->_bounds)
@@ -510,16 +520,17 @@ namespace dhorn
             }
 
             // Increase length after the write in case an exception is thrown
+            // NOTE: Does not write the null character; that's the caller's responsibility
             this->_back = Traits::write(ch, this->_back);
             ++this->_length;
             assert(this->_back < this->_bounds);
         }
 
-        inline void Resize(void)
+        inline void Resize(_In_ size_t desiredCapacity = 0)
         {
             size_t capacity = Capacity();
             size_t bufferSize = BufferSize();
-            capacity = capacity ? (capacity * 2) : 8;
+            capacity = dhorn::max(capacity * 2, 8u, desiredCapacity + 1);
             assert(capacity >= (bufferSize + max_char_size + 1));
 
             // Don't copy the null character since this->_front is null on creation
@@ -533,14 +544,14 @@ namespace dhorn
             this->_bounds = this->_front + capacity;
         }
 
-        inline size_t BufferSize(void)
+        inline size_t BufferSize(void) const
         {
             // Size (in units of value_type) of the buffer *NOT* inluding the null character. I.e. the size that we
             // need to copy on resize
             return (this->_back - this->_front);
         }
 
-        inline size_t Capacity(void)
+        inline size_t Capacity(void) const
         {
             // Size of our internal buffer
             return (this->_bounds - this->_front);
