@@ -16,6 +16,7 @@
 #define NOMINMAX 1
 #endif
 
+#include <cstdint>
 #include <exception>
 
 #include <Windows.h>

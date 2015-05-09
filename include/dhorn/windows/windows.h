@@ -497,6 +497,7 @@ namespace dhorn
 
         inline uintptr_t set_window_long_ptr(_In_ window_handle window, _In_ int index, _In_ uintptr_t value)
         {
+            ::SetLastError(0);
             return garbage::make_call_fail_on_value<uintptr_t>(SetWindowLongPtr, window, index, value);
         }
 

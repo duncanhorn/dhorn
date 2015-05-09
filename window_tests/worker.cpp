@@ -40,7 +40,7 @@ void worker::start(void)
     this->_threadsExecuting = this->_threadCount;
 
     // Finally, begin execution!
-    for (uint32_t i = 0; i < this->_threadCount; i++)
+    for (uint32_t i = 0; i < this->_threadCount; ++i)
     {
         this->_threads.emplace_back(dhorn::bind_member_function(&worker::thread_proc, this));
     }
@@ -77,7 +77,7 @@ void worker::thread_proc(void)
                     continue;
                 }
 
-                for (size_t i = 0; i < this->_iterationsPerUpdate; i++)
+                for (size_t i = 0; i < this->_iterationsPerUpdate; ++i)
                 {
                     entry.value = (entry.value * entry.value) + entry.point;
                     if (dhorn::length_squared(entry.value.imag(), entry.value.real()) >= 4)
@@ -139,5 +139,6 @@ callback_handler::result_type worker::on_paint(
     _In_ intptr_t /*lparam*/)
 {
     // TODO
+    (void)pWindow;
     return std::make_pair(false, 0);
 }

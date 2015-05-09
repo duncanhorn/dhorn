@@ -28,6 +28,8 @@ class worker final
         }
     };
 
+
+
 public:
     worker(void);
     ~worker(void);
@@ -44,15 +46,15 @@ private:
 
     dhorn::win32::callback_handler::result_type on_paint(
         _In_ dhorn::win32::window *pWindow,
-        _In_ uint32_t /*wparam*/,
-        _In_ int32_t /*lparam*/);
+        _In_ uintptr_t /*wparam*/,
+        _In_ intptr_t /*lparam*/);
 
     // Internal data that keeps track of each current value
     ComplexType _topLeft;
     ComplexType _bottomRight;
     std::vector<std::vector<StorageType>> _data;
     std::atomic_size_t _nextRow;
-    volatile size_t _iterations;
+    size_t _iterations;
     size_t _iterationsPerUpdate;
 
     // Thread pooling information
@@ -61,10 +63,10 @@ private:
 
     // Thread synchronization
     std::mutex _monitor;
-    volatile size_t _threadsExecuting;
+    size_t _threadsExecuting;
     std::condition_variable _updateReady;
     std::condition_variable _updateCompleted;
-    volatile bool _sizeUpdatePending;
+    bool _sizeUpdatePending;
 
     // Graphics information
 };

@@ -16,8 +16,8 @@ worker globals::worker;
 
 int WINAPI wWinMain(
     _In_ dhorn::win32::instance_handle instance,
-    _In_ dhorn::win32::instance_handle prevInstance,
-    _In_ wchar_t *cmdLine,
+    _In_ dhorn::win32::instance_handle /*prevInstance*/,
+    _In_ wchar_t * /*cmdLine*/,
     _In_ int cmdShow)
 {
     // Initialize the window
