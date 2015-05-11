@@ -28,6 +28,8 @@ class worker final
         }
     };
 
+    using DataType = std::vector<std::vector<StorageType>>;
+
 
 
 public:
@@ -43,16 +45,24 @@ private:
 
     void thread_proc(void);
     void synchronize_update(void);
+    void update_size(void);
 
     dhorn::win32::callback_handler::result_type on_paint(
         _In_ dhorn::win32::window *pWindow,
-        _In_ uintptr_t /*wparam*/,
-        _In_ intptr_t /*lparam*/);
+        _In_ uintptr_t wparam,
+        _In_ intptr_t lparam);
 
-    // Internal data that keeps track of each current value
+    dhorn::win32::callback_handler::result_type on_resize(
+        _In_ dhorn::win32::window *pWindow,
+        _In_ uintptr_t wparam,
+        _In_ intptr_t lparam);
+
+    // Internal data that keeps track of each current value. We use a std::shared_ptr on our data since it is possible
+    // for us to post a paint request, receive a size update, and clear our buffer information before - or worse,
+    // during - the paint
     ComplexType _topLeft;
     ComplexType _bottomRight;
-    std::vector<std::vector<StorageType>> _data;
+    std::shared_ptr<DataType> _data;
     std::atomic_size_t _nextRow;
     size_t _iterations;
     size_t _iterationsPerUpdate;
@@ -67,6 +77,7 @@ private:
     std::condition_variable _updateReady;
     std::condition_variable _updateCompleted;
     bool _sizeUpdatePending;
+    bool _running;
 
     // Graphics information
 };

@@ -37,6 +37,7 @@
 #include <mutex>
 #include <vector>
 
+#include "../math.h"
 #include "../scope_exit.h"
 #include "windows.h"
 
@@ -759,6 +760,12 @@ namespace dhorn
             bool running(void) const
             {
                 return this->_running;
+            }
+
+            rect<size_t> size(void) const
+            {
+                auto result = get_client_rect(this->_window);
+                return rect<size_t>(result.left, result.top, result.right - result.left, result.bottom - result.top);
             }
 
 #pragma endregion
