@@ -10,6 +10,9 @@
     <Filter Include="include\windows">
       <UniqueIdentifier>{4bda7774-65ee-4685-bb92-1466e1b4b3ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\d3d\garbage">
+      <UniqueIdentifier>{befea23a-0979-4466-b8ee-a5900e05b462}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\d3d.h">
@@ -77,6 +80,12 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\algorithm.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\d3d\d3d_vector.h">
+      <Filter>include\d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\d3d\garbage\dx_vector_base.h">
+      <Filter>include\d3d\garbage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
