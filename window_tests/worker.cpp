@@ -38,6 +38,9 @@ void worker::start(void)
     globals::window.add_callback_handler(
         window_message::erase_background,
         dhorn::bind_member_function(&worker::on_erase_background, this));
+    globals::window.add_callback_handler(
+        window_message::mouse_wheel,
+        dhorn::bind_member_function(&worker::on_scrollwheel, this));
 
     // Initialize the number of threads executing since the update function assums that the thread was already
     // contributing to the execution count
@@ -69,7 +72,7 @@ COLORREF DecideColor(_In_ size_t iterations)
 {
     if (iterations)
     {
-        static const size_t RESOLUTION = 10;
+        static const size_t RESOLUTION = 50;
         static const float PI = 3.14159f;
         float angle = (iterations * 2 * PI) / RESOLUTION;
         float r = cos(angle);
@@ -266,4 +269,27 @@ callback_handler::result_type worker::on_erase_background(
 {
     // Return true so that the background will not get cleared
     return std::make_pair(true, 1);
+}
+
+callback_handler::result_type worker::on_scrollwheel(
+    _In_ dhorn::win32::window * /*pWindow*/,
+    _In_ uintptr_t wparam,
+    _In_ intptr_t lparam)
+{
+    POINT pt = { LOWORD(lparam), HIWORD(lparam) };
+    ScreenToClient(globals::window.handle(), &pt);
+
+    // Ignore if not in the client area
+    auto size = globals::window.size();
+    if ((pt.x < 0) || (pt.x >= (LONG)size.width) || (pt.y < 0) || (pt.y >= (LONG)size.height))
+    {
+        return std::make_pair(false, 0);
+    }
+
+    float amt = static_cast<float>(HIWORD(wparam)) / 120;
+    amt;
+
+    // Schedule a resize since we need to clear our buffers
+    this->_sizeUpdatePending = true;
+    return std::make_pair(true, 0);
 }

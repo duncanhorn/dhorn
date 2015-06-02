@@ -64,6 +64,11 @@ private:
         _In_ uintptr_t wparam,
         _In_ intptr_t lparam);
 
+    dhorn::win32::callback_handler::result_type on_scrollwheel(
+        _In_ dhorn::win32::window *pWindow,
+        _In_ uintptr_t wparam,
+        _In_ intptr_t lparam);
+
     // Internal data that keeps track of each current value. We use a std::shared_ptr on our data since it is possible
     // for us to post a paint request, receive a size update, and clear our buffer information before - or worse,
     // during - the paint
