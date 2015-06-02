@@ -35,12 +35,16 @@ void worker::start(void)
     // Register callback handlers
     globals::window.add_callback_handler(window_message::paint, dhorn::bind_member_function(&worker::on_paint, this));
     globals::window.add_callback_handler(window_message::size, dhorn::bind_member_function(&worker::on_resize, this));
+    globals::window.add_callback_handler(
+        window_message::erase_background,
+        dhorn::bind_member_function(&worker::on_erase_background, this));
 
     // Initialize the number of threads executing since the update function assums that the thread was already
     // contributing to the execution count
     this->_threadsExecuting = this->_threadCount;
 
     this->update_size();
+    this->dc = GetDC(globals::window.handle());
 
     // Finally, begin execution!
     this->_running = true;
@@ -61,6 +65,23 @@ void worker::exit(void)
     this->_threads.clear();
 }
 
+COLORREF DecideColor(_In_ size_t iterations)
+{
+    if (iterations)
+    {
+        static const size_t RESOLUTION = 10;
+        static const float PI = 3.14159f;
+        float angle = (iterations * 2 * PI) / RESOLUTION;
+        float r = cos(angle);
+        float g = cos(angle + (2 * PI / 3));
+        float b = cos(angle + (4 * PI / 3));
+
+        return RGB((UINT)(127 * (1 + r)), (UINT)(127 * (1 + g)), (UINT)(127 * (1 + b)));
+    }
+
+    return RGB(0, 0, 0);
+}
+
 void worker::thread_proc(void)
 {
     while (this->_running)
@@ -71,8 +92,10 @@ void worker::thread_proc(void)
         for (; row_index < this->_data->size(); row_index = ++this->_nextRow)
         {
             auto &row = (*this->_data)[row_index];
-            for (auto &entry : row)
+            for (size_t col_index = 0; col_index < row.size(); ++col_index)
             {
+                auto &entry = row[col_index];
+
                 // Skip points that are already complete
                 if (entry.iterations)
                 {
@@ -85,6 +108,13 @@ void worker::thread_proc(void)
                     if (dhorn::length_squared(entry.value.imag(), entry.value.real()) >= 4)
                     {
                         entry.iterations = this->_iterations + i;
+                        entry.color = DecideColor(entry.iterations);
+
+                        {
+                            auto lock = std::unique_lock<std::mutex>(this->_drawMutex);
+                            SetPixel(this->dc, col_index, row_index, entry.color);
+                        }
+
                         break;
                     }
                 }
@@ -122,6 +152,13 @@ void worker::synchronize_update(void)
         this->_iterations += this->_iterationsPerUpdate;
         this->_updateReady.notify_all();
         this->_running = globals::window.running();
+
+        // Update the UI thread and inform it to re-paint
+        // TODO: save data
+        if (this->_running)
+        {
+            globals::window.invalidate();
+        }
     }
     else
     {
@@ -159,6 +196,15 @@ void worker::update_size(void)
             row.push_back(pt);
         }
     }
+
+    // Fill with black
+    {
+        auto lock = std::unique_lock<std::mutex>(this->_drawMutex);
+        RECT rc = { 0, 0, (LONG)size.width, (LONG)size.height };
+        dhorn::unique_brush black = CreateSolidBrush(RGB(0, 0, 0));
+        FillRect(this->dc, &rc, black);
+    }
+
 }
 
 callback_handler::result_type worker::on_paint(
@@ -166,8 +212,41 @@ callback_handler::result_type worker::on_paint(
     _In_ uintptr_t /*wparam*/,
     _In_ intptr_t /*lparam*/)
 {
-    // TODO
-    (void)pWindow;
+    pWindow;
+    //auto ps = pWindow->begin_paint();
+
+    //// Grab a strong reference to the data (in case the size changes)
+    //auto data = this->_data;
+    //auto width = (*data)[0].size();
+    //auto height = data->size();
+
+    //// Create the bitmap that we will draw to
+    //dhorn::unique_deletable_dc dc = CreateCompatibleDC(ps.device_context);
+    //dhorn::unique_bitmap backBuffer = CreateCompatibleBitmap(ps.device_context, width, height);
+
+    //int savedDC = SaveDC(dc);
+    //SelectObject(dc, backBuffer);
+
+    //// For now, we only use black and white
+    //dhorn::unique_brush white = CreateSolidBrush(RGB(255, 255, 255));
+
+    //RECT rc = { 0, 0, static_cast<LONG>(width), static_cast<LONG>(height) };
+    //FillRect(dc, &rc, white);
+
+    //// Fill in the data
+    //for (size_t i = 0; i < data->size(); ++i)
+    //{
+    //    auto &list = (*data)[i];
+    //    for (size_t j = 0; j < list.size(); ++j)
+    //    {
+    //        auto &val = list[j];
+    //        SetPixel(dc, j, i, DecideColor(val.color));
+    //    }
+    //}
+
+    //BitBlt(ps.device_context, 0, 0, width, height, dc, 0, 0, SRCCOPY);
+    //RestoreDC(dc, savedDC);
+
     return std::make_pair(false, 0);
 }
 
@@ -177,5 +256,14 @@ callback_handler::result_type worker::on_resize(
     _In_ intptr_t /*lparam*/)
 {
     this->_sizeUpdatePending = true;
-    return std::make_pair(false, 0);
+    return std::make_pair(true, 0);
+}
+
+callback_handler::result_type worker::on_erase_background(
+    _In_ dhorn::win32::window * /*pWindow*/,
+    _In_ uintptr_t /*wparam*/,
+    _In_ intptr_t /*lparam*/)
+{
+    // Return true so that the background will not get cleared
+    return std::make_pair(true, 1);
 }

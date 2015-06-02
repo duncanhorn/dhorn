@@ -87,5 +87,14 @@
     <ClInclude Include="include\dhorn\d3d\garbage\dx_vector_base.h">
       <Filter>include\d3d\garbage</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\animation_manager.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\animation.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\d3d\d3d_window.h">
+      <Filter>include\d3d</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

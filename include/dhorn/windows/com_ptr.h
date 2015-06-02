@@ -253,7 +253,7 @@ namespace dhorn
                 return this->_ptr;
             }
 
-            interface_type *operator->(void)
+            interface_type *operator->(void) const
             {
                 return this->_ptr;
             }

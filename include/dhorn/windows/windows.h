@@ -362,6 +362,21 @@ namespace dhorn
          */
 #pragma region Painting and Drawing Functions
 
+        inline device_context_handle begin_paint(_In_ window_handle window, _Out_ PAINTSTRUCT *ps)
+        {
+            return garbage::make_call_fail_on_value<HDC>(::BeginPaint, window, ps);
+        }
+
+        inline void end_paint(_In_ window_handle window, _In_ const PAINTSTRUCT &ps)
+        {
+            garbage::make_boolean_call(::EndPaint, window, &ps);
+        }
+
+        inline void invalidate_rect(_In_ window_handle window, _In_opt_ RECT *area, _In_ bool eraseBackground)
+        {
+            garbage::make_boolean_call(::InvalidateRect, window, area, eraseBackground);
+        }
+
         inline void update_window(_In_ window_handle window)
         {
             garbage::make_boolean_call(UpdateWindow, window);

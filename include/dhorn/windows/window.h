@@ -575,6 +575,75 @@ namespace dhorn
 
 
         /*
+         * paint_struct
+         */
+        struct paint_struct final
+        {
+            device_context_handle device_context;
+            PAINTSTRUCT ps;
+
+            /*
+             * Constructor(s)/Destructor
+             */
+            paint_struct(void) :
+                device_context(nullptr),
+                ps{},
+                _window(nullptr)
+            {
+            }
+
+            paint_struct(_In_ window_handle window) :
+                _window(window)
+            {
+                this->device_context = begin_paint(window, &this->ps);
+            }
+
+            ~paint_struct(void)
+            {
+                if (this->_window)
+                {
+                    end_paint(this->_window, ps);
+                }
+            }
+
+            // Cannot copy
+            paint_struct(_In_ const paint_struct &) = delete;
+            paint_struct &operator=(_In_ const paint_struct &) = delete;
+
+            // Can move
+            paint_struct(_Inout_ paint_struct &&other) :
+                paint_struct()
+            {
+                this->swap(other);
+            }
+
+            paint_struct &operator=(_Inout_ paint_struct &&rhs)
+            {
+                assert(this != &rhs);
+                this->swap(rhs);
+
+                return *this;
+            }
+
+
+
+            void swap(_Inout_ paint_struct &other)
+            {
+                std::swap(this->_window, other._window);
+                std::swap(this->device_context, other.device_context);
+                std::swap(this->ps, other.ps);
+            }
+
+
+
+        private:
+
+            window_handle _window;
+        };
+
+
+
+        /*
          * callback_handler
          */
         class window;
@@ -666,6 +735,9 @@ namespace dhorn
 
 
         public:
+            /*
+             * Constructor(s)/Destructor
+             */
             window() :
                 _running(false),
                 _nextCallbackId(0),
@@ -689,6 +761,10 @@ namespace dhorn
                 {
                     return std::make_pair(sender->on_destroy(), 0);
                 });
+            }
+
+            virtual ~window(void)
+            {
             }
 
 
@@ -766,6 +842,30 @@ namespace dhorn
             {
                 auto result = get_client_rect(this->_window);
                 return rect<size_t>(result.left, result.top, result.right - result.left, result.bottom - result.top);
+            }
+
+            paint_struct begin_paint(void)
+            {
+                EnsureWindowInitialized();
+                return paint_struct(this->_window);
+            }
+
+            void invalidate(_In_opt_ bool eraseBackground = true, _In_opt_ rect<size_t> *area = nullptr)
+            {
+                EnsureWindowInitialized();
+                if (area)
+                {
+                    RECT rc;
+                    rc.left = area->x;
+                    rc.right = rc.left + area->width;
+                    rc.top = area->y;
+                    rc.bottom = rc.top + area->height;
+                    invalidate_rect(this->_window, &rc, eraseBackground);
+                }
+                else
+                {
+                    invalidate_rect(this->_window, nullptr, eraseBackground);
+                }
             }
 
 #pragma endregion

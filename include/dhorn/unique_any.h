@@ -202,6 +202,14 @@ namespace dhorn
             }
         };
 
+        struct delete_dc
+        {
+            void operator()(_In_ win32::device_context_handle handle)
+            {
+                win32::delete_dc(handle);
+            }
+        };
+
         struct delete_object
         {
             void operator()(_In_ win32::gdi_object_handle handle)
@@ -302,8 +310,8 @@ namespace dhorn
     using unique_bitmap = unique_any<win32::bitmap_handle, garbage::delete_object, garbage::null_handle_traits<win32::bitmap_handle>>;
     using unique_brush = unique_any<win32::brush_handle, garbage::delete_object, garbage::null_handle_traits<win32::brush_handle>>;
     using unique_cursor = unique_any<win32::cursor_handle, garbage::destroy_cursor, garbage::null_handle_traits<win32::cursor_handle>>;
-    // Note, unique_device_context is for use with ::GetDC, not ::CreateDC
-    using unique_device_context = unique_any<win32::device_context_handle, garbage::release_dc, garbage::null_handle_traits<win32::device_context_handle>>;
+    using unique_deletable_dc = unique_any<win32::device_context_handle, garbage::delete_dc, garbage::null_handle_traits<win32::device_context_handle>>;
+    using unique_releasable_dc = unique_any<win32::device_context_handle, garbage::release_dc, garbage::null_handle_traits<win32::device_context_handle>>;
     using unique_gdi_object = unique_any<win32::gdi_object_handle, garbage::delete_object, garbage::null_handle_traits<win32::gdi_object_handle>>;
     using unique_icon = unique_any<win32::icon_handle, garbage::destroy_icon, garbage::null_handle_traits<win32::icon_handle>>;
     using unique_instance = unique_any<win32::instance_handle, garbage::free_library, garbage::null_handle_traits<win32::instance_handle>>;
