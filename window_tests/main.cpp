@@ -27,6 +27,8 @@ int WINAPI wWinMain(
 
     dhorn::win32::window_options options(L"Test Window");
     options.style = dhorn::win32::window_style::overlapped_window;
+    options.width = 600;
+    options.height = 400;
 
     globals::window.on_initialized([]()
     {

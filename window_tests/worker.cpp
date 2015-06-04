@@ -46,8 +46,8 @@ void worker::start(void)
     // contributing to the execution count
     this->_threadsExecuting = this->_threadCount;
 
-    this->update_size();
     this->dc = GetDC(globals::window.handle());
+    this->update_size();
 
     // Finally, begin execution!
     this->_running = true;
@@ -185,6 +185,7 @@ void worker::synchronize_update(void)
 void worker::update_size(void)
 {
     auto size = globals::window.size();
+    this->_iterations = 0;
 
     // We treat the indices as (row, column), so (x, y) is flipped
     this->_data = std::make_shared<DataType>(size.height);
@@ -280,14 +281,32 @@ callback_handler::result_type worker::on_scrollwheel(
     ScreenToClient(globals::window.handle(), &pt);
 
     // Ignore if not in the client area
-    auto size = globals::window.size();
+    auto data = this->_data;
+    dhorn::rect<size_t> size = { (*data)[0].size(), data->size() };
     if ((pt.x < 0) || (pt.x >= (LONG)size.width) || (pt.y < 0) || (pt.y >= (LONG)size.height))
     {
         return std::make_pair(false, 0);
     }
 
-    float amt = static_cast<float>(HIWORD(wparam)) / 120;
-    amt;
+    // Percentage of the current window
+    float amt = 1 / (1 + ((int16_t)HIWORD(wparam) / 120.0f));
+
+    size_t new_width = static_cast<size_t>(size.width * amt);
+    size_t new_height = static_cast<size_t>(size.height * amt);
+
+    int left = pt.x - new_width / 2;
+    int top = pt.y - new_height / 2;
+    int right = left + new_width;
+    int bottom = top + new_height;
+
+    // Convert these co-ords to complex values
+    auto topLeftReal = this->_topLeft.real() + (this->_bottomRight.real() - this->_topLeft.real()) * left / size.width;
+    auto topLeftImag = this->_bottomRight.imag() + (this->_topLeft.imag() - this->_bottomRight.imag()) * top / size.height;
+    auto bottomRightReal = this->_topLeft.real() + (this->_bottomRight.real() - this->_topLeft.real()) * right / size.width;
+    auto bottomRightImag = this->_bottomRight.imag() + (this->_topLeft.imag() - this->_bottomRight.imag()) * bottom / size.height;
+
+    this->_topLeft = { topLeftReal, topLeftImag };
+    this->_bottomRight = { bottomRightReal, bottomRightImag };
 
     // Schedule a resize since we need to clear our buffers
     this->_sizeUpdatePending = true;

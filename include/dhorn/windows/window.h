@@ -799,6 +799,7 @@ namespace dhorn
                     windowClass.instance,                               // Instance Handle
                     this);                                              // lpCreateParams
 
+                this->initialize();
                 if (this->_initializeCallback)
                 {
                     this->_initializeCallback();
@@ -959,6 +960,15 @@ namespace dhorn
                 }
 
                 return msg.wParam;
+            }
+
+
+
+            /*
+             * Custom setup code that runs after the window is created, but before invoking the initialization callback
+             */
+            virtual void initialize(void)
+            {
             }
 
 
