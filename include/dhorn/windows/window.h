@@ -384,7 +384,7 @@ namespace dhorn
             execute                 = VK_EXECUTE,
             print_screen            = VK_SNAPSHOT,
             insert                  = VK_INSERT,
-            /*delete*/
+            del                     = VK_DELETE,
             help                    = VK_HELP,
             left_windows            = VK_LWIN,
             right_windows           = VK_RWIN,

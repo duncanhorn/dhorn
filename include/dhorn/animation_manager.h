@@ -17,11 +17,26 @@
  *
  * The general "flow" of events is:
  *
- *      1. The client creates an animation instance and transfers ownership over to the animation_manager instance.
+ *      1.  The client creates an animation instance and transfers ownership over to the animation_manager instance.
+ *          In return, the animation_manager returns an animation_handle instance. The client can use this handle to
+ *          track the progress of the animation (among other things described below). Note that animation_manager deals
+ *          with animation instances using std::shared_ptr, so ownership can technically be shared if a smart_ptr is
+ *          supplied.
+ *      2.  The client calls animation_manager::update which will put the animation into the running state and call
+ *          the animation's on_begin function (assuming the animation has not been paused)
+ *      3.  Once the animation finishes (returns animation_state::completed), animation_manager will transfer the
+ *          animation instance to its completed collection and call the animation's on_completed function. The
+ *          animation will remain in this state until all references to the corresponding animation_handle have been
+ *          released. Note that if the animation_handle loses all of its references prior to entering the completed
+ *          state, the animation won't get destroyed until after the animation completes, at which time it will get
+ *          destroyed immediately.
+ *
+ * Note that if the client wishes to pause, cancel, or resume an animation, he/she can do so by calling the
+ * corresponding function on animation_manager with the corresponding animation_handle. Also note that the 'cancelled'
+ * state is considered equivalent to the 'completed' state in terms of animation lifetime management.
  */
 #pragma once
 
-#include <chrono>
 #include <map>
 
 #include "animation.h"
@@ -40,37 +55,46 @@ namespace dhorn
 
 
 
-    namespace garbage
-    {
-        /*
-         * animation_state_data
-         */
-        struct animation_state_data final
-        {
-            animation_state state;
-
-            // Constructor
-            animation_state_data() :
-                state(animation_state::pending)
-            {
-            }
-        };
-    }
-
-
-
     /*
      * animation_handle
      */
     class animation_handle final
     {
     public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        animation_handle(_In_ animation_manager *owner, _In_ animation_cookie cookie) :
+            _owner(owner),
+            _cookie(cookie)
+        {
+        }
+
+        ~animation_handle(void)
+        {
+            // TODO: Notify of destruction
+        }
+
+        // Cannot copy (otherwise we screw up the reference count)
+        animation_handle(_In_ const animation_handle &) = delete;
+        animation_handle &operator=(_In_ const animation_handle &) = delete;
+
+
+
+        /*
+         * Public Functions
+         */
+        animation_cookie id(void) const
+        {
+            return this->_cookie;
+        }
 
 
 
     private:
 
-        animation_manager *_manager;
+        animation_manager *_owner;
+        animation_cookie _cookie;
     };
 
 
@@ -80,20 +104,108 @@ namespace dhorn
      */
     class animation_manager final
     {
+        /*
+         * Internal animation_info state object
+         */
+        struct animation_info
+        {
+            std::shared_ptr<animation> instance;
+            std::shared_ptr<animation_handle> handle;
+            animation_state state;
+            bool started;
+
+            // Constructor
+            animation_info(
+                _In_ std::shared_ptr<animation> animation,
+                _In_ animation_manager *owner,
+                _In_ animation_cookie cookie) :
+                instance(std::move(animation)),
+                handle(std::make_shared<animation_handle>(owner, cookie)),
+                state(animation_state::pending),
+                started(false)
+            {
+            }
+        };
+        using AnimationMap = std::map<animation_cookie, animation_info>;
+
+
+
     public:
         /*
          * Constructor(s)/Destructor
          */
+        animation_manager(void) :
+            _nextCookie(1)
+        {
+        }
+
+
+
+        /*
+         * Client functions
+         */
+        void update(void)
+        {
+            // Since the animation_manager instance could be a global variable and because initialization of the rest
+            // of the application could take a long time, the first call to update could have an artifically large
+            // delta. Therefore, we initialize the previous time point here instead of in the constructor.
+
+            // TODO
+        }
+
+        std::shared_ptr<animation_handle> submit(_In_ animation *instance)
+        {
+            this->submit(std::make_shared<animation>(instance));
+        }
+
+        std::shared_ptr<animation_handle> submit(_In_ std::shared_ptr<animation> instance)
+        {
+            auto pair = this->_animationInfo.emplace(std::move(instance), this, NextCookie());
+            return pair.first->second.handle;
+        }
+
+        animation_state query_state(_In_ animation_handle *handle) const
+        {
+            return this->FindInfo(handle->id())->second.state;
+        }
 
 
 
     private:
 
-        struct animation_info
+        animation_cookie NextCookie(void)
         {
+            while (this->_animationInfo.find(this->_nextCookie) != std::end(this->_animationInfo))
+            {
+                ++this->_nextCookie;
+            }
 
-        };
+            return this->_nextCookie;
+        }
 
-        std::map<animation_cookie, animation_info> _animationInfo;
+        AnimationMap::iterator FindInfo(_In_ animation_cookie cookie)
+        {
+            auto itr = this->_animationInfo.find(cookie);
+            if (itr == std::end(this->_animationInfo))
+            {
+                throw std::out_of_range("animation not found");
+            }
+
+            return itr;
+        }
+
+        AnimationMap::const_iterator FindInfo(_In_ animation_cookie cookie) const
+        {
+            auto itr = this->_animationInfo.find(cookie);
+            if (itr == std::end(this->_animationInfo))
+            {
+                throw std::out_of_range("animation not found");
+            }
+
+            return itr;
+        }
+
+        AnimationMap _animationInfo;
+        animation_cookie _nextCookie;
     };
 }

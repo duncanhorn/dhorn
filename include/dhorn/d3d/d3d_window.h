@@ -7,8 +7,7 @@
  */
 #pragma once
 
-#include <d3d11.h>
-
+#include "d3d_utils.h"
 #include "../functional.h"
 #include "../unique_any.h"
 #include "../windows/com_ptr.h"
@@ -19,9 +18,22 @@ namespace dhorn
     namespace d3d
     {
         /*
-         * d3d_window
+         * d3d_window_traits - the default traits type for the basic_d3d_window class
          */
-        class d3d_window :
+        struct d3d_window_traits
+        {
+            static const DXGI_FORMAT swap_chain_format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            static const DXGI_FORMAT depth_stencil_format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+            static const UINT back_buffer_count = 1;
+        };
+
+
+
+        /*
+         * basic_d3d_window
+         */
+        template <typename Traits>
+        class basic_d3d_window :
             public dhorn::win32::window
         {
             using QualityFunc = std::function<UINT(_In_ ID3D11Device *, _Inout_ UINT *)>;
@@ -30,21 +42,18 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            d3d_window() :
-                _swapChainFormat(DXGI_FORMAT_R8G8B8A8_UNORM),
-                _depthStencilFormat(DXGI_FORMAT_D24_UNORM_S8_UINT),
-                _sampleCount(4),
-                _backBufferCount(1)
+            basic_d3d_window() :
+                _sampleCount(4)
             {
                 this->add_callback_handler(
                     win32::window_message::enter_size_move,
-                    bind_member_function(&d3d_window::on_enter_size_move, this));
+                    bind_member_function(&basic_d3d_window::on_enter_size_move, this));
                 this->add_callback_handler(
                     win32::window_message::exit_size_move,
-                    bind_member_function(&d3d_window::on_exit_size_move, this));
+                    bind_member_function(&basic_d3d_window::on_exit_size_move, this));
                 this->add_callback_handler(
                     win32::window_message::size,
-                    bind_member_function(&d3d_window::on_resize, this));
+                    bind_member_function(&basic_d3d_window::on_resize, this));
             }
 
 
@@ -80,29 +89,9 @@ namespace dhorn
             /*
              * Custom initialization values
              */
-            void set_swap_chain_format(_In_ const DXGI_FORMAT &format)
-            {
-                this->_swapChainFormat = format;
-            }
-
-            void set_depth_stencil_format(_In_ const DXGI_FORMAT &format)
-            {
-                this->_depthStencilFormat = format;
-            }
-
-            void set_msaa_level(_In_ UINT level)
-            {
-                this->_sampleCount = level;
-            }
-
             void set_msaa_quality_callback(_In_ QualityFunc func)
             {
                 this->_qualityFunc = std::move(func);
-            }
-
-            void set_back_buffer_count(_In_ UINT count)
-            {
-                this->_backBufferCount = count;
             }
 
 #pragma endregion
@@ -130,9 +119,11 @@ namespace dhorn
                 else
                 {
                     win32::throw_if_failed(this->_device->CheckMultisampleQualityLevels(
-                        this->_swapChainFormat,
+                        Traits::swap_chain_format,
                         this->_sampleCount,
                         &this->_sampleQuality));
+                    win32::throw_hr_if_false(this->_sampleQuality > 0, E_INVALIDARG);
+
                     --this->_sampleQuality;
                 }
 
@@ -148,7 +139,7 @@ namespace dhorn
                     this->_renderTargetView.get_address_of(),
                     this->_depthStencilView);
 
-                this->SetViewport(size);
+                this->SetViewports(size); // Note that this is meaningless if we set it inside of Render()
             }
 
             virtual void CreateDevice(void)
@@ -179,21 +170,15 @@ namespace dhorn
                 assert(this->_device);
                 assert(!this->_swapChain);
 
-                DXGI_SWAP_CHAIN_DESC desc{};
-                desc.BufferDesc.Width = static_cast<UINT>(size.width);
-                desc.BufferDesc.Height = static_cast<UINT>(size.height);
-                desc.BufferDesc.RefreshRate.Numerator = 60;
-                desc.BufferDesc.RefreshRate.Denominator = 1;
-                desc.BufferDesc.Format = this->_swapChainFormat;
-                desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-                desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-                desc.SampleDesc.Count = this->_sampleCount;
-                desc.SampleDesc.Quality = this->_sampleQuality;
-                desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-                desc.BufferCount = this->_backBufferCount;
-                desc.OutputWindow = this->handle();
-                desc.Windowed = true;
-                desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+                DXGI_SWAP_CHAIN_DESC desc = swap_chain_desc(
+                    static_cast<UINT>(size.width),
+                    static_cast<UINT>(size.height),
+                    this->handle(),
+                    this->_sampleCount,
+                    this->_sampleQuality,
+                    true, // Windowed
+                    Traits::swap_chain_format,
+                    Traits::back_buffer_count);
 
                 win32::com_ptr<IDXGIDevice> device = this->_device;
                 win32::com_ptr<IDXGIAdapter> adapter;
@@ -219,16 +204,12 @@ namespace dhorn
             {
                 assert(!this->_depthStencilBuffer);
 
-                D3D11_TEXTURE2D_DESC desc{};
-                desc.Width = static_cast<UINT>(size.width);
-                desc.Height = static_cast<UINT>(size.height);
-                desc.MipLevels = 1;
-                desc.ArraySize = 1;
-                desc.Format = this->_depthStencilFormat;
-                desc.SampleDesc.Count = this->_sampleCount;
-                desc.SampleDesc.Quality = this->_sampleQuality;
-                desc.Usage = D3D11_USAGE_DEFAULT;
-                desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+                D3D11_TEXTURE2D_DESC desc = depth_stencil_desc(
+                    static_cast<UINT>(size.width),
+                    static_cast<UINT>(size.height),
+                    this->_sampleCount,
+                    this->_sampleQuality,
+                    Traits::depth_stencil_format);
 
                 win32::throw_if_failed(this->_device->CreateTexture2D(
                     &desc,
@@ -246,16 +227,10 @@ namespace dhorn
                     &this->_depthStencilView));
             }
 
-            virtual void SetViewport(_In_ const dhorn::rect<size_t> &size)
+            virtual void SetViewports(_In_ const dhorn::rect<size_t> &size)
             {
                 // By default, create one view port that is the size of the window
-                D3D11_VIEWPORT viewPort{};
-                viewPort.TopLeftX = viewPort.TopLeftY = 0;
-                viewPort.Width = static_cast<UINT>(size.width);
-                viewPort.Height = static_cast<UINT>(size.height);
-                viewPort.MinDepth = 0;
-                viewPort.MaxDepth = 1;
-
+                D3D11_VIEWPORT viewPort = view_port(static_cast<UINT>(size.width), static_cast<UINT>(height));
                 this->_deviceContext->RSSetViewports(1, &viewPort);
             }
 
@@ -333,12 +308,16 @@ namespace dhorn
             win32::com_ptr<ID3D11DepthStencilView> _depthStencilView;
 
             // Data that can be set so that clients need not derive from this class unless actually needed
-            DXGI_FORMAT _swapChainFormat;
-            DXGI_FORMAT _depthStencilFormat;
             QualityFunc _qualityFunc;
             UINT _sampleCount;
             UINT _sampleQuality;
-            UINT _backBufferCount;
         };
+
+
+
+        /*
+         * basic_d3d_window type definitions
+         */
+        using d3d_window = basic_d3d_window<d3d_window_traits>;
     }
 }

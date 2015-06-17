@@ -5,7 +5,7 @@
  *
  * The "base" class for an animation, along with all relevant types and structures required for supporting an animation
  * instance. Unlike what you might think, clients generally should not be dealing with animation instances directly,
- * unless the animation type is a custom type and a desired effect is desired that could not otherwise be accomplished
+ * unless the animation type is a custom type and a special effect is desired that could not otherwise be accomplished
  * without direct access to the object. Instead, clients should generally use the animation_handle returned by
  * animation_manager.
  */
@@ -18,7 +18,6 @@ namespace dhorn
 {
     enum class animation_state
     {
-        invalid   = 0,
         pending   = 1,
         running   = 2,
         paused    = 3,
