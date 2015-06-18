@@ -33,10 +33,11 @@
  *
  * Note that if the client wishes to pause, cancel, or resume an animation, he/she can do so by calling the
  * corresponding function on animation_manager with the corresponding animation_handle. Also note that the 'cancelled'
- * state is considered equivalent to the 'completed' state in terms of animation lifetime management.
+ * state is the treated same as the 'completed' state and obeys the same animation lifetime management.
  */
 #pragma once
 
+#include <cassert>
 #include <map>
 
 #include "animation.h"
@@ -105,14 +106,21 @@ namespace dhorn
     class animation_manager final
     {
         /*
+         * Private types
+         */
+        using clock = std::chrono::high_resolution_clock;
+        using time_point = clock::time_point;
+
+
+
+        /*
          * Internal animation_info state object
          */
         struct animation_info
         {
             std::shared_ptr<animation> instance;
-            std::shared_ptr<animation_handle> handle;
             animation_state state;
-            bool started;
+            time_point prev_time;
 
             // Constructor
             animation_info(
@@ -120,10 +128,39 @@ namespace dhorn
                 _In_ animation_manager *owner,
                 _In_ animation_cookie cookie) :
                 instance(std::move(animation)),
-                handle(std::make_shared<animation_handle>(owner, cookie)),
-                state(animation_state::pending),
-                started(false)
+                state(animation_state::running),
+                prev_time(clock::now())
             {
+                instance->on_begin();
+            }
+
+            void update_state(_In_ animation_state state)
+            {
+                if (state != this->state)
+                {
+                    this->state = state;
+                    instance->on_state_change(this->state);
+
+                    switch (state)
+                    {
+                    case animation_state::running:
+                        // We call on_begin on construction, so this must be from a resume
+                        this->instance->on_resume();
+                        break;
+
+                    case animation_state::paused:
+                        this->instance->on_pause();
+                        break;
+
+                    case animation_state::canceled:
+                        this->instance->on_canceled();
+
+                        // vvv fall through vvv
+                    case animation_state::completed:
+                        this->instance->on_completed();
+                        break;
+                    }
+                }
             }
         };
         using AnimationMap = std::map<animation_cookie, animation_info>;
@@ -131,6 +168,13 @@ namespace dhorn
 
 
     public:
+        /*
+         * Public types
+         */
+        using duration = clock::duration;
+
+
+
         /*
          * Constructor(s)/Destructor
          */
@@ -146,11 +190,20 @@ namespace dhorn
          */
         void update(void)
         {
-            // Since the animation_manager instance could be a global variable and because initialization of the rest
-            // of the application could take a long time, the first call to update could have an artifically large
-            // delta. Therefore, we initialize the previous time point here instead of in the constructor.
+            auto now = clock::now();
 
-            // TODO
+            for (auto &pair : this->_animationInfo)
+            {
+                auto &info = pair.second;
+
+                if (garbage::is_running(info.state))
+                {
+                    auto elapsedTime = now - info.prev_time;
+                    info.prev_time = now;
+
+                    info.update_state(info.instance->on_update(elapsedTime));
+                }
+            }
         }
 
         std::shared_ptr<animation_handle> submit(_In_ animation *instance)
@@ -161,7 +214,49 @@ namespace dhorn
         std::shared_ptr<animation_handle> submit(_In_ std::shared_ptr<animation> instance)
         {
             auto pair = this->_animationInfo.emplace(std::move(instance), this, NextCookie());
-            return pair.first->second.handle;
+            return std::make_shared<animation_handle>(this, pair.first->first);
+        }
+
+        bool pause(_In_ animation_handle *handle)
+        {
+            auto itr = this->FindInfo(handle->id());
+            auto &info = itr->second;
+            if (!garbage::is_running(info.state))
+            {
+                // Cannot be paused if not running
+                return false;
+            }
+
+            info.update_state(animation_state::paused);
+            return true;
+        }
+
+        bool resume(_In_ animation_handle *handle)
+        {
+            auto itr = this->FindInfo(handle->id());
+            auto &info = itr->second;
+            if (!garbage::is_paused(info.state))
+            {
+                // Can't resume if not paused
+                return false;
+            }
+
+            info.update_state(animation_state::running);
+            return true;
+        }
+
+        bool cancel(_In_ animation_handle *handle)
+        {
+            auto itr = this->FindInfo(handle->id());
+            auto &info = itr->second;
+            if (garbage::is_complete(info.state))
+            {
+                // Can't cancel if already complete
+                return false;
+            }
+
+            info.update_state(animation_state::canceled);
+            return true;
         }
 
         animation_state query_state(_In_ animation_handle *handle) const
@@ -205,6 +300,7 @@ namespace dhorn
             return itr;
         }
 
+        // Animation state
         AnimationMap _animationInfo;
         animation_cookie _nextCookie;
     };

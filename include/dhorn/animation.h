@@ -16,13 +16,41 @@
 
 namespace dhorn
 {
+    /*
+     * animation_state
+     */
     enum class animation_state
     {
-        pending   = 1,
-        running   = 2,
-        paused    = 3,
-        completed = 4,
+        running   = 1,
+        paused    = 2,
+        completed = 3,
+        canceled  = 4,
     };
+
+
+
+    /*
+     * Common animation helpers
+     */
+    namespace garbage
+    {
+        // Helpers surrounding animation_state in case the enum ever expands. We have three conceptual states: running,
+        // paused, and completed, though we have more than three "true" states
+        inline constexpr bool is_complete(_In_ animation_state state)
+        {
+            return (state == animation_state::completed) || (state == animation_state::canceled);
+        }
+
+        inline constexpr bool is_running(_In_ animation_state state)
+        {
+            return state == animation_state::running;
+        }
+
+        inline constexpr bool is_paused(_In_ animation_state state)
+        {
+            return state == animation_state::paused;
+        }
+    }
 
 
 
@@ -60,7 +88,7 @@ namespace dhorn
         {
         }
 
-        virtual void on_cancelled(void)
+        virtual void on_canceled(void)
         {
         }
 
