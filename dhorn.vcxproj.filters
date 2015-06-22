@@ -102,5 +102,11 @@
     <ClInclude Include="include\dhorn\d3d\d3d_utils.h">
       <Filter>include\d3d</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\linear_animation.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\discrete_animation.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
