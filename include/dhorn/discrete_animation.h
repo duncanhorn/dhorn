@@ -3,7 +3,9 @@
  *
  * discrete_animation.h
  *
- * 
+ * Updates values at discrete times. I.e. if there are two key frames (0, 0) and (1, 1), then any time between time
+ * [0, 1) we will apply the value 0 and any time after that interval we will apply the value 1. Note that for any key
+ * frame, only one change will get sent.
  */
 #pragma once
 
@@ -29,6 +31,13 @@ namespace dhorn
         {
         }
 
+        template <typename Func>
+        discrete_animation(_In_ const Func &func) :
+            MyBase(func),
+            _prev(this->next())
+        {
+        }
+
 
 
         /*
@@ -43,12 +52,11 @@ namespace dhorn
             {
                 // Only update if our next iterator changes
                 auto next = this->next();
+                --next;
+
                 if (next != this->_prev)
                 {
                     this->_prev = next;
-
-                    // (next - 1) guaranteed to be a valid iterator
-                    --next;
                     this->update(next->second);
                 }
             }

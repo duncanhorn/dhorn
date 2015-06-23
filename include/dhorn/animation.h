@@ -13,6 +13,7 @@
 
 #include <chrono>
 #include <functional>
+#include <map>
 #include <memory>
 
 namespace dhorn
@@ -100,7 +101,7 @@ namespace dhorn
         {
         }
 
-        virtual animation_state on_update(_In_ duration elapsedTime)
+        virtual animation_state on_update(_In_ duration /*elapsedTime*/)
         {
             // By default, immediately transition to the completed state
             return animation_state::completed;
@@ -151,6 +152,13 @@ namespace dhorn
             {
             }
 
+            template <typename Func>
+            key_frame_animation(_In_ const Func &func) :
+                key_frame_animation()
+            {
+                this->set_callback(func);
+            }
+
 
 
             /*
@@ -167,24 +175,36 @@ namespace dhorn
             /*
              * Public functions
              */
+            template <typename Func>
+            void set_callback(_In_ const Func &func)
+            {
+                this->_updateFunc = func;
+            }
+
             void add_key_frame(_In_ duration time, _In_ Ty &value)
             {
                 this->_keyFrames.emplace(time, value);
 
-                // We may need to update our _next iterator. This can at most move back by one, so just go ahead and do
-                // that and then force the update of the _next iterator
-                --this->_next;
-                this->next();
+                if (this->_next != std::begin(this->_keyFrames))
+                {
+                    // We may need to update our _next iterator. This can at most move back by one, so just go ahead
+                    // and do that and then force the update of the _next iterator
+                    --this->_next;
+                    this->next();
+                }
             }
 
             void add_key_frame(_In_ duration time, _In_ Ty &&value)
             {
                 this->_keyFrames.emplace(time, std::move(value));
 
-                // We may need to update our _next iterator. This can at most move back by one, so just go ahead and do
-                // that and then force the update of the _next iterator
-                --this->_next;
-                this->next();
+                if (this->_next != std::begin(this->_keyFrames))
+                {
+                    // We may need to update our _next iterator. This can at most move back by one, so just go ahead
+                    // and do that and then force the update of the _next iterator
+                    --this->_next;
+                    this->next();
+                }
             }
 
 
@@ -203,7 +223,7 @@ namespace dhorn
 
             bool begun(void)
             {
-                return this->next() == std::begin(this->_keyFrames);
+                return this->next() != std::begin(this->_keyFrames);
             }
 
             bool completed(void)
