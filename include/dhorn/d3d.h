@@ -13,6 +13,8 @@
 static_assert(false, "ERROR: DirectX not supported on non-Windows operating systems");
 #endif  /* WIN32 */
 
+#pragma comment(lib, "d3d11.lib")
+
 /* Windows/DirectX library includes */
 #pragma warning(push)
 #pragma warning(disable:4838)
@@ -23,4 +25,5 @@ static_assert(false, "ERROR: DirectX not supported on non-Windows operating syst
 
 
 /* Additional header files */
+#include "d3d/d3d_utils.h"
 #include "d3d/vector.h"

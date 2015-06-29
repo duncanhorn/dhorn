@@ -151,10 +151,12 @@
     <ClInclude Include="include\dhorn\auto_event_cookie.h" />
     <ClInclude Include="include\dhorn\d3d.h" />
     <ClInclude Include="include\dhorn\d3d\camera.h" />
+    <ClInclude Include="include\dhorn\d3d\colors.h" />
     <ClInclude Include="include\dhorn\d3d\d3d_utils.h" />
     <ClInclude Include="include\dhorn\d3d\d3d_vector.h" />
     <ClInclude Include="include\dhorn\d3d\d3d_window.h" />
     <ClInclude Include="include\dhorn\d3d\garbage\dx_vector_base.h" />
+    <ClInclude Include="include\dhorn\d3d\shapes.h" />
     <ClInclude Include="include\dhorn\d3d\vector.h" />
     <ClInclude Include="include\dhorn\discrete_animation.h" />
     <ClInclude Include="include\dhorn\event_source.h" />

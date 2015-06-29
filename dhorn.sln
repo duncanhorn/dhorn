@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dhorn", "dhorn.vcxproj", "{F7242374-40D8-40D5-ABB5-FF54E43276F8}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "efficiency_tests", "efficiency_tests\efficiency_tests.vcxproj", "{593676EF-B372-4DFA-BA7F-250E89C2C770}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "window_tests", "window_tests\window_tests.vcxproj", "{F28D3451-1BCB-41B3-940B-71EE015E2254}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "d3d_tests", "d3d_tests\d3d_tests.vcxproj", "{2F3F6A63-A59F-4439-968B-40A099824BEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,12 @@ Global
 		{F28D3451-1BCB-41B3-940B-71EE015E2254}.Release|Win32.ActiveCfg = Release|Win32
 		{F28D3451-1BCB-41B3-940B-71EE015E2254}.Release|Win32.Build.0 = Release|Win32
 		{F28D3451-1BCB-41B3-940B-71EE015E2254}.Release|x64.ActiveCfg = Release|Win32
+		{2F3F6A63-A59F-4439-968B-40A099824BEA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2F3F6A63-A59F-4439-968B-40A099824BEA}.Debug|Win32.Build.0 = Debug|Win32
+		{2F3F6A63-A59F-4439-968B-40A099824BEA}.Debug|x64.ActiveCfg = Debug|Win32
+		{2F3F6A63-A59F-4439-968B-40A099824BEA}.Release|Win32.ActiveCfg = Release|Win32
+		{2F3F6A63-A59F-4439-968B-40A099824BEA}.Release|Win32.Build.0 = Release|Win32
+		{2F3F6A63-A59F-4439-968B-40A099824BEA}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

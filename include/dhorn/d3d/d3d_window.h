@@ -37,6 +37,8 @@ namespace dhorn
             public dhorn::win32::window
         {
             using QualityFunc = std::function<UINT(_In_ ID3D11Device *, _Inout_ UINT *)>;
+            using UpdateFunc = std::function<void(void)>;
+            using DrawFunc = std::function<void(ID3D11Device *, ID3D11DeviceContext *)>;
 
         public:
             /*
@@ -54,6 +56,8 @@ namespace dhorn
                 this->add_callback_handler(
                     win32::window_message::size,
                     bind_member_function(&basic_d3d_window::on_resize, this));
+
+                DirectX::XMStoreFloat4(&this->_backgroundColor, colors::cornflower_blue);
             }
 
 
@@ -66,6 +70,11 @@ namespace dhorn
             D3D_FEATURE_LEVEL feature_level(void) const
             {
                 return this->_featureLevel;
+            }
+
+            void XM_CALLCONV set_background(_In_ DirectX::FXMVECTOR color)
+            {
+                DirectX::XMStoreFloat4(&this->_backgroundColor, color);
             }
 
             ID3D11Device *device(void) const
@@ -89,9 +98,19 @@ namespace dhorn
             /*
              * Custom initialization values
              */
-            void set_msaa_quality_callback(_In_ QualityFunc func)
+            void msaa_quality_callback(_In_ QualityFunc func)
             {
                 this->_qualityFunc = std::move(func);
+            }
+
+            void on_update(_In_ UpdateFunc func)
+            {
+                this->_updateFunc = std::move(func);
+            }
+
+            void on_draw(_In_ DrawFunc func)
+            {
+                this->_drawFunc = std::move(func);
             }
 
 #pragma endregion
@@ -100,6 +119,9 @@ namespace dhorn
 
         protected:
 
+            /*
+             * Initialization
+             */
             virtual void initialize(void)
             {
                 // Let our base class do any initialization it needs first
@@ -230,8 +252,34 @@ namespace dhorn
             virtual void SetViewports(_In_ const dhorn::rect<size_t> &size)
             {
                 // By default, create one view port that is the size of the window
-                D3D11_VIEWPORT viewPort = view_port(static_cast<UINT>(size.width), static_cast<UINT>(height));
+                D3D11_VIEWPORT viewPort = view_port(static_cast<float>(size.width), static_cast<float>(size.height));
                 this->_deviceContext->RSSetViewports(1, &viewPort);
+            }
+
+
+
+            /*
+             * Update/render loop
+             */
+            virtual void update(void)
+            {
+                if (this->_updateFunc)
+                {
+                    this->_updateFunc();
+                }
+            }
+
+            virtual void render(void)
+            {
+                this->_deviceContext->ClearRenderTargetView(this->_renderTargetView, &this->_backgroundColor.x);
+                this->_deviceContext->ClearDepthStencilView(this->_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+                if (this->_drawFunc)
+                {
+                    this->_drawFunc(this->_device, this->_deviceContext);
+                }
+
+                win32::throw_if_failed(this->_swapChain->Present(0, 0));
             }
 
 
@@ -252,7 +300,8 @@ namespace dhorn
                     }
                     else
                     {
-                        // TODO: Update/draw
+                        this->update();
+                        this->render();
                     }
                 }
 
@@ -296,7 +345,9 @@ namespace dhorn
 
 
 
-        private:
+            /*
+             * Protected members
+             */
 
             // DirectX Interface Pointers
             D3D_FEATURE_LEVEL _featureLevel;
@@ -309,8 +360,12 @@ namespace dhorn
 
             // Data that can be set so that clients need not derive from this class unless actually needed
             QualityFunc _qualityFunc;
+            UpdateFunc _updateFunc;
+            DrawFunc _drawFunc;
             UINT _sampleCount;
             UINT _sampleQuality;
+
+            DirectX::XMFLOAT4 _backgroundColor;
         };
 
 
