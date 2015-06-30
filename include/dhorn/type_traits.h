@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <cstdint>
 #include <type_traits>
 
 namespace dhorn
@@ -122,5 +123,18 @@ namespace dhorn
     inline constexpr size_t array_size(_In_ const Ty(&)[size])
     {
         return size;
+    }
+
+
+
+    /*
+     * byte_offset
+     */
+    template <typename Ty, typename Struct>
+    inline constexpr size_t byte_offset(_In_ Ty Struct::*member)
+    {
+        return
+            reinterpret_cast<uint8_t *>(&(reinterpret_cast<Struct *>(nullptr)->*member)) -
+            reinterpret_cast<uint8_t *>(nullptr);
     }
 }

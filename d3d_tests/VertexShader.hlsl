@@ -1,4 +1,8 @@
 
+cbuffer ObjectData
+{
+    matrix viewProjectionMatrix;
+}
 
 void main(
     in float3 pos : POSITION,
@@ -7,8 +11,7 @@ void main(
     out float4 outPos : SV_POSITION,
     out float4 outColor : COLOR)
 {
-    // TODO
-    outPos = float4(pos, 1.0f);
+    outPos = mul(float4(pos, 1.0f), viewProjectionMatrix);
 
     // Pass along the color
     outColor = color;
