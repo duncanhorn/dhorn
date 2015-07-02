@@ -479,6 +479,34 @@ namespace dhorn
             zoom                    = VK_ZOOM,
             pa_1                    = VK_PA1,
             oem_clear               = VK_OEM_CLEAR,
+
+            // Alphabetic characters
+            a                       = 'A',
+            b                       = 'B',
+            c                       = 'C',
+            d                       = 'D',
+            e                       = 'E',
+            f                       = 'F',
+            g                       = 'G',
+            h                       = 'H',
+            i                       = 'I',
+            j                       = 'J',
+            k                       = 'K',
+            l                       = 'L',
+            m                       = 'M',
+            n                       = 'N',
+            o                       = 'O',
+            p                       = 'P',
+            q                       = 'Q',
+            r                       = 'R',
+            s                       = 'S',
+            t                       = 'T',
+            u                       = 'U',
+            v                       = 'V',
+            w                       = 'W',
+            x                       = 'X',
+            y                       = 'Y',
+            z                       = 'Z',
         };
 
 #pragma endregion
@@ -839,7 +867,13 @@ namespace dhorn
                 return this->_running;
             }
 
-            rect<size_t> size(void) const
+            rect<size_t> window_rect(void) const
+            {
+                auto result = get_window_rect(this->_window);
+                return rect<size_t>(result.left, result.top, result.right - result.left, result.bottom - result.top);
+            }
+
+            rect<size_t> client_rect(void) const
             {
                 auto result = get_client_rect(this->_window);
                 return rect<size_t>(result.left, result.top, result.right - result.left, result.bottom - result.top);

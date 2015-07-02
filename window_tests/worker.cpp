@@ -184,7 +184,7 @@ void worker::synchronize_update(void)
 
 void worker::update_size(void)
 {
-    auto size = globals::window.size();
+    auto size = globals::window.client_rect();
     this->_iterations = 0;
 
     // We treat the indices as (row, column), so (x, y) is flipped

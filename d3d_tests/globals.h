@@ -25,4 +25,12 @@ namespace globals
     extern dhorn::win32::com_ptr<ID3D11Buffer> cuboid_vertices;
     extern dhorn::win32::com_ptr<ID3D11Buffer> cuboid_indices;
     extern dhorn::win32::com_ptr<ID3D11Buffer> object_data;
+
+    // Camera controls
+    extern bool forward;
+    extern bool backward;
+    extern bool up;
+    extern bool down;
+    extern bool left;
+    extern bool right;
 }

@@ -23,6 +23,13 @@ dhorn::win32::com_ptr<ID3D11Buffer> globals::cuboid_vertices;
 dhorn::win32::com_ptr<ID3D11Buffer> globals::cuboid_indices;
 dhorn::win32::com_ptr<ID3D11Buffer> globals::object_data;
 
+bool globals::forward = false;
+bool globals::backward = false;
+bool globals::up = false;
+bool globals::down = false;
+bool globals::left = false;
+bool globals::right = false;
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define OUTPUT_PATH "Debug\\"
 #else
@@ -59,7 +66,7 @@ static void load_shaders(void)
 }
 
 
-void load_geometry(void)
+static void load_geometry(void)
 {
     std::vector<dhorn::d3d::vertex> cuboidVertices;
     std::vector<UINT> indices;
@@ -89,6 +96,97 @@ void load_geometry(void)
 }
 
 
+static std::pair<bool, intptr_t> key_press_handler(
+    _In_ dhorn::win32::window * /*sender*/,
+    _In_ uintptr_t wparam,
+    _In_ intptr_t lparam)
+{
+    bool handled = false;
+    bool key_down = (lparam & 0x80000000) == 0;
+
+    switch (static_cast<dhorn::win32::virtual_key>(wparam))
+    {
+    case dhorn::win32::virtual_key::up:
+    case dhorn::win32::virtual_key::w:
+        globals::forward = key_down;
+        handled = true;
+        break;
+
+    case dhorn::win32::virtual_key::down:
+    case dhorn::win32::virtual_key::s:
+        globals::backward = key_down;
+        handled = true;
+        break;
+
+    case dhorn::win32::virtual_key::left:
+    case dhorn::win32::virtual_key::a:
+        globals::left = key_down;
+        handled = true;
+        break;
+
+    case dhorn::win32::virtual_key::right:
+    case dhorn::win32::virtual_key::d:
+        globals::right = key_down;
+        handled = true;
+        break;
+
+    case dhorn::win32::virtual_key::space:
+        globals::up = key_down;
+        handled = true;
+        break;
+
+    case dhorn::win32::virtual_key::shift:
+        globals::down = key_down;
+        handled = true;
+        break;
+    }
+
+    return std::make_pair(handled, 0);
+}
+
+
+static void move_cursor(void)
+{
+    // Move the cursor to position (100, 100)
+    auto rect = globals::window.client_rect();
+    POINT pt = { static_cast<LONG>(rect.x), static_cast<LONG>(rect.y) };
+    ::ClientToScreen(globals::window.handle(), &pt);
+    ::SetCursorPos(pt.x + 300, pt.y + 200);
+}
+
+
+static std::pair<bool, intptr_t> mouse_move_handler(
+    _In_ dhorn::win32::window * /*sender*/,
+    _In_ uintptr_t /*wparam*/,
+    _In_ intptr_t lparam)
+{
+    bool handled = false;
+    size_t x = static_cast<uint16_t>(LOWORD(lparam));
+    size_t y = static_cast<uint16_t>(HIWORD(lparam));
+
+    float delta_x = static_cast<float>(x) - 300;
+    if (delta_x != 0)
+    {
+        globals::camera.rotate_y(delta_x * DirectX::XM_PI / 520);
+    }
+
+    float delta_y = static_cast<float>(y) - 200;
+    if (delta_y != 0)
+    {
+        auto v = globals::camera.right();
+        globals::camera.rotate(v, delta_y * DirectX::XM_PI / 520);
+    }
+
+    // Reset the cursor position
+    if (x != 300 || y != 200)
+    {
+        move_cursor();
+    }
+
+    return std::make_pair(handled, 0);
+}
+
+
 int WINAPI wWinMain(
     _In_ dhorn::win32::instance_handle instance,
     _In_ dhorn::win32::instance_handle /*prevInstance*/,
@@ -110,6 +208,34 @@ int WINAPI wWinMain(
     {
         load_shaders();
         load_geometry();
+        move_cursor();
+
+        // Initialize the camera
+        auto rect = globals::window.client_rect();
+        float ratio = static_cast<float>(rect.width) / static_cast<float>(rect.height);
+        globals::camera.configure_frustum(0.1f, 100.0f, DirectX::XM_PIDIV2, ratio);
+        globals::camera.set_position(DirectX::XMVectorSet(0, 0, -2, 0));
+        globals::camera.look_at(DirectX::g_XMZero, DirectX::XMVectorSet(0, 1, 0, 0));
+    });
+
+    globals::window.on_update([&]()
+    {
+        static const float delta = 0.0001f;
+
+        if (globals::up ^ globals::down)
+        {
+            globals::camera.translate_up(delta * (globals::up ? 1.0f : -1.0f));
+        }
+
+        if (globals::right ^ globals::left)
+        {
+            globals::camera.translate_right(delta * (globals::right ? 1.0f : -1.0f));
+        }
+
+        if (globals::forward ^ globals::backward)
+        {
+            globals::camera.translate_forward(delta * (globals::forward ? 1.0f : -1.0f));
+        }
     });
 
     globals::window.on_draw([&](ID3D11Device * /*device*/, ID3D11DeviceContext *context)
@@ -136,10 +262,16 @@ int WINAPI wWinMain(
         context->DrawIndexed(36, 0, 0);
     });
 
-    // Initialize the camera
-    globals::camera.configure_frustum(0.1f, 100.0f, DirectX::XM_PIDIV2, 6.0f / 4.0f);
-    globals::camera.set_position(DirectX::XMVectorSet(0, 0, -2, 0));
-    globals::camera.look_at(DirectX::g_XMZero, DirectX::XMVectorSet(0, 1, 0, 0));
+    globals::window.on_resize([&](const dhorn::rect<size_t> &clientArea)
+    {
+        float ratio = static_cast<float>(clientArea.width) / static_cast<float>(clientArea.height);
+        globals::camera.configure_frustum(0.1f, 100.0f, DirectX::XM_PIDIV2, ratio);
+    });
+
+    // Set window message handlers
+    globals::window.add_callback_handler(dhorn::win32::window_message::key_down, &key_press_handler);
+    globals::window.add_callback_handler(dhorn::win32::window_message::key_up, &key_press_handler);
+    globals::window.add_callback_handler(dhorn::win32::window_message::mouse_move, &mouse_move_handler);
 
     // Run the application!
     globals::window.run(windowClass, options, cmdShow);
