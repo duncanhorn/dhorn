@@ -114,5 +114,8 @@
     <ClInclude Include="include\dhorn\d3d\shapes.h">
       <Filter>include\d3d</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\units.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
