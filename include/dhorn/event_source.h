@@ -31,17 +31,21 @@ namespace dhorn
     /*
      * event_source
      */
-    template <typename EventFuncType>
-    class event_source final
+    template <typename Func>
+    class event_source;
+
+    template <typename ReturnType, typename... Args>
+    class event_source<ReturnType(Args...)> final
     {
-        using event_function = std::function<EventFuncType>;
-        using storage_type = std::map<event_cookie, event_function>;
+        using CallbackType = std::function<ReturnType(Args...)>;
+        using storage_type = std::map<event_cookie, CallbackType>;
 
     public:
 
         /*
          * Type Definitions
          */
+        using callback_type = CallbackType;
         using size_type = typename storage_type::size_type;
 
 
@@ -80,7 +84,7 @@ namespace dhorn
         /*
          * Public Functions
          */
-        event_cookie add(_In_ event_function func)
+        event_cookie add(_In_ callback_type func)
         {
             auto itr = this->_eventTargets.emplace(++this->_nextEventCookie, std::move(func));
             assert(itr.second);
@@ -93,41 +97,41 @@ namespace dhorn
             this->_eventTargets.erase(this->FindEvent(cookie));
         }
 
-        void invoke_one(void) const
+        void invoke_one(_In_ Args... args) const
         {
             auto itr = std::begin(this->_eventTargets);
             if (itr != std::end(this->_eventTargets))
             {
-                itr->second();
+                itr->second(args...);
             }
         }
 
         template <typename ResultFunc>
-        void invoke_one(_In_ const ResultFunc &func) const
+        void invoke_one(_In_ Args... args, _In_ const ResultFunc &func) const
         {
             // Allow callers to handle failures
             auto itr = std::begin(this->_eventTargets);
             if (itr != std::end(this->_eventTargets))
             {
-                func(itr->second());
+                func(itr->second(args...));
             }
         }
 
-        void invoke_all(void) const
+        void invoke_all(_In_ Args... args) const
         {
             for (auto &pair : this->_eventTargets)
             {
-                pair.second();
+                pair.second(args...);
             }
         }
 
         template <typename ResultFunc>
-        void invoke_all(_In_ const ResultFunc &func)
+        void invoke_all(_In_ Args... args, _In_ const ResultFunc &func)
         {
             for (auto &pair : this->_eventTargets)
             {
                 // Allow callers to handle failures
-                func(pair.second());
+                func(pair.second(args...));
             }
         }
 

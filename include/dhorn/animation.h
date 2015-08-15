@@ -16,6 +16,8 @@
 #include <map>
 #include <memory>
 
+#include "event_source.h"
+
 namespace dhorn
 {
     /*
@@ -23,6 +25,7 @@ namespace dhorn
      */
     enum class animation_state
     {
+        pending   = 0,
         running   = 1,
         paused    = 2,
         completed = 3,
@@ -61,6 +64,9 @@ namespace dhorn
      */
     class animation
     {
+        using EventSourceType = event_source<void(animation_state /*prev*/, animation_state /*new*/)>;
+        using CallbackType = EventSourceType::callback_type;
+
     public:
         /*
          * Public types
@@ -72,6 +78,11 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
+        animation(void) :
+            _currentState(animation_state::pending)
+        {
+        }
+
         virtual ~animation(void)
         {
         }
@@ -79,37 +90,131 @@ namespace dhorn
 
 
         /*
+         * Non-virtual public function(s)
+         */
+        event_cookie add_on_begin(_In_ CallbackType callback)
+        {
+            return this->_beginEventSource.add(std::move(callback));
+        }
+
+        void remove_on_begin(_In_ event_cookie cookie)
+        {
+            this->_beginEventSource.remove(cookie);
+        }
+
+        event_cookie add_on_pause(_In_ CallbackType callback)
+        {
+            return this->_pauseEventSource.add(std::move(callback));
+        }
+
+        void remove_on_pause(_In_ event_cookie cookie)
+        {
+            this->_pauseEventSource.remove(cookie);
+        }
+
+        event_cookie add_on_resume(_In_ CallbackType callback)
+        {
+            return this->_resumeEventSource.add(std::move(callback));
+        }
+
+        void remove_on_resume(_In_ event_cookie cookie)
+        {
+            this->_resumeEventSource.remove(cookie);
+        }
+
+        event_cookie add_on_canceled(_In_ CallbackType callback)
+        {
+            return this->_canceledEventSource.add(std::move(callback));
+        }
+
+        void remove_on_canceled(_In_ event_cookie cookie)
+        {
+            this->_canceledEventSource.remove(cookie);
+        }
+
+        event_cookie add_on_completed(_In_ CallbackType callback)
+        {
+            return this->_completedEventSource.add(std::move(callback));
+        }
+
+        void remove_on_completed(_In_ event_cookie cookie)
+        {
+            this->_completedEventSource.remove(cookie);
+        }
+
+
+
+        /*
          * Public virtual Function(s)
          */
-        virtual void on_begin(void)
-        {
-        }
-
-        virtual void on_pause(void)
-        {
-        }
-
-        virtual void on_resume(void)
-        {
-        }
-
-        virtual void on_completed(void)
-        {
-        }
-
-        virtual void on_canceled(void)
-        {
-        }
-
         virtual animation_state on_update(_In_ duration /*elapsedTime*/)
         {
             // By default, immediately transition to the completed state
             return animation_state::completed;
         }
 
-        virtual void on_state_change(_In_ animation_state /*newState*/)
+        virtual void on_state_change(_In_ animation_state newState)
         {
+            auto oldState = this->_currentState;
+            this->_currentState = newState;
+
+            switch (newState)
+            {
+            case animation_state::running:
+                if (oldState == animation_state::pending)
+                {
+                    this->_beginEventSource.invoke_all(oldState, newState);
+                }
+                else if (oldState == animation_state::paused)
+                {
+                    this->_resumeEventSource.invoke_all(oldState, newState);
+                }
+                else
+                {
+                    assert(false);
+                }
+                break;
+
+            case animation_state::paused:
+                if (oldState == animation_state::running)
+                {
+                    this->_pauseEventSource.invoke_all(oldState, newState);
+                }
+                else
+                {
+                    assert(false);
+                }
+                break;
+
+            case animation_state::canceled:
+                assert((oldState != animation_state::canceled) && (oldState != animation_state::completed));
+                this->_canceledEventSource.invoke_all(oldState, newState);
+                break;
+
+            case animation_state::completed:
+                assert(oldState != animation_state::completed);
+                this->_completedEventSource.invoke_all(oldState, newState);
+                break;
+
+            default:
+                assert(false);
+                break;
+            }
         }
+
+
+
+    private:
+
+        // State
+        animation_state _currentState;
+
+        // Event sources
+        EventSourceType _beginEventSource;
+        EventSourceType _pauseEventSource;
+        EventSourceType _resumeEventSource;
+        EventSourceType _canceledEventSource;
+        EventSourceType _completedEventSource;
     };
 
 

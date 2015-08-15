@@ -100,7 +100,7 @@ namespace dhorn
             this->_offset = static_cast<Ty>(v_0 - this->_slope * t_0);
         }
 
-        inline constexpr double seconds_fraction(_In_ duration duration)
+        inline constexpr double seconds_fraction(_In_ duration duration) const
         {
             return static_cast<double>(duration.count() * duration::period::num) / duration::period::den;
         }

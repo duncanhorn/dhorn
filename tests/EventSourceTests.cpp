@@ -91,10 +91,29 @@ namespace dhorn
                 int x = 0;
                 dhorn::event_source<int(void)> source;
 
-                source.add([&]() -> int { ++x; return x; });
+                auto cookie = source.add([&]() -> int { ++x; return x; });
                 source.add([&]() -> int { x += 2; return x; });
 
                 source.invoke_all([&](int val) { Assert::AreEqual(x, val); });
+                Assert::AreEqual(3, x);
+
+                source.remove(cookie);
+                source.invoke_all();
+                Assert::AreEqual(5, x);
+            }
+
+            TEST_METHOD(NonVoidArgsTest)
+            {
+                int x = 0;
+                dhorn::event_source<void(int, int)> source;
+
+                source.add([&](int a, int b)
+                {
+                    x += a + b;
+                });
+
+                source.invoke_all(1, 2);
+
                 Assert::AreEqual(3, x);
             }
         };

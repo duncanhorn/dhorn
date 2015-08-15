@@ -19,8 +19,8 @@ namespace dhorn
     {
         struct foo
         {
-            foo(int val) : val(val) {}
-            foo &operator=(int val) { this->val = val; return *this; }
+            foo(int value) : val(value) {}
+            foo &operator=(int value) { this->val = value; return *this; }
 
             bool operator==(foo &o) { return val == o.val; }
             bool operator!=(foo &o) { return !(*this == o); }

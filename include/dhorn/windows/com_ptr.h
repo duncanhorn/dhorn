@@ -83,7 +83,7 @@ namespace dhorn
         template <typename IFace>
         class com_ptr final
         {
-            static_assert(std::is_convertible<IFace *, IUnknown *>::value,
+            static_assert(std::is_base_of<IUnknown, IFace>::value,
                 "You can only declare com_ptr for types that derive from IUnknown");
         public:
             /*
@@ -110,7 +110,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<IUnknown, Ty>::value>::type>
             com_ptr(_In_opt_ Ty *ptr) :
                 com_ptr()
             {
@@ -138,7 +138,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<interface_type, Ty>::value>::type>
             com_ptr(_Inout_ com_ptr<Ty> &&other) :
                 _ptr(other._ptr)
             {
@@ -165,7 +165,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<IUnknown, Ty>::value>::type>
             com_ptr &operator=(_In_opt_ Ty *ptr)
             {
                 // We cannot call swap() here, because the assignment might throw. In the case that it does, we would
@@ -207,7 +207,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<interface_type, Ty>::value>::type>
             com_ptr &operator=(_Inout_ com_ptr<Ty> &&other)
             {
                 // We do not call swap here as it would require an extra AddRef and Release since we would need to
@@ -275,7 +275,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<IUnknown, Ty>::value>::type>
             void assign(_In_opt_ Ty *ptr)
             {
                 this->Release();
@@ -289,7 +289,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<IUnknown, Ty>::value>::type>
             void attach(_In_opt_ Ty *ptr)
             {
                 this->Release();
@@ -333,7 +333,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<IUnknown, Ty>::value>::type>
             void copy_to(_Outptr_result_maybenull_ Ty **ptr)
             {
                 // Must first assign to null in case an exception is thrown
@@ -374,7 +374,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<interface_type, Ty>::value>::type>
             inline void Assign(_In_opt_ Ty *ptr)
             {
                 assert(!this->_ptr);
@@ -384,8 +384,8 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<!std::is_convertible<Ty *, interface_type *>::value>::type,
-                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+                typename = typename std::enable_if<!std::is_base_of<interface_type, Ty>::value>::type,
+                typename = typename std::enable_if<std::is_base_of<IUnknown, Ty>::value>::type>
             inline void Assign(_In_opt_ Ty *ptr)
             {
                 assert(!this->_ptr);
@@ -397,7 +397,7 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<std::is_convertible<Ty *, interface_type *>::value>::type>
+                typename = typename std::enable_if<std::is_base_of<interface_type, Ty>::value>::type>
             inline void Attach(_In_opt_ Ty *ptr)
             {
                 // Easy case: we can just do simple assignment
@@ -407,8 +407,8 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename = typename std::enable_if<!std::is_convertible<Ty *, interface_type *>::value>::type,
-                typename = typename std::enable_if<std::is_convertible<Ty *, IUnknown *>::value>::type>
+                typename = typename std::enable_if<!std::is_base_of<interface_type, Ty>::value>::type,
+                typename = typename std::enable_if<std::is_base_of<IUnknown, Ty>::value>::type>
             inline void Attach(_In_opt_ Ty *ptr)
             {
                 // More complicated case: we must QI and Release, even if we fail

@@ -5,15 +5,18 @@
  *
  * Manages currently active animations at a level of abstraction above that of the UI framework being used. The
  * animation_manager has the concept of four different stages for animations: pending, running, paused, and completed.
- * The pending state is for animations that are queued, but not yet processed. Note that pausing an animation in this
- * state will put the animation into to the 'paused' state, and will re-enter the 'pending' state when resumed. The
- * running state indicates that the animation's on_update function will get called once for every call to update on
- * animation_manager. The paused state indicates that the animation has started (i.e. on_begin has been called), but
- * the client has expressed a desire to temporarily disable further updates to the animation. Attempting to pause an
- * already paused animation will no-op, and in similar fashion, attempting to resume a running animation will no-op as
- * well. The completed state indicates that the animation has finished (i.e. on_update has returned the value
- * animation_state::completed). Once an animation reaches the completed state, it remains there until all references to
- * the associated animation_handle have been released, at which point the animation instance will be destroyed.
+ * The pending state is for animations that have been created, but have not yet been submitted to an animation_manager
+ * instance. Thus, it is not possible for an animation to re-enter the pending state, nor is it possible for an
+ * animation to transition from the pending state to any state other than running. The running state indicates that the
+ * animation's on_update function will get called once for every call to update on animation_manager. The paused state
+ * indicates that the animation has started, but the client has expressed a desire to temporarily disable further
+ * updates to the animation. Attempting to pause an already paused animation will no-op, and in similar fashion,
+ * attempting to resume a running animation will no-op as well. The completed state indicates that the animation has
+ * finished (i.e. on_update has returned the value animation_state::completed). Once an animation reaches the completed
+ * state, it remains there until all references to the associated animation_handle have been released, at which point
+ * the animation instance will be destroyed. There is a fifth state - canceled - which will remove the animation from
+ * the list of currently running animations, though this state is just a transient state and will immediately
+ * transition to the completed state.
  *
  * The general "flow" of events is:
  *
@@ -22,18 +25,18 @@
  *          track the progress of the animation (among other things described below). Note that animation_manager deals
  *          with animation instances using std::shared_ptr, so ownership can technically be shared if a smart_ptr is
  *          supplied.
- *      2.  The client calls animation_manager::update which will put the animation into the running state and call
- *          the animation's on_begin function (assuming the animation has not been paused)
- *      3.  Once the animation finishes (returns animation_state::completed), animation_manager will transfer the
- *          animation instance to its completed collection and call the animation's on_completed function. The
- *          animation will remain in this state until all references to the corresponding animation_handle have been
- *          released. Note that if the animation_handle loses all of its references prior to entering the completed
- *          state, the animation won't get destroyed until after the animation completes, at which time it will get
- *          destroyed immediately.
+ *      2.  On submission, the animation_manager will transition the animation to the running state. Note that there is
+ *          no call to on_update at this time (since the animation has made no progress).
+ *      3.  The client calls animation_manager::update for every frame, and as long as the animation has not been
+ *          paused, canceled, or completed, animation_manager will call the animation's on_update function
+ *      4.  Once the animation finishes (returns animation_state::completed), animation_manager will transfer the
+ *          animation instance to its completed collection. The animation will remain in this state until all
+ *          references to the corresponding animation_handle have been released. Note that if the animation_handle
+ *          loses all of its references prior to entering the completed state, the animation won't get destroyed until
+ *          after the animation completes, at which time it will get destroyed immediately.
  *
  * Note that if the client wishes to pause, cancel, or resume an animation, he/she can do so by calling the
- * corresponding function on animation_manager with the corresponding animation_handle. Also note that the 'cancelled'
- * state is the treated same as the 'completed' state and obeys the same animation lifetime management.
+ * corresponding function on animation_manager with the corresponding animation_handle.
  */
 #pragma once
 
@@ -140,26 +143,6 @@ namespace dhorn
                 {
                     this->state = state;
                     instance->on_state_change(this->state);
-
-                    switch (state)
-                    {
-                    case animation_state::running:
-                        // We call on_begin on construction, so this must be from a resume
-                        this->instance->on_resume();
-                        break;
-
-                    case animation_state::paused:
-                        this->instance->on_pause();
-                        break;
-
-                    case animation_state::canceled:
-                        this->instance->on_canceled();
-
-                        // vvv fall through vvv
-                    case animation_state::completed:
-                        this->instance->on_completed();
-                        break;
-                    }
                 }
             }
         };
