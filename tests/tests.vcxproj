@@ -121,6 +121,7 @@
     <ClCompile Include="TaskPoolTests.cpp" />
     <ClCompile Include="TreeTests.cpp" />
     <ClCompile Include="UniqueAnyTests.cpp" />
+    <ClCompile Include="UnitsTests.cpp" />
     <ClCompile Include="UtfStringTests.cpp" />
     <ClCompile Include="UUIDTests.cpp" />
     <ClCompile Include="WindowsTests.cpp" />

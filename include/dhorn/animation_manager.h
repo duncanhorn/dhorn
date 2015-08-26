@@ -35,6 +35,13 @@
  *          loses all of its references prior to entering the completed state, the animation won't get destroyed until
  *          after the animation completes, at which time it will get destroyed immediately.
  *
+ *  *** NOTE: Since animation_manager deals with std::shared_ptr instances, the term "destroyed" for each animation ***
+ *  ***       instance is meant to indicate that the reference to the object is lost. I.e. if ownership is          ***
+ *  ***       completely transferred to animation_manager, then the reference count will drop to zero and the       ***
+ *  ***       animation will get destroyed. However, if the client retains a reference to the animation object,     ***
+ *  ***       then the object will stay alive, but animation_manager will have no knowledge of the existence of the ***
+ *  ***       animation.                                                                                            ***
+ *
  * Note that if the client wishes to pause, cancel, or resume an animation, he/she can do so by calling the
  * corresponding function on animation_manager with the corresponding animation_handle.
  */
@@ -44,6 +51,7 @@
 #include <map>
 
 #include "animation.h"
+#include "functional.h"
 
 namespace dhorn
 {
@@ -56,6 +64,7 @@ namespace dhorn
      * Types
      */
     using animation_cookie = size_t;
+    static const animation_cookie invalid_animation_cookie = 0;
 
 
 
@@ -64,19 +73,17 @@ namespace dhorn
      */
     class animation_handle final
     {
+        friend class animation_manager;
+
+        using DestroyCallback = std::function<void(animation_cookie)>;
+
     public:
         /*
          * Constructor(s)/Destructor
          */
-        animation_handle(_In_ animation_manager *owner, _In_ animation_cookie cookie) :
-            _owner(owner),
-            _cookie(cookie)
-        {
-        }
-
         ~animation_handle(void)
         {
-            // TODO: Notify of destruction
+            this->_callback(this->_cookie);
         }
 
         // Cannot copy (otherwise we screw up the reference count)
@@ -97,8 +104,23 @@ namespace dhorn
 
     private:
 
-        animation_manager *_owner;
+        /*
+         * Private constructor (for use by animation_manager)
+         */
+        animation_handle(_In_ animation_cookie cookie, _In_ DestroyCallback callback) :
+            _cookie(cookie),
+            _callback(std::move(callback))
+        {
+        }
+
+        void NotifyAnimationManagerDestroyed()
+        {
+            // There is nothing to notify when we are destroyed anymore, so just nop
+            this->_callback = [](animation_cookie) {};
+        }
+
         animation_cookie _cookie;
+        DestroyCallback _callback;
     };
 
 
@@ -122,19 +144,20 @@ namespace dhorn
         struct animation_info
         {
             std::shared_ptr<animation> instance;
+            std::function<void(void)> notify_destroyed;
             animation_state state;
             time_point prev_time;
+            bool has_references;
 
             // Constructor
-            animation_info(
-                _In_ std::shared_ptr<animation> animation,
-                _In_ animation_manager *owner,
-                _In_ animation_cookie cookie) :
+            animation_info(_In_ std::shared_ptr<animation> animation, _In_ std::function<void(void)> notifyDestroyed) :
                 instance(std::move(animation)),
+                notify_destroyed(std::move(notifyDestroyed)),
                 state(animation_state::running),
-                prev_time(clock::now())
+                prev_time(clock::now()),
+                has_references(true)
             {
-                instance->on_begin();
+                instance->on_state_change(animation_state::running);
             }
 
             void update_state(_In_ animation_state state)
@@ -166,6 +189,14 @@ namespace dhorn
         {
         }
 
+        ~animation_manager(void)
+        {
+            for (auto &pair : this->_animationInfo)
+            {
+                pair.second.notify_destroyed();
+            }
+        }
+
 
 
         /*
@@ -175,29 +206,46 @@ namespace dhorn
         {
             auto now = clock::now();
 
-            for (auto &pair : this->_animationInfo)
+            for (auto itr = std::begin(this->_animationInfo); itr != std::end(this->_animationInfo); )
             {
-                auto &info = pair.second;
-
-                if (garbage::is_running(info.state))
+                // Force info to fall out of scope before calling TryRemove to help prevent logic errors
                 {
-                    auto elapsedTime = now - info.prev_time;
-                    info.prev_time = now;
+                    auto &info = itr->second;
+                    if (garbage::is_running(info.state))
+                    {
+                        auto elapsedTime = now - info.prev_time;
+                        info.prev_time = now;
 
-                    info.update_state(info.instance->on_update(elapsedTime));
+                        info.update_state(info.instance->on_update(elapsedTime));
+                    }
                 }
+
+                // NOTE: TryRemove must be last call since the iterator (and its data) may become invalid
+                auto prev = itr;
+                ++itr;
+                TryRemove(prev);
             }
         }
 
         std::shared_ptr<animation_handle> submit(_In_ animation *instance)
         {
-            this->submit(std::make_shared<animation>(instance));
+            return this->submit(std::shared_ptr<animation>(instance));
         }
 
         std::shared_ptr<animation_handle> submit(_In_ std::shared_ptr<animation> instance)
         {
-            auto pair = this->_animationInfo.emplace(std::move(instance), this, NextCookie());
-            return std::make_shared<animation_handle>(this, pair.first->first);
+            auto cookie = this->NextCookie();
+            auto result = std::make_shared<animation_handle>(
+                cookie,
+                bind_member_function(&animation_manager::AnimationHandleDestroyedCallback, this));
+
+            auto pair = this->_animationInfo.emplace(
+                cookie,
+                std::move(instance),
+                std::bind(&animation_handle::NotifyAnimationManagerDestroyed, result.get()));
+            assert(pair.second);
+
+            return result;
         }
 
         bool pause(_In_ animation_handle *handle)
@@ -253,7 +301,8 @@ namespace dhorn
 
         animation_cookie NextCookie(void)
         {
-            while (this->_animationInfo.find(this->_nextCookie) != std::end(this->_animationInfo))
+            while ((this->_nextCookie == invalid_animation_cookie) ||
+                   (this->_animationInfo.find(this->_nextCookie) != std::end(this->_animationInfo)))
             {
                 ++this->_nextCookie;
             }
@@ -281,6 +330,30 @@ namespace dhorn
             }
 
             return itr;
+        }
+
+        void AnimationHandleDestroyedCallback(_In_ animation_cookie cookie)
+        {
+            // We don't call TryRemove here since it could be possible that the last reference to the animation_handle
+            // was released off of the UI thread (which is not desired, but is a lot harder for clients to control). If
+            // this is the case, and we do call TryRemove while the main update loop is running, things could get into
+            // a pretty bad state very easily... Therefore, just let the update loop do the remove
+            auto itr = this->FindInfo(cookie);
+            auto &info = itr->second;
+            info.notify_destroyed = []() {};
+            info.has_references = false;
+        }
+
+        bool TryRemove(_In_ const AnimationMap::iterator &pos)
+        {
+            auto &info = pos->second;
+            if (!info.has_references && garbage::is_complete(info.state))
+            {
+                this->_animationInfo.erase(pos);
+                return true;
+            }
+
+            return false;
         }
 
         // Animation state

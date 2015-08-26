@@ -31,9 +31,8 @@ namespace dhorn
         {
         }
 
-        template <typename Func>
-        discrete_animation(_In_ const Func &func) :
-            MyBase(func),
+        discrete_animation(_In_ update_function func) :
+            MyBase(std::move(func)),
             _prev(this->next())
         {
         }
@@ -68,6 +67,7 @@ namespace dhorn
 
     private:
 
+        // NOTE: _prev will be an end iterator up until the animation begins
         iterator_type _prev;
     };
 }

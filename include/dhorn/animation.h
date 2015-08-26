@@ -39,8 +39,8 @@ namespace dhorn
      */
     namespace garbage
     {
-        // Helpers surrounding animation_state in case the enum ever expands. We have three conceptual states: running,
-        // paused, and completed, though we have more than three "true" states
+        // Helpers surrounding animation_state in case the enum ever expands. We have four conceptual states: pending,
+        // running, paused, and completed, though we have more than four "true" states
         inline constexpr bool is_complete(_In_ animation_state state)
         {
             return (state == animation_state::completed) || (state == animation_state::canceled);
@@ -55,6 +55,11 @@ namespace dhorn
         {
             return state == animation_state::paused;
         }
+
+        inline constexpr bool is_pending(_In_ animation_state state)
+        {
+            return state == animation_state::pending;
+        }
     }
 
 
@@ -64,7 +69,7 @@ namespace dhorn
      */
     class animation
     {
-        using EventSourceType = event_source<void(animation_state /*prev*/, animation_state /*new*/)>;
+        using EventSourceType = event_source<void(animation *, animation_state /*prev*/, animation_state /*new*/)>;
         using CallbackType = EventSourceType::callback_type;
 
     public:
@@ -92,54 +97,14 @@ namespace dhorn
         /*
          * Non-virtual public function(s)
          */
-        event_cookie add_on_begin(_In_ CallbackType callback)
+        event_cookie add_state_change(_In_ CallbackType callback)
         {
-            return this->_beginEventSource.add(std::move(callback));
+            return this->_stateChangeEventSource.add(std::move(callback));
         }
 
-        void remove_on_begin(_In_ event_cookie cookie)
+        void remove_state_change(_In_ event_cookie cookie)
         {
-            this->_beginEventSource.remove(cookie);
-        }
-
-        event_cookie add_on_pause(_In_ CallbackType callback)
-        {
-            return this->_pauseEventSource.add(std::move(callback));
-        }
-
-        void remove_on_pause(_In_ event_cookie cookie)
-        {
-            this->_pauseEventSource.remove(cookie);
-        }
-
-        event_cookie add_on_resume(_In_ CallbackType callback)
-        {
-            return this->_resumeEventSource.add(std::move(callback));
-        }
-
-        void remove_on_resume(_In_ event_cookie cookie)
-        {
-            this->_resumeEventSource.remove(cookie);
-        }
-
-        event_cookie add_on_canceled(_In_ CallbackType callback)
-        {
-            return this->_canceledEventSource.add(std::move(callback));
-        }
-
-        void remove_on_canceled(_In_ event_cookie cookie)
-        {
-            this->_canceledEventSource.remove(cookie);
-        }
-
-        event_cookie add_on_completed(_In_ CallbackType callback)
-        {
-            return this->_completedEventSource.add(std::move(callback));
-        }
-
-        void remove_on_completed(_In_ event_cookie cookie)
-        {
-            this->_completedEventSource.remove(cookie);
+            this->_stateChangeEventSource.remove(cookie);
         }
 
 
@@ -156,49 +121,10 @@ namespace dhorn
         virtual void on_state_change(_In_ animation_state newState)
         {
             auto oldState = this->_currentState;
-            this->_currentState = newState;
-
-            switch (newState)
+            if (oldState != newState)
             {
-            case animation_state::running:
-                if (oldState == animation_state::pending)
-                {
-                    this->_beginEventSource.invoke_all(oldState, newState);
-                }
-                else if (oldState == animation_state::paused)
-                {
-                    this->_resumeEventSource.invoke_all(oldState, newState);
-                }
-                else
-                {
-                    assert(false);
-                }
-                break;
-
-            case animation_state::paused:
-                if (oldState == animation_state::running)
-                {
-                    this->_pauseEventSource.invoke_all(oldState, newState);
-                }
-                else
-                {
-                    assert(false);
-                }
-                break;
-
-            case animation_state::canceled:
-                assert((oldState != animation_state::canceled) && (oldState != animation_state::completed));
-                this->_canceledEventSource.invoke_all(oldState, newState);
-                break;
-
-            case animation_state::completed:
-                assert(oldState != animation_state::completed);
-                this->_completedEventSource.invoke_all(oldState, newState);
-                break;
-
-            default:
-                assert(false);
-                break;
+                this->_currentState = newState;
+                this->_stateChangeEventSource.invoke_all(this, oldState, newState);
             }
         }
 
@@ -210,11 +136,7 @@ namespace dhorn
         animation_state _currentState;
 
         // Event sources
-        EventSourceType _beginEventSource;
-        EventSourceType _pauseEventSource;
-        EventSourceType _resumeEventSource;
-        EventSourceType _canceledEventSource;
-        EventSourceType _completedEventSource;
+        EventSourceType _stateChangeEventSource;
     };
 
 
@@ -257,11 +179,10 @@ namespace dhorn
             {
             }
 
-            template <typename Func>
-            key_frame_animation(_In_ const Func &func) :
+            key_frame_animation(_In_ update_function func) :
                 key_frame_animation()
             {
-                this->set_callback(func);
+                this->set_callback(std::move(func));
             }
 
 
@@ -280,23 +201,23 @@ namespace dhorn
             /*
              * Public functions
              */
-            template <typename Func>
-            void set_callback(_In_ const Func &func)
+            void set_callback(_In_ update_function func)
             {
-                this->_updateFunc = func;
+                this->_updateFunc = std::move(func);
             }
 
-            void add_key_frame(_In_ duration time, _In_ Ty &value)
+            void add_key_frame(_In_ duration time, _In_ const Ty &value)
             {
                 this->_keyFrames.emplace(time, value);
 
                 if (this->_next != std::begin(this->_keyFrames))
                 {
                     // We may need to update our _next iterator. This can at most move back by one, so just go ahead
-                    // and do that and then force the update of the _next iterator
+                    // and do that since we force the update of the _next iterator
                     --this->_next;
-                    this->next();
                 }
+
+                this->next();
             }
 
             void add_key_frame(_In_ duration time, _In_ Ty &&value)
@@ -306,10 +227,11 @@ namespace dhorn
                 if (this->_next != std::begin(this->_keyFrames))
                 {
                     // We may need to update our _next iterator. This can at most move back by one, so just go ahead
-                    // and do that and then force the update of the _next iterator
+                    // and do that since we force the update of the _next iterator
                     --this->_next;
-                    this->next();
                 }
+
+                this->next();
             }
 
 

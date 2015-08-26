@@ -1,7 +1,7 @@
 /*
- * utf_string.h
- *
  * Duncan Horn
+ *
+ * utf_string.h
  *
  *
  */

@@ -9,9 +9,28 @@
 
 #include <limits>
 #include <ratio>
+#include <type_traits>
 
 namespace dhorn
 {
+    /*
+     * Unit types
+     */
+    enum class unit_type
+    {
+        length      = 1,
+        area        = 2,
+        volume      = 3,
+        mass        = 4,
+        time        = 5,
+        current     = 6,
+        temperature = 7,
+        quantity    = 8,
+        luminosity  = 9,
+    };
+
+
+
     /*
      * Conversion helpers (squared, cubed, etc.)
      */
@@ -27,79 +46,66 @@ namespace dhorn
                 return val * ((Power == 1) ? 1 : power<Power - 1>(val));
             }
         };
+
+
+
+        template <unit_type Type, typename Ty>
+        struct unit_traits;
+
+        template <typename Ty>
+        struct unit_traits<unit_type::length, Ty>
+        {
+            using convert_type = power<Ty, 1>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::area, Ty>
+        {
+            using convert_type = power<Ty, 2>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::volume, Ty>
+        {
+            using convert_type = power<Ty, 3>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::mass, Ty>
+        {
+            using convert_type = power<Ty, 1>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::time, Ty>
+        {
+            using convert_type = power<Ty, 1>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::current, Ty>
+        {
+            using convert_type = power<Ty, 1>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::temperature, Ty>
+        {
+            using convert_type = power<Ty, 1>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::quantity, Ty>
+        {
+            using convert_type = power<Ty, 1>;
+        };
+
+        template <typename Ty>
+        struct unit_traits<unit_type::luminosity, Ty>
+        {
+            using convert_type = power<Ty, 1>;
+        };
     }
-
-
-
-    /*
-     * Unit types
-     */
-#pragma region Unit Types
-
-    template <typename Ty>
-    struct length
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 1>;
-    };
-
-    template <typename Ty>
-    struct area
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 2>;
-    };
-
-    template <typename Ty>
-    struct volume
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 3>;
-    };
-
-    template <typename Ty>
-    struct mass
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 1>;
-    };
-
-    template <typename Ty>
-    struct time
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 1>;
-    };
-
-    template <typename Ty>
-    struct current
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 1>;
-    };
-
-    template <typename Ty>
-    struct temperature
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 1>;
-    };
-
-    template <typename Ty>
-    struct quantity // TODO: rename? Example unit is mole
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 1>;
-    };
-
-    template <typename Ty>
-    struct luminosity
-    {
-        using value_type = Ty;
-        using convert_type = garbage::power<Ty, 1>;
-    };
-
-#pragma endregion
 
 
 
@@ -108,6 +114,10 @@ namespace dhorn
      */
 #pragma region Unit Type
 
+    template <unit_type Unit, typename Ty, typename Ratio>
+    class unit;
+
+    // Helpers
     namespace garbage
     {
         template <typename Ty>
@@ -119,20 +129,39 @@ namespace dhorn
         struct is_ratio<std::ratio<Num, Den>> : std::true_type
         {
         };
+
+
+
+        template <typename Lhs, typename Rhs>
+        struct unit_result_type;
+
+        template <unit_type Unit, typename Ty, typename Ratio, typename Rhs>
+        struct unit_result_type<unit<Unit, Ty, Ratio>, Rhs>
+        {
+            using type = unit<Unit, typename std::common_type<Ty, Rhs>::type, Ratio>;
+        };
     }
 
 
 
-    template <typename Unit, typename Ratio>
+    template <unit_type Unit, typename Ty, typename Ratio>
     class unit final
     {
         static_assert(garbage::is_ratio<Ratio>::value, "Second template argument must be of type std::ratio");
+
+        /*
+         * Private types
+         */
+        using Traits = garbage::unit_traits<Unit, Ty>;
+
+
 
     public:
         /*
          * Public types
          */
-        using value_type = typename Unit::value_type;
+        using value_type = typename Ty;
+        static const unit_type type = Unit;
 
 
 
@@ -144,16 +173,16 @@ namespace dhorn
         {
         }
 
+        unit(_In_ value_type val) :
+            _value(std::move(val))
+        {
+        }
+
         // Default copy/move
         unit(_In_ const unit &) = default;
         unit(_Inout_ unit &&) = default;
         unit &operator=(_In_ const unit &) = default;
         unit &operator=(_Inout_ unit &&) = default;
-
-        unit(_In_ value_type val) :
-            _value(std::move(val))
-        {
-        }
 
 
 
@@ -282,6 +311,28 @@ namespace dhorn
 
         value_type _value;
     };
+
+
+
+    /*
+     * Operators
+     */
+
+    // Addition
+    //template <
+    //    unit_type Unit,
+    //    typename Ty1, typename Ratio1,
+    //    typename Ty2, typename Ratio2>
+    //unit<Unit, Ratio> operator+(_In_ const unit<Unit, Ratio> &lhs, _In_ const unit<Unit, Ratio> &rhs)
+    //{
+    //    return unit<Unit, Ratio>(lhs) += rhs;
+    //}
+
+    //template <typename Unit, typename Ratio, typename Ty>
+    //unit<Unit, Ratio> operator+(_In_ const unit<Unit, Ratio> &lhs, _In_ Ty rhs)
+    //{
+    //    return unit<Unit, Ratio>(lhs) += rhs;
+    //}
 
 #pragma endregion
 }
