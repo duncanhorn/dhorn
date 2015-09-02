@@ -9,7 +9,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
-//#include <dhorn/units.h>
+#include <dhorn/units.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

@@ -81,6 +81,12 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
+        animation_handle(_In_ animation_cookie cookie, _In_ DestroyCallback callback) :
+            _cookie(cookie),
+            _callback(std::move(callback))
+        {
+        }
+
         ~animation_handle(void)
         {
             this->_callback(this->_cookie);
@@ -103,15 +109,6 @@ namespace dhorn
 
 
     private:
-
-        /*
-         * Private constructor (for use by animation_manager)
-         */
-        animation_handle(_In_ animation_cookie cookie, _In_ DestroyCallback callback) :
-            _cookie(cookie),
-            _callback(std::move(callback))
-        {
-        }
 
         void NotifyAnimationManagerDestroyed()
         {
@@ -160,11 +157,11 @@ namespace dhorn
                 instance->on_state_change(animation_state::running);
             }
 
-            void update_state(_In_ animation_state state)
+            void update_state(_In_ animation_state newState)
             {
-                if (state != this->state)
+                if (newState != this->state)
                 {
-                    this->state = state;
+                    this->state = newState;
                     instance->on_state_change(this->state);
                 }
             }
@@ -218,6 +215,12 @@ namespace dhorn
 
                         info.update_state(info.instance->on_update(elapsedTime));
                     }
+
+                    // We are expected to transfer any canceled animation to the completed state prior to destroying
+                    if (info.state == animation_state::canceled)
+                    {
+                        info.update_state(animation_state::completed);
+                    }
                 }
 
                 // NOTE: TryRemove must be last call since the iterator (and its data) may become invalid
@@ -240,9 +243,11 @@ namespace dhorn
                 bind_member_function(&animation_manager::AnimationHandleDestroyedCallback, this));
 
             auto pair = this->_animationInfo.emplace(
-                cookie,
-                std::move(instance),
-                std::bind(&animation_handle::NotifyAnimationManagerDestroyed, result.get()));
+                std::piecewise_construct,
+                std::forward_as_tuple(cookie),
+                std::forward_as_tuple(
+                    std::move(instance),
+                    std::bind(&animation_handle::NotifyAnimationManagerDestroyed, result.get())));
             assert(pair.second);
 
             return result;

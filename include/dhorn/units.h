@@ -41,7 +41,7 @@ namespace dhorn
         {
             static_assert(Power != 0, "Power of zero is not supported");
 
-            inline constexpr Ty operator()(_In_ const Ty &val)
+            inline constexpr Ty operator()(_In_ const Ty &val) const
             {
                 return val * ((Power == 1) ? 1 : power<Power - 1>(val));
             }
@@ -189,13 +189,13 @@ namespace dhorn
         /*
          * Operators
          */
-        unit &operator=(_In_ const value_type &val)
+        unit &operator=(_In_ const value_type val)
         {
-            this->_value = val;
+            this->_value = std::move(val);
             return *this;
         }
 
-        // Sign
+        // Unary operators
         unit operator+(void) const
         {
             return *this;
@@ -206,7 +206,6 @@ namespace dhorn
             return unit(-this->_value);
         }
 
-        // Addition
         unit &operator++(void)
         {
             ++this->_value;
@@ -218,19 +217,6 @@ namespace dhorn
             return unit(this->_value++);
         }
 
-        unit &operator+=(_In_ const unit &rhs)
-        {
-            this->_value += rhs._value;
-            return *this;
-        }
-
-        unit &operator+=(_In_ const value_type &val)
-        {
-            this->_value += val;
-            return *this;
-        }
-
-        // Subtraction
         unit &operator--(void)
         {
             --this->_value;
@@ -242,35 +228,16 @@ namespace dhorn
             return unit(this->_value--);
         }
 
-        unit &operator-=(_In_ const unit &rhs)
-        {
-            this->_value -= rhs._value;
-            return *this;
-        }
-
-        unit &operator-=(_In_ const value_type &val)
-        {
-            this->_value -= val;
-            return *this;
-        }
-
-        // Multiplication
+        // Multiplication/Division/Modulous
         unit &operator*=(_In_ const value_type &val)
         {
             this->_value *= val;
             return *this;
         }
 
-        // Division/modulous
         unit &operator/=(_In_ const value_type &val)
         {
             this->_value /= val;
-            return *this;
-        }
-
-        unit &operator%=(_In_ const unit &rhs)
-        {
-            this->_value %= rhs._value;
             return *this;
         }
 
@@ -315,6 +282,37 @@ namespace dhorn
 
 
     /*
+     * Value Multiplication/Division/Modulous
+     */
+    template <unit_type Unit, typename Ty, typename Ratio, typename ValueType>
+    inline unit<Unit, Ty, Ratio> operator*(_In_ const unit<Unit, Ty, Ratio> &lhs, _In_ const ValueType &rhs)
+    {
+        return unit<Unit, Ty, Ratio>(lhs.value() * rhs);
+    }
+
+    template <typename ValueType, unit_type Unit, typename Ty, typename Ratio>
+    inline unit<Unit, Ty, Ratio> operator*(_In_ const ValueType &lhs, _In_ const unit<Unit, Ty, Ratio> &rhs)
+    {
+        return unit<Unit, Ty, Ratio>(lhs * rhs.value());
+    }
+
+    template <unit_type Unit, typename Ty, typename Ratio, typename ValueType>
+    inline unit<Unit, Ty, Ratio> operator/(_In_ const unit<Unit, Ty, Ratio> &lhs, _In_ const ValueType &rhs)
+    {
+        // Note that it does not make sense to divide a value by a unit; only a unit by a value
+        return unit<Unit, Ty, Ratio>(lhs.value() / rhs);
+    }
+
+    template <unit_type Unit, typename Ty, typename Ratio, typename ValueType>
+    inline unit<Unit, Ty, Ratio> operator%(_In_ const unit<Unit, Ty, Ratio> &lhs, _In_ const ValueType &rhs)
+    {
+        // Note that it does not make sense to divide a value by a unit; only a unit by a value
+        return unit<Unit, Ty, Ratio>(lhs.value() % rhs);
+    }
+
+
+
+    /*
      * Operators
      */
 
@@ -333,6 +331,47 @@ namespace dhorn
     //{
     //    return unit<Unit, Ratio>(lhs) += rhs;
     //}
+
+#pragma endregion
+
+
+
+#pragma region Type Definitions
+
+    enum class unit_type
+    {
+        length = 1,
+        area = 2,
+        volume = 3,
+        mass = 4,
+        time = 5,
+        current = 6,
+        temperature = 7,
+        quantity = 8,
+        luminosity = 9,
+    };
+
+    // TODO: Fix all of these ratios
+    // TODO: Can we get away with not using double...?
+
+    // Length; base is meter
+    using attometer     = unit<unit_type::length, intmax_t, std::atto>;
+    using femtometer    = unit<unit_type::length, intmax_t, std::femto>;
+    using picometer     = unit<unit_type::length, intmax_t, std::pico>;
+    using nanometer     = unit<unit_type::length, intmax_t, std::nano>;
+    using micrometer    = unit<unit_type::length, intmax_t, std::micro>;
+    using millimeter    = unit<unit_type::length, intmax_t, std::milli>;
+    using centimeter    = unit<unit_type::length, intmax_t, std::centi>;
+    using decimeter     = unit<unit_type::length, intmax_t, std::deci>;
+    using meter         = unit<unit_type::length, intmax_t, std::ratio<1>>;
+    using decameter     = unit<unit_type::length, intmax_t, std::deca>;
+    using hectometer    = unit<unit_type::length, intmax_t, std::hecto>;
+    using kilometer     = unit<unit_type::length, intmax_t, std::kilo>;
+    using megameter     = unit<unit_type::length, intmax_t, std::mega>;
+    using gigameter     = unit<unit_type::length, intmax_t, std::giga>;
+    using terameter     = unit<unit_type::length, intmax_t, std::tera>;
+    using petameter     = unit<unit_type::length, intmax_t, std::peta>;
+    using exameter      = unit<unit_type::length, intmax_t, std::exa>;
 
 #pragma endregion
 }
