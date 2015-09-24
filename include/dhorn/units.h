@@ -18,18 +18,10 @@ namespace dhorn
      */
     namespace garbage
     {
-        template <typename Ty, size_t Power>
-        struct unit_power
+        template <typename Ty>
+        struct unit_type_base
         {
-            static_assert(Power != 0, "Power of zero is not supported");
-
             using type = Ty;
-
-            // TODO: Due to new naming, give this function a name
-            inline constexpr Ty operator()(_In_ const Ty &val) const
-            {
-                return val * ((Power == 1) ? 1 : unit_power<Power - 1>(val));
-            }
         };
     }
 
@@ -74,66 +66,28 @@ namespace dhorn
 
 
 
-        template <typename Lhs, typename Rhs>
-        struct unit_result_type;
-
-        template <typename UnitType1, typename Ratio1, typename UnitType2, typename Ratio2>
-        struct unit_result_type<unit<UnitType1, Ratio1>, unit<UnitType2, Ratio2>>
+        template <
+            typename From,
+            typename To,
+            typename Ty,
+            typename = std::enable_if<is_ratio<From>::value>::type,
+            typename = std::enable_if<is_ratio<To>::value>::type>
+        inline constexpr Ty ratio_convert(_In_ const Ty &val)
         {
-        private:
-            // The result of arithmetic operation op(val1, val2)
-            //      val1 = x * (n1 / d1)
-            //      val2 = y * (n2 / d2)
-            // is going to have a resulting ratio of type std::ratio<n', d'> where
-            //      n' = GCF(n1 * d2, n2 * d1)
-            //      d' = d1 * d2
-            //  and a resulting value of
-            //      op(x * n1 * d2, y * n2 * d1) / n'
-            //
-            // Note the candidates for integer overflow:
-            //      n1 * d2
-            //      n2 * d1
-            //      d1 * d2
-            //
-            // The last one (d1 * d2) is particularly worrisome in cases where both units are very "small" (think
-            // adding picometers to picometers). The other two aren't as worrisome (since adding gigameters to
-            // picometers will almost certainly overflow in units of picometers), but we should still give the correct
-            // ratio for the result type and instead let the overflow happen when the operation takes place. E.g. if
-            // we are adding zero gigameters to 10 picometers, we would expect no overflow to take place. To accomplish
-            // this, we need to separate numerators and denominators out so that we can deal with and reduce each
-            // separately
-            using Num1 = std::ratio<Ratio1::num, 1>;
-            using Num2 = std::ratio<Ratio2::num, 1>;
-            using Den1 = std::ratio<1, Ratio1::den>;
-            using Den2 = std::ratio<1, Ratio2::den>;
-
-            using DenRatio1 = std::ratio_divide<Den1, Den2>;
-            using DenRatio2 = std::ratio_divide<Den2, Den1>;
-
-
-
-
-            // Attempt to reduce the denominator of each ratio. Note that if the numerator of one is very large and
-            // the denominator of the other is very large, we will likely have integer overflow, but even if we were
-            // able to avoid it here, the final result would more than likely have the same issue
-            using Den1Ratio = std::ratio<1, Ratio1::den>;
-            using Den2Ratio = std::ratio<1, Ratio2::den>;
-
-
-
-
-
-
-            using Unit1 = unit<UnitType1, Ratio1>;
-            using Unit2 = unit<UnitType2, Ratio2>;
-
-            using ValueType1 = typename UnitType1::type;
-            using ValueType2 = typename UnitType2::type;
-            using CommonValueType = typename std::common_type<ValueType1, ValueType2>::type;
-
-        public:
-            // TODO: using type = unit<UnitType, typename std::common_type<Ty, Rhs>::type, Ratio>;
-        };
+            using convert_ratio = std::ratio_divide<From, To>;
+            return
+                ((convert_ratio::num == 1) && (convert_ratio::den == 1))
+                ? val
+                : (
+                    (convert_ratio::den == 1)
+                    ? (val * convert_ratio::num)
+                    : (
+                        (convert_ratio::num == 1)
+                        ? (val / convert_ratio::den)
+                        : (val * convert_ratio::num / convert_ratio::den)
+                      )
+                  );
+        }
     }
 
 
@@ -146,39 +100,28 @@ namespace dhorn
     namespace unit_type
     {
         template <typename Ty>
-        struct length : public garbage::unit_power<Ty, 1> {};
+        struct length : public garbage::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct area : public garbage::unit_power<Ty, 2> {};
+        struct area : public garbage::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct volume : public garbage::unit_power<Ty, 3> {};
+        struct volume : public garbage::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct mass : public garbage::unit_power<Ty, 1> {};
+        struct mass : public garbage::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct time : public garbage::unit_power<Ty, 1> {};
+        struct time : public garbage::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct current : public garbage::unit_power<Ty, 1> {};
-
-        template <typename Ty>
-        struct temperature : public garbage::unit_power<Ty, 1> {};
-
-        template <typename Ty>
-        struct quantity : public garbage::unit_power<Ty, 1> {};
-
-        template <typename Ty>
-        struct luminosity : public garbage::unit_power<Ty, 1> {};
+        struct current : public garbage::unit_type_base<Ty> {};
     }
 
 #pragma endregion
 
 
 
-    // NOTE: Arithmetic operations can very easily overflow if the GCF of the denominators is small compared to the
-    // two denominators. Therefore, it is highly recommended that only powers of ten are used
     template <typename UnitType, typename Ratio>
     class unit final
     {
@@ -205,6 +148,12 @@ namespace dhorn
         {
         }
 
+        template <typename OtherRatio>
+        unit(_In_ const unit<UnitType, OtherRatio> &other) :
+            _value(garbage::ratio_convert<OtherRatio, Ratio>(other.value()))
+        {
+        }
+
         // Default copy/move
         unit(_In_ const unit &) = default;
         unit(_Inout_ unit &&) = default;
@@ -219,6 +168,13 @@ namespace dhorn
         unit &operator=(_In_ const value_type val)
         {
             this->_value = std::move(val);
+            return *this;
+        }
+
+        template <typename OtherRatio>
+        unit &operator=(_In_ unit<UnitType, OtherRatio> &other)
+        {
+            this->_value = garbage::ratio_convert<OtherRatio, Ratio>(other.value());
             return *this;
         }
 
@@ -342,22 +298,81 @@ namespace dhorn
     /*
      * Operators
      */
+    template <typename UnitType, typename Ratio, typename ValueType>
+    inline bool operator==(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    {
+        return lhs.value() == rhs;
+    }
 
-    // Addition
-    //template <
-    //    unit_type Unit,
-    //    typename Ty1, typename Ratio1,
-    //    typename Ty2, typename Ratio2>
-    //unit<Unit, Ratio> operator+(_In_ const unit<Unit, Ratio> &lhs, _In_ const unit<Unit, Ratio> &rhs)
-    //{
-    //    return unit<Unit, Ratio>(lhs) += rhs;
-    //}
+    template <typename ValueType, typename UnitType, typename Ratio>
+    inline bool operator==(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return lhs == rhs.value();
+    }
 
-    //template <typename Unit, typename Ratio, typename Ty>
-    //unit<Unit, Ratio> operator+(_In_ const unit<Unit, Ratio> &lhs, _In_ Ty rhs)
-    //{
-    //    return unit<Unit, Ratio>(lhs) += rhs;
-    //}
+    template <typename UnitType, typename Ratio>
+    inline bool operator==(_In_ const unit<UnitType, Ratio> &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return lhs.value() == rhs.value();
+    }
+
+    template <typename UnitType, typename Ratio, typename ValueType>
+    inline bool operator!=(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    {
+        return lhs.value() != rhs;
+    }
+
+    template <typename ValueType, typename UnitType, typename Ratio>
+    inline bool operator!=(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return lhs != rhs.value();
+    }
+
+    template <typename UnitType, typename Ratio>
+    inline bool operator!=(_In_ const unit<UnitType, Ratio> &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return lhs.value() != rhs.value();
+    }
+
+    template <typename UnitType, typename Ratio, typename ValueType>
+    inline unit<UnitType, Ratio> operator+(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    {
+        return unit<UnitType, Ratio>(lhs.value() + rhs);
+    }
+
+    template <typename ValueType, typename UnitType, typename Ratio>
+    inline unit<UnitType, Ratio> operator+(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return unit<UnitType, Ratio>(lhs + rhs.value());
+    }
+
+    template <typename UnitType, typename Ratio>
+    inline unit<UnitType, Ratio> operator+(
+        _In_ const unit<UnitType, Ratio> &lhs,
+        _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return unit<UnitType, Ratio>(lhs.value() + rhs.value());
+    }
+
+    template <typename UnitType, typename Ratio, typename ValueType>
+    inline unit<UnitType, Ratio> operator-(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    {
+        return unit<UnitType, Ratio>(lhs.value() - rhs);
+    }
+
+    template <typename ValueType, typename UnitType, typename Ratio>
+    inline unit<UnitType, Ratio> operator-(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return unit<UnitType, Ratio>(lhs - rhs.value());
+    }
+
+    template <typename UnitType, typename Ratio>
+    inline unit<UnitType, Ratio> operator-(
+        _In_ const unit<UnitType, Ratio> &lhs,
+        _In_ const unit<UnitType, Ratio> &rhs)
+    {
+        return unit<UnitType, Ratio>(lhs.value() - rhs.value());
+    }
 
 
 
@@ -372,21 +387,7 @@ namespace dhorn
         typename = typename std::enable_if<std::is_same<UnitType, typename garbage::unit_traits<TargetType>::unit_type>::value>::type>
     inline constexpr TargetType unit_cast(_In_ const unit<UnitType, Ratio> &val)
     {
-        using target_ratio = typename garbage::unit_traits<TargetType>::ratio_type;
-        using convert_ratio = std::ratio_divide<Ratio, target_ratio>;
-
-        return
-            ((convert_ratio::num == 1) && (convert_ratio::den == 1))
-            ? TargetType(val.value())
-            : (
-                (convert_ratio::den == 1)
-                ? TargetType(val.value() * convert_ratio::num)
-                : (
-                    (convert_ratio::num == 1)
-                    ? TargetType(val.value() / convert_ratio::den)
-                    : TargetType(val.value() * convert_ratio::num / convert_ratio::den)
-                )
-            );
+        return TargetType(val);
     }
 
 #pragma endregion
@@ -400,41 +401,158 @@ namespace dhorn
     // Length; base is meter
 #pragma region Length
 
-    // SI units
-    using attometers    = unit<unit_type::length<intmax_t>, std::atto>;
-    using femtometers   = unit<unit_type::length<intmax_t>, std::femto>;
-    using picometers    = unit<unit_type::length<intmax_t>, std::pico>;
-    using nanometers    = unit<unit_type::length<intmax_t>, std::nano>;
-    using micrometers   = unit<unit_type::length<intmax_t>, std::micro>;
-    using millimeters   = unit<unit_type::length<intmax_t>, std::milli>;
-    using centimeters   = unit<unit_type::length<intmax_t>, std::centi>;
-    using decimeters    = unit<unit_type::length<intmax_t>, std::deci>;
-    using meters        = unit<unit_type::length<intmax_t>, std::ratio<1>>;
-    using decameters    = unit<unit_type::length<intmax_t>, std::deca>;
-    using hectometers   = unit<unit_type::length<intmax_t>, std::hecto>;
-    using kilometers    = unit<unit_type::length<intmax_t>, std::kilo>;
-    using megameters    = unit<unit_type::length<intmax_t>, std::mega>;
-    using gigameters    = unit<unit_type::length<intmax_t>, std::giga>;
-    using terameters    = unit<unit_type::length<intmax_t>, std::tera>;
-    using petameters    = unit<unit_type::length<intmax_t>, std::peta>;
-    using exameters     = unit<unit_type::length<intmax_t>, std::exa>;
+    // Metric
+    using attometers        = unit<unit_type::length<intmax_t>, std::atto>;
+    using femtometers       = unit<unit_type::length<intmax_t>, std::femto>;
+    using picometers        = unit<unit_type::length<intmax_t>, std::pico>;
+    using nanometers        = unit<unit_type::length<intmax_t>, std::nano>;
+    using micrometers       = unit<unit_type::length<intmax_t>, std::micro>;
+    using millimeters       = unit<unit_type::length<intmax_t>, std::milli>;
+    using centimeters       = unit<unit_type::length<intmax_t>, std::centi>;
+    using decimeters        = unit<unit_type::length<intmax_t>, std::deci>;
+    using meters            = unit<unit_type::length<intmax_t>, std::ratio<1>>;
+    using decameters        = unit<unit_type::length<intmax_t>, std::deca>;
+    using hectometers       = unit<unit_type::length<intmax_t>, std::hecto>;
+    using kilometers        = unit<unit_type::length<intmax_t>, std::kilo>;
+    using megameters        = unit<unit_type::length<intmax_t>, std::mega>;
+    using gigameters        = unit<unit_type::length<intmax_t>, std::giga>;
+    using terameters        = unit<unit_type::length<intmax_t>, std::tera>;
+    using petameters        = unit<unit_type::length<intmax_t>, std::peta>;
+    using exameters         = unit<unit_type::length<intmax_t>, std::exa>;
 
-    // TODO: Imperial
+    // Imperial
+    using thous             = unit<unit_type::length<intmax_t>, std::ratio<254, 10000000>>;
+    using inches            = unit<unit_type::length<intmax_t>, std::ratio<254, 10000>>;
+    using feet              = unit<unit_type::length<intmax_t>, std::ratio<3048, 10000>>;
+    using chains            = unit<unit_type::length<intmax_t>, std::ratio<201168, 10000>>;
+    using furlongs          = unit<unit_type::length<intmax_t>, std::ratio<201168, 1000>>;
+    using miles             = unit<unit_type::length<intmax_t>, std::ratio<1609344, 1000>>;
+    using leagues           = unit<unit_type::length<intmax_t>, std::ratio<4828032, 1000>>;
+    using fathoms           = unit<unit_type::length<intmax_t>, std::ratio<18288, 10000>>;
+    using cables            = unit<unit_type::length<intmax_t>, std::ratio<1853184, 10000>>;
+    using nautical_miles    = unit<unit_type::length<intmax_t>, std::ratio<1853184, 1000>>;
+    using links             = unit<unit_type::length<intmax_t>, std::ratio<201168, 1000000>>;
+    using rods              = unit<unit_type::length<intmax_t>, std::ratio<50292, 10000>>;
 
 #pragma endregion
 
-    //enum class unit_type
-    //{
-    //    length = 1,
-    //    area = 2,
-    //    volume = 3,
-    //    mass = 4,
-    //    time = 5,
-    //    current = 6,
-    //    temperature = 7,
-    //    quantity = 8,
-    //    luminosity = 9,
-    //};
+
+
+    // Area; base is square meters
+#pragma region Area
+
+    // TODO
+
+#pragma endregion
+
+
+
+    // Volume; base is meters cubed
+#pragma region Volume
+
+    // TODO
+
+#pragma endregion
+
+
+
+    // Mass; base is gram (TODO: Should this actually be kilogram?)
+#pragma region Mass
+
+    // Metric
+    using attograms         = unit<unit_type::mass<intmax_t>, std::atto>;
+    using femtograms        = unit<unit_type::mass<intmax_t>, std::femto>;
+    using picograms         = unit<unit_type::mass<intmax_t>, std::pico>;
+    using nanograms         = unit<unit_type::mass<intmax_t>, std::nano>;
+    using micrograms        = unit<unit_type::mass<intmax_t>, std::micro>;
+    using milligrams        = unit<unit_type::mass<intmax_t>, std::milli>;
+    using centigrams        = unit<unit_type::mass<intmax_t>, std::centi>;
+    using decigrams         = unit<unit_type::mass<intmax_t>, std::deci>;
+    using grams             = unit<unit_type::mass<intmax_t>, std::ratio<1>>;
+    using decagrams         = unit<unit_type::mass<intmax_t>, std::deca>;
+    using hectograms        = unit<unit_type::mass<intmax_t>, std::hecto>;
+    using kilograms         = unit<unit_type::mass<intmax_t>, std::kilo>;
+    using megagrams         = unit<unit_type::mass<intmax_t>, std::mega>;
+    using gigagrams         = unit<unit_type::mass<intmax_t>, std::giga>;
+    using teragrams         = unit<unit_type::mass<intmax_t>, std::tera>;
+    using petagrams         = unit<unit_type::mass<intmax_t>, std::peta>;
+    using exagrams          = unit<unit_type::mass<intmax_t>, std::exa>;
+
+    using metric_tonnes     = megagrams;
+
+    // Imperial
+    using grains            = unit<unit_type::mass<intmax_t>, std::ratio<6479891LL, 100000000LL>>;
+    using drachms           = unit<unit_type::mass<intmax_t>, std::ratio<17718451953125LL, 10000000000000LL>>;
+    using ounces            = unit<unit_type::mass<intmax_t>, std::ratio<28349523125LL, 1000000000LL>>;
+    using pounds            = unit<unit_type::mass<intmax_t>, std::ratio<45359237LL, 100000LL>>;
+    using stones            = unit<unit_type::mass<intmax_t>, std::ratio<635029318LL, 100000LL>>;
+    using slugs             = unit<unit_type::mass<intmax_t>, std::ratio<1459390294LL, 100000LL>>;
+    using quarters          = unit<unit_type::mass<intmax_t>, std::ratio<1270058636LL, 100000000000LL>>;
+    using hundredweights    = unit<unit_type::mass<intmax_t>, std::ratio<5080234544LL, 100000000000LL>>;
+    using short_tons        = unit<unit_type::mass<intmax_t>, std::ratio<90718474LL, 100000000LL>>;
+    using long_tons         = unit<unit_type::mass<intmax_t>, std::ratio<10160469088LL, 10000000000LL>>;
+
+#pragma endregion
+
+
+
+    // Time; base is second
+#pragma region Time
+
+    using attoseconds       = unit<unit_type::time<intmax_t>, std::atto>;
+    using femtoseconds      = unit<unit_type::time<intmax_t>, std::femto>;
+    using picoseconds       = unit<unit_type::time<intmax_t>, std::pico>;
+    using nanoseconds       = unit<unit_type::time<intmax_t>, std::nano>;
+    using microseconds      = unit<unit_type::time<intmax_t>, std::micro>;
+    using milliseconds      = unit<unit_type::time<intmax_t>, std::milli>;
+    using centiseconds      = unit<unit_type::time<intmax_t>, std::centi>;
+    using deciseconds       = unit<unit_type::time<intmax_t>, std::deci>;
+    using seconds           = unit<unit_type::time<intmax_t>, std::ratio<1>>;
+    using decaseconds       = unit<unit_type::time<intmax_t>, std::deca>;
+    using hectoseconds      = unit<unit_type::time<intmax_t>, std::hecto>;
+    using kiloseconds       = unit<unit_type::time<intmax_t>, std::kilo>;
+    using megaseconds       = unit<unit_type::time<intmax_t>, std::mega>;
+    using gigaseconds       = unit<unit_type::time<intmax_t>, std::giga>;
+    using teraseconds       = unit<unit_type::time<intmax_t>, std::tera>;
+    using petaseconds       = unit<unit_type::time<intmax_t>, std::peta>;
+    using exaseconds        = unit<unit_type::time<intmax_t>, std::exa>;
+
+    using minutes           = unit<unit_type::time<intmax_t>, std::ratio<60, 1>>;
+    using hours             = unit<unit_type::time<intmax_t>, std::ratio<3600, 1>>;
+    using days              = unit<unit_type::time<intmax_t>, std::ratio<86400, 1>>;
+    using weeks             = unit<unit_type::time<intmax_t>, std::ratio<604800, 1>>;
+    using fortnights        = unit<unit_type::time<intmax_t>, std::ratio<1209600, 1>>;
+    using common_years      = unit<unit_type::time<intmax_t>, std::ratio<31536000, 1>>;
+    using leap_years        = unit<unit_type::time<intmax_t>, std::ratio<31622400, 1>>;
+    using sidereal_years    = unit<unit_type::time<intmax_t>, std::ratio<31558149504LL, 1000>>;
+
+#pragma endregion
+
+
+
+    // Electrical current; base is ampere
+#pragma region Current
+
+    using attoamps  = unit<unit_type::current<intmax_t>, std::atto>;
+    using femtoamps = unit<unit_type::current<intmax_t>, std::femto>;
+    using picoamps  = unit<unit_type::current<intmax_t>, std::pico>;
+    using nanoamps  = unit<unit_type::current<intmax_t>, std::nano>;
+    using microamps = unit<unit_type::current<intmax_t>, std::micro>;
+    using milliamps = unit<unit_type::current<intmax_t>, std::milli>;
+    using centiamps = unit<unit_type::current<intmax_t>, std::centi>;
+    using deciamps  = unit<unit_type::current<intmax_t>, std::deci>;
+    using amps      = unit<unit_type::current<intmax_t>, std::ratio<1>>;
+    using amperes   = amps;
+    using decaamps  = unit<unit_type::current<intmax_t>, std::deca>;
+    using hectoamps = unit<unit_type::current<intmax_t>, std::hecto>;
+    using kiloamps  = unit<unit_type::current<intmax_t>, std::kilo>;
+    using megaamps  = unit<unit_type::current<intmax_t>, std::mega>;
+    using gigaamps  = unit<unit_type::current<intmax_t>, std::giga>;
+    using teraamps  = unit<unit_type::current<intmax_t>, std::tera>;
+    using petaamps  = unit<unit_type::current<intmax_t>, std::peta>;
+    using exaamps   = unit<unit_type::current<intmax_t>, std::exa>;
+
+#pragma endregion
 
 #pragma endregion
 }

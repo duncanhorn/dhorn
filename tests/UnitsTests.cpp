@@ -19,6 +19,44 @@ namespace dhorn
     {
         TEST_CLASS(UnitsTests)
         {
+            TEST_METHOD(EqualityTest)
+            {
+                dhorn::meters v1(100);
+                dhorn::meters v2(150);
+                dhorn::meters v3(100);
+
+                Assert::IsFalse(v1 == v2);
+                Assert::IsFalse(v2 == v1);
+                Assert::IsTrue(v1 == v3);
+                Assert::IsTrue(v3 == v1);
+                Assert::IsFalse(v2 == v3);
+                Assert::IsFalse(v3 == v2);
+
+                Assert::IsTrue(100 == v1);
+                Assert::IsTrue(v1 == 100);
+                Assert::IsFalse(200 == v1);
+                Assert::IsFalse(v1 == 200);
+            }
+
+            TEST_METHOD(InequalityTest)
+            {
+                dhorn::meters v1(100);
+                dhorn::meters v2(150);
+                dhorn::meters v3(100);
+
+                Assert::IsTrue(v1 != v2);
+                Assert::IsTrue(v2 != v1);
+                Assert::IsFalse(v1 != v3);
+                Assert::IsFalse(v3 != v1);
+                Assert::IsTrue(v2 != v3);
+                Assert::IsTrue(v3 != v2);
+
+                Assert::IsFalse(100 != v1);
+                Assert::IsFalse(v1 != 100);
+                Assert::IsTrue(200 != v1);
+                Assert::IsTrue(v1 != 200);
+            }
+
             TEST_METHOD(PositiveTest)
             {
                 dhorn::meters val(1);
@@ -110,15 +148,33 @@ namespace dhorn
                 Assert::IsTrue(val.value() == -3);
             }
 
-            // The unit_result_type helper is key in determining the correct return type of arithmetic operations and
-            // thus deserves its own tests
-            //TEST_METHOD(UnitResultTypeTest)
-            //{
-            //}
+            TEST_METHOD(AdditionTest)
+            {
+                dhorn::meters v1(100);
+                dhorn::meters v2(250);
+
+                Assert::IsTrue((v1 + 50).value() == 150);
+                Assert::IsTrue((150 + v2).value() == 400);
+                Assert::IsTrue((v1 + v2).value() == 350);
+            }
+
+            TEST_METHOD(SubtractionTest)
+            {
+                dhorn::meters v1(100);
+                dhorn::meters v2(250);
+
+                Assert::IsTrue((v1 - 50).value() == 50);
+                Assert::IsTrue((150 - v2).value() == -100);
+                Assert::IsTrue((v1 - v2).value() == -150);
+            }
 
             TEST_METHOD(UnitCastTest)
             {
                 dhorn::kilometers km(1);
+
+                // Same type should give same value
+                auto other = dhorn::unit_cast<dhorn::kilometers>(km);
+                Assert::IsTrue(other.value() == 1);
 
                 // One kilometer is 1000 meters
                 auto m = dhorn::unit_cast<dhorn::meters>(km);
@@ -127,6 +183,32 @@ namespace dhorn
                 // 2500 meters is 2.5 (rounds down to 2) kilometers
                 m = dhorn::meters(2500);
                 km = dhorn::unit_cast<dhorn::kilometers>(m);
+                Assert::IsTrue(km.value() == 2);
+            }
+
+            TEST_METHOD(ConstructConvertTest)
+            {
+                dhorn::kilometers km(1);
+
+                dhorn::meters m(km);
+                Assert::IsTrue(m.value() == 1000);
+
+                m = 2000;
+                dhorn::kilometers km2(m);
+                Assert::IsTrue(km2.value() == 2);
+            }
+
+            TEST_METHOD(AssignConvertTest)
+            {
+                dhorn::kilometers km(1);
+
+                dhorn::meters m(1);
+                Assert::IsTrue(m.value() == 1); // Prevent optimizations
+                m = km;
+                Assert::IsTrue(m.value() == 1000);
+
+                m = 2000;
+                km = m;
                 Assert::IsTrue(km.value() == 2);
             }
         };

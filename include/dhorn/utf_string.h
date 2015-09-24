@@ -92,18 +92,24 @@ namespace dhorn
             // 1110 xxxx    - 3 bytes wide
             // 1111 0xxx    - 4 bytes wide
             return
-                !(ch & 0x80) ? 1 :
-                !(ch & 0x20) ? 2 :
-                !(ch & 0x10) ? 3 :
-                !(ch & 0x08) ? 4 : 0;
+                ((ch & 0x80) == 0x00) ? 1 :
+                ((ch & 0xE0) == 0xC0) ? 2 :
+                ((ch & 0xF0) == 0xE0) ? 3 :
+                ((ch & 0xF8) == 0xF0) ? 4 : 0;
         }
 
         inline constexpr size_t size_utf8(_In_ char32_t val)
         {
+            // The format of a utf-8 character is (A is first byte, B is second, etc.):
+            // 1 byte:  0000 0000 0000 0000 0000 0000 0AAA AAAA
+            // 2 bytes: 0000 0000 0000 0000 0000 0AAA AABB BBBB
+            // 3 bytes: 0000 0000 0000 0000 AAAA BBBB BBCC CCCC
+            // 4 bytes: 0000 0000 000A AABB BBBB CCCC CCDD DDDD
             return
-                (val & 0x00FF0000) ? 4 :
-                (val & 0x00FFF800) ? 3 :
-                (val & 0x00FFFF80) ? 2 : 1;
+                (val & 0xFFE00000) ? 0 :
+                (val & 0x001F0000) ? 4 :
+                (val & 0x001FF800) ? 3 :
+                (val & 0x001FFF80) ? 2 : 1;
         }
 
         inline char32_t read_utf8(_In_ const char *str, _Out_opt_ const char **result)
@@ -156,7 +162,7 @@ namespace dhorn
         inline constexpr size_t size_utf16(_In_ char32_t ch)
         {
             // 0x000000 to 0x00D7FF:    1 character (2 bytes)
-            // 0x00D800 to 0x00DC00:    INVALID
+            // 0x00D800 to 0x00DFFF:    INVALID
             // 0x00E000 to 0x00FFFF:    1 character (2 bytes)
             // 0x010000 to 0x10FFFF:    2 characters (4 bytes)
             // >= 0x110000:             INVALID
@@ -175,7 +181,11 @@ namespace dhorn
             }
 
             char32_t val;
-            if (size == 1)
+            if (size == 0)
+            {
+                throw bad_utf_encoding(utf_encoding::utf_16, *str);
+            }
+            else if (size == 1)
             {
                 val = *str;
             }
@@ -235,11 +245,14 @@ namespace dhorn
                 verify_character(utf_encoding::utf_8, val);
 
                 static const unsigned char masks[] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0 };
-                unsigned char mask = masks[bytes];
+                auto mask = masks[bytes];
+
+                // All bytes past the first one are six bits of data long
                 size_t shift = (bytes - 1) * 6;
 
                 for (size_t i = 0; i < bytes; ++i)
                 {
+                    // All masks start with all 1s followed by a single 0. We use that knowledge to our advantage
                     *pos = ((val >> shift) & (~mask >> 1)) | mask;
 
                     mask = 0x80;
@@ -282,8 +295,8 @@ namespace dhorn
                 {
                     // high bytes go first
                     val -= 0x00010000;
-                    pos[0] = 0x0000D800 | ((val >> 10) & 0x03FF);
-                    pos[1] = 0x0000DC00 | (val & 0x03FF);
+                    pos[0] = 0xD800 | ((val >> 10) & 0x03FF);
+                    pos[1] = 0xDC00 | (val & 0x03FF);
                 }
 
                 return pos + bytes;
@@ -453,6 +466,11 @@ namespace dhorn
         /*
          * Public "string-like" functions
          */
+        bool empty(void) const
+        {
+            return (this->_length == 0);
+        }
+
         size_t length(void) const
         {
             // Length of the string
@@ -462,7 +480,18 @@ namespace dhorn
         size_t size(void) const
         {
             // Size of the string buffer (minus the null character)
-            return BufferSize();
+            return this->BufferSize();
+        }
+
+        size_t capacity(void) const
+        {
+            // Size of the complete string buffer available minus the null character
+            return this->Capacity() - 1;
+        }
+
+        void reserve(_In_ size_t desiredSize)
+        {
+            this->Resize(desiredSize);
         }
 
         const value_type *c_str(void) const
@@ -481,6 +510,14 @@ namespace dhorn
         {
             using their_traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
 
+            // It's faster to calculate the size of the buffer needed instead of relying on our amortized doubling
+            auto end = str;
+            while (*end)
+            {
+                their_traits::next(end, &end);
+            }
+            this->Resize(end - str);
+
             while (*str)
             {
                 this->InternalPushBack(their_traits::next(str, &str));
@@ -492,6 +529,9 @@ namespace dhorn
         template <typename Itr>
         void Create(_In_ Itr front, _In_ Itr back)
         {
+            // It's faster to resize to the size of the buffer first even if the iterators are not random access
+            this->Resize(std::distance(front, back));
+
             // It's assumed that dereferencing an iterator gives the full character, and that incrementing the iterator
             // moves to the next character
             for (; front != back; ++front)
@@ -516,7 +556,7 @@ namespace dhorn
             // Determine if we need to resize
             if ((this->_back + max_char_size) >= this->_bounds)
             {
-                this->Resize();
+                this->Resize(this->Capacity() * 2);
             }
 
             // Increase length after the write in case an exception is thrown
@@ -526,11 +566,11 @@ namespace dhorn
             assert(this->_back < this->_bounds);
         }
 
-        inline void Resize(_In_ size_t desiredCapacity = 0)
+        inline void Resize(_In_ size_t desiredCapacity)
         {
-            size_t capacity = Capacity();
-            size_t bufferSize = BufferSize();
-            capacity = dhorn::max(capacity * 2, 8u, desiredCapacity + 1);
+            size_t capacity = this->Capacity();
+            size_t bufferSize = this->BufferSize();
+            capacity = dhorn::max(capacity, 8u, desiredCapacity + 1);
             assert(capacity >= (bufferSize + max_char_size + 1));
 
             // Don't copy the null character since this->_front is null on creation
