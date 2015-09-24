@@ -419,9 +419,14 @@ namespace dhorn
      */
 #pragma region utf_string Definition
 
-    template <typename Traits>
+    template <typename CharT>
     class utf_string
     {
+        using Traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
+
+        template <typename CharType>
+        friend class utf_string;
+
     public:
 
         /*
@@ -442,10 +447,34 @@ namespace dhorn
         {
         }
 
+        // Copy
+        utf_string(_In_ const utf_string &other) :
+            utf_string()
+        {
+            this->Copy(other);
+        }
+
+        // "Convert" copy
+        template <typename CharType>
+        utf_string(_In_ const utf_string<CharType> &other) :
+            utf_string()
+        {
+            this->Copy(other);
+        }
+
         template <typename CharType>
         utf_string(_In_ const CharType *str) :
             utf_string()
         {
+            this->Create(str);
+        }
+
+        template <typename CharType>
+        utf_string(_In_ const std::basic_string<CharType> &str) :
+            utf_string()
+        {
+            // We don't use the iterator Create function since std::basic_string does not know about utf encodings and
+            // dereferencing/incrementing may not give a full character
             this->Create(str);
         }
 
@@ -459,6 +488,31 @@ namespace dhorn
         ~utf_string(void)
         {
             this->Destroy();
+        }
+
+
+
+        /*
+         * Operators
+         */
+        utf_string &operator=(_In_ const utf_string &other)
+        {
+            if (this != &other)
+            {
+                this->Destroy();
+                this->Copy(other);
+            }
+
+            return *this;
+        }
+
+        template <typename CharType>
+        utf_string &operator=(_In_ const utf_string<CharType> &other)
+        {
+            this->Destroy();
+            this->Copy(other);
+
+            return *this;
         }
 
 
@@ -505,10 +559,29 @@ namespace dhorn
 
         static const size_t max_char_size = sizeof(char32_t) / sizeof(value_type);
 
-        template <typename CharT>
-        void Create(_In_ const CharT *str)
+        void Copy(_In_ const utf_string &other)
         {
-            using their_traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
+            auto bufferSize = other.BufferSize();
+            this->Resize(bufferSize);
+
+            memcpy(this->_front, other._front, bufferSize * sizeof(value_type));
+            this->_back = this->_front + bufferSize;
+            this->_length = other._length;
+
+            *this->_back = '\0';
+        }
+
+        template <typename CharType>
+        void Copy(_In_ const utf_string<CharType> &other)
+        {
+            this->Resize(other._length);
+            this->CreateFromBuffer(other._front);
+        }
+
+        template <typename CharType>
+        void Create(_In_ const CharType *str)
+        {
+            using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
 
             // It's faster to calculate the size of the buffer needed instead of relying on our amortized doubling
             auto end = str;
@@ -518,6 +591,20 @@ namespace dhorn
             }
             this->Resize(end - str);
 
+            this->CreateFromBuffer(str);
+        }
+
+        template <typename CharType>
+        void Create(_In_ const std::basic_string<CharType> &str)
+        {
+            this->Resize(str.length());
+            this->CreateFromBuffer(str.c_str());
+        }
+
+        template <typename CharType>
+        void CreateFromBuffer(_In_ const CharType *str)
+        {
+            using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
             while (*str)
             {
                 this->InternalPushBack(their_traits::next(str, &str));
@@ -568,32 +655,36 @@ namespace dhorn
 
         inline void Resize(_In_ size_t desiredCapacity)
         {
-            size_t capacity = this->Capacity();
+            size_t currentCapacity = this->Capacity();
             size_t bufferSize = this->BufferSize();
-            capacity = dhorn::max(capacity, 8u, desiredCapacity + 1);
+            size_t capacity = dhorn::max(currentCapacity, 8u, desiredCapacity + 1);
             assert(capacity >= (bufferSize + max_char_size + 1));
 
-            // Don't copy the null character since this->_front is null on creation
-            std::unique_ptr<value_type[]> buffer(new value_type[capacity]);
-            memcpy(buffer.get(), this->_front, bufferSize * sizeof(value_type));
-            buffer.get()[bufferSize] = '\0';
+            // Don't resize if we don't need to
+            if (capacity != currentCapacity)
+            {
+                // Don't copy the null character since this->_front is null on creation
+                std::unique_ptr<value_type[]> buffer(new value_type[capacity]);
+                memcpy(buffer.get(), this->_front, bufferSize * sizeof(value_type));
+                buffer.get()[bufferSize] = '\0';
 
-            delete[] this->_front;
-            this->_front = buffer.release();
-            this->_back = this->_front + bufferSize;
-            this->_bounds = this->_front + capacity;
+                delete[] this->_front;
+                this->_front = buffer.release();
+                this->_back = this->_front + bufferSize;
+                this->_bounds = this->_front + capacity;
+            }
         }
 
         inline size_t BufferSize(void) const
         {
-            // Size (in units of value_type) of the buffer *NOT* inluding the null character. I.e. the size that we
+            // Size (in units of value_type) of the string *NOT* inluding the null character. I.e. the size that we
             // need to copy on resize
             return (this->_back - this->_front);
         }
 
         inline size_t Capacity(void) const
         {
-            // Size of our internal buffer
+            // Size of our internal buffer (includes the null character)
             return (this->_bounds - this->_front);
         }
 
@@ -608,9 +699,9 @@ namespace dhorn
     /*
      * Type Definitions
      */
-    using utf8_string = utf_string<garbage::utf8_traits>;
-    using utf16_string = utf_string<garbage::utf16_traits>;
-    using utf32_string = utf_string<garbage::utf32_traits>;
+    using utf8_string = utf_string<char>;
+    using utf16_string = utf_string<char16_t>;
+    using utf32_string = utf_string<char32_t>;
 
 #pragma endregion
 }

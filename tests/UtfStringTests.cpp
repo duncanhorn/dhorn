@@ -245,6 +245,9 @@ namespace dhorn
 
 
 
+        /*
+         * utf8_string Tests
+         */
         TEST_CLASS(Utf8StringTests)
         {
             using string_type = dhorn::utf8_string;
@@ -257,7 +260,7 @@ namespace dhorn
                 Assert::AreEqual(0u, str.size());
             }
 
-            TEST_METHOD(Utf8StringConstructorTest)
+            TEST_METHOD(Utf8StringLiteralConstructorTest)
             {
                 char buff1[] = u8"This is a test";
                 string_type str1 = buff1;
@@ -274,6 +277,62 @@ namespace dhorn
                 Assert::AreEqual(0, strcmp(buff2, str2.c_str()));
             }
 
+            TEST_METHOD(Utf16StringLiteralConstructorTest)
+            {
+                char16_t buff1[] = u"This is a test";
+                char buff1_utf8[] = u8"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(sizeof(buff1_utf8) - 1, str1.length());
+                Assert::AreEqual(sizeof(buff1_utf8) - 1, str1.size());
+                Assert::AreEqual(sizeof(buff1_utf8) - 1, strlen(str1.c_str()));
+                Assert::AreEqual(0, strcmp(buff1_utf8, str1.c_str()));
+
+                char16_t buff2[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                char buff2_utf8[] = u8"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(sizeof(buff2_utf8) - 7, str2.length());
+                Assert::AreEqual(sizeof(buff2_utf8) - 1, str2.size());
+                Assert::AreEqual(sizeof(buff2_utf8) - 1, strlen(str2.c_str()));
+                Assert::AreEqual(0, strcmp(buff2_utf8, str2.c_str()));
+            }
+
+            TEST_METHOD(Utf32StringLiteralConstructorTest)
+            {
+                char32_t buff1[] = U"This is a test";
+                char buff1_utf8[] = u8"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(sizeof(buff1_utf8) - 1, str1.length());
+                Assert::AreEqual(sizeof(buff1_utf8) - 1, str1.size());
+                Assert::AreEqual(sizeof(buff1_utf8) - 1, strlen(str1.c_str()));
+                Assert::AreEqual(0, strcmp(buff1_utf8, str1.c_str()));
+
+                char32_t buff2[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                char buff2_utf8[] = u8"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(sizeof(buff2_utf8) - 7, str2.length());
+                Assert::AreEqual(sizeof(buff2_utf8) - 1, str2.size());
+                Assert::AreEqual(sizeof(buff2_utf8) - 1, strlen(str2.c_str()));
+                Assert::AreEqual(0, strcmp(buff2_utf8, str2.c_str()));
+            }
+
+            TEST_METHOD(StdStringConstructorTest)
+            {
+                // NOTE: std::wstring is purposefully not tested since it purposefully is not supported
+                std::string s1 = u8"This is a test";
+                string_type str1 = s1;
+                Assert::AreEqual(s1.length(), str1.length());
+                Assert::AreEqual(s1.length(), str1.size());
+                Assert::AreEqual(s1.length(), strlen(str1.c_str()));
+                Assert::AreEqual(0, strcmp(s1.c_str(), str1.c_str()));
+
+                std::string s2 = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = s2;
+                Assert::AreEqual(s2.length() - 6, str2.length());
+                Assert::AreEqual(s2.length(), str2.size());
+                Assert::AreEqual(s2.length(), strlen(str2.c_str()));
+                Assert::AreEqual(0, strcmp(s2.c_str(), str2.c_str()));
+            }
+
             TEST_METHOD(IteratorConstructorTest)
             {
                 // We aren't testing the validity of the utf_string::iterator yet, so we have to rely on std::string
@@ -283,6 +342,291 @@ namespace dhorn
                 Assert::IsTrue(s == str.c_str());
                 Assert::AreEqual(s.length(), str.length());
                 Assert::AreEqual(s.length(), str.size());
+            }
+
+            TEST_METHOD(CopyConstructorTest)
+            {
+                char buffer[] = u8"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                string_type str1 = buffer;
+                string_type str2 = str1;
+
+                Assert::AreEqual(str1.length(), str2.length());
+                Assert::AreEqual(str1.size(), str2.size());
+                Assert::IsTrue(std::equal(std::begin(buffer), std::end(buffer), str1.c_str()));
+                Assert::IsTrue(std::equal(std::begin(buffer), std::end(buffer), str2.c_str()));
+                Assert::IsTrue('\0' == *(str1.c_str() + str1.size()));
+                Assert::IsTrue('\0' == *(str2.c_str() + str2.size()));
+            }
+
+            TEST_METHOD(ConvertConstructorTest)
+            {
+                char buffer_utf8[] = u8"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char16_t buffer_utf16[] = u"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t buffer_utf32[] = U"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+
+                dhorn::utf16_string str16 = buffer_utf16;
+                string_type str = str16;
+                Assert::AreEqual(str16.length(), str.length());
+                Assert::AreEqual(dhorn::array_size(buffer_utf8) - 1, str.size());
+                Assert::IsTrue(std::equal(std::begin(buffer_utf8), std::end(buffer_utf8), str.c_str()));
+
+                dhorn::utf32_string str32 = buffer_utf32;
+                string_type str2 = str32;
+                Assert::AreEqual(str32.length(), str2.length());
+                Assert::AreEqual(dhorn::array_size(buffer_utf8) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buffer_utf8), std::end(buffer_utf8), str2.c_str()));
+            }
+        };
+
+
+
+        /*
+         * utf16_string Tests
+         */
+        TEST_CLASS(Utf16StringTests)
+        {
+            using string_type = dhorn::utf16_string;
+
+            TEST_METHOD(DefaultConstructorTest)
+            {
+                string_type str;
+
+                Assert::AreEqual(0u, str.length());
+                Assert::AreEqual(0u, str.size());
+            }
+
+            TEST_METHOD(Utf8StringLiteralConstructorTest)
+            {
+                char buff1[] = u8"This is a test";
+                char16_t buff1_utf16[] = u"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.length());
+                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.size());
+                Assert::IsTrue(std::equal(std::begin(buff1_utf16), std::end(buff1_utf16), str1.c_str()));
+
+                char buff2[] = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                char16_t buff2_utf16[] = u"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 2, str2.length());
+                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buff2_utf16), std::end(buff2_utf16), str2.c_str()));
+            }
+
+            TEST_METHOD(Utf16StringLiteralConstructorTest)
+            {
+                char16_t buff1[] = u"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.length());
+                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.size());
+                Assert::IsTrue(std::equal(std::begin(buff1), std::begin(buff1), str1.c_str()));
+
+                char16_t buff2[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(dhorn::array_size(buff2) - 2, str2.length());
+                Assert::AreEqual(dhorn::array_size(buff2) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buff2), std::begin(buff2), str2.c_str()));
+            }
+
+            TEST_METHOD(Utf32StringLiteralConstructorTest)
+            {
+                char32_t buff1[] = U"This is a test";
+                char16_t buff1_utf16[] = u"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.length());
+                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.size());
+                Assert::IsTrue(std::equal(std::begin(buff1_utf16), std::begin(buff1_utf16), str1.c_str()));
+
+                char32_t buff2[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                char16_t buff2_utf16[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 2, str2.length());
+                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buff2_utf16), std::begin(buff2_utf16), str2.c_str()));
+            }
+
+            TEST_METHOD(StdStringConstructorTest)
+            {
+                // NOTE: std::wstring is purposefully not tested since it purposefully is not supported
+                std::string s1 = u8"This is a test";
+                string_type str1 = s1;
+                Assert::AreEqual(s1.length(), str1.length());
+                Assert::AreEqual(s1.length(), str1.size());
+                Assert::IsTrue(std::equal(std::begin(s1), std::end(s1), str1.c_str()));
+
+                std::string s2 = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = s2;
+                Assert::AreEqual(s2.length() - 6, str2.length());
+                Assert::AreEqual(s2.length() - 5, str2.size());
+            }
+
+            TEST_METHOD(IteratorConstructorTest)
+            {
+                // We aren't testing the validity of the utf_string::iterator yet, so we have to rely on std::string
+                // here
+                std::string s = "This is a string";
+                string_type str(std::begin(s), std::end(s));
+                Assert::IsTrue(std::equal(std::begin(s), std::end(s), str.c_str()));
+                Assert::AreEqual(s.length(), str.length());
+                Assert::AreEqual(s.length(), str.size());
+            }
+
+            TEST_METHOD(CopyConstructorTest)
+            {
+                char16_t buffer[] = u"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                string_type str1 = buffer;
+                string_type str2 = str1;
+
+                Assert::AreEqual(str1.length(), str2.length());
+                Assert::AreEqual(str1.size(), str2.size());
+                Assert::IsTrue(std::equal(std::begin(buffer), std::end(buffer), str1.c_str()));
+                Assert::IsTrue(std::equal(std::begin(buffer), std::end(buffer), str2.c_str()));
+                Assert::IsTrue('\0' == *(str1.c_str() + str1.size()));
+                Assert::IsTrue('\0' == *(str2.c_str() + str2.size()));
+            }
+
+            TEST_METHOD(ConvertConstructorTest)
+            {
+                char buffer_utf8[] = u8"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char16_t buffer_utf16[] = u"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t buffer_utf32[] = U"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+
+                dhorn::utf8_string str8 = buffer_utf8;
+                string_type str = str8;
+                Assert::AreEqual(str8.length(), str.length());
+                Assert::AreEqual(dhorn::array_size(buffer_utf16) - 1, str.size());
+                Assert::IsTrue(std::equal(std::begin(buffer_utf16), std::end(buffer_utf16), str.c_str()));
+
+                dhorn::utf32_string str32 = buffer_utf32;
+                string_type str2 = str32;
+                Assert::AreEqual(str32.length(), str2.length());
+                Assert::AreEqual(dhorn::array_size(buffer_utf16) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buffer_utf16), std::end(buffer_utf16), str2.c_str()));
+            }
+        };
+
+
+
+        /*
+        * utf32_string Tests
+        */
+        TEST_CLASS(Utf32StringTests)
+        {
+            using string_type = dhorn::utf32_string;
+
+            TEST_METHOD(DefaultConstructorTest)
+            {
+                string_type str;
+
+                Assert::AreEqual(0u, str.length());
+                Assert::AreEqual(0u, str.size());
+            }
+
+            TEST_METHOD(Utf8StringLiteralConstructorTest)
+            {
+                char buff1[] = u8"This is a test";
+                char32_t buff1_utf32[] = U"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.length());
+                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.size());
+                Assert::IsTrue(std::equal(std::begin(buff1_utf32), std::end(buff1_utf32), str1.c_str()));
+
+                char buff2[] = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                char32_t buff2_utf32[] = U"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.length());
+                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buff2_utf32), std::end(buff2_utf32), str2.c_str()));
+            }
+
+            TEST_METHOD(Utf16StringLiteralConstructorTest)
+            {
+                char16_t buff1[] = u"This is a test";
+                char32_t buff1_utf32[] = U"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.length());
+                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.size());
+                Assert::IsTrue(std::equal(std::begin(buff1_utf32), std::begin(buff1_utf32), str1.c_str()));
+
+                char16_t buff2[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                char32_t buff2_utf32[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.length());
+                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buff2_utf32), std::begin(buff2_utf32), str2.c_str()));
+            }
+
+            TEST_METHOD(Utf32StringLiteralConstructorTest)
+            {
+                char32_t buff1[] = U"This is a test";
+                string_type str1 = buff1;
+                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.length());
+                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.size());
+                Assert::IsTrue(std::equal(std::begin(buff1), std::begin(buff1), str1.c_str()));
+
+                char32_t buff2[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = buff2;
+                Assert::AreEqual(dhorn::array_size(buff2) - 1, str2.length());
+                Assert::AreEqual(dhorn::array_size(buff2) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buff2), std::begin(buff2), str2.c_str()));
+            }
+
+            TEST_METHOD(StdStringConstructorTest)
+            {
+                // NOTE: std::wstring is purposefully not tested since it purposefully is not supported
+                std::string s1 = u8"This is a test";
+                string_type str1 = s1;
+                Assert::AreEqual(s1.length(), str1.length());
+                Assert::AreEqual(s1.length(), str1.size());
+                Assert::IsTrue(std::equal(std::begin(s1), std::end(s1), str1.c_str()));
+
+                std::string s2 = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
+                string_type str2 = s2;
+                Assert::AreEqual(s2.length() - 6, str2.length());
+                Assert::AreEqual(s2.length() - 6, str2.size());
+            }
+
+            TEST_METHOD(IteratorConstructorTest)
+            {
+                // We aren't testing the validity of the utf_string::iterator yet, so we have to rely on std::string
+                // here
+                std::string s = "This is a string";
+                string_type str(std::begin(s), std::end(s));
+                Assert::IsTrue(std::equal(std::begin(s), std::end(s), str.c_str()));
+                Assert::AreEqual(s.length(), str.length());
+                Assert::AreEqual(s.length(), str.size());
+            }
+
+            TEST_METHOD(CopyConstructorTest)
+            {
+                char32_t buffer[] = U"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                string_type str1 = buffer;
+                string_type str2 = str1;
+
+                Assert::AreEqual(str1.length(), str2.length());
+                Assert::AreEqual(str1.size(), str2.size());
+                Assert::IsTrue(std::equal(std::begin(buffer), std::end(buffer), str1.c_str()));
+                Assert::IsTrue(std::equal(std::begin(buffer), std::end(buffer), str2.c_str()));
+                Assert::IsTrue('\0' == *(str1.c_str() + str1.size()));
+                Assert::IsTrue('\0' == *(str2.c_str() + str2.size()));
+            }
+
+            TEST_METHOD(ConvertConstructorTest)
+            {
+                char buffer_utf8[] = u8"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char16_t buffer_utf16[] = u"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t buffer_utf32[] = U"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
+
+                dhorn::utf8_string str8 = buffer_utf8;
+                string_type str = str8;
+                Assert::AreEqual(str8.length(), str.length());
+                Assert::AreEqual(dhorn::array_size(buffer_utf32) - 1, str.size());
+                Assert::IsTrue(std::equal(std::begin(buffer_utf32), std::end(buffer_utf32), str.c_str()));
+
+                dhorn::utf16_string str16 = buffer_utf16;
+                string_type str2 = str16;
+                Assert::AreEqual(str16.length(), str2.length());
+                Assert::AreEqual(dhorn::array_size(buffer_utf32) - 1, str2.size());
+                Assert::IsTrue(std::equal(std::begin(buffer_utf32), std::end(buffer_utf32), str2.c_str()));
             }
         };
     }
