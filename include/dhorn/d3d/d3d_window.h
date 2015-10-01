@@ -25,6 +25,12 @@ namespace dhorn
             static const DXGI_FORMAT swap_chain_format = DXGI_FORMAT_R8G8B8A8_UNORM;
             static const DXGI_FORMAT depth_stencil_format = DXGI_FORMAT_D24_UNORM_S8_UINT;
             static const UINT back_buffer_count = 1;
+            static const UINT sample_count = 4;
+#if defined(DEBUG) || defined(_DEBUG)
+            static const UINT device_flags = D3D11_CREATE_DEVICE_DEBUG;
+#else
+            static const UINT device_flags = 0;
+#endif
         };
 
 
@@ -46,7 +52,7 @@ namespace dhorn
              * Constructor(s)/Destructor
              */
             basic_d3d_window() :
-                _sampleCount(4),
+                _sampleCount(Traits::sample_count),
                 _previousClientArea{},
                 _resizing(false)
             {
@@ -164,17 +170,11 @@ namespace dhorn
 
             virtual void create_device(void)
             {
-                UINT deviceFlags = 0;
-
-#if defined(DEBUG) || defined(_DEBUG)
-                deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
                 win32::throw_if_failed(::D3D11CreateDevice(
                     nullptr,                    // IDXGIAdapter
                     D3D_DRIVER_TYPE_HARDWARE,
                     nullptr,                    // HMODULE
-                    deviceFlags,
+                    Traits::device_flags,
                     nullptr, 0,                 // D3D_FEATURE_LEVEL array
                     D3D11_SDK_VERSION,
                     &this->_device,

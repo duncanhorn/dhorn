@@ -447,19 +447,23 @@ namespace dhorn
         {
         }
 
-        // Copy
         utf_string(_In_ const utf_string &other) :
             utf_string()
         {
-            this->Copy(other);
+            this->Create(other);
         }
 
-        // "Convert" copy
         template <typename CharType>
         utf_string(_In_ const utf_string<CharType> &other) :
             utf_string()
         {
-            this->Copy(other);
+            this->Create(other);
+        }
+
+        utf_string(_Inout_ utf_string &&other) :
+            utf_string()
+        {
+            this->swap(other);
         }
 
         template <typename CharType>
@@ -497,22 +501,68 @@ namespace dhorn
          */
         utf_string &operator=(_In_ const utf_string &other)
         {
-            if (this != &other)
-            {
-                this->Destroy();
-                this->Copy(other);
-            }
-
+            this->Assign(other);
             return *this;
         }
 
         template <typename CharType>
         utf_string &operator=(_In_ const utf_string<CharType> &other)
         {
-            this->Destroy();
-            this->Copy(other);
+            this->Assign(other);
+            return *this;
+        }
+
+        utf_string &operator=(_Inout_ utf_string &&other)
+        {
+            assert(this != &other);
+            this->swap(other);
 
             return *this;
+        }
+
+        template <typename CharType>
+        utf_string &operator=(_In_ const CharType *str)
+        {
+            this->Assign(str);
+            return *this;
+        }
+
+        template <typename CharType>
+        utf_string &operator=(_In_ const std::basic_string<CharType> &other)
+        {
+            this->Assign(other);
+            return *this;
+        }
+
+        template <typename CharType>
+        utf_string &operator+=(_In_ const utf_string<CharType> &other)
+        {
+            this->Append(other);
+            return *this;
+        }
+
+        template <typename CharType>
+        utf_string &operator+=(_In_ const CharType *other)
+        {
+            this->Append(other);
+            return *this;
+        }
+
+        template <typename CharType>
+        utf_string &operator+=(_In_ const std::basic_string<CharType> &other)
+        {
+            this->Append(other);
+            return *this;
+        }
+
+        operator CharT *(void)
+        {
+            return this->_front;
+        }
+
+        operator const CharT *(void) const
+        {
+            return this->_front;
         }
 
 
@@ -553,56 +603,50 @@ namespace dhorn
             return this->_front;
         }
 
+        void push_back(_In_ char32_t ch)
+        {
+            this->InternalPushBack(ch);
+            *this->_back = '\0';
+        }
+
+
+
+        /*
+         * Public Functions
+         */
+        void swap(_Inout_ utf_string &other)
+        {
+            std::swap(this->_front, other._front);
+            std::swap(this->_back, other._back);
+            std::swap(this->_bounds, other._bounds);
+            std::swap(this->_length, other._length);
+        }
+
 
 
     private:
 
         static const size_t max_char_size = sizeof(char32_t) / sizeof(value_type);
 
-        void Copy(_In_ const utf_string &other)
-        {
-            auto bufferSize = other.BufferSize();
-            this->Resize(bufferSize);
-
-            memcpy(this->_front, other._front, bufferSize * sizeof(value_type));
-            this->_back = this->_front + bufferSize;
-            this->_length = other._length;
-
-            *this->_back = '\0';
-        }
-
+        // Returns pair (length, buffer size)
         template <typename CharType>
-        void Copy(_In_ const utf_string<CharType> &other)
-        {
-            this->Resize(other._length);
-            this->CreateFromBuffer(other._front);
-        }
-
-        template <typename CharType>
-        void Create(_In_ const CharType *str)
+        static std::pair<size_t, size_t> BufferSizeFromStringLiteral(_In_ const CharType *str)
         {
             using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
 
-            // It's faster to calculate the size of the buffer needed instead of relying on our amortized doubling
             auto end = str;
+            size_t length = 0;
             while (*end)
             {
+                ++length;
                 their_traits::next(end, &end);
             }
-            this->Resize(end - str);
 
-            this->CreateFromBuffer(str);
+            return std::make_pair(length, end - str);
         }
 
         template <typename CharType>
-        void Create(_In_ const std::basic_string<CharType> &str)
-        {
-            this->Resize(str.length());
-            this->CreateFromBuffer(str.c_str());
-        }
-
-        template <typename CharType>
-        void CreateFromBuffer(_In_ const CharType *str)
+        void AppendFromBuffer(_In_ const CharType *str)
         {
             using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
             while (*str)
@@ -610,13 +654,89 @@ namespace dhorn
                 this->InternalPushBack(their_traits::next(str, &str));
             }
 
+            assert(this->_back < this->_bounds);
             *this->_back = '\0';
+        }
+
+        inline bool Inside(_In_ const CharT *str) const
+        {
+            return (str >= this->_front) && (str < this->_bounds);
+        }
+
+        inline void FinishString()
+        {
+            assert(this->_back < this->_bounds);
+            *this->_back = '\0';
+        }
+
+        inline void Copy(_In_ const CharT *str, _In_ size_t length, _In_ size_t bufferSize)
+        {
+            assert(this->_back + bufferSize < this->_bounds);
+            memcpy(this->_back, str, bufferSize * sizeof(value_type));
+            this->_back += bufferSize;
+            this->_length += length;
+        }
+
+
+
+        //
+        // Creating - assumes that this is uninitialized (i.e. this->_front == nullptr)
+        //
+        void Create(_In_ const utf_string &other)
+        {
+            assert(!this->_front);
+            auto bufferSize = other.BufferSize();
+            this->Resize(bufferSize);
+
+            this->Copy(other._front, other._length, bufferSize);
+            this->FinishString();
+        }
+
+        template <typename CharType>
+        void Create(_In_ const utf_string<CharType> &other)
+        {
+            assert(!this->_front);
+            this->Resize(other._length);
+            this->AppendFromBuffer(other._front);
+        }
+
+        void Create(_In_ const CharT *str)
+        {
+            // For string literals that are the same type as us (CharT *), we can just use memcpy
+            assert(!this->_front);
+            auto otherSize = BufferSizeFromStringLiteral(str);
+            this->Resize(otherSize.second);
+
+            this->Copy(str, otherSize.first, otherSize.second);
+            this->FinishString();
+        }
+
+        template <typename CharType>
+        void Create(_In_ const CharType *str)
+        {
+            assert(!this->_front);
+            this->Resize(BufferSizeFromStringLiteral(str).first);
+            this->AppendFromBuffer(str);
+        }
+
+        void Create(_In_ const std::basic_string<CharT> &str)
+        {
+            // We need to calculate the buffer size anyway, so just go ahead and call the memcpy version
+            this->Create(str.c_str());
+        }
+
+        template <typename CharType>
+        void Create(_In_ const std::basic_string<CharType> &str)
+        {
+            assert(!this->_front);
+            this->Resize(str.length());
+            this->AppendFromBuffer(str.c_str());
         }
 
         template <typename Itr>
         void Create(_In_ Itr front, _In_ Itr back)
         {
-            // It's faster to resize to the size of the buffer first even if the iterators are not random access
+            assert(!this->_front);
             this->Resize(std::distance(front, back));
 
             // It's assumed that dereferencing an iterator gives the full character, and that incrementing the iterator
@@ -626,8 +746,134 @@ namespace dhorn
                 this->InternalPushBack(*front);
             }
 
-            *this->_back = '\0';
+            this->FinishString();
         }
+
+
+
+        //
+        // Assignment - Has proper checks for when the this == target, or when the buffer is a part of our buffer
+        //
+        void Assign(_In_ const utf_string &other)
+        {
+            if (&other != this)
+            {
+                this->Destroy();
+                this->Create(other);
+            }
+        }
+
+        template <typename CharType>
+        void Assign(_In_ const utf_string<CharType> &other)
+        {
+            this->Destroy();
+            this->Create(other);
+        }
+
+        void Assign(_In_ const CharT *str)
+        {
+            if (str == this->_front)
+            {
+                // Nothing to do here
+                return;
+            }
+            else if (this->Inside(str))
+            {
+                // If str is a part of our string, we can't destroy our string until the copy is done
+                utf_string(str).swap(*this);
+            }
+            else
+            {
+                // No harm in destroying and re-creating
+                this->Destroy();
+                this->Create(str);
+            }
+        }
+
+        template <typename CharType>
+        void Assign(_In_ const CharType *str)
+        {
+            assert(!this->Inside(reinterpret_cast<const CharT *>(str))); // Guaranteed bad operation
+            this->Destroy();
+            this->Create(str);
+        }
+
+        template <typename CharType>
+        void Assign(_In_ std::basic_string<CharType> &str)
+        {
+            this->Destroy();
+            this->Create(str);
+        }
+
+
+
+        //
+        // Append - has proper checks for when we append ourself or part of ourself
+        //
+        void Append(_In_ const utf_string &other)
+        {
+            auto otherSize = other.BufferSize();
+            auto otherLength = other._length;
+
+            // Okay to destroy our buffer if &other == this since we memcpy using the length later
+            this->Resize(this->BufferSize() + otherSize);
+
+            this->Copy(other._front, otherLength, otherSize);
+            this->FinishString();
+        }
+
+        template <typename CharType>
+        void Append(_In_ const utf_string<CharType> &other)
+        {
+            // Guess the resulting buffer size as one unit per character
+            this->Resize(this->BufferSize() + other._length);
+            this->AppendFromBuffer(other._front);
+        }
+
+        void Append(_In_ const CharT *str)
+        {
+            auto otherSize = BufferSizeFromStringLiteral(str);
+
+            if (this->Inside(str))
+            {
+                // Since we might be destroying our buffer, we can't use str from that point on
+                auto index = str - this->_front;
+                this->Resize(this->BufferSize() + otherSize.second);
+                str = this->_front + index;
+            }
+            else
+            {
+                this->Resize(this->BufferSize() + otherSize.second);
+            }
+
+            this->Copy(str, otherSize.first, otherSize.second);
+            this->FinishString();
+        }
+
+        template <typename CharType>
+        void Append(_In_ const CharType *other)
+        {
+            this->Resize(this->BufferSize() + this->BufferSizeFromStringLiteral(other).first);
+            this->AppendFromBuffer(other);
+        }
+
+        void Append(_In_ const std::basic_string<CharT> &str)
+        {
+            auto otherSize = BufferSizeFromStringLiteral(str.c_str());
+            this->Resize(this->BufferSize() + otherSize.second);
+
+            this->Copy(str.c_str(), otherSize.first, otherSize.second);
+            this->FinishString();
+        }
+
+        template <typename CharType>
+        void Append(_In_ const std::basic_string<CharType> &other)
+        {
+            this->Resize(this->BufferSize() + other.length());
+            this->AppendFromBuffer(other.c_str());
+        }
+
+
 
         inline void Destroy(void)
         {
@@ -636,6 +882,7 @@ namespace dhorn
             this->_front = nullptr;
             this->_back = nullptr;
             this->_bounds = nullptr;
+            this->_length = 0;
         }
 
         inline void InternalPushBack(_In_ char32_t ch)
@@ -657,7 +904,7 @@ namespace dhorn
         {
             size_t currentCapacity = this->Capacity();
             size_t bufferSize = this->BufferSize();
-            size_t capacity = dhorn::max(currentCapacity, 8u, desiredCapacity + 1);
+            size_t capacity = dhorn::max(currentCapacity, max_char_size + 1, desiredCapacity + 1);
             assert(capacity >= (bufferSize + max_char_size + 1));
 
             // Don't resize if we don't need to
