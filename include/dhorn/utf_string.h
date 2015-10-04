@@ -944,6 +944,55 @@ namespace dhorn
 
 
     /*
+     * Operators
+     */
+#pragma region Append Operators
+
+    template <typename CharT>
+    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    {
+        utf_string<CharT> copy(lhs);
+        copy += rhs;
+        return copy;
+    }
+
+    template <typename CharT>
+    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const CharT *rhs)
+    {
+        utf_string<CharT> copy(lhs);
+        copy += rhs;
+        return copy;
+    }
+
+    template <typename CharT>
+    utf_string<CharT> operator+(_In_ const CharT *lhs, _In_ const utf_string<CharT> &rhs)
+    {
+        utf_string<CharT> copy(lhs);
+        copy += rhs;
+        return copy;
+    }
+
+    template <typename CharT>
+    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const std::basic_string<CharT> &rhs)
+    {
+        utf_string<CharT> copy(lhs);
+        copy += rhs;
+        return copy;
+    }
+
+    template <typename CharT>
+    utf_string<CharT> operator+(_In_ const std::basic_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    {
+        utf_string<CharT> copy(lhs);
+        copy += rhs;
+        return copy;
+    }
+
+#pragma endregion
+
+
+
+    /*
      * Type Definitions
      */
     using utf8_string = utf_string<char>;
