@@ -148,7 +148,7 @@
     <ClInclude Include="include\dhorn\algorithm.h" />
     <ClInclude Include="include\dhorn\animation.h" />
     <ClInclude Include="include\dhorn\animation_manager.h" />
-    <ClInclude Include="include\dhorn\auto_event_cookie.h" />
+    <ClInclude Include="include\dhorn\unique_event_cookie.h" />
     <ClInclude Include="include\dhorn\d3d.h" />
     <ClInclude Include="include\dhorn\d3d\camera.h" />
     <ClInclude Include="include\dhorn\d3d\colors.h" />
@@ -159,6 +159,9 @@
     <ClInclude Include="include\dhorn\d3d\shapes.h" />
     <ClInclude Include="include\dhorn\d3d\vector.h" />
     <ClInclude Include="include\dhorn\discrete_animation.h" />
+    <ClInclude Include="include\dhorn\dynamic_ui\garbage\render_types.h" />
+    <ClInclude Include="include\dhorn\dynamic_ui\render_node.h" />
+    <ClInclude Include="include\dhorn\dynamic_ui\render_tree.h" />
     <ClInclude Include="include\dhorn\event_source.h" />
     <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="include\dhorn\linear_animation.h" />

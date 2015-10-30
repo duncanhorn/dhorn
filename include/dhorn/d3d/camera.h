@@ -104,12 +104,16 @@ namespace dhorn
             /*
              * Projection Matrix
              */
-            void configure_frustum(_In_ float nearZ, _In_ float farZ, _In_ float verticalFov, _In_ float aspectRatio)
+            void configure_frustum(
+                _In_ float nearZ,
+                _In_ float farZ,
+                _In_ float verticalFov,
+                _In_ float aspectRatioWidthDivHeight)
             {
                 this->_nearZ = nearZ;
                 this->_farZ = farZ;
                 this->_verticalFov = verticalFov;
-                this->_aspectRatio = aspectRatio;
+                this->_aspectRatio = aspectRatioWidthDivHeight;
 
                 this->InvalidateProjectionMatrix();
             }
@@ -157,7 +161,7 @@ namespace dhorn
                 this->InvalidateViewMatrix();
             }
 
-            void XM_CALLCONV rotate(_In_ DirectX::XMVECTOR axis, _In_ float angle)
+            void XM_CALLCONV rotate(_In_ DirectX::FXMVECTOR axis, _In_ float angle)
             {
                 // angle is in units of radians
                 auto transform = DirectX::XMMatrixRotationAxis(axis, angle);
@@ -204,7 +208,7 @@ namespace dhorn
                 using namespace DirectX;
 
                 // angle is in units of radians
-                auto transform = XMMatrixRotationAxis(up(), angle);
+                auto transform = XMMatrixRotationAxis(this->up(), angle);
                 auto forward = XMVector3TransformNormal(this->forward(), transform);
                 auto right = XMVector3TransformNormal(this->up(), transform);
 

@@ -187,8 +187,6 @@ namespace dhorn
      */
     namespace garbage
     {
-
-
         /*
          * For Windows types
          */
@@ -290,9 +288,23 @@ namespace dhorn
         template <typename HandleType>
         struct invalid_handle_traits
         {
-            static const/*expr*/ HandleType invalid(void)
+        private:
+
+            struct constexpr_handle_helper
             {
-                return INVALID_HANDLE_VALUE;
+                HandleType handle;
+
+                constexpr_handle_helper() :
+                    handle(INVALID_HANDLE_VALUE)
+                {
+                }
+            };
+
+        public:
+
+            static constexpr HandleType invalid(void)
+            {
+                return constexpr_handle_helper().handle;
             }
         };
 

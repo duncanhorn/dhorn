@@ -1,5 +1,5 @@
 /*
- * basic_auto_event_cookie.h
+ * basic_unique_event_cookie.h
  *
  * Duncan Horn
  *
@@ -12,12 +12,12 @@
 namespace dhorn
 {
     /*
-     * auto_event_cookie
+     * unique_event_cookie
      */
-#pragma region auto_event_cookie
+#pragma region unique_event_cookie
 
     template <typename DestroyFuncType = void(event_cookie)>
-    class basic_auto_event_cookie final
+    class basic_unique_event_cookie final
     {
         using destroy_func_type = std::function<DestroyFuncType>;
 
@@ -25,38 +25,38 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        basic_auto_event_cookie(void) :
+        basic_unique_event_cookie(void) :
             _cookie(invalid_event_cookie)
         {
         }
 
-        basic_auto_event_cookie(_Inout_ basic_auto_event_cookie &&other) :
-            basic_auto_event_cookie()
+        basic_unique_event_cookie(_Inout_ basic_unique_event_cookie &&other) :
+            basic_unique_event_cookie()
         {
             this->swap(other);
         }
 
-        basic_auto_event_cookie(_In_ event_cookie cookie, _In_ destroy_func_type destroyFunc) :
+        basic_unique_event_cookie(_In_ event_cookie cookie, _In_ destroy_func_type destroyFunc) :
             _cookie(cookie),
             _destroyFunc(std::move(destroyFunc))
         {
         }
 
-        ~basic_auto_event_cookie(void)
+        ~basic_unique_event_cookie(void)
         {
             this->Destroy();
         }
 
         // Cannot copy
-        basic_auto_event_cookie(const basic_auto_event_cookie &) = delete;
-        basic_auto_event_cookie &operator=(_In_ const basic_auto_event_cookie &) = delete;
+        basic_unique_event_cookie(const basic_unique_event_cookie &) = delete;
+        basic_unique_event_cookie &operator=(_In_ const basic_unique_event_cookie &) = delete;
 
 
 
         /*
          * Operators
          */
-        basic_auto_event_cookie &operator=(_Inout_ basic_auto_event_cookie &&other)
+        basic_unique_event_cookie &operator=(_Inout_ basic_unique_event_cookie &&other)
         {
             this->swap(other);
         }
@@ -90,7 +90,7 @@ namespace dhorn
             return cookie;
         }
 
-        void swap(_Inout_ basic_auto_event_cookie &other)
+        void swap(_Inout_ basic_unique_event_cookie &other)
         {
             std::swap(this->_cookie, other._cookie);
             std::swap(this->_destroyFunc, other._destroyFunc);
@@ -113,11 +113,19 @@ namespace dhorn
         destroy_func_type _destroyFunc;
     };
 
+    template <typename DestroyFuncType>
+    basic_unique_event_cookie<DestroyFuncType> make_event_cookie(
+        _In_ event_cookie cookie,
+        _In_ std::function<DestroyFuncType> destroyFunc)
+    {
+        return basic_unique_event_cookie<DestroyFuncType>(cookie, std::move(destroyFunc));
+    }
+
 
 
     // C++ still requires a template argument list for types with default values for all template arguments. Hence, if
-    // we do not do this typedef, the syntax would be dhorn::auto_event_cookie<> which is a bit odd...
-    using auto_event_cookie = basic_auto_event_cookie<void(event_cookie)>;
+    // we do not do this typedef, the syntax would be dhorn::unique_event_cookie<> which is a bit odd...
+    using unique_event_cookie = basic_unique_event_cookie<void(event_cookie)>;
 
 #pragma endregion
 }
@@ -130,8 +138,8 @@ namespace std
 {
     template <typename DestroyFuncType>
     void swap(
-        _Inout_ dhorn::basic_auto_event_cookie<DestroyFuncType> &lhs,
-        _Inout_ dhorn::basic_auto_event_cookie<DestroyFuncType> &rhs)
+        _Inout_ dhorn::basic_unique_event_cookie<DestroyFuncType> &lhs,
+        _Inout_ dhorn::basic_unique_event_cookie<DestroyFuncType> &rhs)
     {
         lhs.swap(rhs);
     }

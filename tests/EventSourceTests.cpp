@@ -8,7 +8,7 @@
 
 #include "stdafx.h"
 
-#include "dhorn/auto_event_cookie.h"
+#include "dhorn/unique_event_cookie.h"
 #include "dhorn/event_source.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -120,22 +120,23 @@ namespace dhorn
 
 
 
-        TEST_CLASS(AutoEventCookieTests)
+        TEST_CLASS(UniqueEventCookieTests)
         {
+            using source_type = dhorn::event_source<void(void)>;
+
             TEST_METHOD(DefaultConstructionTest)
             {
                 // Should not throw/AV when empty
-                dhorn::auto_event_cookie cookie;
+                dhorn::unique_event_cookie cookie;
             }
 
             TEST_METHOD(EventCookieConstuctionTest)
             {
-                dhorn::event_source<void(void)> source;
+                source_type source;
                 {
-                    dhorn::auto_event_cookie cookie(source.add([]() {}), [&](dhorn::event_cookie cookie)
-                    {
-                        source.remove(cookie);
-                    });
+                    dhorn::unique_event_cookie cookie(
+                        source.add([]() {}),
+                        std::bind(&source_type::remove, &source, std::placeholders::_1));
 
                     Assert::AreEqual(static_cast<size_t>(1), source.size());
                 }
@@ -146,15 +147,14 @@ namespace dhorn
 
             TEST_METHOD(EventCookieMoveConstructionTest)
             {
-                dhorn::event_source<void(void)> source;
+                source_type source;
                 {
-                    dhorn::auto_event_cookie cookie(source.add([]() {}), [&](dhorn::event_cookie cookie)
-                    {
-                        source.remove(cookie);
-                    });
+                    dhorn::unique_event_cookie cookie(
+                        source.add([]() {}),
+                        std::bind(&source_type::remove, &source, std::placeholders::_1));
                     Assert::AreEqual(static_cast<size_t>(1), source.size());
 
-                    dhorn::auto_event_cookie cookie2(std::move(cookie));
+                    dhorn::unique_event_cookie cookie2(std::move(cookie));
                     Assert::AreEqual(dhorn::invalid_event_cookie, static_cast<dhorn::event_cookie>(cookie));
                 }
 

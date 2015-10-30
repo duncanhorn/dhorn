@@ -13,6 +13,12 @@
     <Filter Include="include\d3d\garbage">
       <UniqueIdentifier>{befea23a-0979-4466-b8ee-a5900e05b462}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\dynamic_ui">
+      <UniqueIdentifier>{72cc98d2-37a1-4787-ab03-492bf8089f92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\dynamic_ui\garbage">
+      <UniqueIdentifier>{63e3207e-c299-4959-9e91-505f828e56d7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\d3d.h">
@@ -52,9 +58,6 @@
       <Filter>include\windows</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\utf_string.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\auto_event_cookie.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\event_source.h">
@@ -115,6 +118,18 @@
       <Filter>include\d3d</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\units.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\dynamic_ui\render_tree.h">
+      <Filter>include\dynamic_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\dynamic_ui\render_node.h">
+      <Filter>include\dynamic_ui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\dynamic_ui\garbage\render_types.h">
+      <Filter>include\dynamic_ui\garbage</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\unique_event_cookie.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
