@@ -148,6 +148,8 @@
     <ClInclude Include="include\dhorn\algorithm.h" />
     <ClInclude Include="include\dhorn\animation.h" />
     <ClInclude Include="include\dhorn\animation_manager.h" />
+    <ClInclude Include="include\dhorn\json.h" />
+    <ClInclude Include="include\dhorn\numeric.h" />
     <ClInclude Include="include\dhorn\unique_event_cookie.h" />
     <ClInclude Include="include\dhorn\d3d.h" />
     <ClInclude Include="include\dhorn\d3d\camera.h" />

@@ -132,5 +132,11 @@
     <ClInclude Include="include\dhorn\unique_event_cookie.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\json.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\numeric.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

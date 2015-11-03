@@ -111,6 +111,7 @@
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
+    <ClCompile Include="NumericTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />
     <ClCompile Include="SocketsTests.cpp" />
     <ClCompile Include="SocketStreamTests.cpp" />
