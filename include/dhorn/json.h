@@ -432,4 +432,108 @@ namespace dhorn
 
         utf8_string _str;
     };
+
+
+
+    /*
+     * json_boolean
+     */
+    class json_boolean final :
+        public json_value
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        json_boolean(_In_ bool value) :
+            _value(value)
+        {
+        }
+
+        // Default copy/move
+        json_boolean(_In_ const json_boolean &) = default;
+        json_boolean(_Inout_ json_boolean &&) = default;
+
+        json_boolean &operator=(_In_ const json_boolean &) = default;
+        json_boolean &operator=(_Inout_ json_boolean &&) = default;
+
+
+
+        /*
+         * json_value
+         */
+        virtual json_type type(void) const noexcept override
+        {
+            return json_type::boolean;
+        }
+
+
+
+        /*
+         * Functions
+         */
+        bool value() const noexcept
+        {
+            return this->_value;
+        }
+
+        void swap(_Inout_ json_boolean &other)
+        {
+            this->_value = other._value;
+        }
+
+
+
+    private:
+
+        bool _value;
+    };
+
+
+
+    /*
+     * json_null
+     */
+    class json_null final :
+        public json_value
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        json_null()
+        {
+        }
+
+        // Default copy/move
+        json_null(_In_ const json_null &) = default;
+        json_null(_Inout_ json_null &&) = default;
+
+        json_null &operator=(_In_ const json_null &) = default;
+        json_null &operator=(_Inout_ json_null &&) = default;
+
+
+
+        /*
+         * json_value
+         */
+        virtual json_type type(void) const noexcept override
+        {
+            return json_type::null;
+        }
+
+
+
+        /*
+         * Functions
+         */
+        std::nullptr_t value() const noexcept
+        {
+            return nullptr;
+        }
+
+        void swap(_Inout_ json_boolean &)
+        {
+        }
+    };
 }

@@ -25,16 +25,16 @@ namespace dhorn
 
             template <
                 typename Ty,
-                typename CharT,
+                typename StringType,
                 typename = typename std::enable_if<!std::is_same<Ty, double>::value>::type>
-            void DoTest(CharT *str, Ty expected)
+            void DoTest(const StringType &str, Ty expected)
             {
                 auto val = numeric_cast<Ty>(str);
                 Assert::AreEqual(expected, val);
             }
 
-            template <typename, typename CharT>
-            void DoTest(CharT *str, double expected)
+            template <typename, typename StringType>
+            void DoTest(const StringType &str, double expected)
             {
                 auto val = numeric_cast<double>(str);
                 Assert::AreEqual(expected, val, tolerance);
@@ -120,6 +120,17 @@ namespace dhorn
                 // Max integer value is 2,147,483,647
                 DoTest<int>(u8"2147483647", 2147483647);
                 DoTest<int>(u8"0.2147483647e10", 2147483647);
+                DoTest<int>(u8"123456789012345.123456789012345e-14", 1);
+                DoTest<int>(u8".000000000000000123e17", 12);
+            }
+
+            TEST_METHOD(LargeValueSignedIntegerNegativeValueTest)
+            {
+                // Minimum integer value is -2,147,483,648
+                DoTest<int>(u8"-2147483648", -static_cast<int>(2147483648));
+                DoTest<int>(u8"-0.2147483648e10", -static_cast<int>(2147483648));
+                DoTest<int>(u8"-123456789012345.123456789012345e-14", -1);
+                DoTest<int>(u8"-.000000000000000123e+17", -12);
             }
 
 #pragma endregion
@@ -185,6 +196,23 @@ namespace dhorn
                 ExpectException<unsigned int>(u8"-.123456e2");
             }
 
+            TEST_METHOD(LargeValueUnsignedIntegerPositiveValueTest)
+            {
+                // Max unsigned integer value is 4,294,967,295
+                DoTest<unsigned int>(u8"4294967295", 4294967295u);
+                DoTest<unsigned int>(u8"0.4294967295e10", 4294967295u);
+                DoTest<unsigned int>(u8"123456789012345.123456789012345e-14", 1u);
+                DoTest<unsigned int>(u8".000000000000000123e17", 12u);
+            }
+
+            TEST_METHOD(LargeValueUnsignedIntegerNegativeValueTest)
+            {
+                ExpectException<unsigned int>(u8"-4294967295");
+                ExpectException<unsigned int>(u8"-0.4294967295e10");
+                ExpectException<unsigned int>(u8"-123456789012345.123456789012345e-14");
+                ExpectException<unsigned int>(u8"-.000000000000000123e+17");
+            }
+
 #pragma endregion
 
 
@@ -245,6 +273,106 @@ namespace dhorn
                 DoTest<double>(u8"-1e2", -100.0);
                 DoTest<double>(u8"-0e3", 0.0);
                 DoTest<double>(u8"-.123456e2", -12.3456);
+            }
+
+            TEST_METHOD(LargeValueDoublePositiveValueTest)
+            {
+                DoTest<int>(u8"2147483647", 2147483647);
+                DoTest<int>(u8"0.2147483647e10", 2147483647);
+                DoTest<int>(u8"123456789012345.123456789012345e-14", 1.23456789012345123456789012345);
+                DoTest<int>(u8".000000000000000123e17", 12.3);
+            }
+
+            TEST_METHOD(LargeValueDoubleNegativeValueTest)
+            {
+                DoTest<int>(u8"-2147483648", -static_cast<int>(2147483648));
+                DoTest<int>(u8"-0.2147483648e10", -static_cast<int>(2147483648));
+                DoTest<int>(u8"-123456789012345.123456789012345e-14", -1.23456789012345123456789012345);
+                DoTest<int>(u8"-.000000000000000123e+17", -12.3);
+            }
+
+#pragma endregion
+
+
+
+#pragma region String Literal Tests
+
+            TEST_METHOD(Utf8StringLiteralTest)
+            {
+                char *str = u8"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(Utf16StringLiteralTest)
+            {
+                char16_t *str = u"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(Utf32StringLiteralTest)
+            {
+                char32_t *str = U"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(WideCharacterStringLiteralTest)
+            {
+                wchar_t *str = L"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+#pragma endregion
+
+
+
+#pragma region std::basic_string Tests
+
+            TEST_METHOD(Utf8BasicStringTest)
+            {
+                std::basic_string<char> str = u8"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(Utf16BasicStringTest)
+            {
+                std::basic_string<char16_t> str = u"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(Utf32BasicStringTest)
+            {
+                std::basic_string<char32_t> str = U"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(WideCharacterBasicStringTest)
+            {
+                std::basic_string<wchar_t> str = L"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+#pragma endregion
+
+
+
+#pragma region dhorn::utf_string Tests
+
+            TEST_METHOD(Utf8UtfStringTest)
+            {
+                utf8_string str = u8"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(Utf16UtfStringTest)
+            {
+                utf16_string str = u"123.456e1";
+                DoTest<double>(str, 1234.56);
+            }
+
+            TEST_METHOD(Utf32UtfStringTest)
+            {
+                utf32_string str = U"123.456e1";
+                DoTest<double>(str, 1234.56);
             }
 
 #pragma endregion
