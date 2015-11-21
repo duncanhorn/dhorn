@@ -34,23 +34,28 @@
  * The json_boolean type is simply just a bool that can be retrieved with the value function.
  *
  * The json_null type is significant only by name.
-
-
-
- 
- 
- The base type is json_object which, at its heart, is just a tree. Iterating over a json_object will
- * give key/value pairs of the type std::pair<dhorn::utf8_string, dhorn::json_object>.
  *
- * json_object instances can be converted to C++ objects using the json_cast function where Ty is the desired C++ type.
  *
- *      json_object obj = get_object();
- *      auto myFoo = json_cast<foo>(obj);
+ * json_value instances can be converted to C++ objects using the json_cast function that can be overloaded for any
+ * type Ty:
  *
- * Since a json_object need not represent another object (e.g. it could be an array
+ *      std::shared_ptr<json_value> obj = get_object();
+ *      auto myFoo = json_cast<foo>(obj.get());
  *
- * Similarly, C++ objects can be converted to json objects using the make_json function that can be overloaded for any
- * user-defined type. Note that several STL types (e.g. std::vector, etc.) already have.
+ * The json_cast function is already defined for a set of standard types (e.g. std::vector, std::basic_string,
+ * dhorn::utf_string, std::map, etc.). The expecetd input form is specified with the definition, but for the most part,
+ * it is pretty obvious (e.g. json_cast<std::basic_string<...>> requires that the json_value be a json_string,
+ * json_cast<std::vector<...>> requires that the json_value be a json_array, json_cast<std::map<...>> requires that the
+ * json_value be a json_array of json_objects that represent pairs, etc.).
+ *
+ * Similarly, C++ objects can be converted to json values using the make_json function that can be overloaded for any
+ * user-defined type:
+ *
+ *      foo myFoo = get_foo();
+ *      std::shared_ptr<json_value> value = make_json(myFoo);
+ *
+ * And of course, the make_json function is already overloaded for a set of standard types. In general, these do the
+ * reverse of what json_cast does for these types.
  */
 #pragma once
 
@@ -76,25 +81,25 @@ namespace dhorn
 
 
 
-    namespace garbage
-    {
-
-    }
-
-
-
     /*
      * json_type
      */
     enum class json_type
     {
-        object  = 0,
-        array   = 1,
-        number  = 2,
-        string  = 3,
+        object = 0,
+        array = 1,
+        number = 2,
+        string = 3,
         boolean = 4,
-        null    = 5,
+        null = 5,
     };
+
+
+
+    namespace garbage
+    {
+        std::shared_ptr<json_value> copy_json_value(_In_ const std::shared_ptr<json_value> &other);
+    }
 
 
 
@@ -111,6 +116,8 @@ namespace dhorn
     };
 
 
+
+#pragma region JSON Types
 
     /*
      * json_value
@@ -144,6 +151,18 @@ namespace dhorn
 
             return result;
         }
+
+        template <typename Ty>
+        std::shared_ptr<const Ty> as(void) const
+        {
+            auto result = std::dynamic_pointer_cast<const Ty>(this->shared_from_this());
+            if (!result)
+            {
+                throw json_exception("Invalid json cast");
+            }
+
+            return result;
+        }
     };
 
 
@@ -162,7 +181,7 @@ namespace dhorn
         /*
          * Public Types
          */
-        using size_type = typename container_type::size_type;
+        using size_type = container_type::size_type;
 
 
 
@@ -175,7 +194,7 @@ namespace dhorn
 
         json_object(_In_ const json_object &other)
         {
-            // TODO
+            this->copy(other);
         }
 
         json_object(_Inout_ json_object &&) = default;
@@ -199,13 +218,26 @@ namespace dhorn
         {
             if (&other != this)
             {
-                // TODO
+                this->copy(other);
             }
 
             return *this;
         }
 
         json_object &operator=(_Inout_ json_object &&) = default;
+
+        std::shared_ptr<json_value> operator[](_In_ const utf8_string &str)
+        {
+            auto itr = this->_tree.find(str);
+
+            if (itr != std::end(this->_tree))
+            {
+                return itr->second;
+            }
+
+            // Does not exist
+            return nullptr;
+        }
 
 
 
@@ -227,7 +259,7 @@ namespace dhorn
             return this->_tree.size();
         }
 
-        void swap(_Inout_ json_object& other)
+        void swap(_Inout_ json_object &other)
         {
             this->_tree.swap(other._tree);
         }
@@ -235,6 +267,19 @@ namespace dhorn
 
 
     private:
+
+        void copy(_In_ const json_object &other)
+        {
+            this->_tree.clear();
+
+            for (auto &pair : other._tree)
+            {
+                this->_tree.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(pair.first),
+                    std::forward_as_tuple(garbage::copy_json_value(pair.second)));
+            }
+        }
 
         container_type _tree;
     };
@@ -254,7 +299,7 @@ namespace dhorn
         /*
          * Public Types
          */
-        using size_type = typename container_type::size_type;
+        using size_type = container_type::size_type;
 
 
 
@@ -267,7 +312,7 @@ namespace dhorn
 
         json_array(_In_ const json_array &other)
         {
-            // TODO
+            this->copy(other);
         }
 
         json_array(_Inout_ json_array &&) = default;
@@ -291,7 +336,7 @@ namespace dhorn
         {
             if (&other != this)
             {
-                // TODO
+                this->copy(other);
             }
 
             return *this;
@@ -314,9 +359,39 @@ namespace dhorn
             return this->_array;
         }
 
+        void clear()
+        {
+            this->_array.clear();
+        }
+
+        bool empty() const noexcept
+        {
+            return this->_array.empty();
+        }
+
+        size_type size() const noexcept
+        {
+            return this->_array.size();
+        }
+
+        void swap(_Inout_ json_array &other)
+        {
+            this->_array.swap(other._array);
+        }
+
 
 
     private:
+
+        void copy(_In_ const json_array &other)
+        {
+            this->_array.clear();
+
+            for (auto &value : other._array)
+            {
+                this->_array.emplace_back(garbage::copy_json_value(value));
+            }
+        }
 
         container_type _array;
     };
@@ -339,7 +414,7 @@ namespace dhorn
         }
 
         // Default copy/move
-        json_number(_In_ const json_number &) = default;
+        json_number(const json_number &) = default;
         json_number(_Inout_ json_number &&) = default;
 
         json_number &operator=(_In_ const json_number &) = default;
@@ -395,7 +470,7 @@ namespace dhorn
         }
 
         // Default copy/move
-        json_string(_In_ const json_string &) = default;
+        json_string(const json_string &) = default;
         json_string(_Inout_ json_string &&) = default;
 
         json_string &operator=(_In_ const json_string &) = default;
@@ -451,7 +526,7 @@ namespace dhorn
         }
 
         // Default copy/move
-        json_boolean(_In_ const json_boolean &) = default;
+        json_boolean(const json_boolean &) = default;
         json_boolean(_Inout_ json_boolean &&) = default;
 
         json_boolean &operator=(_In_ const json_boolean &) = default;
@@ -506,7 +581,7 @@ namespace dhorn
         }
 
         // Default copy/move
-        json_null(_In_ const json_null &) = default;
+        json_null(const json_null &) = default;
         json_null(_Inout_ json_null &&) = default;
 
         json_null &operator=(_In_ const json_null &) = default;
@@ -536,4 +611,132 @@ namespace dhorn
         {
         }
     };
+
+
+
+    namespace garbage
+    {
+        std::shared_ptr<json_value> copy_json_value(_In_ const std::shared_ptr<json_value> &other)
+        {
+            auto type = other->type();
+
+            switch (type)
+            {
+            case json_type::object:
+                return std::make_shared<json_object>(*other->as<json_object>());
+                break;
+
+            case json_type::array:
+                return std::make_shared<json_array>(*other->as<json_array>());
+                break;
+
+            case json_type::number:
+                return std::make_shared<json_number>(*other->as<json_number>());
+                break;
+
+            case json_type::string:
+                return std::make_shared<json_string>(*other->as<json_string>());
+                break;
+
+            case json_type::boolean:
+                return std::make_shared<json_boolean>(*other->as<json_boolean>());
+                break;
+
+            case json_type::null:
+                return std::make_shared<json_null>(*other->as<json_null>());
+                break;
+
+            default:
+                assert(false && "Unexpected json_type");
+                break;
+            }
+
+            return nullptr;
+        }
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * json_cast and make_json declarations
+     */
+#pragma region Conversion Function/Type Declarations
+
+    /*
+     * json_cast
+     */
+    template <typename Ty>
+    struct json_cast_t
+    {
+        inline Ty operator()(_In_ const json_value *value);
+    };
+
+    template <typename Ty, typename CastTy = json_cast_t<Ty>>
+    inline Ty json_cast(_In_ const json_value *value)
+    {
+        return CastTy()(value);
+    }
+
+    template <typename Ty, typename CastTy>
+    inline Ty json_cast(_In_ const json_value *value, _In_ const CastTy &cast)
+    {
+        return cast(value);
+    }
+
+
+
+    /*
+     * make_json
+     */
+    template <typename Ty>
+    struct make_json_t
+    {
+        inline std::shared_ptr<json_value> make_json(_In_ const Ty &);
+    };
+
+    template <typename Ty, typename MakeTy = make_json_t<Ty>>
+    inline std::shared_ptr<json_value> make_json(_In_ const Ty &value)
+    {
+        return MakeTy()(value);
+    }
+
+    template <typename Ty, typename MakeTy>
+    inline std::shared_ptr<json_value> make_json(_In_ const Ty &value, _In_ const MakeTy &make)
+    {
+        return make(value);
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * std::basic_string (currently don't support std::wstring)
+     */
+#pragma region
+
+    template <typename CharT>
+    struct json_cast_t<std::basic_string<CharT>>
+    {
+        inline std::basic_string<CharT> operator()(_In_ const json_value *value)
+        {
+            auto jsonString = value->as<json_string>();
+            utf_string<CharT> utfString = jsonString->str();
+            return utfString.c_str();
+        }
+    };
+
+    template <typename CharT>
+    struct make_json_t<std::basic_string<CharT>>
+    {
+        inline std::shared_ptr<json_value> operator()(_In_ const std::basic_string<CharT> &value)
+        {
+            utf_string<CharT> utfString = value.c_str();
+            return std::make_shared<json_string>(utfString);
+        }
+    };
+
+#pragma endregion
 }

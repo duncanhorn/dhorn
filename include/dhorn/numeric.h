@@ -118,7 +118,7 @@ namespace dhorn
             _In_ const CharT *front,
             _In_opt_ const CharT *back,
             _Inout_ NumericType *value,
-            _Out_ bool* isNonZero)
+            _Inout_ bool* isNonZero)
         {
             if (back == nullptr)
             {

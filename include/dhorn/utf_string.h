@@ -990,6 +990,48 @@ namespace dhorn
 
 #pragma endregion
 
+#pragma region Equality Operators
+
+    template <typename CharT>
+    bool operator==(_In_ const utf_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    {
+        // Shortcuts since they are of the same string type
+        if ((lhs.length() != rhs.length()) || (lhs.size() != rhs.size()))
+        {
+            return false;
+        }
+
+        // Use size since we need to compare the whole buffer
+        return memcmp(lhs.c_str(), rhs.c_str(), lhs.size());
+    }
+
+    template <typename LhsCharT, typename RhsCharT>
+    bool operator==(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        // We can't compare size, but the length should at least be equal
+        if (lhs.length() != rhs.length())
+        {
+            return false;
+        }
+
+        // There's not much optimization we can do here; we must go character-by-character
+        auto lhsItr = std::begin(lhs);
+        for (auto ch : rhs)
+        {
+            if (ch != *lhsItr)
+            {
+                return false;
+            }
+
+            // Don't need to check bounds since we know they are of the same length
+            ++lhsItr;
+        }
+
+        return true;
+    }
+
+#pragma endregion
+
 
 
     /*

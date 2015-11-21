@@ -110,6 +110,7 @@
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
+    <ClCompile Include="JSONTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="NumericTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />
@@ -120,6 +121,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="D3DVectorTests.cpp" />
+    <ClCompile Include="SynchronizedObjectTests.cpp" />
     <ClCompile Include="TaskPoolTests.cpp" />
     <ClCompile Include="TreeTests.cpp" />
     <ClCompile Include="UniqueAnyTests.cpp" />

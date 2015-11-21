@@ -83,5 +83,11 @@
     <ClCompile Include="NumericTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JSONTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SynchronizedObjectTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
