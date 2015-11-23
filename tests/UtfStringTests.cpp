@@ -779,6 +779,121 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
+
+            TEST_METHOD(ForwardIteratorIncrementTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 0; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *itr);
+                    ++itr;
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPreIncrementTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 1; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *++itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPostIncrementTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 0; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *itr++);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorDecrementTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    --itr;
+                    Assert::IsTrue(arr[i - 1] == *itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPreDecrementTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *--itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPostDecrementTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                --itr;
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *itr--);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorEqualityTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                auto end = str.end();
+                size_t size = 0;
+                while (itr != end)
+                {
+                    Assert::IsFalse(itr == end);
+                    ++size;
+                    ++itr;
+                }
+
+                Assert::IsTrue(itr == end);
+                Assert::AreEqual(dhorn::array_size(arr), size);
+            }
+
+            TEST_METHOD(ReverseIteratorTest)
+            {
+                char buff[] = u8"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.rbegin();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *itr);
+                    ++itr;
+                }
+            }
         };
 
 
@@ -1299,6 +1414,121 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
+
+            TEST_METHOD(ForwardIteratorIncrementTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 0; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *itr);
+                    ++itr;
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPreIncrementTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 1; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *++itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPostIncrementTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 0; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *itr++);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorDecrementTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    --itr;
+                    Assert::IsTrue(arr[i - 1] == *itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPreDecrementTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *--itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPostDecrementTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                --itr;
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *itr--);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorEqualityTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                auto end = str.end();
+                size_t size = 0;
+                while (itr != end)
+                {
+                    Assert::IsFalse(itr == end);
+                    ++size;
+                    ++itr;
+                }
+
+                Assert::IsTrue(itr == end);
+                Assert::AreEqual(dhorn::array_size(arr), size);
+            }
+
+            TEST_METHOD(ReverseIteratorTest)
+            {
+                char16_t buff[] = u"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.rbegin();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *itr);
+                    ++itr;
+                }
+            }
         };
 
 
@@ -1818,6 +2048,121 @@ namespace dhorn
                 Assert::AreEqual(dhorn::array_size(expected) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
+            }
+
+            TEST_METHOD(ForwardIteratorIncrementTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 0; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *itr);
+                    ++itr;
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPreIncrementTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 1; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *++itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPostIncrementTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                for (size_t i = 0; i < dhorn::array_size(arr); ++i)
+                {
+                    Assert::IsTrue(arr[i] == *itr++);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorDecrementTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    --itr;
+                    Assert::IsTrue(arr[i - 1] == *itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPreDecrementTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *--itr);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorPostDecrementTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.end();
+                --itr;
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *itr--);
+                }
+            }
+
+            TEST_METHOD(ForwardIteratorEqualityTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.begin();
+                auto end = str.end();
+                size_t size = 0;
+                while (itr != end)
+                {
+                    Assert::IsFalse(itr == end);
+                    ++size;
+                    ++itr;
+                }
+
+                Assert::IsTrue(itr == end);
+                Assert::AreEqual(dhorn::array_size(arr), size);
+            }
+
+            TEST_METHOD(ReverseIteratorTest)
+            {
+                char32_t buff[] = U"test - \u1FE7\u09EA\U0010FE2B\u0080";
+                char32_t arr[] = { 't', 'e', 's', 't', ' ', '-', ' ', u'\u1FE7', u'\u09EA', U'\U0010FE2B', u'\u0080' };
+                string_type str = buff;
+
+                auto itr = str.rbegin();
+                for (size_t i = dhorn::array_size(arr); i > 0; --i)
+                {
+                    Assert::IsTrue(arr[i - 1] == *itr);
+                    ++itr;
+                }
             }
         };
 

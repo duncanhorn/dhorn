@@ -84,7 +84,7 @@ namespace dhorn
 
 #pragma region utf-8
 
-        inline constexpr size_t size_utf8(_In_ char ch)
+        inline constexpr size_t size_utf8(_In_ char ch) noexcept
         {
             // UTF-8 character widths are defined as:
             // 0xxx xxxx    - 1 byte wide
@@ -98,7 +98,7 @@ namespace dhorn
                 ((ch & 0xF8) == 0xF0) ? 4 : 0;
         }
 
-        inline constexpr size_t size_utf8(_In_ char32_t val)
+        inline constexpr size_t size_utf8(_In_ char32_t val) noexcept
         {
             // The format of a utf-8 character is (A is first byte, B is second, etc.):
             // 1 byte:  0000 0000 0000 0000 0000 0000 0AAA AAAA
@@ -148,7 +148,7 @@ namespace dhorn
 
 #pragma region utf-16
 
-        inline constexpr size_t size_utf16(_In_ char16_t ch)
+        inline constexpr size_t size_utf16(_In_ char16_t ch) noexcept
         {
             // UTF-16 character widths are defined as:
             // 1101 10xx xxxx xxxx  - 2 characters (4 bytes)
@@ -159,7 +159,7 @@ namespace dhorn
                 ((static_cast<uint16_t>(ch) & 0xFC00) == 0xDC00) ? 0 : 1;
         }
 
-        inline constexpr size_t size_utf16(_In_ char32_t ch)
+        inline constexpr size_t size_utf16(_In_ char32_t ch) noexcept
         {
             // 0x000000 to 0x00D7FF:    1 character (2 bytes)
             // 0x00D800 to 0x00DFFF:    INVALID
@@ -229,7 +229,7 @@ namespace dhorn
             static const utf_encoding encoding = utf_encoding::utf_8;
             using value_type = char;
 
-            static inline constexpr size_t size(_In_ value_type val)
+            static inline constexpr size_t size(_In_ value_type val) noexcept
             {
                 return size_utf8(val);
             }
@@ -237,6 +237,18 @@ namespace dhorn
             static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
             {
                 return read_utf8(pos, output);
+            }
+
+            static inline const value_type *previous(_In_ const value_type *pos) noexcept
+            {
+                // 10xx xxxx indicates that we are not yet at the end
+                do
+                {
+                    --pos;
+                }
+                while ((*pos & 0xC0) == 0x80);
+
+                return pos;
             }
 
             static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
@@ -272,7 +284,7 @@ namespace dhorn
             static const utf_encoding encoding = utf_encoding::utf_16;
             using value_type = char16_t;
 
-            static inline constexpr size_t size(_In_ value_type val)
+            static inline constexpr size_t size(_In_ value_type val) noexcept
             {
                 return size_utf16(val);
             }
@@ -280,6 +292,14 @@ namespace dhorn
             static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
             {
                 return read_utf16(pos, output);
+            }
+
+            static inline constexpr const value_type *previous(_In_ const value_type *pos) noexcept
+            {
+                // 1101 11xx xxxx xxxx indicates that the current character is part of a surrogate pair
+                return ((*(pos - 1) & 0xFC00) == 0xDC00) ?
+                    (pos - 2) :
+                    (pos - 1);
             }
 
             static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
@@ -311,7 +331,7 @@ namespace dhorn
             static const utf_encoding encoding = utf_encoding::utf_32;
             using value_type = char32_t;
 
-            static inline constexpr size_t size(_In_ value_type /*val*/)
+            static inline constexpr size_t size(_In_ value_type /*val*/) noexcept
             {
                 return 1;
             }
@@ -328,6 +348,11 @@ namespace dhorn
                 }
 
                 return val;
+            }
+
+            static inline constexpr const value_type *previous(_In_ const value_type *pos) noexcept
+            {
+                return pos - 1;
             }
 
             static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
@@ -382,35 +407,88 @@ namespace dhorn
         };
 
 #pragma endregion
+    }
+
+
+
+    /*
+     * utf_string_iterator Definition
+     */
+#pragma region utf_string_iterator Definition
+
+    template <typename CharT>
+    class utf_string_iterator final :
+        public std::iterator<std::bidirectional_iterator_tag, char32_t, ptrdiff_t, CharT *, char32_t>
+    {
+        using Traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
+
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        utf_string_iterator(_In_ const CharT *ptr) :
+            _ptr(ptr)
+        {
+        }
+
+        utf_string_iterator(_In_ const utf_string_iterator &other) = default;
 
 
 
         /*
-         * utf8_string const iterator
+         * Operators
          */
-        class utf_string_const_iterator
+        utf_string_iterator &operator=(_In_ const utf_string_iterator &other) = default;
+
+        char32_t operator*(void) const
         {
-        public:
-            /*
-             * Constructor(s)/Destructor
-             */
-            utf_string_const_iterator(
-                _In_ const unsigned char *front,
-                _In_ const unsigned char *back,
-                _In_ const unsigned char *pos) :
-                _front(front),
-                _back(back),
-                _pos(pos)
-            {
-            }
+            return Traits::next(this->_ptr, nullptr);
+        }
 
-        private:
+        bool operator==(_In_ const utf_string_iterator &other)
+        {
+            return this->_ptr == other._ptr;
+        }
 
-            const unsigned char *_front;
-            const unsigned char *_back;
-            const unsigned char *_pos;
-        };
-    }
+        bool operator!=(_In_ const utf_string_iterator &other)
+        {
+            return this->_ptr != other._ptr;
+        }
+
+        utf_string_iterator &operator++(void)
+        {
+            Traits::next(this->_ptr, &this->_ptr);
+            return *this;
+        }
+
+        utf_string_iterator operator++(int /*unused*/)
+        {
+            auto copy = *this;
+            ++(*this);
+            return copy;
+        }
+
+        utf_string_iterator &operator--(void)
+        {
+            this->_ptr = Traits::previous(this->_ptr);
+            return *this;
+        }
+
+        utf_string_iterator operator--(int /*unused*/)
+        {
+            auto copy = *this;
+            --(*this);
+            return copy;
+        }
+
+
+
+    private:
+
+        const CharT *_ptr;
+    };
+
+#pragma endregion
 
 
 
@@ -420,7 +498,7 @@ namespace dhorn
 #pragma region utf_string Definition
 
     template <typename CharT>
-    class utf_string
+    class utf_string final
     {
         using Traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
 
@@ -433,6 +511,10 @@ namespace dhorn
          * Public Type Definitions
          */
         using value_type = typename Traits::value_type;
+        using iterator = utf_string_iterator<CharT>;
+        using const_iterator = utf_string_iterator<CharT>;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 
 
@@ -563,6 +645,71 @@ namespace dhorn
         operator const CharT *(void) const
         {
             return this->_front;
+        }
+
+
+
+        /*
+         * Iterators
+         */
+        iterator begin(void) noexcept
+        {
+            return iterator(this->_front);
+        }
+
+        const_iterator begin(void) const noexcept
+        {
+            return const_iterator(this->_front);
+        }
+
+        const_iterator cbegin(void) const noexcept
+        {
+            return const_iterator(this->_front);
+        }
+
+        reverse_iterator rbegin(void) noexcept
+        {
+            return reverse_iterator(this->end());
+        }
+
+        const_reverse_iterator rbegin(void) const noexcept
+        {
+            return const_reverse_iterator(this->end());
+        }
+
+        const_reverse_iterator crbegin(void) const noexcept
+        {
+            return const_reverse_iterator(this->cend());
+        }
+
+        iterator end(void) noexcept
+        {
+            return iterator(this->_back);
+        }
+
+        const_iterator end(void) const noexcept
+        {
+            return const_iterator(this->_back);
+        }
+
+        const_iterator cend(void) const noexcept
+        {
+            return const_iterator(this->_back);
+        }
+
+        reverse_iterator rend(void) noexcept
+        {
+            return reverse_iterator(this->begin());
+        }
+
+        const_reverse_iterator rend(void) const noexcept
+        {
+            return const_reverse_iterator(this->begin());
+        }
+
+        const_reverse_iterator crend(void) const noexcept
+        {
+            return const_reverse_iterator(this->cbegin());
         }
 
 
