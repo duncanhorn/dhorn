@@ -76,11 +76,11 @@ namespace dhorn
             this->Destroy();
         }
 
-        void reset(_In_ event_cookie cookie, _In_ destroy_func_type destroyFunc)
+        void reset(_In_ event_cookie cookie, _In_ const destroy_func_type &destroyFunc)
         {
             this->Destroy();
             this->_cookie = cookie;
-            this->_destroyFunc = std::move(destroyFunc);
+            this->_destroyFunc = destroyFunc;
         }
 
         event_cookie release(void)
@@ -116,9 +116,9 @@ namespace dhorn
     template <typename DestroyFuncType>
     basic_unique_event_cookie<DestroyFuncType> make_event_cookie(
         _In_ event_cookie cookie,
-        _In_ std::function<DestroyFuncType> destroyFunc)
+        _In_ const std::function<DestroyFuncType> &destroyFunc)
     {
-        return basic_unique_event_cookie<DestroyFuncType>(cookie, std::move(destroyFunc));
+        return basic_unique_event_cookie<DestroyFuncType>(cookie, destroyFunc);
     }
 
 

@@ -97,9 +97,9 @@ namespace dhorn
         /*
          * Non-virtual public function(s)
          */
-        event_cookie add_state_change(_In_ CallbackType callback)
+        event_cookie add_state_change(_In_ const CallbackType &callback)
         {
-            return this->_stateChangeEventSource.add(std::move(callback));
+            return this->_stateChangeEventSource.add(callback);
         }
 
         void remove_state_change(_In_ event_cookie cookie)
@@ -201,9 +201,9 @@ namespace dhorn
             /*
              * Public functions
              */
-            void set_callback(_In_ update_function func)
+            void set_callback(_In_ const update_function &func)
             {
-                this->_updateFunc = std::move(func);
+                this->_updateFunc = func;
             }
 
             void add_key_frame(_In_ duration time, _In_ const Ty &value)

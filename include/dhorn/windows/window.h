@@ -912,9 +912,9 @@ namespace dhorn
              */
 #pragma region Callbacks
 
-            void post_async(_Inout_ deferred_callback_type func)
+            void post_async(_In_ const deferred_callback_type &func)
             {
-                std::unique_ptr<deferred_invoke_handler> handler(new deferred_invoke_handler(std::move(func)));
+                auto handler = std::make_unique<deferred_invoke_handler>(func);
                 this->Post(std::move(handler));
             }
 
@@ -939,7 +939,7 @@ namespace dhorn
                 cond.wait(guard, [&]() -> bool { return completed; });
             }
 
-            size_t add_callback_handler(_Inout_ callback_handler handler)
+            size_t add_callback_handler(_In_ const callback_handler &handler)
             {
                 size_t callbackId = ++this->_nextCallbackId;
 
@@ -949,29 +949,29 @@ namespace dhorn
                 if (this->_threadId)
                 {
                     // Already running; post
-                    this->post_async([this, callback = std::move(handler), callbackId]() mutable
+                    this->post_async([this, handler, callbackId]() mutable
                     {
-                        this->AddCallbackHandler(std::move(callback), callbackId);
+                        this->AddCallbackHandler(callback_handler(handler), callbackId);
                     });
                 }
                 else
                 {
                     // Not running; add now
-                    this->AddCallbackHandler(std::move(handler), callbackId);
+                    this->AddCallbackHandler(callback_handler(handler), callbackId);
                 }
 
                 return callbackId;
             }
 
-            size_t add_callback_handler(_In_ window_message message, _Inout_ message_callback_type func)
+            size_t add_callback_handler(_In_ window_message message, _In_ const message_callback_type &func)
             {
-                return this->add_callback_handler(callback_handler(message, std::move(func)));
+                return this->add_callback_handler(callback_handler(message, func));
             }
 
-            void on_initialized(_In_ const deferred_callback_type callback)
+            void on_initialized(_In_ const deferred_callback_type &callback)
             {
                 // There can only be one initialize callback
-                this->_initializeCallback = std::move(callback);
+                this->_initializeCallback = callback;
             }
 
 #pragma endregion

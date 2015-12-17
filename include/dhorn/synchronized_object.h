@@ -98,16 +98,16 @@ namespace dhorn
             return this->_value;
         }
 
-        void set_unlocked(_In_ Ty value)
+        void set_unlocked(_In_ const Ty &value)
         {
-            this->_value = std::move(value);
+            this->_value = value;
         }
 
         template <typename LockType = std::unique_lock<MutexType>>
-        void set_locked(_In_ Ty value)
+        void set_locked(_In_ const Ty &value)
         {
             LockType lock(this->_mutex);
-            this->_value = std::move(value);
+            this->_value = value;
         }
 
 

@@ -112,7 +112,14 @@ namespace dhorn
             return *this;
         }
 
-        unique_any &operator=(_In_ storage_type val)
+        unique_any &operator=(_In_ const storage_type &val)
+        {
+            this->Destroy();
+            this->_value = val;
+            return *this;
+        }
+
+        unique_any &operator=(_In_ storage_type &&val)
         {
             this->Destroy();
             this->_value = std::move(val);
@@ -141,7 +148,7 @@ namespace dhorn
 
         storage_type release(void)
         {
-            storage_type val = std::move(this->_value);
+            auto val = std::move(this->_value);
             this->_value = Traits::invalid();
 
             return val;
@@ -152,7 +159,12 @@ namespace dhorn
             this->Destroy();
         }
 
-        void reset(_In_ storage_type val)
+        void reset(_In_ const storage_type &val)
+        {
+            *this = val;
+        }
+
+        void reset(_In_ storage_type &&val)
         {
             *this = std::move(val);
         }

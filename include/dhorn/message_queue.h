@@ -102,10 +102,10 @@ namespace dhorn
             return this->_size;
         }
 
-        void push_back(_In_ FunctionType func)
+        void push_back(_In_ const FunctionType &func)
         {
             // Do all initialization work that does not need to occur under lock first
-            auto pNode = new garbage::message_queue_node<MyTypes>(std::move(func));
+            auto pNode = new garbage::message_queue_node<MyTypes>(func);
 
             { // Acquire _backMutex
                 std::lock_guard<std::mutex> lock(this->_backMutex);

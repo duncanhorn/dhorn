@@ -107,24 +107,24 @@ namespace dhorn
             /*
              * Custom initialization values
              */
-            void msaa_quality_callback(_In_ QualityFunc func)
+            void msaa_quality_callback(_In_ const QualityFunc &func)
             {
-                this->_qualityFunc = std::move(func);
+                this->_qualityFunc = func;
             }
 
-            void on_update(_In_ UpdateFunc func)
+            void on_update(_In_ const UpdateFunc &func)
             {
-                this->_updateFunc = std::move(func);
+                this->_updateFunc = func;
             }
 
-            void on_draw(_In_ DrawFunc func)
+            void on_draw(_In_ const DrawFunc &func)
             {
-                this->_drawFunc = std::move(func);
+                this->_drawFunc = func;
             }
 
-            void on_resize(_In_ SizeChangeFunc func)
+            void on_resize(_In_ const SizeChangeFunc &func)
             {
-                this->_sizeChangeFunc = std::move(func);
+                this->_sizeChangeFunc = func;
             }
 
 #pragma endregion

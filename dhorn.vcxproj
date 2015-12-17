@@ -150,6 +150,7 @@
     <ClInclude Include="include\dhorn\animation_manager.h" />
     <ClInclude Include="include\dhorn\json.h" />
     <ClInclude Include="include\dhorn\numeric.h" />
+    <ClInclude Include="include\dhorn\singleton.h" />
     <ClInclude Include="include\dhorn\synchronized_object.h" />
     <ClInclude Include="include\dhorn\unique_event_cookie.h" />
     <ClInclude Include="include\dhorn\d3d.h" />

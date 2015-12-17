@@ -21,7 +21,7 @@ namespace dhorn
     {
     public:
         scope_exit(_In_ std::function<void(void)> func) :
-            _func(func)
+            _func(std::move(func))
         {
         }
 

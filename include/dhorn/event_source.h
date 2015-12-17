@@ -84,9 +84,9 @@ namespace dhorn
         /*
          * Public Functions
          */
-        event_cookie add(_In_ callback_type func)
+        event_cookie add(_In_ const callback_type &func)
         {
-            auto itr = this->_eventTargets.emplace(++this->_nextEventCookie, std::move(func));
+            auto itr = this->_eventTargets.emplace(++this->_nextEventCookie, func);
             assert(itr.second);
 
             return this->_nextEventCookie;

@@ -1234,21 +1234,13 @@ namespace dhorn
             this->reset(capacity);
         }
 
-        // Visual Studio won't auto generate move constructors/assignment operators...
-        udp_packet(_Inout_ udp_packet &&other)
-        {
-            this->swap(other);
-        }
-
-        udp_packet &operator=(_Inout_ udp_packet &&other)
-        {
-            this->swap(other);
-            return *this;
-        }
-
         // Cannot copy
         udp_packet(_In_ const udp_packet &) = delete;
         udp_packet &operator=(_In_ const udp_packet &) = delete;
+
+        // Default move
+        udp_packet(_Inout_ udp_packet &&) = default;
+        udp_packet &operator=(_Inout_ udp_packet &&) = default;
 
 
 

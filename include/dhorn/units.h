@@ -165,9 +165,9 @@ namespace dhorn
         /*
          * Operators
          */
-        unit &operator=(_In_ const value_type val)
+        unit &operator=(_In_ const value_type &val)
         {
-            this->_value = std::move(val);
+            this->_value = val;
             return *this;
         }
 

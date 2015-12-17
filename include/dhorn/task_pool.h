@@ -50,19 +50,19 @@ namespace dhorn
          * Task Submit Functions
          */
         template <typename Func>
-        void submit(_In_ Func func)
+        void submit(_In_ const Func &func)
         {
-            this->_messageQueue.push_back(std::move(func));
+            this->_messageQueue.push_back(func);
         }
 
         template <typename Func, typename ResultType = decltype(std::declval<Func>()())>
-        auto submit_for_result(_In_ Func func) ->
+        auto submit_for_result(_In_ const Func &func) ->
             std::future<ResultType>
         {
             auto promise = std::make_shared<std::promise<ResultType>>();
             auto future = promise->get_future();
 
-            this->_messageQueue.push_back([promise = std::move(promise), func = std::move(func)]()
+            this->_messageQueue.push_back([promise = std::move(promise), func]()
             {
                 promise->set_value(func());
             });
