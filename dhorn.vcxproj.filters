@@ -141,7 +141,7 @@
     <ClInclude Include="include\dhorn\synchronized_object.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\singleton.h">
+    <ClInclude Include="include\dhorn\instance.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

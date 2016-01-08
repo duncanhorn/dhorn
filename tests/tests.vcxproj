@@ -114,7 +114,7 @@
     <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="NumericTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />
-    <ClCompile Include="SingletonTests.cpp" />
+    <ClCompile Include="InstanceTests.cpp" />
     <ClCompile Include="SocketsTests.cpp" />
     <ClCompile Include="SocketStreamTests.cpp" />
     <ClCompile Include="stdafx.cpp">
