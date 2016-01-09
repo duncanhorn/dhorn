@@ -265,6 +265,8 @@ namespace dhorn
                 Assert::IsTrue(str.c_str()[str.size()] == '\0');
             }
 
+#pragma region Constructor Tests
+
             TEST_METHOD(DefaultConstructorTest)
             {
                 string_type str;
@@ -366,6 +368,15 @@ namespace dhorn
                 EnsureCorrectString(str);
             }
 
+            TEST_METHOD(UtfStringIteratorConstructorTest)
+            {
+                string_type str = test_string;
+                string_type s1(str.begin(), str.end());
+                Assert::AreEqual(dhorn::array_size(test_array), s1.length());
+                Assert::AreEqual(str.size(), s1.size());
+                Assert::IsTrue(std::equal(std::begin(test_array), std::end(test_array), s1.begin()));
+            }
+
             TEST_METHOD(CopyConstructorTest)
             {
                 string_type str1 = test_string;
@@ -412,6 +423,10 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(buffer_utf8), std::end(buffer_utf8), str2.c_str()));
                 EnsureCorrectString(str2);
             }
+
+#pragma endregion
+
+#pragma region Assignment Tests
 
             TEST_METHOD(CopyAssignmentTest)
             {
@@ -591,6 +606,10 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
+
+#pragma endregion
+
+#pragma region Append Tests
 
             TEST_METHOD(PushBackTest)
             {
@@ -774,6 +793,10 @@ namespace dhorn
                 EnsureCorrectString(str);
             }
 
+#pragma endregion
+
+#pragma region Iterator Tests
+
             TEST_METHOD(ForwardIteratorIncrementTest)
             {
                 string_type str = test_string;
@@ -872,6 +895,119 @@ namespace dhorn
                     ++itr;
                 }
             }
+
+#pragma endregion
+
+#pragma region Equality Tests
+
+            TEST_METHOD(SelfEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == str);
+                Assert::IsFalse(str != str);
+            }
+
+            TEST_METHOD(Utf8StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf8_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf8_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf8StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf8);
+                Assert::IsTrue(test_string_utf8 == str);
+                Assert::IsFalse(str != test_string_utf8);
+                Assert::IsFalse(test_string_utf8 != str);
+
+                auto sub = test_string_utf8 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf16StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf16_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf16_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf16StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf16);
+                Assert::IsTrue(test_string_utf16 == str);
+                Assert::IsFalse(str != test_string_utf16);
+                Assert::IsFalse(test_string_utf16 != str);
+
+                auto sub = test_string_utf16 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf32StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf32_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf32_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf32StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf32);
+                Assert::IsTrue(test_string_utf32 == str);
+                Assert::IsFalse(str != test_string_utf32);
+                Assert::IsFalse(test_string_utf32 != str);
+
+                auto sub = test_string_utf32 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+#pragma endregion
         };
 
 
@@ -889,6 +1025,8 @@ namespace dhorn
             {
                 Assert::IsTrue(str.c_str()[str.size()] == '\0');
             }
+
+#pragma region Constructor Tests
 
             TEST_METHOD(DefaultConstructorTest)
             {
@@ -982,6 +1120,15 @@ namespace dhorn
                 EnsureCorrectString(str);
             }
 
+            TEST_METHOD(UtfStringIteratorConstructorTest)
+            {
+                string_type str = test_string;
+                string_type s1(str.begin(), str.end());
+                Assert::AreEqual(dhorn::array_size(test_array), s1.length());
+                Assert::AreEqual(str.size(), s1.size());
+                Assert::IsTrue(std::equal(std::begin(test_array), std::end(test_array), s1.begin()));
+            }
+
             TEST_METHOD(CopyConstructorTest)
             {
                 string_type str1 = test_string;
@@ -1028,6 +1175,10 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(buffer_utf16), std::end(buffer_utf16), str2.c_str()));
                 EnsureCorrectString(str2);
             }
+
+#pragma endregion
+
+#pragma region Assignment Tests
 
             TEST_METHOD(CopyAssignmentTest)
             {
@@ -1198,6 +1349,10 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
+
+#pragma endregion
+
+#pragma region Append Tests
 
             TEST_METHOD(PushBackTest)
             {
@@ -1381,6 +1536,10 @@ namespace dhorn
                 EnsureCorrectString(str);
             }
 
+#pragma endregion
+
+#pragma region Iterator Tests
+
             TEST_METHOD(ForwardIteratorIncrementTest)
             {
                 string_type str = test_string;
@@ -1479,6 +1638,119 @@ namespace dhorn
                     ++itr;
                 }
             }
+
+#pragma endregion
+
+#pragma region Equality Tests
+
+            TEST_METHOD(SelfEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == str);
+                Assert::IsFalse(str != str);
+            }
+
+            TEST_METHOD(Utf8StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf8_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf8_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf8StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf8);
+                Assert::IsTrue(test_string_utf8 == str);
+                Assert::IsFalse(str != test_string_utf8);
+                Assert::IsFalse(test_string_utf8 != str);
+
+                auto sub = test_string_utf8 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf16StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf16_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf16_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf16StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf16);
+                Assert::IsTrue(test_string_utf16 == str);
+                Assert::IsFalse(str != test_string_utf16);
+                Assert::IsFalse(test_string_utf16 != str);
+
+                auto sub = test_string_utf16 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf32StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf32_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf32_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf32StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf32);
+                Assert::IsTrue(test_string_utf32 == str);
+                Assert::IsFalse(str != test_string_utf32);
+                Assert::IsFalse(test_string_utf32 != str);
+
+                auto sub = test_string_utf32 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+#pragma endregion
         };
 
 
@@ -1496,6 +1768,8 @@ namespace dhorn
             {
                 Assert::IsTrue(str.c_str()[str.size()] == '\0');
             }
+
+#pragma region Constructor Tests
 
             TEST_METHOD(DefaultConstructorTest)
             {
@@ -1589,6 +1863,15 @@ namespace dhorn
                 EnsureCorrectString(str);
             }
 
+            TEST_METHOD(UtfStringIteratorConstructorTest)
+            {
+                string_type str = test_string;
+                string_type s1(str.begin(), str.end());
+                Assert::AreEqual(dhorn::array_size(test_array), s1.length());
+                Assert::AreEqual(str.size(), s1.size());
+                Assert::IsTrue(std::equal(std::begin(test_array), std::end(test_array), s1.begin()));
+            }
+
             TEST_METHOD(CopyConstructorTest)
             {
                 string_type str1 = test_string;
@@ -1635,6 +1918,10 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(buffer_utf32), std::end(buffer_utf32), str2.c_str()));
                 EnsureCorrectString(str2);
             }
+
+#pragma endregion
+
+#pragma region Assignment Tests
 
             TEST_METHOD(CopyAssignmentTest)
             {
@@ -1805,6 +2092,10 @@ namespace dhorn
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
+
+#pragma endregion
+
+#pragma region Append Tests
 
             TEST_METHOD(PushBackTest)
             {
@@ -1988,6 +2279,10 @@ namespace dhorn
                 EnsureCorrectString(str);
             }
 
+#pragma endregion
+
+#pragma region Iterator Tests
+
             TEST_METHOD(ForwardIteratorIncrementTest)
             {
                 string_type str = test_string;
@@ -2086,6 +2381,119 @@ namespace dhorn
                     ++itr;
                 }
             }
+
+#pragma endregion
+
+#pragma region Equality Tests
+
+            TEST_METHOD(SelfEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == str);
+                Assert::IsFalse(str != str);
+            }
+
+            TEST_METHOD(Utf8StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf8_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf8_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf8StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf8);
+                Assert::IsTrue(test_string_utf8 == str);
+                Assert::IsFalse(str != test_string_utf8);
+                Assert::IsFalse(test_string_utf8 != str);
+
+                auto sub = test_string_utf8 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf16StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf16_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf16_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf16StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf16);
+                Assert::IsTrue(test_string_utf16 == str);
+                Assert::IsFalse(str != test_string_utf16);
+                Assert::IsFalse(test_string_utf16 != str);
+
+                auto sub = test_string_utf16 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf32StringEqualityTest)
+            {
+                string_type str = test_string;
+
+                dhorn::utf32_string same = test_string;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                dhorn::utf32_string sub(std::begin(str), --std::end(str));
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(Utf32StringLiteralEqualityTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsTrue(str == test_string_utf32);
+                Assert::IsTrue(test_string_utf32 == str);
+                Assert::IsFalse(str != test_string_utf32);
+                Assert::IsFalse(test_string_utf32 != str);
+
+                auto sub = test_string_utf32 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+#pragma endregion
         };
 
 

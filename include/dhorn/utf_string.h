@@ -15,6 +15,12 @@
 
 namespace dhorn
 {
+    // Forward declare
+    template <typename CharT>
+    class utf_string;
+
+
+
     /*
      * UTF Encoding
      */
@@ -420,6 +426,7 @@ namespace dhorn
     class utf_string_iterator final :
         public std::iterator<std::bidirectional_iterator_tag, char32_t, ptrdiff_t, CharT *, char32_t>
     {
+        friend class utf_string<CharT>;
         using Traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
 
     public:
@@ -453,6 +460,26 @@ namespace dhorn
         bool operator!=(_In_ const utf_string_iterator &other)
         {
             return this->_ptr != other._ptr;
+        }
+
+        bool operator>(_In_ const utf_string_iterator &other)
+        {
+            return this->_ptr > other._ptr;
+        }
+
+        bool operator>=(_In_ const utf_string_iterator &other)
+        {
+            return this->_ptr >= other._ptr;
+        }
+
+        bool operator<(_In_ const utf_string_iterator &other)
+        {
+            return this->_ptr < other._ptr;
+        }
+
+        bool operator<=(_In_ const utf_string_iterator &other)
+        {
+            return this->_ptr <= other._ptr;
         }
 
         utf_string_iterator &operator++(void)
@@ -508,13 +535,16 @@ namespace dhorn
     public:
 
         /*
-         * Public Type Definitions
+         * Public Type and Constants Definitions
          */
         using value_type = typename Traits::value_type;
+        using size_type = size_t;
         using iterator = utf_string_iterator<CharT>;
         using const_iterator = utf_string_iterator<CharT>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+        static const size_type npos = static_cast<size_type>(-1);
 
 
 
@@ -637,12 +667,12 @@ namespace dhorn
             return *this;
         }
 
-        operator CharT *(void)
+        operator CharT *(void) noexcept
         {
             return this->_front;
         }
 
-        operator const CharT *(void) const
+        operator const CharT *(void) const noexcept
         {
             return this->_front;
         }
@@ -717,24 +747,24 @@ namespace dhorn
         /*
          * Public "string-like" functions
          */
-        bool empty(void) const
+        bool empty(void) const noexcept
         {
             return (this->_length == 0);
         }
 
-        size_t length(void) const
+        size_t length(void) const noexcept
         {
             // Length of the string
             return this->_length;
         }
 
-        size_t size(void) const
+        size_t size(void) const noexcept
         {
             // Size of the string buffer (minus the null character)
             return this->BufferSize();
         }
 
-        size_t capacity(void) const
+        size_t capacity(void) const noexcept
         {
             // Size of the complete string buffer available minus the null character
             return this->Capacity() - 1;
@@ -745,7 +775,17 @@ namespace dhorn
             this->Resize(desiredSize);
         }
 
-        const value_type *c_str(void) const
+        void clear(void)
+        {
+            this->Destroy();
+        }
+
+        const value_type *c_str(void) const noexcept
+        {
+            return this->_front;
+        }
+
+        const value_type *data() const noexcept
         {
             return this->_front;
         }
@@ -753,7 +793,30 @@ namespace dhorn
         void push_back(_In_ char32_t ch)
         {
             this->InternalPushBack(ch);
-            *this->_back = '\0';
+            this->FinishString();
+        }
+
+        utf_string substr(_In_ const_iterator pos, size_type count = npos) const
+        {
+            utf_string result;
+            for (size_type i = 0; (i < count) && (pos != this->end()); ++i)
+            {
+                result.InternalPushBack(*pos);
+                ++pos;
+            }
+
+            if (this->_front)
+            {
+                result.FinishString();
+            }
+
+            return result;
+        }
+
+        utf_string substr(_In_ const_iterator pos, _In_ const_iterator back) const
+        {
+            assert(this->OwnsIterator(pos) && this->OwnsIterator(back));
+            return utf_string(pos, back);
         }
 
 
@@ -801,8 +864,7 @@ namespace dhorn
                 this->InternalPushBack(their_traits::next(str, &str));
             }
 
-            assert(this->_back < this->_bounds);
-            *this->_back = '\0';
+            this->FinishString();
         }
 
         inline bool Inside(_In_ const CharT *str) const
@@ -1069,17 +1131,22 @@ namespace dhorn
             }
         }
 
-        inline size_t BufferSize(void) const
+        inline size_t BufferSize(void) const noexcept
         {
             // Size (in units of value_type) of the string *NOT* inluding the null character. I.e. the size that we
             // need to copy on resize
             return (this->_back - this->_front);
         }
 
-        inline size_t Capacity(void) const
+        inline size_t Capacity(void) const noexcept
         {
             // Size of our internal buffer (includes the null character)
             return (this->_bounds - this->_front);
+        }
+
+        inline bool OwnsIterator(_In_ const_iterator itr) const noexcept
+        {
+            return (itr._ptr >= this->_front) && (itr._ptr <= this->_back);
         }
 
         size_t _length;
@@ -1104,22 +1171,6 @@ namespace dhorn
     }
 
     template <typename CharT>
-    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const CharT *rhs)
-    {
-        utf_string<CharT> copy(lhs);
-        copy += rhs;
-        return copy;
-    }
-
-    template <typename CharT>
-    utf_string<CharT> operator+(_In_ const CharT *lhs, _In_ const utf_string<CharT> &rhs)
-    {
-        utf_string<CharT> copy(lhs);
-        copy += rhs;
-        return copy;
-    }
-
-    template <typename CharT>
     utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const std::basic_string<CharT> &rhs)
     {
         utf_string<CharT> copy(lhs);
@@ -1128,7 +1179,23 @@ namespace dhorn
     }
 
     template <typename CharT>
+    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const CharT *rhs)
+    {
+        utf_string<CharT> copy(lhs);
+        copy += rhs;
+        return copy;
+    }
+
+    template <typename CharT>
     utf_string<CharT> operator+(_In_ const std::basic_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    {
+        utf_string<CharT> copy(lhs);
+        copy += rhs;
+        return copy;
+    }
+
+    template <typename CharT>
+    utf_string<CharT> operator+(_In_ const CharT *lhs, _In_ const utf_string<CharT> &rhs)
     {
         utf_string<CharT> copy(lhs);
         copy += rhs;
@@ -1149,7 +1216,13 @@ namespace dhorn
         }
 
         // Use size since we need to compare the whole buffer
-        return memcmp(lhs.c_str(), rhs.c_str(), lhs.size());
+        return memcmp(lhs.c_str(), rhs.c_str(), lhs.size()) == 0;
+    }
+
+    template <typename CharT>
+    bool operator!=(_In_ const utf_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    {
+        return !(lhs == rhs);
     }
 
     template <typename LhsCharT, typename RhsCharT>
@@ -1175,6 +1248,61 @@ namespace dhorn
         }
 
         return true;
+    }
+
+    template <typename LhsCharT, typename RhsCharT>
+    bool operator!=(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator==(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    {
+        for (auto ch : lhs)
+        {
+            if (ch != LiteralTraits::next(rhs, &rhs))
+            {
+                return false;
+            }
+        }
+
+        return *rhs == '\0';
+    }
+
+    template <typename LhsCharT, typename RhsCharT>
+    bool operator!=(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        bool operator==(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        for (auto ch : rhs)
+        {
+            if (ch != LiteralTraits::next(lhs, &lhs))
+            {
+                return false;
+            }
+        }
+
+        return *lhs == '\0';
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator!=(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return !(lhs == rhs);
     }
 
 #pragma endregion
