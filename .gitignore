@@ -65,7 +65,8 @@ ipch/
 *.sdf
 *.cachefile
 
-# Other Visual Studio files
+# Other Visual Studio files/paths
+.vs/
 *.VC.opendb
 
 # Visual Studio profiler
