@@ -241,7 +241,7 @@ namespace dhorn
              }
          }
 
-         auto result = integer_part + fractional_part;
+         auto result = static_cast<NumericType>(integer_part + fractional_part);
 
          // Negate if necessary; ignore if zero
          if ((*string_front == '-') && ((integer_part != 0) || fractionNonZero))

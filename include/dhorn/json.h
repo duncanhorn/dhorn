@@ -922,11 +922,70 @@ namespace dhorn
      */
 #pragma region Integer Casting
 
-    template <>
-    inline int json_cast<int>(_In_ const json_value *value)
+    namespace garbage
     {
-        auto jsonNumber = value->as<json_number>();
-        return numeric_cast<int>(jsonNumber->str());
+        template <typename Ty>
+        struct numeric_json_cast
+        {
+            inline Ty operator()(_In_ const json_value *value)
+            {
+                return numeric_cast<Ty>(value->as<json_number>()->str());
+            }
+        };
+    }
+
+    template <>
+    inline char json_cast<char>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<char>()(value);
+    }
+
+    template <>
+    inline int8_t json_cast<int8_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<int8_t>()(value);
+    }
+
+    template <>
+    inline uint8_t json_cast<uint8_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<uint8_t>()(value);
+    }
+
+    template <>
+    inline int16_t json_cast<int16_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<int16_t>()(value);
+    }
+
+    template <>
+    inline uint16_t json_cast<uint16_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<uint16_t>()(value);
+    }
+
+    template <>
+    inline int32_t json_cast<int32_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<int32_t>()(value);
+    }
+
+    template <>
+    inline uint32_t json_cast<uint32_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<uint32_t>()(value);
+    }
+
+    template <>
+    inline int64_t json_cast<int64_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<int64_t>()(value);
+    }
+
+    template <>
+    inline uint64_t json_cast<uint64_t>(_In_ const json_value *value)
+    {
+        return garbage::numeric_json_cast<uint64_t>()(value);
     }
 
 #pragma endregion
