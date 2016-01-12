@@ -45,8 +45,19 @@
  * The json_cast function is already defined for a set of standard types (e.g. std::vector, std::basic_string,
  * dhorn::utf_string, std::map, etc.). The expecetd input form is specified with the definition, but for the most part,
  * it is pretty obvious (e.g. json_cast<std::basic_string<...>> requires that the json_value be a json_string,
- * json_cast<std::vector<...>> requires that the json_value be a json_array, json_cast<std::map<...>> requires that the
- * json_value be a json_array of json_objects that represent pairs, etc.).
+ * json_cast<std::vector<...>> requires that the json_value be a json_array. json_cast<std::map<...>> is a little less
+ * straight forward, however... If the input to json_cast is a json_array, then it is expected that this array be an
+ * array of other json_arrays, each containing two values each representing a key/value pair that can each be
+ * json_cast-ed to the types of the desired std::map. E.g. if the cast type is std::map<int, foo> where foo is a type
+ * that has a single property - value - of type int, valid input json would look like:
+ *
+ *      [
+ *          [ 0, { "value" : 1 } ],
+ *          [ 1, { "value" : 2 } ]
+ *      ]
+ *
+ * Otherwise, the only other allowable input type is json_object, in which case, the key type for std::map must be a
+ * string type, and the result will just map the property values as strings to objects json_cast-ed to the value type.
  *
  * Similarly, C++ objects can be converted to json values using the make_json function that can be overloaded for any
  * user-defined type:
@@ -55,7 +66,7 @@
  *      std::shared_ptr<json_value> value = make_json(myFoo);
  *
  * And of course, the make_json function is already overloaded for a set of standard types. In general, these do the
- * reverse of what json_cast does for these types.
+ * reverse of what json_cast does for these types. For std::map, the result is always the array of arrays type.
  */
 #pragma once
 
@@ -64,6 +75,7 @@
 #include <utility>
 #include <vector>
 
+#include "numeric.h"
 #include "utf_string.h"
 
 namespace dhorn
@@ -170,6 +182,113 @@ namespace dhorn
     /*
      * json_object
      */
+#pragma region json_object
+
+    class json_object;
+
+    namespace garbage
+    {
+        template <typename MapItr>
+        class json_object_iterator_base :
+            public std::iterator<
+                typename MapItr::iterator_category,
+                typename MapItr::value_type,
+                typename MapItr::difference_type,
+                typename MapItr::pointer,
+                typename MapItr::reference>
+        {
+        protected:
+            friend class json_object;
+
+            using internal_iterator = MapItr;
+
+        public:
+            /*
+             * Constructor(s)/Destructor
+             */
+            json_object_iterator_base(void) = default;
+
+            json_object_iterator_base(_In_ internal_iterator itr) :
+                _itr(itr)
+            {
+            }
+
+
+
+            /*
+             * Operators
+             */
+            bool operator==(_In_ const json_object_iterator_base &other)
+            {
+                return this->_itr == other._itr;
+            }
+
+            bool operator!=(_In_ const json_object_iterator_base &other)
+            {
+                return this->_itr != other._itr;
+            }
+
+            reference operator*(void)
+            {
+                return *this->_itr;
+            }
+
+            pointer operator->(void)
+            {
+                return this->_itr.operator->();
+            }
+
+            json_object_iterator_base &operator++(void)
+            {
+                ++this->_itr;
+                return *this;
+            }
+
+            json_object_iterator_base operator++(_In_ int)
+            {
+                return json_object_iterator_base(this->_itr++);
+            }
+
+            json_object_iterator_base &operator--(void)
+            {
+                --this->_itr;
+                return *this;
+            }
+
+            json_object_iterator_base operator--(_In_ int)
+            {
+                return json_object_iterator_base(this->_itr--);
+            }
+
+        protected:
+
+            internal_iterator _itr;
+        };
+
+
+
+        class json_object_iterator :
+            public json_object_iterator_base<std::map<utf8_string, std::shared_ptr<json_value>>::iterator>
+        {
+            using MyBase = json_object_iterator_base<std::map<utf8_string, std::shared_ptr<json_value>>::iterator>;
+
+        public:
+            using MyBase::MyBase;
+        };
+
+        class json_object_const_iterator :
+            public json_object_iterator_base<std::map<utf8_string, std::shared_ptr<json_value>>::const_iterator>
+        {
+            using MyBase =
+                json_object_iterator_base<std::map<utf8_string, std::shared_ptr<json_value>>::const_iterator>;
+
+        public:
+            using MyBase::MyBase;
+        };
+    }
+
+
+
     class json_object final :
         public json_value
     {
@@ -182,6 +301,10 @@ namespace dhorn
          * Public Types
          */
         using size_type = container_type::size_type;
+        using iterator = garbage::json_object_iterator;
+        using const_iterator = garbage::json_object_const_iterator;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 
 
@@ -228,9 +351,9 @@ namespace dhorn
 
         std::shared_ptr<json_value> operator[](_In_ const utf8_string &str)
         {
-            auto itr = this->_tree.find(str);
+            auto itr = this->_map.find(str);
 
-            if (itr != std::end(this->_tree))
+            if (itr != std::end(this->_map))
             {
                 return itr->second;
             }
@@ -242,26 +365,91 @@ namespace dhorn
 
 
         /*
+         * Iterators
+         */
+        iterator begin(void)
+        {
+            return iterator(std::begin(this->_map));
+        }
+
+        const_iterator begin(void) const
+        {
+            return this->cbegin();
+        }
+
+        const_iterator cbegin(void) const
+        {
+            return const_iterator(std::begin(this->_map));
+        }
+
+        reverse_iterator rbegin(void)
+        {
+            return reverse_iterator(std::end(this->_map));
+        }
+
+        const_reverse_iterator rbegin(void) const
+        {
+            return this->crbegin();
+        }
+
+        const_reverse_iterator crbegin(void) const
+        {
+            return const_reverse_iterator(std::end(this->_map));
+        }
+
+        iterator end(void)
+        {
+            return iterator(std::end(this->_map));
+        }
+
+        const_iterator end(void) const
+        {
+            return this->cend();
+        }
+
+        const_iterator cend(void) const
+        {
+            return const_iterator(std::end(this->_map));
+        }
+
+        reverse_iterator rend(void)
+        {
+            return reverse_iterator(std::begin(this->_map));
+        }
+
+        const_reverse_iterator rend(void) const
+        {
+            return this->crend();
+        }
+
+        const_reverse_iterator crend(void) const
+        {
+            return const_reverse_iterator(std::begin(this->_map));
+        }
+
+
+
+        /*
          * Functions
          */
         void clear()
         {
-            this->_tree.clear();
+            this->_map.clear();
         }
 
         bool empty() const noexcept
         {
-            return this->_tree.empty();
+            return this->_map.empty();
         }
 
         size_type size() const noexcept
         {
-            return this->_tree.size();
+            return this->_map.size();
         }
 
         void swap(_Inout_ json_object &other)
         {
-            this->_tree.swap(other._tree);
+            this->_map.swap(other._map);
         }
 
 
@@ -270,19 +458,21 @@ namespace dhorn
 
         void copy(_In_ const json_object &other)
         {
-            this->_tree.clear();
+            this->_map.clear();
 
-            for (auto &pair : other._tree)
+            for (auto &pair : other._map)
             {
-                this->_tree.emplace(
+                this->_map.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(pair.first),
                     std::forward_as_tuple(garbage::copy_json_value(pair.second)));
             }
         }
 
-        container_type _tree;
+        container_type _map;
     };
+
+#pragma endregion
 
 
 
@@ -316,6 +506,16 @@ namespace dhorn
         }
 
         json_array(_Inout_ json_array &&) = default;
+
+        json_array(_In_ const container_type &array)
+        {
+            this->copy(array);
+        }
+
+        json_array(_Inout_ container_type &&array) :
+            _array(std::move(array))
+        {
+        }
 
 
 
@@ -385,9 +585,14 @@ namespace dhorn
 
         void copy(_In_ const json_array &other)
         {
+            this->copy(other._array);
+        }
+
+        void copy(_In_ const container_type &array)
+        {
             this->_array.clear();
 
-            for (auto &value : other._array)
+            for (auto &value : array)
             {
                 this->_array.emplace_back(garbage::copy_json_value(value));
             }
@@ -713,14 +918,32 @@ namespace dhorn
 
 
     /*
+     * Integer casting
+     */
+#pragma region Integer Casting
+
+    template <>
+    inline int json_cast<int>(_In_ const json_value *value)
+    {
+        auto jsonNumber = value->as<json_number>();
+        return numeric_cast<int>(jsonNumber->str());
+    }
+
+#pragma endregion
+
+
+
+    /*
      * std::basic_string (currently don't support std::wstring)
      */
-#pragma region
+#pragma region basic_string Casting
 
     template <typename CharT>
     struct json_cast_t<std::basic_string<CharT>>
     {
-        inline std::basic_string<CharT> operator()(_In_ const json_value *value)
+        using value_type = std::basic_string<CharT>;
+
+        inline value_type operator()(_In_ const json_value *value)
         {
             auto jsonString = value->as<json_string>();
             utf_string<CharT> utfString = jsonString->str();
@@ -735,6 +958,143 @@ namespace dhorn
         {
             utf_string<CharT> utfString = value.c_str();
             return std::make_shared<json_string>(utfString);
+        }
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * dhorn::utf_string
+     */
+#pragma region utf_string Casting
+
+    template <typename CharT>
+    struct json_cast_t<utf_string<CharT>>
+    {
+        using value_type = utf_string<CharT>;
+
+        inline value_type operator()(_In_ const json_value *value)
+        {
+            auto jsonString = value->as<json_string>();
+            return jsonString->str();
+        }
+    };
+
+    template <typename CharT>
+    struct make_json_t<utf_string<CharT>>
+    {
+        inline std::shared_ptr<json_value> operator()(_In_ const utf_string<CharT> &value)
+        {
+            return std::make_shared<json_string>(value);
+        }
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * std::vector
+     */
+#pragma region std::vector Casting
+
+    template <typename Ty, typename Alloc>
+    struct json_cast_t<std::vector<Ty, Alloc>>
+    {
+        using value_type = std::vector<Ty, Alloc>;
+
+        inline value_type operator()(_In_ const json_value *value)
+        {
+            auto jsonArray = value->as<json_array>();
+            auto &array = jsonArray->array();
+
+            value_type result;
+            for (auto &obj : array)
+            {
+                result.emplace_back(json_cast<Ty>(obj.get()));
+            }
+
+            return result;
+        }
+    };
+
+    template <typename Ty, typename Alloc>
+    struct make_json_t<std::vector<Ty, Alloc>>
+    {
+        inline std::shared_ptr<json_value> operator()(_In_ const std::vector<Ty, Alloc> &value)
+        {
+            std::vector<std::shared_ptr<json_value>> array;
+
+            for (auto &val : value)
+            {
+                array.emplace_back(make_json(val));
+            }
+
+            return std::make_shared<json_array>(std::move(array));
+        }
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * std::map
+     */
+#pragma region std::map Casting
+
+    template <typename KeyTy, typename ValueTy, typename Comp, typename Alloc>
+    struct json_cast_t<std::map<KeyTy, ValueTy, Comp, Alloc>>
+    {
+        using value_type = std::map<KeyTy, ValueTy, Comp, Alloc>;
+
+        inline value_type operator()(_In_ const json_value *value)
+        {
+            value_type result;
+
+            // Check the type of the input
+            auto jsonArray = dynamic_cast<const json_array *>(value);
+            if (jsonArray)
+            {
+                auto &array = jsonArray->array();
+                for (auto &pairObj : array)
+                {
+                    auto pairArray = pairObj->as<json_array>();
+                    auto &pairVector = pairArray->array();
+                    if (pairVector.size() != 2)
+                    {
+                        throw json_exception("Expected only two values in key/value array");
+                    }
+
+                    auto key = json_cast<KeyTy>(pairVector[0].get());
+                    auto itr = result.find(key);
+                    if (itr != std::end(result))
+                    {
+                        throw json_exception("Keys are not unique");
+                    }
+
+                    result.emplace(
+                        std::move(key),
+                        json_cast<ValueTy>(pairVector[1].get()));
+                }
+            }
+            else
+            {
+                auto jsonObject = value->as<json_object>();
+                for (auto &pair : *jsonObject)
+                {
+                    // json_object guarantees unique-ness in key values
+                    // TODO
+                    (void)pair;
+                    //result.emplace(
+                    //    pair.first.c_str(),
+                    //    json_cast<ValueTy>(pair.second.get()));
+                }
+            }
+
+            return result;
         }
     };
 

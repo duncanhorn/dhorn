@@ -1273,7 +1273,10 @@ namespace dhorn
         return *rhs == '\0';
     }
 
-    template <typename LhsCharT, typename RhsCharT>
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator!=(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
     {
         return !(lhs == rhs);
@@ -1283,7 +1286,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-        bool operator==(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator==(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
     {
         for (auto ch : rhs)
         {
@@ -1301,6 +1304,42 @@ namespace dhorn
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator!=(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator==(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    {
+        return lhs == rhs.c_str();
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator!=(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator==(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return lhs.c_str() == rhs;
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator!=(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
     }

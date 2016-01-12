@@ -110,7 +110,7 @@
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
-    <ClCompile Include="JSONTests.cpp" />
+    <ClCompile Include="JsonTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="NumericTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />

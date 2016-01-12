@@ -941,6 +941,23 @@ namespace dhorn
                 Assert::IsTrue(sub != str);
             }
 
+            TEST_METHOD(StdStringEqualityTest)
+            {
+                string_type str = test_string;
+
+                std::string same = test_string_utf8;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                std::string sub(std::begin(test_string_utf8), std::end(test_string_utf8) - 3);
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
             TEST_METHOD(Utf16StringEqualityTest)
             {
                 string_type str = test_string;
@@ -1684,6 +1701,23 @@ namespace dhorn
                 Assert::IsTrue(sub != str);
             }
 
+            TEST_METHOD(StdStringEqualityTest)
+            {
+                string_type str = test_string;
+
+                std::string same = test_string_utf8;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                std::string sub(std::begin(test_string_utf8), std::end(test_string_utf8) - 3);
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
             TEST_METHOD(Utf16StringEqualityTest)
             {
                 string_type str = test_string;
@@ -2421,6 +2455,23 @@ namespace dhorn
                 Assert::IsFalse(test_string_utf8 != str);
 
                 auto sub = test_string_utf8 + 1;
+                Assert::IsFalse(str == sub);
+                Assert::IsFalse(sub == str);
+                Assert::IsTrue(str != sub);
+                Assert::IsTrue(sub != str);
+            }
+
+            TEST_METHOD(StdStringEqualityTest)
+            {
+                string_type str = test_string;
+
+                std::string same = test_string_utf8;
+                Assert::IsTrue(str == same);
+                Assert::IsTrue(same == str);
+                Assert::IsFalse(str != same);
+                Assert::IsFalse(same != str);
+
+                std::string sub(std::begin(test_string_utf8), std::end(test_string_utf8) - 3);
                 Assert::IsFalse(str == sub);
                 Assert::IsFalse(sub == str);
                 Assert::IsTrue(str != sub);

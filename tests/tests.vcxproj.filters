@@ -83,13 +83,13 @@
     <ClCompile Include="NumericTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="JSONTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SynchronizedObjectTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InstanceTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JsonTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
