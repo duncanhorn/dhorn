@@ -20,6 +20,42 @@ namespace dhorn
         {
 #pragma region json_cast Tests
 
+            TEST_METHOD(Int32JsonCastTest)
+            {
+                utf8_string str = u8"-42";
+
+                auto value = std::make_shared<json_number>(str);
+                auto num = json_cast<int32_t>(value.get());
+                Assert::AreEqual(-42, num);
+            }
+
+            TEST_METHOD(UInt32JsonCastTest)
+            {
+                utf8_string str = u8"42";
+
+                auto value = std::make_shared<json_number>(str);
+                auto num = json_cast<uint32_t>(value.get());
+                Assert::AreEqual(42u, num);
+            }
+
+            TEST_METHOD(FloatJsonCastTest)
+            {
+                utf8_string str = u8"42.123";
+
+                auto value = std::make_shared<json_number>(str);
+                auto num = json_cast<float>(value.get());
+                Assert::AreEqual(42.123f, num);
+            }
+
+            TEST_METHOD(DoubleJsonCastTest)
+            {
+                utf8_string str = u8"42.123";
+
+                auto value = std::make_shared<json_number>(str);
+                auto num = json_cast<double>(value.get());
+                Assert::AreEqual(42.123, num);
+            }
+
             TEST_METHOD(Utf8StdStringJsonCastTest)
             {
                 utf8_string str = u8"Test String";
@@ -91,6 +127,29 @@ namespace dhorn
                 Assert::IsTrue(arr[0] == str1);
                 Assert::IsTrue(arr[1] == str2);
                 Assert::IsTrue(arr[2] == str3);
+            }
+
+            TEST_METHOD(StdListJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto arr = json_cast<std::list<utf8_string>>(value.get());
+                Assert::AreEqual(array.size(), arr.size());
+
+                auto itr = arr.begin();
+                Assert::IsTrue(*itr == str1);
+                ++itr;
+                Assert::IsTrue(*itr == str2);
+                ++itr;
+                Assert::IsTrue(*itr == str3);
             }
 
             TEST_METHOD(StdMapFromArraysJsonCastTest)

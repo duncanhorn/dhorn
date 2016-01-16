@@ -70,6 +70,7 @@
  */
 #pragma once
 
+#include <list>
 #include <map>
 #include <memory>
 #include <utility>
@@ -872,11 +873,8 @@ namespace dhorn
     /*
      * json_cast
      */
-    template <typename Ty>
-    struct json_cast_t
-    {
-        inline Ty operator()(_In_ const json_value *value);
-    };
+    template <typename Ty, typename /*enable*/ = void>
+    struct json_cast_t;
 
     template <typename Ty, typename CastTy = json_cast_t<Ty>>
     inline Ty json_cast(_In_ const json_value *value)
@@ -895,11 +893,8 @@ namespace dhorn
     /*
      * make_json
      */
-    template <typename Ty>
-    struct make_json_t
-    {
-        inline std::shared_ptr<json_value> make_json(_In_ const Ty &);
-    };
+    template <typename Ty, typename /*enable*/ = void>
+    struct make_json_t;
 
     template <typename Ty, typename MakeTy = make_json_t<Ty>>
     inline std::shared_ptr<json_value> make_json(_In_ const Ty &value)
@@ -918,75 +913,32 @@ namespace dhorn
 
 
     /*
-     * Integer casting
+     * Arithmetic casting
      */
 #pragma region Integer Casting
 
-    namespace garbage
+    template <typename Ty>
+    struct json_cast_t<Ty, std::enable_if_t<std::is_arithmetic<Ty>::value>>
     {
-        template <typename Ty>
-        struct numeric_json_cast
+        using value_type = Ty;
+
+        inline value_type operator()(_In_ const json_value *value) const
         {
-            inline Ty operator()(_In_ const json_value *value)
-            {
-                return numeric_cast<Ty>(value->as<json_number>()->str());
-            }
-        };
-    }
+            return numeric_cast<Ty>(value->as<json_number>()->str());
+        }
+    };
 
-    template <>
-    inline char json_cast<char>(_In_ const json_value *value)
+    template <typename Ty>
+    struct make_json_t<Ty, std::enable_if_t<std::is_arithmetic<Ty>::value>>
     {
-        return garbage::numeric_json_cast<char>()(value);
-    }
-
-    template <>
-    inline int8_t json_cast<int8_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<int8_t>()(value);
-    }
-
-    template <>
-    inline uint8_t json_cast<uint8_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<uint8_t>()(value);
-    }
-
-    template <>
-    inline int16_t json_cast<int16_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<int16_t>()(value);
-    }
-
-    template <>
-    inline uint16_t json_cast<uint16_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<uint16_t>()(value);
-    }
-
-    template <>
-    inline int32_t json_cast<int32_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<int32_t>()(value);
-    }
-
-    template <>
-    inline uint32_t json_cast<uint32_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<uint32_t>()(value);
-    }
-
-    template <>
-    inline int64_t json_cast<int64_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<int64_t>()(value);
-    }
-
-    template <>
-    inline uint64_t json_cast<uint64_t>(_In_ const json_value *value)
-    {
-        return garbage::numeric_json_cast<uint64_t>()(value);
-    }
+        inline std::shared_ptr<json_value> operator()(_In_ const Ty &value) const
+        {
+            // TODO: Are string streams really the best option here? Also, should we attempt to do scientific notation?
+            std::stringstream stream;
+            stream << value;
+            return std::make_shared<json_number>(stream.str().c_str());
+        }
+    };
 
 #pragma endregion
 
@@ -1002,7 +954,7 @@ namespace dhorn
     {
         using value_type = std::basic_string<CharT>;
 
-        inline value_type operator()(_In_ const json_value *value)
+        inline value_type operator()(_In_ const json_value *value) const
         {
             auto jsonString = value->as<json_string>();
             utf_string<CharT> utfString = jsonString->str();
@@ -1013,7 +965,7 @@ namespace dhorn
     template <typename CharT>
     struct make_json_t<std::basic_string<CharT>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const std::basic_string<CharT> &value)
+        inline std::shared_ptr<json_value> operator()(_In_ const std::basic_string<CharT> &value) const
         {
             utf_string<CharT> utfString = value.c_str();
             return std::make_shared<json_string>(utfString);
@@ -1034,7 +986,7 @@ namespace dhorn
     {
         using value_type = utf_string<CharT>;
 
-        inline value_type operator()(_In_ const json_value *value)
+        inline value_type operator()(_In_ const json_value *value) const
         {
             auto jsonString = value->as<json_string>();
             return jsonString->str();
@@ -1044,7 +996,7 @@ namespace dhorn
     template <typename CharT>
     struct make_json_t<utf_string<CharT>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const utf_string<CharT> &value)
+        inline std::shared_ptr<json_value> operator()(_In_ const utf_string<CharT> &value) const
         {
             return std::make_shared<json_string>(value);
         }
@@ -1064,7 +1016,7 @@ namespace dhorn
     {
         using value_type = std::vector<Ty, Alloc>;
 
-        inline value_type operator()(_In_ const json_value *value)
+        inline value_type operator()(_In_ const json_value *value) const
         {
             auto jsonArray = value->as<json_array>();
             auto &array = jsonArray->array();
@@ -1082,7 +1034,52 @@ namespace dhorn
     template <typename Ty, typename Alloc>
     struct make_json_t<std::vector<Ty, Alloc>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const std::vector<Ty, Alloc> &value)
+        inline std::shared_ptr<json_value> operator()(_In_ const std::vector<Ty, Alloc> &value) const
+        {
+            std::vector<std::shared_ptr<json_value>> array;
+
+            for (auto &val : value)
+            {
+                array.emplace_back(make_json(val));
+            }
+
+            return std::make_shared<json_array>(std::move(array));
+        }
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * std::list
+     */
+#pragma region std::list Casting
+
+    template <typename Ty, typename Alloc>
+    struct json_cast_t<std::list<Ty, Alloc>>
+    {
+        using value_type = std::list<Ty, Alloc>;
+
+        inline value_type operator()(_In_ const json_value *value) const
+        {
+            auto jsonArray = value->as<json_array>();
+            auto &array = jsonArray->array();
+
+            value_type result;
+            for (auto &obj : array)
+            {
+                result.emplace_back(json_cast<Ty>(obj.get()));
+            }
+
+            return result;
+        }
+    };
+
+    template <typename Ty, typename Alloc>
+    struct make_json_t<std::list<Ty, Alloc>>
+    {
+        inline std::shared_ptr<json_value> operator()(_In_ const std::list<Ty, Alloc> &value) const
         {
             std::vector<std::shared_ptr<json_value>> array;
 
@@ -1109,7 +1106,7 @@ namespace dhorn
     {
         using value_type = std::map<KeyTy, ValueTy, Comp, Alloc>;
 
-        inline value_type operator()(_In_ const json_value *value)
+        inline value_type operator()(_In_ const json_value *value) const
         {
             value_type result;
 
