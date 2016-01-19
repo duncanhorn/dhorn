@@ -70,9 +70,15 @@
  */
 #pragma once
 
+#include <array>
+#include <deque>
+#include <forward_list>
 #include <list>
 #include <map>
 #include <memory>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -1007,44 +1013,156 @@ namespace dhorn
 
 
     /*
+     * Container base-classes
+     */
+#pragma region Base classes for container json_cast_t and make_json_t
+
+    namespace garbage
+    {
+        template <typename Ty>
+        struct emplace_back_json_cast_t
+        {
+            using value_type = Ty;
+
+            inline value_type operator()(_In_ const json_value *value) const
+            {
+                auto jsonArray = value->as<json_array>();
+                auto &array = jsonArray->array();
+
+                value_type result;
+                for (auto &obj : array)
+                {
+                    result.emplace_back(json_cast<typename value_type::value_type>(obj.get()));
+                }
+
+                return result;
+            }
+        };
+
+        template <typename Ty>
+        struct emplace_after_json_cast_t
+        {
+            using value_type = Ty;
+
+            inline value_type operator()(_In_ const json_value *value) const
+            {
+                auto jsonArray = value->as<json_array>();
+                auto &array = jsonArray->array();
+
+                value_type result;
+                auto itr = result.before_begin();
+                for (auto &obj : array)
+                {
+                    itr = result.emplace_after(itr, json_cast<typename value_type::value_type>(obj.get()));
+                }
+
+                return result;
+            }
+        };
+
+        template <typename Ty>
+        struct emplace_json_cast_t
+        {
+            using value_type = Ty;
+
+            inline value_type operator()(_In_ const json_value *value) const
+            {
+                auto jsonArray = value->as<json_array>();
+                auto &array = jsonArray->array();
+
+                value_type result;
+                for (auto &obj : array)
+                {
+                    auto pair = result.emplace(json_cast<typename value_type::value_type>(obj.get()));
+                }
+
+                return result;
+            }
+        };
+
+        template <typename Ty>
+        struct random_access_json_cast_t
+        {
+            using value_type = Ty;
+
+            inline value_type operator()(_In_ const json_value *value) const
+            {
+                value_type result;
+                constexpr size_t size = result.size();
+
+                auto jsonArray = value->as<json_array>();
+                auto &array = jsonArray->array();
+                if (array.size() != size)
+                {
+                    throw json_exception("Unexpected array size");
+                }
+
+                for (size_t i = 0; i < size; ++i)
+                {
+                    result[i] = json_cast<typename value_type::value_type>(array[i].get());
+                }
+
+                return result;
+            }
+        };
+
+        template <typename Ty>
+        struct sequence_container_make_json_t
+        {
+            inline std::shared_ptr<json_value> operator()(_In_ const Ty &value) const
+            {
+                std::vector<std::shared_ptr<json_value>> array;
+
+                for (auto &val : value)
+                {
+                    array.emplace_back(make_json(val));
+                }
+
+                return std::make_shared<json_array>(std::move(array));
+            }
+        };
+    }
+
+#pragma endregion
+
+
+
+    /*
      * std::vector
      */
 #pragma region std::vector Casting
 
     template <typename Ty, typename Alloc>
-    struct json_cast_t<std::vector<Ty, Alloc>>
+    struct json_cast_t<std::vector<Ty, Alloc>> :
+        public garbage::emplace_back_json_cast_t<std::vector<Ty, Alloc>>
     {
-        using value_type = std::vector<Ty, Alloc>;
-
-        inline value_type operator()(_In_ const json_value *value) const
-        {
-            auto jsonArray = value->as<json_array>();
-            auto &array = jsonArray->array();
-
-            value_type result;
-            for (auto &obj : array)
-            {
-                result.emplace_back(json_cast<Ty>(obj.get()));
-            }
-
-            return result;
-        }
     };
 
     template <typename Ty, typename Alloc>
-    struct make_json_t<std::vector<Ty, Alloc>>
+    struct make_json_t<std::vector<Ty, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::vector<Ty, Alloc>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const std::vector<Ty, Alloc> &value) const
-        {
-            std::vector<std::shared_ptr<json_value>> array;
+    };
 
-            for (auto &val : value)
-            {
-                array.emplace_back(make_json(val));
-            }
+#pragma endregion
 
-            return std::make_shared<json_array>(std::move(array));
-        }
+
+
+    /*
+     * std::deque
+     */
+#pragma region std::deque Casting
+
+    template <typename Ty, typename Alloc>
+    struct json_cast_t<std::deque<Ty, Alloc>> :
+        public garbage::emplace_back_json_cast_t<std::deque<Ty, Alloc>>
+    {
+    };
+
+    template <typename Ty, typename Alloc>
+    struct make_json_t<std::deque<Ty, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::deque<Ty, Alloc>>
+    {
     };
 
 #pragma endregion
@@ -1057,39 +1175,120 @@ namespace dhorn
 #pragma region std::list Casting
 
     template <typename Ty, typename Alloc>
-    struct json_cast_t<std::list<Ty, Alloc>>
+    struct json_cast_t<std::list<Ty, Alloc>> :
+        public garbage::emplace_back_json_cast_t<std::list<Ty, Alloc>>
     {
-        using value_type = std::list<Ty, Alloc>;
-
-        inline value_type operator()(_In_ const json_value *value) const
-        {
-            auto jsonArray = value->as<json_array>();
-            auto &array = jsonArray->array();
-
-            value_type result;
-            for (auto &obj : array)
-            {
-                result.emplace_back(json_cast<Ty>(obj.get()));
-            }
-
-            return result;
-        }
     };
 
     template <typename Ty, typename Alloc>
-    struct make_json_t<std::list<Ty, Alloc>>
+    struct make_json_t<std::list<Ty, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::list<Ty, Alloc>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const std::list<Ty, Alloc> &value) const
-        {
-            std::vector<std::shared_ptr<json_value>> array;
+    };
 
-            for (auto &val : value)
-            {
-                array.emplace_back(make_json(val));
-            }
+#pragma endregion
 
-            return std::make_shared<json_array>(std::move(array));
-        }
+
+
+    /*
+     * std::forward_list
+     */
+#pragma region std::forward_list Casting
+
+    template <typename Ty, typename Alloc>
+    struct json_cast_t<std::forward_list<Ty, Alloc>> :
+        public garbage::emplace_after_json_cast_t<std::forward_list<Ty, Alloc>>
+    {
+    };
+
+    template <typename Ty, typename Alloc>
+    struct make_json_t<std::forward_list<Ty, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::forward_list<Ty, Alloc>>
+    {
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * std::array
+     */
+#pragma region std::array Casting
+
+    template <typename Ty, size_t Size>
+    struct json_cast_t<std::array<Ty, Size>> :
+        public garbage::random_access_json_cast_t<std::array<Ty, Size>>
+    {
+    };
+
+    template <typename Ty, size_t Size>
+    struct make_json_t<std::array<Ty, Size>> :
+        public garbage::sequence_container_make_json_t<std::array<Ty, Size>>
+    {
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * std::set
+     */
+#pragma region std::set Casting
+
+    template <typename Key, typename Comp, typename Alloc>
+    struct json_cast_t<std::set<Key, Comp, Alloc>> :
+        public garbage::emplace_json_cast_t<std::set<Key, Comp, Alloc>>
+    {
+    };
+
+    template <typename Key, typename Comp, typename Alloc>
+    struct make_json_t<std::set<Key, Comp, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::set<Key, Comp, Alloc>>
+    {
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * std::multiset
+     */
+#pragma region std::multiset Casting
+
+    template <typename Key, typename Comp, typename Alloc>
+    struct json_cast_t<std::multiset<Key, Comp, Alloc>> :
+        public garbage::emplace_json_cast_t<std::multiset<Key, Comp, Alloc>>
+    {
+    };
+
+    template <typename Key, typename Comp, typename Alloc>
+    struct make_json_t<std::multiset<Key, Comp, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::multiset<Key, Comp, Alloc>>
+    {
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * std::unordered_set
+     */
+#pragma region std::unordered_set Casting
+
+    template <typename Key, typename Hash, typename Equals, typename Alloc>
+    struct json_cast_t<std::unordered_set<Key, Hash, Equals, Alloc>> :
+        public garbage::emplace_json_cast_t<std::unordered_set<Key, Hash, Equals, Alloc>>
+    {
+    };
+
+    template <typename Key, typename Hash, typename Equals, typename Alloc>
+    struct make_json_t<std::unordered_set<Key, Hash, Equals, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::unordered_set<Key, Hash, Equals, Alloc>>
+    {
     };
 
 #pragma endregion

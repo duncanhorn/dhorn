@@ -152,6 +152,137 @@ namespace dhorn
                 Assert::IsTrue(*itr == str3);
             }
 
+            TEST_METHOD(StdForwardListJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto arr = json_cast<std::forward_list<utf8_string>>(value.get());
+
+                auto itr = arr.begin();
+                Assert::IsTrue(*itr == str1);
+                ++itr;
+                Assert::IsTrue(*itr == str2);
+                ++itr;
+                Assert::IsTrue(*itr == str3);
+
+                ++itr;
+                Assert::IsTrue(itr == arr.end());
+            }
+
+            TEST_METHOD(StdSetJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto arr = json_cast<std::set<utf8_string>>(value.get());
+                Assert::AreEqual(3u, arr.size());
+
+                Assert::IsTrue(arr.find(str1) != std::end(arr));
+                Assert::IsTrue(arr.find(str2) != std::end(arr));
+                Assert::IsTrue(arr.find(str3) != std::end(arr));
+
+                // set does not allow duplicates
+                array.push_back(std::make_shared<json_string>(str1));
+                value = std::make_shared<json_array>(array);
+                arr = json_cast<std::set<utf8_string>>(value.get());
+                Assert::AreEqual(3u, arr.size());
+            }
+
+            TEST_METHOD(StdMultiSetJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto arr = json_cast<std::multiset<utf8_string>>(value.get());
+                Assert::AreEqual(3u, arr.size());
+
+                Assert::IsTrue(arr.find(str1) != std::end(arr));
+                Assert::IsTrue(arr.find(str2) != std::end(arr));
+                Assert::IsTrue(arr.find(str3) != std::end(arr));
+
+                // multiset allows duplicates
+                array.push_back(std::make_shared<json_string>(str1));
+                value = std::make_shared<json_array>(array);
+                arr = json_cast<std::multiset<utf8_string>>(value.get());
+                Assert::AreEqual(4u, arr.size());
+            }
+
+            TEST_METHOD(StdUnorderedSetJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto arr = json_cast<std::unordered_set<utf8_string>>(value.get());
+                Assert::AreEqual(3u, arr.size());
+
+                Assert::IsTrue(arr.find(str1) != std::end(arr));
+                Assert::IsTrue(arr.find(str2) != std::end(arr));
+                Assert::IsTrue(arr.find(str3) != std::end(arr));
+
+                // unordered_set does not allow duplicates
+                array.push_back(std::make_shared<json_string>(str1));
+                value = std::make_shared<json_array>(array);
+                arr = json_cast<std::unordered_set<utf8_string>>(value.get());
+                Assert::AreEqual(3u, arr.size());
+            }
+
+            TEST_METHOD(StdArrayJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto arr = json_cast<std::array<utf8_string, 3u>>(value.get());
+                Assert::AreEqual(array.size(), arr.size());
+                Assert::IsTrue(arr[0] == str1);
+                Assert::IsTrue(arr[1] == str2);
+                Assert::IsTrue(arr[2] == str3);
+
+                try
+                {
+                    auto arr2 = json_cast<std::array<utf8_string, 4u>>(value.get());
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (const json_exception &)
+                {
+                }
+            }
+
             TEST_METHOD(StdMapFromArraysJsonCastTest)
             {
                 using pair_array = std::vector<std::shared_ptr<json_value>>;

@@ -1225,6 +1225,8 @@ namespace dhorn
         return !(lhs == rhs);
     }
 
+
+
     template <typename LhsCharT, typename RhsCharT>
     bool operator==(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
     {
@@ -1255,6 +1257,8 @@ namespace dhorn
     {
         return !(lhs == rhs);
     }
+
+
 
     template <
         typename LhsCharT,
@@ -1308,6 +1312,8 @@ namespace dhorn
         return !(lhs == rhs);
     }
 
+
+
     template <
         typename LhsCharT,
         typename RhsCharT,
@@ -1346,6 +1352,276 @@ namespace dhorn
 
 #pragma endregion
 
+#pragma region Comparison Operators
+
+    template <typename LhsCharT, typename RhsCharT>
+    bool operator<(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        auto litr = std::begin(lhs);
+        auto ritr = std::begin(rhs);
+
+        for (; litr != std::end(lhs); ++litr, ++ritr)
+        {
+            if (ritr == std::end(rhs))
+            {
+                // rhs substring of lhs
+                return false;
+            }
+
+            if (*litr != *ritr)
+            {
+                return *litr < *ritr;
+            }
+        }
+
+        if (ritr != std::end(rhs))
+        {
+            // lhs substring of rhs
+            return true;
+        }
+
+        // lhs == rhs
+        return false;
+    }
+
+    template <typename LhsCharT, typename RhsCharT>
+    bool operator<=(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        auto litr = std::begin(lhs);
+        auto ritr = std::begin(rhs);
+
+        for (; litr != std::end(lhs); ++litr, ++ritr)
+        {
+            if (ritr == std::end(rhs))
+            {
+                // rhs substring of lhs
+                return false;
+            }
+
+            if (*litr != *ritr)
+            {
+                return *litr < *ritr;
+            }
+        }
+
+        // lhs is at least a substring of rhs
+        return true;
+    }
+
+    template <typename LhsCharT, typename RhsCharT>
+    bool operator>(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return !(lhs <= rhs);
+    }
+
+    template <typename LhsCharT, typename RhsCharT>
+    bool operator>=(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return !(lhs < rhs);
+    }
+
+
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator<(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    {
+        for (auto ch : lhs)
+        {
+            auto nxt = LiteralTraits::next(rhs, &rhs);
+
+            // nxt is null character if no characters left
+            if (nxt != ch)
+            {
+                return ch < nxt;
+            }
+        }
+
+        // Guaranteed that lhs <= rhs. If lhs != rhs, then we know that lhs < rhs
+        return LiteralTraits::next(rhs, &rhs) != U'\0';
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator<=(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    {
+        for (auto ch : lhs)
+        {
+            auto nxt = LiteralTraits::next(rhs, &rhs);
+
+            // nxt is null character if no characters left
+            if (nxt != ch)
+            {
+                return ch < nxt;
+            }
+        }
+
+        // lhs is at least a substring of rhs
+        return true;
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator>(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    {
+        return !(lhs <= rhs);
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator>=(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    {
+        return !(lhs < rhs);
+    }
+
+
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator<(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        for (auto ch : rhs)
+        {
+            auto nxt = LiteralTraits::next(lhs, &lhs);
+
+            // nxt is null character if no characters left
+            if (nxt != ch)
+            {
+                return nxt < ch;
+            }
+        }
+
+        // Guaranteed that lhs >= rhs. Impossible for lhs < rhs
+        return false;
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator<=(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        for (auto ch : rhs)
+        {
+            auto nxt = LiteralTraits::next(lhs, &lhs);
+
+            // nxt is null character if no characters left
+            if (nxt != ch)
+            {
+                return nxt < ch;
+            }
+        }
+
+        // Guaranteed that lhs >= rhs. lhs <= rhs iff lhs == rhs
+        return LiteralTraits::next(lhs, &lhs) == U'\0';
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator>(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return !(lhs <= rhs);
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator>=(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return !(lhs < rhs);
+    }
+
+
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator<(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    {
+        return lhs < rhs.c_str();
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator<=(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    {
+        return lhs <= rhs.c_str();
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator>(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    {
+        return lhs > rhs.c_str();
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+    bool operator>=(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    {
+        return lhs >= rhs.c_str();
+    }
+
+
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator<(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return lhs.c_str() < rhs;
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator<=(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return lhs.c_str() <= rhs;
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator>(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return lhs.c_str() > rhs;
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+    bool operator>=(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    {
+        return lhs.c_str() >= rhs;
+    }
+
+#pragma endregion
+
 
 
     /*
@@ -1357,3 +1633,23 @@ namespace dhorn
 
 #pragma endregion
 }
+
+
+
+#ifndef DHORN_NO_STD
+
+namespace std
+{
+    template <typename CharT>
+    struct hash<dhorn::utf_string<CharT>>
+    {
+        inline size_t operator()(_In_ const dhorn::utf_string<CharT> &str) const
+        {
+            // TODO: Make this better. It's not good to create a string just for hashing
+            // TODO: This won't be unique across CharT types. Does it need to be?
+            return std::hash<std::basic_string<CharT>>()(str.c_str());
+        }
+    };
+}
+
+#endif

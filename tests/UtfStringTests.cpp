@@ -1025,6 +1025,359 @@ namespace dhorn
             }
 
 #pragma endregion
+
+#pragma region Comparison Tests
+
+            TEST_METHOD(SelfComparisonTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsFalse(str < str);
+                Assert::IsFalse(str > str);
+                Assert::IsTrue(str <= str);
+                Assert::IsTrue(str >= str);
+            }
+
+            TEST_METHOD(Utf8StringComparisonTest)
+            {
+                string_type str = u8"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = u8"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf8_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = u8"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf8_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = u8"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf8_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+            TEST_METHOD(Utf16StringComparisonTest)
+            {
+                string_type str = u8"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = u"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf16_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = u"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf16_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = u"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf16_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+            TEST_METHOD(Utf32StringComparisonTest)
+            {
+                string_type str = u8"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = U"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf32_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = U"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf32_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = U"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf32_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+#pragma endregion
         };
 
 
@@ -1785,6 +2138,359 @@ namespace dhorn
             }
 
 #pragma endregion
+
+#pragma region Comparison Tests
+
+            TEST_METHOD(SelfComparisonTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsFalse(str < str);
+                Assert::IsFalse(str > str);
+                Assert::IsTrue(str <= str);
+                Assert::IsTrue(str >= str);
+            }
+
+            TEST_METHOD(Utf8StringComparisonTest)
+            {
+                string_type str = u"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = u8"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf8_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = u8"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf8_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = u8"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf8_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+            TEST_METHOD(Utf16StringComparisonTest)
+            {
+                string_type str = u"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = u"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf16_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = u"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf16_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = u"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf16_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+            TEST_METHOD(Utf32StringComparisonTest)
+            {
+                string_type str = u"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = U"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf32_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = U"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf32_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = U"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf32_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+#pragma endregion
         };
 
 
@@ -2542,6 +3248,359 @@ namespace dhorn
                 Assert::IsFalse(sub == str);
                 Assert::IsTrue(str != sub);
                 Assert::IsTrue(sub != str);
+            }
+
+#pragma endregion
+
+#pragma region Comparison Tests
+
+            TEST_METHOD(SelfComparisonTest)
+            {
+                string_type str = test_string;
+
+                Assert::IsFalse(str < str);
+                Assert::IsFalse(str > str);
+                Assert::IsTrue(str <= str);
+                Assert::IsTrue(str >= str);
+            }
+
+            TEST_METHOD(Utf8StringComparisonTest)
+            {
+                string_type str = U"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = u8"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf8_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = u8"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf8_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = u8"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf8_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+            TEST_METHOD(Utf16StringComparisonTest)
+            {
+                string_type str = U"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = u"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf16_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = u"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf16_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = u"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf16_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char16_t> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
+            }
+
+            TEST_METHOD(Utf32StringComparisonTest)
+            {
+                string_type str = U"test_1";
+
+                // equal string comparison
+                {
+                    // Raw pointer comparison
+                    auto equal = U"test_1";
+                    Assert::IsFalse(str < equal);
+                    Assert::IsFalse(equal < str);
+                    Assert::IsFalse(str > equal);
+                    Assert::IsFalse(equal > str);
+                    Assert::IsTrue(str <= equal);
+                    Assert::IsTrue(equal <= str);
+                    Assert::IsTrue(str >= equal);
+                    Assert::IsTrue(equal >= str);
+
+                    // utf8_string comparison
+                    utf32_string equalUtfStr = equal;
+                    Assert::IsFalse(str < equalUtfStr);
+                    Assert::IsFalse(equalUtfStr < str);
+                    Assert::IsFalse(str > equalUtfStr);
+                    Assert::IsFalse(equalUtfStr > str);
+                    Assert::IsTrue(str <= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr <= str);
+                    Assert::IsTrue(str >= equalUtfStr);
+                    Assert::IsTrue(equalUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> equalStr = equal;
+                    Assert::IsFalse(str < equalStr);
+                    Assert::IsFalse(equalStr < str);
+                    Assert::IsFalse(str > equalStr);
+                    Assert::IsFalse(equalStr > str);
+                    Assert::IsTrue(str <= equalStr);
+                    Assert::IsTrue(equalStr <= str);
+                    Assert::IsTrue(str >= equalStr);
+                    Assert::IsTrue(equalStr >= str);
+                }
+
+                // substring comparison
+                {
+                    // Raw pointer comparison
+                    auto sub = U"test_";
+                    Assert::IsFalse(str < sub);
+                    Assert::IsTrue(sub < str);
+                    Assert::IsTrue(str > sub);
+                    Assert::IsFalse(sub > str);
+                    Assert::IsFalse(str <= sub);
+                    Assert::IsTrue(sub <= str);
+                    Assert::IsTrue(str >= sub);
+                    Assert::IsFalse(sub >= str);
+
+                    // utf8_string comparison
+                    utf32_string subUtfStr = sub;
+                    Assert::IsFalse(str < subUtfStr);
+                    Assert::IsTrue(subUtfStr < str);
+                    Assert::IsTrue(str > subUtfStr);
+                    Assert::IsFalse(subUtfStr > str);
+                    Assert::IsFalse(str <= subUtfStr);
+                    Assert::IsTrue(subUtfStr <= str);
+                    Assert::IsTrue(str >= subUtfStr);
+                    Assert::IsFalse(subUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> subStr = sub;
+                    Assert::IsFalse(str < subStr);
+                    Assert::IsTrue(subStr < str);
+                    Assert::IsTrue(str > subStr);
+                    Assert::IsFalse(subStr > str);
+                    Assert::IsFalse(str <= subStr);
+                    Assert::IsTrue(subStr <= str);
+                    Assert::IsTrue(str >= subStr);
+                    Assert::IsFalse(subStr >= str);
+                }
+
+                // superstring comparison
+                {
+                    // Raw pointer comparison
+                    auto super = U"test_12";
+                    Assert::IsTrue(str < super);
+                    Assert::IsFalse(super < str);
+                    Assert::IsFalse(str > super);
+                    Assert::IsTrue(super > str);
+                    Assert::IsTrue(str <= super);
+                    Assert::IsFalse(super <= str);
+                    Assert::IsFalse(str >= super);
+                    Assert::IsTrue(super >= str);
+
+                    // utf8_string comparison
+                    utf32_string superUtfStr = super;
+                    Assert::IsTrue(str < superUtfStr);
+                    Assert::IsFalse(superUtfStr < str);
+                    Assert::IsFalse(str > superUtfStr);
+                    Assert::IsTrue(superUtfStr > str);
+                    Assert::IsTrue(str <= superUtfStr);
+                    Assert::IsFalse(superUtfStr <= str);
+                    Assert::IsFalse(str >= superUtfStr);
+                    Assert::IsTrue(superUtfStr >= str);
+
+                    // basic_string comparison
+                    std::basic_string<char32_t> superStr = super;
+                    Assert::IsTrue(str < superStr);
+                    Assert::IsFalse(superStr < str);
+                    Assert::IsFalse(str > superStr);
+                    Assert::IsTrue(superStr > str);
+                    Assert::IsTrue(str <= superStr);
+                    Assert::IsFalse(superStr <= str);
+                    Assert::IsFalse(str >= superStr);
+                    Assert::IsTrue(superStr >= str);
+                }
             }
 
 #pragma endregion
