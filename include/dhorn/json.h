@@ -1296,6 +1296,27 @@ namespace dhorn
 
 
     /*
+     * std::unordered_multiset
+     */
+#pragma region std::unordered_multiset Casting
+
+    template <typename Key, typename Hash, typename Equals, typename Alloc>
+    struct json_cast_t<std::unordered_multiset<Key, Hash, Equals, Alloc>> :
+        public garbage::emplace_json_cast_t<std::unordered_multiset<Key, Hash, Equals, Alloc>>
+    {
+    };
+
+    template <typename Key, typename Hash, typename Equals, typename Alloc>
+    struct make_json_t<std::unordered_multiset<Key, Hash, Equals, Alloc>> :
+        public garbage::sequence_container_make_json_t<std::unordered_multiset<Key, Hash, Equals, Alloc>>
+    {
+    };
+
+#pragma endregion
+
+
+
+    /*
      * std::map
      */
 #pragma region std::map Casting

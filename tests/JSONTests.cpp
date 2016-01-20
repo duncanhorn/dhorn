@@ -255,6 +255,32 @@ namespace dhorn
                 Assert::AreEqual(3u, arr.size());
             }
 
+            TEST_METHOD(StdUnorderedMultiSetJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto arr = json_cast<std::unordered_multiset<utf8_string>>(value.get());
+                Assert::AreEqual(3u, arr.size());
+
+                Assert::IsTrue(arr.find(str1) != std::end(arr));
+                Assert::IsTrue(arr.find(str2) != std::end(arr));
+                Assert::IsTrue(arr.find(str3) != std::end(arr));
+
+                // unordered_multiset allows duplicates
+                array.push_back(std::make_shared<json_string>(str1));
+                value = std::make_shared<json_array>(array);
+                arr = json_cast<std::unordered_multiset<utf8_string>>(value.get());
+                Assert::AreEqual(4u, arr.size());
+            }
+
             TEST_METHOD(StdArrayJsonCastTest)
             {
                 auto str1 = u8"String 1";
