@@ -76,7 +76,9 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <queue>
 #include <set>
+#include <stack>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -1073,7 +1075,7 @@ namespace dhorn
                 value_type result;
                 for (auto &obj : array)
                 {
-                    auto pair = result.emplace(json_cast<typename value_type::value_type>(obj.get()));
+                    result.emplace(json_cast<typename value_type::value_type>(obj.get()));
                 }
 
                 return result;
@@ -1311,6 +1313,64 @@ namespace dhorn
         public garbage::sequence_container_make_json_t<std::unordered_multiset<Key, Hash, Equals, Alloc>>
     {
     };
+
+#pragma endregion
+
+
+
+    /*
+     * std::stack
+     */
+#pragma region std::stack Casting
+
+    // We follow the pattern of the rest of the container types and assume that the first item in the array is at the
+    // "head," which for stacks, is the first item inserted and thus the last item to get pop-ed
+    template <typename Ty, typename Container>
+    struct json_cast_t<std::stack<Ty, Container>> :
+        public garbage::emplace_json_cast_t<std::stack<Ty, Container>>
+    {
+    };
+
+    // We purposefully don't provide an overload of make_json for std::stack since it is not iterable, and the only way
+    // of iterating it is to remove all elements
+
+#pragma endregion
+
+
+
+    /*
+     * std::queue
+     */
+#pragma region std::queue Casting
+
+     // We follow the pattern of the rest of the container types and assume that the first item in the array is at the
+     // "head," which for queues, is the first item inserted and thus the first item to get pop-ed
+    template <typename Ty, typename Container>
+    struct json_cast_t<std::queue<Ty, Container>> :
+        public garbage::emplace_json_cast_t<std::queue<Ty, Container>>
+    {
+    };
+
+    // We purposefully don't provide an overload of make_json for std::queue since it is not iterable, and the only way
+    // of iterating it is to remove all elements
+
+#pragma endregion
+
+
+
+    /*
+     * std::priority_queue
+     */
+#pragma region std::priority_queue Casting
+
+    template <typename Ty, typename Container, typename Compare>
+    struct json_cast_t<std::priority_queue<Ty, Container, Compare>> :
+        public garbage::emplace_json_cast_t<std::priority_queue<Ty, Container, Compare>>
+    {
+    };
+
+    // We purposefully don't provide an overload of make_json for std::priority_queue since it is not iterable, and the
+    // only way of iterating it is to remove all elements
 
 #pragma endregion
 

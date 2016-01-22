@@ -281,6 +281,72 @@ namespace dhorn
                 Assert::AreEqual(4u, arr.size());
             }
 
+            TEST_METHOD(StdStackJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto stack = json_cast<std::stack<utf8_string>>(value.get());
+                Assert::AreEqual(3u, stack.size());
+
+                Assert::IsTrue(stack.top() == str3);
+                stack.pop();
+                Assert::IsTrue(stack.top() == str2);
+                stack.pop();
+                Assert::IsTrue(stack.top() == str1);
+                stack.pop();
+            }
+
+            TEST_METHOD(StdQueueJsonCastTest)
+            {
+                auto str1 = u8"String 1";
+                auto str2 = u8"String 2";
+                auto str3 = u8"String 3";
+
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_string>(str1));
+                array.push_back(std::make_shared<json_string>(str2));
+                array.push_back(std::make_shared<json_string>(str3));
+
+                auto value = std::make_shared<json_array>(array);
+                auto queue = json_cast<std::queue<utf8_string>>(value.get());
+                Assert::AreEqual(3u, queue.size());
+
+                Assert::IsTrue(queue.front() == str1);
+                queue.pop();
+                Assert::IsTrue(queue.front() == str2);
+                queue.pop();
+                Assert::IsTrue(queue.front() == str3);
+                queue.pop();
+            }
+
+            TEST_METHOD(StdPriorityQueueJsonCastTest)
+            {
+                std::vector<std::shared_ptr<json_value>> array;
+                array.push_back(std::make_shared<json_number>(u8"2"));
+                array.push_back(std::make_shared<json_number>(u8"1"));
+                array.push_back(std::make_shared<json_number>(u8"3"));
+
+                auto value = std::make_shared<json_array>(array);
+                auto queue = json_cast<std::priority_queue<int>>(value.get());
+                Assert::AreEqual(3u, queue.size());
+
+                // By default, priority_queue gives highest-value-first
+                Assert::AreEqual(3, queue.top());
+                queue.pop();
+                Assert::AreEqual(2, queue.top());
+                queue.pop();
+                Assert::AreEqual(1, queue.top());
+                queue.pop();
+            }
+
             TEST_METHOD(StdArrayJsonCastTest)
             {
                 auto str1 = u8"String 1";
