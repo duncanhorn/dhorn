@@ -144,5 +144,8 @@
     <ClInclude Include="include\dhorn\instance.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\command_line.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

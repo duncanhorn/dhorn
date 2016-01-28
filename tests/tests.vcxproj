@@ -107,6 +107,7 @@
     <ClCompile Include="AlgorithmTests.cpp" />
     <ClCompile Include="AnimationManagerTests.cpp" />
     <ClCompile Include="AnimationTests.cpp" />
+    <ClCompile Include="CommandLineTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
