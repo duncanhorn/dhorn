@@ -8,29 +8,48 @@
  * interfaced with using iterators. Calling begin() on a command_line type will give you a command_line_iterator which,
  * if enumerated until end(), will give all command line arguments one by one. This is, of course, not desirable since
  * the expected input for command_line is itself an iterable collection that does just that. Instead, what makes
- * command_line useful, is that each command_line_iterator is itself iterable. If the current command_line_iterator is
- * not a switch (see below for how this is defined), then begin() == end(). Otherwise, if the command_line_iterator is
- * a switch, then *begin() == *itr, and incrementing the resulting command_line_switch_iterator will give a non end()
- * command_line_switch_iterator until another switch is encountered. For example, assuming that a switch is defined as
- * having a leading character of either '-' or '/', and assuming the example command line arguments:
+ * command_line useful, is that each command_line_iterator is itself iterable. These "switch iterators" should be
+ * thought of as "references" to the iterator that was used to create it, but with different semantics. I.e. these
+ * switch iterators are forward only - not random access like their source - and thus the end iterator does not
+ * reference a particular element in the collection. The semantics for these different iterator types are as follows:
  *
- *      /bar opt1 opt2 /doit /doit2
+ *  command_line_iterator:
+ *      1. Behaves like any other non-mutable random access iterator (i.e. just like std::vector<Ty>::const_iterator)
  *
- * Then calling begin() on the command_line will give an command_line_iterator that, when dereferenced, references
- * "/bar". Calling begin on this iterator will give a non-end command_line_switch_iterator that, when dereferenced,
- * also references "/bar". If you then increment this switch iterator, it would give a non-end switch iterator that
- * references "opt1". Incrementing again will give a non-end switch iterator that references "opt2". Incrementing one
- * last time will give an end switch iterator. This end switch iterator is implicitly convertible back to a non-switch
- * command_line_iterator that references "/doit". Calling begin() on that converted iterator will give a non-end switch
- * iterator that refernces "/doit", and incrementing that iterator will give an end switch iterator that is implicitly
- * convertible to a command_line_iterator that references "/doit2". Calling begin() on this iterator will again give a
- * non-end switch iterator that references "/doit2". Incrementing this iterator will give an end switch iterator that,
- * when converted back to a command_line_iterator, is also the end iterator for the command_line object.
+ *  command_line_switch_iterator:
+ *      1. When created from a command_line_iterator that does NOT represent a switch:
+ *          ~ Parent iterator is not advanced
+ *          ~ Evaluates equal to an end iterator created from an equivalent command_line_iterator
+ *      2. When created from a command_line_iterator that DOES represent a switch:
+ *          ~ Parent iterator is not advanced on creation, but *is* advanced whenever the switch iterator is advanced
+ *          ~ Dereferencing always references the "next" iterator relevant to the parent iterator
+ *          ~ Once the "next" element is itself a switch, or references past the end of the collection, then the switch
+ *            iterator will evaluate equal to the corresponding switch iterator.
+ *          ~ Once the switch iterator reaches the "end," its parent iterator will naturally reference the last
+ *            non-switch element in the collection
  *
- * NOTE: the conversion from command_line_switch_iterator -> command_line_iterator is only valid for switch iterators
- * that were NOT obtained by calling end() on the command_line_iterator. This limitation exists because
- * command_line_switch_iterator is a forward iterator and thus its end() iterator cannot define an explicit location
- * within the container. If this is attempted, the assignment will throw std::invalid_argument.
+ * Conceptually this can be thought of as the switch iterator "leading" the parent command_line_iterator by one
+ * element, stopping when the parent reaches the last element in the contiguous set of non-switch elements. This gives
+ * the most ideal iterating experience:
+ *
+ *      for (auto itr = std::begin(cmd); itr != std::end(cmd); ++itr)
+ *      {
+ *          if (is_command_line_switch(*itr))
+ *          {
+ *              HandleNonSwitchArg(*itr);
+ *          }
+ *          else
+ *          {
+ *              if (*itr == "/foo")
+ *              {
+ *                  for (auto &arg : itr)
+ *                  {
+ *                      ProcessFooArg(arg);
+ *                  }
+ *              }
+ *          }
+ *      }
+ *
  */
 #pragma once
 
@@ -45,7 +64,7 @@ namespace dhorn
     template <typename StringTy>
     inline constexpr bool is_command_line_switch(_In_ const StringTy &str) noexcept
     {
-        return !str.empty() && ((str[0] == '/') || (str[1] == '-'));
+        return !str.empty() && ((str[0] == '/') || (str[0] == '-'));
     }
 
     template <typename StringTy>
@@ -207,6 +226,7 @@ namespace dhorn
         /*
          * Private types
          */
+        using parent_type = command_line_iterator<CmdLine, IsSwitch>;
         using container = typename const CmdLine::container;
         using index_t = typename container::size_type;
 
@@ -214,30 +234,25 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        command_line_switch_iterator(void) :
-            _container(nullptr),
-            _index(0)
-        {
-        }
-
         command_line_switch_iterator(_In_ const IsSwitch &isSwitch) :
-            _container(nullptr),
-            _index(0),
+            _parent(nullptr),
+            _isEnd(true),
             _isSwitch(isSwitch)
         {
         }
 
-        command_line_switch_iterator(_In_ container *container, _In_ index_t index) :
-            _container(container),
-            _index(index)
-        {
-        }
-
-        command_line_switch_iterator(_In_ container *container, _In_ index_t index, _In_ const IsSwitch &isSwitch) :
-            _container(container),
-            _index(index),
+        command_line_switch_iterator(_In_ parent_type *parent, _In_ const IsSwitch &isSwitch) :
+            _parent(parent),
+            _isEnd(false),
             _isSwitch(isSwitch)
         {
+            this->UpdateIsEnd();
+
+            // We also have the initial constraint that if our parent is not a switch, this is an end iterator
+            if (!this->_isEnd)
+            {
+                this->_isEnd = !this->_isSwitch(**this->_parent);
+            }
         }
 
 
@@ -247,25 +262,13 @@ namespace dhorn
          */
         bool operator==(_In_ const command_line_switch_iterator &other) const
         {
-            if ((other._container == this->_container) && (other._index == this->_index))
+            if (!this->_isEnd && !other._isEnd)
             {
-                // Guaranteed equal
-                return true;
+                return (*this->_parent) == (*other._parent);
             }
 
-            // Otherwise, if one is an empty end iterator, we need to check to see if the other is a logical end
-            if (!other._container)
-            {
-                // this->_container guaranteed to be non-null; else the equality test would have passed
-                return (this->_index == this->_container->size()) || IsSwitch()((*this->_container)[this->_index]);
-            }
-            else if (!this->_container)
-            {
-                // other._container guaranteed to be non-null; else the equality test would have passed
-                return (other._index == other._container->size()) || IsSwitch()((*other._container)[other._index]);
-            }
-
-            return false;
+            // At least one is an end iterator; therefore, they evaluate equal only if both are end iterators
+            return this->_isEnd && other._isEnd;
         }
 
         bool operator!=(_In_ const command_line_switch_iterator &other) const
@@ -275,17 +278,18 @@ namespace dhorn
 
         value_type &operator*(void) const
         {
-            return (*this->_container)[this->_index];
+            return (*this->_parent->_container)[this->_parent->_index + 1];
         }
 
         value_type *operator->(void) const
         {
-            return &(*this->_container)[this->_index];
+            return &(**this);
         }
 
         command_line_switch_iterator &operator++(void)
         {
-            ++this->_index;
+            ++(*this->_parent);
+            this->UpdateIsEnd();
             return *this;
         }
 
@@ -300,10 +304,19 @@ namespace dhorn
 
     private:
 
-        friend class command_line_iterator<CmdLine, IsSwitch>;
+        void UpdateIsEnd(void)
+        {
+            // The conditions for an end iterator are:
+            //      1. Our parent is at the last element in its collection
+            //      2. Our parent is one away from another switch
+            if ((this->_parent->_index == this->_parent->_container->size() - 1) || this->_isSwitch(**this))
+            {
+                this->_isEnd = true;
+            }
+        }
 
-        container *_container;
-        index_t _index;
+        parent_type *_parent;
+        bool _isEnd;
         IsSwitch _isSwitch;
     };
 
@@ -362,39 +375,25 @@ namespace dhorn
         /*
          * Switch Iterators
          */
-        command_line_iterator &operator=(_In_ const iterator &rhs)
+        iterator begin(void)
         {
-            if (!rhs._container)
-            {
-                throw std::invalid_argument("Cannot assign a command_line_switch_iterator to a command_line_switch"
-                    " iterator that was obtained using end()");
-            }
-
-            this->_container = rhs._container;
-            this->_index = rhs._index;
-            return *this;
+            return iterator(this, this->_isSwitch);
         }
 
-        iterator begin(void) const
+        const_iterator cbegin(void)
         {
-            return iterator(this->_container, this->_index, this->_isSwitch);
+            return begin();
         }
 
-        const_iterator cbegin(void) const
-        {
-            return const_iterator(this->_container, this->_index, this->_isSwitch);
-        }
-
-        iterator end(void) const
+        iterator end(void)
         {
             // Empty command_line_const_iterator represents an end iterator
             return iterator(this->_isSwitch);
         }
 
-        const_iterator cend(void) const
+        const_iterator cend(void)
         {
-            // Empty command_line_const_iterator represents an end iterator
-            return const_iterator(this->_isSwitch);
+            return end();
         }
 
 
@@ -402,12 +401,12 @@ namespace dhorn
         /*
          * Forward Iterator Functions
          */
-        bool operator==(_In_ const command_line_iterator &other)
+        bool operator==(_In_ const command_line_iterator &other) const
         {
             return (other._container == this->_container) && (other._index == this->_index);
         }
 
-        bool operator!=(_In_ const command_line_iterator &other)
+        bool operator!=(_In_ const command_line_iterator &other) const
         {
             return !(*this == other);
         }
@@ -438,6 +437,8 @@ namespace dhorn
 
 
     private:
+
+        friend class command_line_switch_iterator<CmdLine, IsSwitch>;
 
         container *_container;
         index_t _index;
