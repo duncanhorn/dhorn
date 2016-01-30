@@ -161,7 +161,7 @@ namespace dhorn
         template <typename CustomIsSwitch>
         command_line_iterator<my_type, CustomIsSwitch> begin(_In_ const CustomIsSwitch &isSwitch) const
         {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0);
+            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
         }
 
         const_iterator cbegin(void) const
@@ -172,7 +172,7 @@ namespace dhorn
         template <typename CustomIsSwitch>
         command_line_iterator<my_type, CustomIsSwitch> cbegin(_In_ const CustomIsSwitch &isSwitch) const
         {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0);
+            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
         }
 
         iterator end(void) const
@@ -183,7 +183,7 @@ namespace dhorn
         template <typename CustomIsSwitch>
         command_line_iterator<my_type, CustomIsSwitch> end(_In_ const CustomIsSwitch &isSwitch) const
         {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size());
+            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
         }
 
         const_iterator cend(void) const
@@ -194,7 +194,7 @@ namespace dhorn
         template <typename CustomIsSwitch>
         command_line_iterator<my_type, CustomIsSwitch> cend(_In_ const CustomIsSwitch &isSwitch) const
         {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size());
+            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
         }
 
 
