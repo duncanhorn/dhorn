@@ -91,7 +91,6 @@
     <ClInclude Include="efficiency.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3DVectorEfficiencyTests.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

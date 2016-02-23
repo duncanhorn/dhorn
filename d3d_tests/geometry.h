@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <dhorn/d3d.h>
+#include <DirectXMath.h>
 
 struct vertex
 {

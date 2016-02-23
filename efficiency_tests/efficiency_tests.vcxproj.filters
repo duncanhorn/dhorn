@@ -14,9 +14,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="D3DVectorEfficiencyTests.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
 </Project>

@@ -19,7 +19,7 @@
 
 #include <vector>
 
-#include "d3d_utils.h"
+#include <DirectXMath.h>
 
 namespace dhorn
 {
@@ -44,7 +44,7 @@ namespace dhorn
             _In_ float height,
             _In_ float depth,
             _Inout_ std::vector<vertex> &vertices,
-            _Inout_ std::vector<UINT> &indices)
+            _Inout_ std::vector<unsigned> &indices)
         {
             vertices.clear();
             indices.clear();

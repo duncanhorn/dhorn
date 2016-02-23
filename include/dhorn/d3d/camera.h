@@ -7,6 +7,8 @@
  */
 #pragma once
 
+#include <DirectXMath.h>
+
 #include "d3d_utils.h"
 
 namespace dhorn

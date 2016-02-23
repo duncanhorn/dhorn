@@ -6,7 +6,8 @@
  * Functional tests for the dhorn::d3d namespace. Namely the d3d_window class
  */
 
-#include <dhorn/d3d.h>
+#include <dhorn/d3d11/d3d11_utils.h>
+#include <dhorn/d3d11/d3d11_window.h>
 #include <dhorn/d3d/colors.h>
 #include <dhorn/d3d/shapes.h>
 
@@ -14,8 +15,8 @@
 #include "globals.h"
 
 // Define the globals
-dhorn::d3d::d3d_window globals::window;
 dhorn::d3d::camera globals::camera;
+dhorn::d3d11::d3d11_window globals::window;
 dhorn::win32::com_ptr<ID3D11VertexShader> globals::vertex_shader;
 dhorn::win32::com_ptr<ID3D11PixelShader> globals::pixel_shader;
 dhorn::win32::com_ptr<ID3D11InputLayout> globals::input_layout;
@@ -46,23 +47,23 @@ struct object_data
 static void load_shaders(void)
 {
     std::vector<uint8_t> vertexShaderBytecode;
-    globals::vertex_shader = dhorn::d3d::load_vertex_shader(
+    globals::vertex_shader = dhorn::d3d11::load_vertex_shader(
         globals::window.device(),
         OUTPUT_PATH "VertexShader.cso",
         vertexShaderBytecode);
 
     D3D11_INPUT_ELEMENT_DESC inputDesc[] =
     {
-        dhorn::d3d::input_element_desc(&vertex::position, DXGI_FORMAT_R32G32B32_FLOAT, "POSITION"),
-        dhorn::d3d::input_element_desc(&vertex::normal, DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL"),
-        dhorn::d3d::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
+        dhorn::d3d11::input_element_desc(&vertex::position, DXGI_FORMAT_R32G32B32_FLOAT, "POSITION"),
+        dhorn::d3d11::input_element_desc(&vertex::normal, DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL"),
+        dhorn::d3d11::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
     };
     dhorn::win32::throw_if_failed(globals::window.device()->CreateInputLayout(
         inputDesc, dhorn::array_size(inputDesc),
         vertexShaderBytecode.data(), vertexShaderBytecode.size(),
         &globals::input_layout));
 
-    globals::pixel_shader = dhorn::d3d::load_pixel_shader(globals::window.device(), OUTPUT_PATH "PixelShader.cso");
+    globals::pixel_shader = dhorn::d3d11::load_pixel_shader(globals::window.device(), OUTPUT_PATH "PixelShader.cso");
 }
 
 
@@ -88,11 +89,11 @@ static void load_geometry(void)
         vertices.push_back(next);
     }
 
-    globals::cuboid_vertices = dhorn::d3d::create_buffer(globals::window.device(), vertices, D3D11_BIND_VERTEX_BUFFER);
-    globals::cuboid_indices = dhorn::d3d::create_buffer(globals::window.device(), indices, D3D11_BIND_INDEX_BUFFER);
+    globals::cuboid_vertices = dhorn::d3d11::create_buffer(globals::window.device(), vertices, D3D11_BIND_VERTEX_BUFFER);
+    globals::cuboid_indices = dhorn::d3d11::create_buffer(globals::window.device(), indices, D3D11_BIND_INDEX_BUFFER);
 
     // Create the buffer that we will use for the cbuffer for 'ObjectData'
-    globals::object_data = dhorn::d3d::create_constant_buffer<object_data>(globals::window.device());
+    globals::object_data = dhorn::d3d11::create_constant_buffer<object_data>(globals::window.device());
 }
 
 

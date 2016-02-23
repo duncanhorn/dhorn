@@ -10,23 +10,17 @@
     <Filter Include="include\windows">
       <UniqueIdentifier>{4bda7774-65ee-4685-bb92-1466e1b4b3ad}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\d3d\garbage">
-      <UniqueIdentifier>{befea23a-0979-4466-b8ee-a5900e05b462}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\dynamic_ui">
       <UniqueIdentifier>{72cc98d2-37a1-4787-ab03-492bf8089f92}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\dynamic_ui\garbage">
       <UniqueIdentifier>{63e3207e-c299-4959-9e91-505f828e56d7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\d3d11">
+      <UniqueIdentifier>{2fee7d41-2e82-4124-9cc5-67f938d7eb82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\dhorn\d3d.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\vector.h">
-      <Filter>include\d3d</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\sockets.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -84,25 +78,13 @@
     <ClInclude Include="include\dhorn\algorithm.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\d3d_vector.h">
-      <Filter>include\d3d</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\garbage\dx_vector_base.h">
-      <Filter>include\d3d\garbage</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\animation_manager.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\animation.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\d3d_window.h">
-      <Filter>include\d3d</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\d3d\camera.h">
-      <Filter>include\d3d</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\d3d_utils.h">
       <Filter>include\d3d</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\linear_animation.h">
@@ -146,6 +128,15 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\command_line.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\d3d11\d3d11_utils.h">
+      <Filter>include\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\d3d11\d3d11_window.h">
+      <Filter>include\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\d3d\d3d_utils.h">
+      <Filter>include\d3d</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

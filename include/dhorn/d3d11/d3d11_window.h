@@ -1,13 +1,15 @@
 /*
  * Duncan Horn
  *
- * d3d_window.h
+ * d3d11_window.h
  *
  * 
  */
 #pragma once
 
-#include "d3d_utils.h"
+#pragma comment(lib, "d3d11.lib")
+
+#include "d3d11_utils.h"
 #include "../functional.h"
 #include "../unique_any.h"
 #include "../windows/com_ptr.h"
@@ -15,31 +17,31 @@
 
 namespace dhorn
 {
-    namespace d3d
+    namespace d3d11
     {
         /*
-         * d3d_window_traits - the default traits type for the basic_d3d_window class
+         * d3d11_window_traits - the default traits type for the basic_d3d11_window class
          */
-        struct d3d_window_traits
+        struct d3d11_window_traits
         {
             static const DXGI_FORMAT swap_chain_format = DXGI_FORMAT_R8G8B8A8_UNORM;
             static const DXGI_FORMAT depth_stencil_format = DXGI_FORMAT_D24_UNORM_S8_UINT;
             static const UINT back_buffer_count = 1;
             static const UINT sample_count = 4;
 #if defined(DEBUG) || defined(_DEBUG)
-            static const UINT device_flags = D3D11_CREATE_DEVICE_DEBUG;
+            static const UINT device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG;
 #else
-            static const UINT device_flags = 0;
+            static const UINT device_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 #endif
         };
 
 
 
         /*
-         * basic_d3d_window
+         * basic_d3d11_window
          */
         template <typename Traits>
-        class basic_d3d_window :
+        class basic_d3d11_window :
             public dhorn::win32::window
         {
             using QualityFunc = std::function<UINT(_In_ ID3D11Device *, _Inout_ UINT *)>;
@@ -51,22 +53,22 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            basic_d3d_window() :
+            basic_d3d11_window() :
                 _sampleCount(Traits::sample_count),
                 _previousClientArea{},
                 _resizing(false)
             {
                 this->add_callback_handler(
                     win32::window_message::enter_size_move,
-                    bind_member_function(&basic_d3d_window::on_enter_size_move, this));
+                    bind_member_function(&basic_d3d11_window::on_enter_size_move, this));
                 this->add_callback_handler(
                     win32::window_message::exit_size_move,
-                    bind_member_function(&basic_d3d_window::on_exit_size_move, this));
+                    bind_member_function(&basic_d3d11_window::on_exit_size_move, this));
                 this->add_callback_handler(
                     win32::window_message::size,
-                    bind_member_function(&basic_d3d_window::on_size_change, this));
+                    bind_member_function(&basic_d3d11_window::on_size_change, this));
 
-                DirectX::XMStoreFloat4(&this->_backgroundColor, colors::cornflower_blue);
+                DirectX::XMStoreFloat4(&this->_backgroundColor, d3d::colors::cornflower_blue);
             }
 
 
@@ -89,7 +91,7 @@ namespace dhorn
             ID3D11Device *device(void) const
             {
                 // Note to callers: this does not AddRef. Therefore, if you call this function, you must have a strong
-                // reference to this d3d_window instance to ensure that the object is not destroyed as the result of
+                // reference to this d3d11_window instance to ensure that the object is not destroyed as the result of
                 // a call to the destructor.
                 return this->_device;
             }
@@ -97,7 +99,7 @@ namespace dhorn
             ID3D11DeviceContext *context(void) const
             {
                 // Note to callers: this does not AddRef. Therefore, if you call this function, you must have a strong
-                // reference to this d3d_window instance to ensure that the object is not destroyed as the result of
+                // reference to this d3d11_window instance to ensure that the object is not destroyed as the result of
                 // a call to the destructor.
                 return this->_deviceContext;
             }
@@ -190,7 +192,7 @@ namespace dhorn
                 assert(this->_device);
                 assert(!this->_swapChain);
 
-                DXGI_SWAP_CHAIN_DESC desc = swap_chain_desc(
+                DXGI_SWAP_CHAIN_DESC desc = d3d::swap_chain_desc(
                     static_cast<UINT>(size.width),
                     static_cast<UINT>(size.height),
                     this->handle(),
@@ -433,8 +435,8 @@ namespace dhorn
 
 
         /*
-         * basic_d3d_window type definitions
+         * basic_d3d11_window type definitions
          */
-        using d3d_window = basic_d3d_window<d3d_window_traits>;
+        using d3d11_window = basic_d3d11_window<d3d11_window_traits>;
     }
 }
