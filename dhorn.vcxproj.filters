@@ -138,5 +138,8 @@
     <ClInclude Include="include\dhorn\d3d\d3d_utils.h">
       <Filter>include\d3d</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\bitmask.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

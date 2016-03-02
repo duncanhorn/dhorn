@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <DirectXMath.h>
 #include <dxgi.h>
+#include <dxgi1_2.h>
 #include <fstream>
 
 namespace dhorn
@@ -31,7 +32,7 @@ namespace dhorn
             _In_ DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM,
             _In_ UINT backBufferCount = 1,
             _In_ DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT_DISCARD,
-            _In_ DXGI_USAGE bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT)
+            _In_ DXGI_USAGE bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT) noexcept
         {
             DXGI_SWAP_CHAIN_DESC desc = {};
             desc.BufferDesc.Width = width;
@@ -52,6 +53,52 @@ namespace dhorn
             return desc;
         }
 
+        inline DXGI_SWAP_CHAIN_DESC1 swap_chain_desc_1(
+            _In_ UINT width,
+            _In_ UINT height,
+            _In_ DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
+            _In_ UINT sampleCount = 1,
+            _In_ UINT sampleQuality = 0,
+            _In_ UINT bufferCount = 2,
+            _In_ bool stereo = false,
+            _In_ UINT flags = 0,
+            _In_ DXGI_SCALING scaling = DXGI_SCALING_NONE,
+            _In_ DXGI_ALPHA_MODE alphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
+            _In_ DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            _In_ DXGI_USAGE bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT) noexcept
+        {
+            // If DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is specified, then MSAA is not allowed
+            assert(((sampleCount == 1) && (sampleQuality == 0)) || (swapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL));
+
+            // If DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is specified, then BufferCount must be between 2 and 16
+            assert(((bufferCount >= 2) && (bufferCount <= 16)) || (swapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL));
+
+            // If DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is specified, then the format must be one of the values below
+            assert((swapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL) ||
+                (format == DXGI_FORMAT_R8G8B8A8_UNORM) ||
+                (format == DXGI_FORMAT_B8G8R8A8_UNORM) ||
+                (format == DXGI_FORMAT_R16G16B16A16_FLOAT));
+
+            // Stereo is only supported for use with DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+            assert(!stereo || (swapEffect == DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL));
+
+            DXGI_SWAP_CHAIN_DESC1 desc = {};
+            desc.Width = width;
+            desc.Height = height;
+            desc.Format = format;
+            desc.Stereo = stereo;
+            desc.SampleDesc.Count = sampleCount;
+            desc.SampleDesc.Quality = sampleQuality;
+            desc.BufferUsage = bufferUsage;
+            desc.BufferCount = bufferCount;
+            desc.Scaling = scaling;
+            desc.SwapEffect = swapEffect;
+            desc.AlphaMode = alphaMode;
+            desc.Flags = flags;
+
+            return desc;
+        }
+
 #pragma endregion
 
 
@@ -66,7 +113,7 @@ namespace dhorn
             _In_ DirectX::FXMVECTOR right,
             _In_ DirectX::FXMVECTOR up,
             _In_ DirectX::FXMVECTOR forward,
-            _In_ DirectX::GXMVECTOR position)
+            _In_ DirectX::GXMVECTOR position) noexcept
         {
             using namespace DirectX;
 

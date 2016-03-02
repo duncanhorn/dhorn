@@ -1,7 +1,7 @@
 /*
- * algorithm.h
- *
  * Duncan Horn
+ *
+ * algorithm.h
  *
  * Definitions that should be in algorithm, but aren't
  */
@@ -41,7 +41,7 @@ namespace dhorn
     /*
      * Variadic min implementation
      */
-#pragma region max
+#pragma region min
 
     template <typename T1>
     inline auto min(_In_ T1 val)

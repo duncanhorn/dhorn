@@ -148,6 +148,7 @@
     <ClInclude Include="include\dhorn\algorithm.h" />
     <ClInclude Include="include\dhorn\animation.h" />
     <ClInclude Include="include\dhorn\animation_manager.h" />
+    <ClInclude Include="include\dhorn\bitmask.h" />
     <ClInclude Include="include\dhorn\command_line.h" />
     <ClInclude Include="include\dhorn\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\d3d11\d3d11_window.h" />
