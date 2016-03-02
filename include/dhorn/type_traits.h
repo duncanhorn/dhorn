@@ -1,7 +1,7 @@
 /*
- * type_traits.h
- *
  * Duncan Horn
+ *
+ * type_traits.h
  *
  * Definitions that should be in type_traits, but aren't
  */

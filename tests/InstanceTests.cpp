@@ -1,7 +1,7 @@
 /*
- * InstanceTests.cpp
- *
  * Duncan Horn
+ *
+ * InstanceTests.cpp
  *
  * Tests for the dhorn instance class
  */

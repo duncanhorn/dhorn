@@ -1,7 +1,7 @@
 /*
- * basic_unique_event_cookie.h
- *
  * Duncan Horn
+ *
+ * basic_unique_event_cookie.h
  *
  * An RAII wrapper around the event_cookie type that comes from an event_source.
  */

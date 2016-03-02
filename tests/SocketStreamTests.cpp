@@ -1,7 +1,7 @@
 /*
- * SocketStreamTest.cpp
- *
  * Duncan Horn
+ *
+ * SocketStreamTest.cpp
  *
  * Tests for the dhorn socket_stream classes, structures, functions, etc.
  */

@@ -1,7 +1,7 @@
 /*
- * AnimationTests.cpp
- *
  * Duncan Horn
+ *
+ * AnimationTests.cpp
  *
  * Tests for the various animations functions/types
  */

@@ -1,7 +1,7 @@
 /*
- * message_queue.h
- *
  * Duncan Horn
+ *
+ * message_queue.h
  *
  * 
  */

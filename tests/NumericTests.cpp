@@ -1,7 +1,7 @@
 /*
- * NumericTests.cpp
- *
  * Duncan Horn
+ *
+ * NumericTests.cpp
  *
  * Tests for the numeric.h functions
  */

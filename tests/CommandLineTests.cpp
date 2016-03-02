@@ -1,7 +1,7 @@
 /*
- * CommandLineTests.cpp
- *
  * Duncan Horn
+ *
+ * CommandLineTests.cpp
  *
  * Tests for the command_line type
  */

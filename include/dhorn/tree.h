@@ -1,7 +1,7 @@
 /*
- * tree.h
- *
  * Duncan Horn
+ *
+ * tree.h
  *
  *
  */

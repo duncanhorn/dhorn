@@ -1,7 +1,7 @@
 /*
- * UtfStringTests.cpp
- *
  * Duncan Horn
+ *
+ * UtfStringTests.cpp
  *
  * Tests for the dhorn utf_string classes, structures, functions, etc.
  */

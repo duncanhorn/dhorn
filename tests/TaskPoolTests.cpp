@@ -1,7 +1,7 @@
 /*
- * TaskPoolTests.cpp
- *
  * Duncan Horn
+ *
+ * TaskPoolTests.cpp
  *
  * Tests for dhorn::task_pool
  */

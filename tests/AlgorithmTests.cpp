@@ -1,7 +1,7 @@
 /*
- * AlgorithmTests.cpp
- *
  * Duncan Horn
+ *
+ * AlgorithmTests.cpp
  *
  * Tests for the algorithms.h functions
  */

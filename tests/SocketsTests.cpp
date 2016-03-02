@@ -1,7 +1,7 @@
 /*
- * SocketsTest.cpp
- *
  * Duncan Horn
+ *
+ * SocketsTest.cpp
  *
  * Tests for the dhorn sockets classes, structures, functions, etc.
  */

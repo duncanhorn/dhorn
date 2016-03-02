@@ -1,7 +1,7 @@
 /*
- * sockets.h
- *
  * Duncan Horn
+ *
+ * sockets.h
  *
  * 
  */

@@ -1,7 +1,7 @@
 /*
- * SynchronizedObjectTests.cpp
- *
  * Duncan Horn
+ *
+ * SynchronizedObjectTests.cpp
  *
  * Tests for synchronized_object.h
  */

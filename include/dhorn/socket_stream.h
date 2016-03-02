@@ -1,7 +1,7 @@
 /*
- * socket_stream.h
- *
  * Duncan Horn
+ *
+ * socket_stream.h
  *
  * Implements a std::streambuf class that is powered by a dhorn::tcp_socket for use with std::iostream, etc. There are
  * also simple wrappers that implement std::iostream, etc. for simpler use. E.g. without them, you'd have to do

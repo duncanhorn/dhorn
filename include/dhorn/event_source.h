@@ -1,7 +1,7 @@
 /*
- * event_source.h
- *
  * Duncan Horn
+ *
+ * event_source.h
  *
  * Represents a source of event firing in event-driven scenarios. Note that the event_source maintains order of what's
  * inserted and will fire events in the same order that they are added to the event_source

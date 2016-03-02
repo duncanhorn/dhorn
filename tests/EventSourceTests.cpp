@@ -1,7 +1,7 @@
 /*
- * EventSourceTests.cpp
- *
  * Duncan Horn
+ *
+ * EventSourceTests.cpp
  *
  * Tests for the dhorn event_source class
  */

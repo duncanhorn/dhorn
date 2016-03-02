@@ -1,7 +1,7 @@
 /*
- * UniqueAnyTests.cpp
- *
  * Duncan Horn
+ *
+ * UniqueAnyTests.cpp
  *
  * Tests for the dhorn unique_any class
  */

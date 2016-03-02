@@ -1,7 +1,7 @@
 /*
- * windows.h
- *
  * Duncan Horn
+ *
+ * windows.h
  *
  * Mostly just wraps Win32 functions and "C++-ifys" them, throwing exceptions on failure
  */
