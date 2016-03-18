@@ -137,4 +137,93 @@ namespace dhorn
             reinterpret_cast<uint8_t *>(&(reinterpret_cast<Struct *>(nullptr)->*member)) -
             reinterpret_cast<uint8_t *>(nullptr);
     }
+
+
+
+    /*
+     * select_integer
+     */
+#pragma region select_integer
+
+    template <size_t Bytes>
+    struct select_integer_t;
+
+    template <size_t Bytes>
+    struct select_unsigned_t;
+
+    template <typename Ty>
+    using select_integer = typename select_integer_t<sizeof(Ty)>::type;
+
+    template <typename Ty>
+    using select_unsigned = typename select_unsigned_t<sizeof(Ty)>::type;
+
+
+
+    /*
+     * int8_t
+     */
+    template <>
+    struct select_integer_t<1>
+    {
+        using type = int8_t;
+    };
+
+    template <>
+    struct select_unsigned_t<1>
+    {
+        using type = uint8_t;
+    };
+
+
+
+    /*
+     * int16_t
+     */
+    template <>
+    struct select_integer_t<2>
+    {
+        using type = int16_t;
+    };
+
+    template <>
+    struct select_unsigned_t<2>
+    {
+        using type = uint16_t;
+    };
+
+
+
+    /*
+     * int32_t
+     */
+    template <>
+    struct select_integer_t<4>
+    {
+        using type = int32_t;
+    };
+
+    template <>
+    struct select_unsigned_t<4>
+    {
+        using type = uint32_t;
+    };
+
+
+
+    /*
+     * int64_t
+     */
+    template <>
+    struct select_integer_t<8>
+    {
+        using type = int64_t;
+    };
+
+    template <>
+    struct select_unsigned_t<8>
+    {
+        using type = uint64_t;
+    };
+
+#pragma endregion
 }

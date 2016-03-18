@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#include <sal.h>
+#include "type_traits.h"
 
 namespace dhorn
 {
@@ -41,3 +41,28 @@ namespace dhorn
         return (value & mask) == mask;
     }
 }
+
+
+
+#ifndef DHORN_NO_BITMASK_OPERATORS
+
+#define DHORN_DECLARE_BITMASK_OPERATORS(Type)   \
+inline Type operator|(const Type &lhs, const Type &rhs)                                 \
+{                                                                                       \
+    using IntType = dhorn::select_unsigned<Type>;                                       \
+    return static_cast<Type>(static_cast<IntType>(lhs) | static_cast<IntType>(rhs));    \
+}                                                                                       \
+                                                                                        \
+inline Type operator&(const Type &lhs, const Type &rhs)                                 \
+{                                                                                       \
+    using IntType = dhorn::select_unsigned<Type>;                                       \
+    return static_cast<Type>(static_cast<IntType>(lhs) & static_cast<IntType>(rhs));    \
+}                                                                                       \
+                                                                                        \
+inline Type operator^(const Type &lhs, const Type &rhs)                                 \
+{                                                                                       \
+    using IntType = dhorn::select_unsigned<Type>;                                       \
+    return static_cast<Type>(static_cast<IntType>(lhs) ^ static_cast<IntType>(rhs));    \
+}
+
+#endif
