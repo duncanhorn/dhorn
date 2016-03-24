@@ -463,19 +463,6 @@ namespace dhorn
      */
 #pragma region Operators
 
-    namespace garbage
-    {
-        template <typename Ty, typename Compare>
-        inline bool compare_array_reference(
-            _In_ const array_reference<Ty> &lhs,
-            _In_ const array_reference<Ty> &rhs,
-            _In_ Compare op)
-        {
-            // TODO
-            return false;
-        }
-    }
-
     template <typename Ty>
     inline bool operator==(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
     {
@@ -488,8 +475,7 @@ namespace dhorn
             return false;
         }
 
-        // TODO
-        return false;
+        return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
     }
 
     template <typename Ty>
@@ -501,22 +487,28 @@ namespace dhorn
     template <typename Ty>
     inline bool operator<(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
     {
-        return garbage::compare_array_reference(lhs, rhs, std::less<Ty>());
-    }
-
-    template <typename Ty>
-    inline bool operator<=(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
-    {
-        return garbage::compare_array_reference(lhs, rhs, [](_In_ const Ty &left, _In_ const Ty &right)
-        {
-            return left <= right;
-        });
+        return std::lexicographical_compare(
+            std::begin(lhs), std::end(lhs),
+            std::begin(rhs), std::end(rhs),
+            std::less<Ty>());
     }
 
     template <typename Ty>
     inline bool operator>(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
     {
-        return !(lhs <= rhs);
+        return std::lexicographical_compare(
+            std::begin(lhs), std::end(lhs),
+            std::begin(rhs), std::end(rhs),
+            [](_In_ const Ty &left, _In_ const Ty &right)
+        {
+            return left > right;
+        });
+    }
+
+    template <typename Ty>
+    inline bool operator<=(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
+    {
+        return !(lhs > rhs);
     }
 
     template <typename Ty>
