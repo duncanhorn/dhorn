@@ -10,6 +10,9 @@
  */
 #pragma once
 
+#pragma warning(push)
+#pragma warning(disable:4702) // Unreachable code -- seems to be a bug with this...
+
 #include <string>
 
 #include "utf_string.h"
@@ -278,3 +281,5 @@ namespace dhorn
 
 #pragma endregion
 }
+
+#pragma warning(pop)
