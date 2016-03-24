@@ -109,8 +109,7 @@ namespace dhorn
                 size_t i = 0;
                 for (auto itr = std::begin(arr); itr != std::cend(arr); ++itr)
                 {
-                    auto value = vals[i];
-                    ++i;
+                    auto value = vals[i++];
 
                     Assert::AreEqual(value, *itr);
                     Assert::AreEqual(value, itr[0]);
@@ -131,8 +130,7 @@ namespace dhorn
                 size_t i = 0;
                 for (auto itr = std::cbegin(arr); itr != std::end(arr); ++itr)
                 {
-                    auto value = vals[i];
-                    ++i;
+                    auto value = vals[i++];
 
                     Assert::AreEqual(value, *itr);
                     Assert::AreEqual(value, itr[0]);
@@ -153,6 +151,24 @@ namespace dhorn
 
                 auto constItr = arr.cbegin();
                 Assert::AreEqual(vals[0].size(), constItr->size());
+            }
+
+            TEST_METHOD(ReverseIteratorTest)
+            {
+                int vals[] = { 0, 1, 2, 3, 4 };
+                dhorn::array_reference<int> arr(vals);
+
+                size_t i = dhorn::array_size(vals) - 1;
+                for (auto itr = arr.rbegin(); itr != arr.crend(); ++itr)
+                {
+                    auto value = vals[i--];
+
+                    Assert::AreEqual(value, *itr);
+
+                    // Should be assignable
+                    *itr += 10;
+                    Assert::AreEqual(value + 10, *itr);
+                }
             }
         };
     }

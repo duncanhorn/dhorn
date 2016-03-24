@@ -403,12 +403,12 @@ namespace dhorn
 
         const_reverse_iterator rbegin(void) const
         {
-            return reverse_iterator(MakeIterator(this->_ptr + this->_size));
+            return const_reverse_iterator(MakeIterator(this->_ptr + this->_size));
         }
 
         const_reverse_iterator crbegin(void) const
         {
-            return reverse_iterator(MakeIterator(this->_ptr + this->_size));
+            return const_reverse_iterator(MakeIterator(this->_ptr + this->_size));
         }
 
         reverse_iterator rend(void)
@@ -418,12 +418,12 @@ namespace dhorn
 
         const_reverse_iterator rend(void) const
         {
-            return reverse_iterator(MakeIterator(this->_ptr));
+            return const_reverse_iterator(MakeIterator(this->_ptr));
         }
 
         const_reverse_iterator crend(void) const
         {
-            return reverse_iterator(MakeIterator(this->_ptr));
+            return const_reverse_iterator(MakeIterator(this->_ptr));
         }
 
 
