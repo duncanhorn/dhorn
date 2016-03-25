@@ -170,6 +170,158 @@ namespace dhorn
                     Assert::AreEqual(value + 10, *itr);
                 }
             }
+
+            TEST_METHOD(ReverseConstIteratorTest)
+            {
+                int vals[] = { 0, 1, 2, 3, 4 };
+                dhorn::array_reference<int> arr(vals);
+
+                size_t i = dhorn::array_size(vals) - 1;
+                for (auto itr = arr.crbegin(); itr != arr.rend(); ++itr)
+                {
+                    auto value = vals[i--];
+
+                    Assert::AreEqual(value, *itr);
+                }
+            }
+
+            TEST_METHOD(EqualityTest)
+            {
+                int vals1[] = { 0, 1, 2, 3, 4 };
+                int vals2[] = { 0, 1, 2, 3, 4 };
+                int vals3[] = { 0, 1, 2, 3 };
+                int vals4[] = { 0, 1, 2, 3, 3 };
+                int vals5[] = { 0, 1, 2, 3, 4, 5 };
+                dhorn::array_reference<int> arr1(vals1);
+                dhorn::array_reference<const int> arr2(vals2);
+                dhorn::array_reference<int> arr3(vals3);
+                dhorn::array_reference<const int> arr4(vals4);
+                dhorn::array_reference<int> arr5(vals5);
+
+                Assert::IsTrue(arr1 == arr2);
+                Assert::IsTrue(arr2 == arr1);
+                Assert::IsFalse(arr1 == arr3);
+                Assert::IsFalse(arr3 == arr1);
+                Assert::IsFalse(arr1 == arr4);
+                Assert::IsFalse(arr4 == arr1);
+                Assert::IsFalse(arr1 == arr5);
+                Assert::IsFalse(arr5 == arr1);
+            }
+
+            TEST_METHOD(InequalityTest)
+            {
+                int vals1[] = { 0, 1, 2, 3, 4 };
+                int vals2[] = { 0, 1, 2, 3, 4 };
+                int vals3[] = { 0, 1, 2, 3 };
+                int vals4[] = { 0, 1, 2, 3, 3 };
+                int vals5[] = { 0, 1, 2, 3, 4, 5 };
+                dhorn::array_reference<int> arr1(vals1);
+                dhorn::array_reference<const int> arr2(vals2);
+                dhorn::array_reference<int> arr3(vals3);
+                dhorn::array_reference<const int> arr4(vals4);
+                dhorn::array_reference<int> arr5(vals5);
+
+                Assert::IsFalse(arr1 != arr2);
+                Assert::IsFalse(arr2 != arr1);
+                Assert::IsTrue(arr1 != arr3);
+                Assert::IsTrue(arr3 != arr1);
+                Assert::IsTrue(arr1 != arr4);
+                Assert::IsTrue(arr4 != arr1);
+                Assert::IsTrue(arr1 != arr5);
+                Assert::IsTrue(arr5 != arr1);
+            }
+
+            TEST_METHOD(LessThanTest)
+            {
+                int vals1[] = { 0, 1, 2, 3, 4 };
+                int vals2[] = { 0, 1, 2, 3, 4 };
+                int vals3[] = { 0, 1, 2, 3 };
+                int vals4[] = { 0, 1, 2, 3, 3 };
+                int vals5[] = { 0, 1, 2, 3, 4, 5 };
+                dhorn::array_reference<int> arr1(vals1);
+                dhorn::array_reference<const int> arr2(vals2);
+                dhorn::array_reference<int> arr3(vals3);
+                dhorn::array_reference<const int> arr4(vals4);
+                dhorn::array_reference<int> arr5(vals5);
+
+                Assert::IsFalse(arr1 < arr2);
+                Assert::IsFalse(arr2 < arr1);
+                Assert::IsFalse(arr1 < arr3);
+                Assert::IsTrue(arr3 < arr1);
+                Assert::IsFalse(arr1 < arr4);
+                Assert::IsTrue(arr4 < arr1);
+                Assert::IsTrue(arr1 < arr5);
+                Assert::IsFalse(arr5 < arr1);
+            }
+
+            TEST_METHOD(LessThanOrEqualTest)
+            {
+                int vals1[] = { 0, 1, 2, 3, 4 };
+                int vals2[] = { 0, 1, 2, 3, 4 };
+                int vals3[] = { 0, 1, 2, 3 };
+                int vals4[] = { 0, 1, 2, 3, 3 };
+                int vals5[] = { 0, 1, 2, 3, 4, 5 };
+                dhorn::array_reference<int> arr1(vals1);
+                dhorn::array_reference<const int> arr2(vals2);
+                dhorn::array_reference<int> arr3(vals3);
+                dhorn::array_reference<const int> arr4(vals4);
+                dhorn::array_reference<int> arr5(vals5);
+
+                Assert::IsTrue(arr1 <= arr2);
+                Assert::IsTrue(arr2 <= arr1);
+                Assert::IsFalse(arr1 <= arr3);
+                Assert::IsTrue(arr3 <= arr1);
+                Assert::IsFalse(arr1 <= arr4);
+                Assert::IsTrue(arr4 <= arr1);
+                Assert::IsTrue(arr1 <= arr5);
+                Assert::IsFalse(arr5 <= arr1);
+            }
+
+            TEST_METHOD(GreaterThanTest)
+            {
+                int vals1[] = { 0, 1, 2, 3, 4 };
+                int vals2[] = { 0, 1, 2, 3, 4 };
+                int vals3[] = { 0, 1, 2, 3 };
+                int vals4[] = { 0, 1, 2, 3, 3 };
+                int vals5[] = { 0, 1, 2, 3, 4, 5 };
+                dhorn::array_reference<int> arr1(vals1);
+                dhorn::array_reference<const int> arr2(vals2);
+                dhorn::array_reference<int> arr3(vals3);
+                dhorn::array_reference<const int> arr4(vals4);
+                dhorn::array_reference<int> arr5(vals5);
+
+                Assert::IsFalse(arr1 > arr2);
+                Assert::IsFalse(arr2 > arr1);
+                Assert::IsTrue(arr1 > arr3);
+                Assert::IsFalse(arr3 > arr1);
+                Assert::IsTrue(arr1 > arr4);
+                Assert::IsFalse(arr4 > arr1);
+                Assert::IsFalse(arr1 > arr5);
+                Assert::IsTrue(arr5 > arr1);
+            }
+
+            TEST_METHOD(GreaterThanOrEqualTest)
+            {
+                int vals1[] = { 0, 1, 2, 3, 4 };
+                int vals2[] = { 0, 1, 2, 3, 4 };
+                int vals3[] = { 0, 1, 2, 3 };
+                int vals4[] = { 0, 1, 2, 3, 3 };
+                int vals5[] = { 0, 1, 2, 3, 4, 5 };
+                dhorn::array_reference<int> arr1(vals1);
+                dhorn::array_reference<const int> arr2(vals2);
+                dhorn::array_reference<int> arr3(vals3);
+                dhorn::array_reference<const int> arr4(vals4);
+                dhorn::array_reference<int> arr5(vals5);
+
+                Assert::IsTrue(arr1 >= arr2);
+                Assert::IsTrue(arr2 >= arr1);
+                Assert::IsTrue(arr1 >= arr3);
+                Assert::IsFalse(arr3 >= arr1);
+                Assert::IsTrue(arr1 >= arr4);
+                Assert::IsFalse(arr4 >= arr1);
+                Assert::IsFalse(arr1 >= arr5);
+                Assert::IsTrue(arr5 >= arr1);
+            }
         };
     }
 }

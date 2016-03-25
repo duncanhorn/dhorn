@@ -366,6 +366,11 @@ namespace dhorn
             return std::numeric_limits<size_type>::max();
         }
 
+
+
+        /*
+         * Iterators
+         */
         iterator begin(void)
         {
             return MakeIterator(this->_ptr);
@@ -463,10 +468,13 @@ namespace dhorn
      */
 #pragma region Operators
 
-    template <typename Ty>
-    inline bool operator==(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+    inline bool operator==(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
     {
-        if (&lhs == &rhs)
+        if (lhs.data() == rhs.data() && lhs.size() == rhs.size())
         {
             return true;
         }
@@ -478,41 +486,53 @@ namespace dhorn
         return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
     }
 
-    template <typename Ty>
-    inline bool operator!=(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+    inline bool operator!=(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
     {
         return !(lhs == rhs);
     }
 
-    template <typename Ty>
-    inline bool operator<(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+    inline bool operator<(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
     {
         return std::lexicographical_compare(
             std::begin(lhs), std::end(lhs),
             std::begin(rhs), std::end(rhs),
-            std::less<Ty>());
+            std::less<const LhsTy>());
     }
 
-    template <typename Ty>
-    inline bool operator>(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+    inline bool operator>(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
     {
         return std::lexicographical_compare(
-            std::begin(lhs), std::end(lhs),
             std::begin(rhs), std::end(rhs),
-            [](_In_ const Ty &left, _In_ const Ty &right)
-        {
-            return left > right;
-        });
+            std::begin(lhs), std::end(lhs),
+            std::less<const LhsTy>());
     }
 
-    template <typename Ty>
-    inline bool operator<=(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+    inline bool operator<=(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
     {
         return !(lhs > rhs);
     }
 
-    template <typename Ty>
-    inline bool operator>=(_In_ const array_reference<Ty> &lhs, _In_ const array_reference<Ty> &rhs)
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+    inline bool operator>=(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
     {
         return !(lhs < rhs);
     }
