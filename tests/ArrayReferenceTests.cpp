@@ -322,6 +322,47 @@ namespace dhorn
                 Assert::IsFalse(arr1 >= arr5);
                 Assert::IsTrue(arr5 >= arr1);
             }
+
+            TEST_METHOD(ResizeTest)
+            {
+                int vals[] = { 0, 1, 2, 3, 4 };
+                dhorn::array_reference<int> arr(vals, 2);
+
+                Assert::AreEqual(2u, arr.size());
+
+                arr.resize(dhorn::array_size(vals));
+                Assert::AreEqual(dhorn::array_size(vals), arr.size());
+
+                size_t i = 0;
+                for (auto &val : arr)
+                {
+                    Assert::AreEqual(vals[i++], val);
+                }
+                Assert::AreEqual(dhorn::array_size(vals), i);
+            }
+
+            TEST_METHOD(CastToTest)
+            {
+                uint32_t vals32[] = { 0, 1, 2, 3, 4 };
+                dhorn::array_reference<uint32_t> arr32(vals32);
+
+                auto arr8 = arr32.cast_to<uint8_t>();
+                Assert::AreEqual(dhorn::array_size(vals32) * 4, arr8.size());
+
+                auto arr32_2 = arr8.cast_to<uint32_t>();
+                Assert::AreEqual(arr32.size(), arr32_2.size());
+
+                uint8_t vals8[] = { 0, 1, 2, 3, 4 };
+                arr8 = dhorn::array_reference<uint8_t>(vals8);
+                try
+                {
+                    arr8.cast_to<uint32_t>();
+                    Assert::Fail(L"Expected an exception");
+                }
+                catch (std::invalid_argument &)
+                {
+                }
+            }
         };
     }
 }

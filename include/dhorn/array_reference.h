@@ -369,6 +369,32 @@ namespace dhorn
 
 
         /*
+         * Resizing/casting
+         */
+        void resize(_In_ size_type size)
+        {
+            // It's impossible to check the safety of this operation since it is, by definition, already unsafe
+            this->_size = size;
+        }
+
+        template <typename TargetTy>
+        array_reference<TargetTy> cast_to(void) const
+        {
+            // Convert our size to units of bytes. This has potential overflow, but if that's the case, then the array
+            // is not valid (it, by definition, cannot hold all the values it says it holds). If anyone tries to do
+            // that, they will get undefined behavior when calling this function
+            auto sizeBytes = this->_size * sizeof(Ty);
+            if (sizeBytes % sizeof(TargetTy) != 0)
+            {
+                throw std::invalid_argument("Cannot cast array; sizes do not match up");
+            }
+
+            return array_reference<TargetTy>(reinterpret_cast<TargetTy *>(this->_ptr), sizeBytes / sizeof(TargetTy));
+        }
+
+
+
+        /*
          * Iterators
          */
         iterator begin(void)
