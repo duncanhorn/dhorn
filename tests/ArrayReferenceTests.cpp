@@ -352,16 +352,52 @@ namespace dhorn
                 auto arr32_2 = arr8.cast_to<uint32_t>();
                 Assert::AreEqual(arr32.size(), arr32_2.size());
 
-                uint8_t vals8[] = { 0, 1, 2, 3, 4 };
+                uint8_t vals8[] = { 0, 1, 2, 3, 4, 5, 6 };
                 arr8 = dhorn::array_reference<uint8_t>(vals8);
-                try
-                {
-                    arr8.cast_to<uint32_t>();
-                    Assert::Fail(L"Expected an exception");
-                }
-                catch (std::invalid_argument &)
-                {
-                }
+                arr32 = arr8.cast_to<uint32_t>();
+                Assert::AreEqual(1u, arr32.size());
+            }
+
+            TEST_METHOD(IncrementTest)
+            {
+                int vals[] = { 0, 1, 2, 3, 4 };
+                dhorn::array_reference<int> arr(vals);
+
+                auto test = arr + 1;
+                Assert::AreEqual(1, *test);
+
+                test = test + -1;
+                Assert::AreEqual(0, *test);
+
+                Assert::AreEqual(1, *(++arr));
+                Assert::AreEqual(1, *(arr++)); // arr now points to 2
+                Assert::AreEqual(3u, arr.size());
+
+                arr += 2; // Now points to 4
+                Assert::AreEqual(4, *arr);
+
+                // Shouldn't assert if the size becomes zero
+                ++arr;
+                Assert::AreEqual(0u, arr.size());
+            }
+
+            TEST_METHOD(DecrementTest)
+            {
+                int vals[] = { 0, 1, 2, 3, 4 };
+                dhorn::array_reference<int> arr(vals + dhorn::array_size(vals), 0);
+
+                auto test = arr - 1;
+                Assert::AreEqual(4, *test);
+
+                test = test - -1;
+                Assert::AreEqual(0u, test.size());
+
+                Assert::AreEqual(4, *(--arr));
+                Assert::AreEqual(4, *(arr--)); // arr now points to 3
+                Assert::AreEqual(2u, arr.size());
+
+                arr -= 2; // Now points to 4
+                Assert::AreEqual(1, *arr);
             }
         };
     }

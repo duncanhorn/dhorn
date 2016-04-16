@@ -296,6 +296,74 @@ namespace dhorn
             return this->_ptr[pos];
         }
 
+        reference operator*(void)
+        {
+            assert(this->_size);
+            return *this->_ptr;
+        }
+
+        const_reference operator*(void) const
+        {
+            assert(this->_size);
+            return *this->_ptr;
+        }
+
+        array_reference &operator+=(_In_ difference_type delta)
+        {
+            assert((delta < 0) || (static_cast<size_t>(delta) <= this->_size));
+            this->_ptr += delta;
+            this->_size -= delta;
+
+            return *this;
+        }
+
+        array_reference &operator-=(_In_ difference_type delta)
+        {
+            assert((delta > 0) || (static_cast<size_t>(-delta) <= this->_size));
+            this->_ptr -= delta;
+            this->_size += delta;
+
+            return *this;
+        }
+
+        array_reference &operator++(void)
+        {
+            return *this += 1;
+        }
+
+        array_reference operator++(_In_ int /*unused*/)
+        {
+            auto copy = *this;
+            ++(*this);
+            return copy;
+        }
+
+        array_reference &operator--(void)
+        {
+            return *this -= 1;
+        }
+
+        array_reference operator--(_In_ int /*unused*/)
+        {
+            auto copy = *this;
+            --(*this);
+            return copy;
+        }
+
+        array_reference operator+(_In_ difference_type delta) const
+        {
+            auto copy = *this;
+            copy += delta;
+            return copy;
+        }
+
+        array_reference operator-(_In_ difference_type delta) const
+        {
+            auto copy = *this;
+            copy -= delta;
+            return copy;
+        }
+
 
 
         /*
@@ -305,7 +373,7 @@ namespace dhorn
         {
             if (pos >= this->_size)
             {
-                throw std::out_of_range("Array index out of range");
+                throw std::out_of_range("array_reference index out of range");
             }
 
             return this->_ptr[pos];
@@ -315,7 +383,7 @@ namespace dhorn
         {
             if (pos >= this->_size)
             {
-                throw std::out_of_range("Array index out of range");
+                throw std::out_of_range("array_reference index out of range");
             }
 
             return this->_ptr[pos];
@@ -384,11 +452,8 @@ namespace dhorn
             // is not valid (it, by definition, cannot hold all the values it says it holds). If anyone tries to do
             // that, they will get undefined behavior when calling this function
             auto sizeBytes = this->_size * sizeof(Ty);
-            if (sizeBytes % sizeof(TargetTy) != 0)
-            {
-                throw std::invalid_argument("Cannot cast array; sizes do not match up");
-            }
 
+            // This will round down (if rounding is necessary), which is what we want
             return array_reference<TargetTy>(reinterpret_cast<TargetTy *>(this->_ptr), sizeBytes / sizeof(TargetTy));
         }
 
