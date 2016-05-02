@@ -11,34 +11,40 @@
 
 namespace dhorn
 {
-    template <typename Ty>
-    inline constexpr Ty set_flag(_In_ const Ty &value, _In_ const Ty &mask) noexcept
+    template <typename ValueTy, typename MaskTy>
+    inline constexpr ValueTy set_flag(_In_ const ValueTy &value, _In_ const MaskTy &mask) noexcept
     {
         return value | mask;
     }
 
-    template <typename Ty>
-    inline constexpr Ty clear_flag(_In_ const Ty &value, _In_ const Ty &mask) noexcept
+    template <typename ValueTy, typename MaskTy>
+    inline constexpr ValueTy clear_flag(_In_ const ValueTy &value, _In_ const MaskTy &mask) noexcept
     {
         return value & (~mask);
     }
 
-    template <typename Ty>
-    inline constexpr Ty toggle_flag(_In_ const Ty &value, _In_ const Ty &mask) noexcept
+    template <typename ValueTy, typename MaskTy>
+    inline constexpr ValueTy toggle_flag(_In_ const ValueTy &value, _In_ const MaskTy &mask) noexcept
     {
         return value ^ mask;
     }
 
-    template <typename Ty>
-    inline constexpr bool is_any_flag_set(_In_ const Ty &value, _In_ const Ty &mask) noexcept
+    template <typename ValueTy, typename MaskTy>
+    inline constexpr bool is_any_flag_set(_In_ const ValueTy &value, _In_ const MaskTy &mask) noexcept
     {
         return !!(value & mask);
     }
 
-    template <typename Ty>
-    inline constexpr bool are_all_flags_set(_In_ const Ty &value, _In_ const Ty &mask) noexcept
+    template <typename ValueTy, typename MaskTy>
+    inline constexpr bool are_all_flags_set(_In_ const ValueTy &value, _In_ const MaskTy &mask) noexcept
     {
         return (value & mask) == mask;
+    }
+
+    template <typename ValueTy, typename MaskTy>
+    inline constexpr bool are_all_flags_clear(_In_ const ValueTy &value, _In_ const MaskTy &mask) noexcept
+    {
+        return (value & mask) == 0;
     }
 }
 

@@ -84,6 +84,17 @@ namespace dhorn
                 Assert::IsFalse(dhorn::are_all_flags_set(value, 0x07));
                 Assert::IsFalse(dhorn::are_all_flags_set(value, 0xFF));
             }
+
+            TEST_METHOD(AreAllFlagsClearTest)
+            {
+                int value = 0x03;
+                Assert::IsFalse(dhorn::are_all_flags_clear(value, 0x03));
+                Assert::IsFalse(dhorn::are_all_flags_clear(value, 0x01));
+                Assert::IsFalse(dhorn::are_all_flags_clear(value, 0x02));
+                Assert::IsTrue(dhorn::are_all_flags_clear(value, 0x00));
+                Assert::IsTrue(dhorn::are_all_flags_clear(value, 0xFC));
+                Assert::IsTrue(dhorn::are_all_flags_clear(value, 0xF0));
+            }
         };
     }
 }
