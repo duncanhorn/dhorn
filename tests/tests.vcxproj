@@ -116,6 +116,7 @@
     <ClCompile Include="JsonTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="NumericTests.cpp" />
+    <ClCompile Include="ScopeExitTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />
     <ClCompile Include="InstanceTests.cpp" />
     <ClCompile Include="SocketsTests.cpp" />

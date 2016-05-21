@@ -26,7 +26,7 @@ namespace dhorn
         {
         }
 
-        ~scope_exit(void)
+        ~scope_exit(void) noexcept(noexcept(this->_func()))
         {
             if (!this->_cancelled)
             {
