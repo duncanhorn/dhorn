@@ -101,7 +101,7 @@ namespace dhorn
             void destroy(_In_ Ty *ptr)
             {
                 // Deallocate even if an exception is thrown in the destructor
-                scope_exit deallocateOnExit([&]
+                auto deallocateOnExit = make_scope_exit([&]
                 {
                     this->_alloc.deallocate(ptr, 1);
                 });

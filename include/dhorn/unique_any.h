@@ -30,7 +30,7 @@ namespace dhorn
         template <typename Ty>
         struct no_op
         {
-            void operator()(_In_ const Ty &)
+            void operator()(_In_ const Ty &) noexcept
             {
             }
         };
@@ -92,7 +92,7 @@ namespace dhorn
             this->swap(other);
         }
 
-        ~unique_any(void)
+        ~unique_any(void) noexcept(noexcept(std::declval<DestroyType>()(this->_value)))
         {
             this->Destroy();
         }

@@ -17,29 +17,37 @@ namespace dhorn
     /*
      * scope_exit
      */
+    template <typename FuncTy>
     class scope_exit
     {
     public:
-        scope_exit(_In_ std::function<void(void)> func) :
+        scope_exit(_In_ FuncTy func) :
             _func(std::move(func))
         {
         }
 
         ~scope_exit(void)
         {
-            if (this->_func)
+            if (!this->_cancelled)
             {
-                _func();
+                this->_func();
             }
         }
 
         void cancel(void)
         {
-            this->_func = nullptr;
+            this->_cancelled = true;
         }
 
     private:
 
-        std::function<void(void)> _func;
+        FuncTy _func;
+        bool _cancelled = false;
     };
+
+    template <typename FuncTy>
+    inline scope_exit<std::decay_t<FuncTy>> make_scope_exit(_Inout_ FuncTy&& func)
+    {
+        return scope_exit<std::decay_t<FuncTy>>(std::forward<FuncTy>(func));
+    }
 }

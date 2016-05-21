@@ -237,7 +237,7 @@ namespace dhorn
         {
         }
 
-        virtual char *what(void)
+        virtual const char *what(void)
         {
             return "socket_exception";
         }
@@ -781,7 +781,7 @@ namespace dhorn
                 }
             }
 
-            ~socket_initializer(void)
+            ~socket_initializer(void) noexcept(false)
             {
                 wsa_throw_if_error(WSACleanup());
             }
@@ -827,7 +827,7 @@ namespace dhorn
             this->swap(other);
         }
 
-        ~socket_base(void)
+        ~socket_base(void) noexcept(false)
         {
             this->Destroy();
         }

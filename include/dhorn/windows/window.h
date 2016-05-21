@@ -801,7 +801,7 @@ namespace dhorn
             {
                 // Can only call run once
                 this->EnsureWindowUninitialized();
-                scope_exit cleanup([&]() { this->_running = false; });
+                auto cleanup = make_scope_exit([&]() { this->_running = false; });
                 this->_running = true;
 
                 // Calling thread becomes the "owner"/ui thread

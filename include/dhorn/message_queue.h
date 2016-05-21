@@ -190,7 +190,7 @@ namespace dhorn
                 }// Release _backMutex
             } // Release _frontMutex
 
-            scope_exit destroy([&]()
+            auto destroy = make_scope_exit([&]()
             {
                 pNode->next = nullptr;
                 delete pNode;
