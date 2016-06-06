@@ -155,6 +155,7 @@
     <ClInclude Include="include\dhorn\d3d11\d3d11_window.h" />
     <ClInclude Include="include\dhorn\d3d\d3d_utils.h" />
     <ClInclude Include="include\dhorn\json.h" />
+    <ClInclude Include="include\dhorn\nullable_value.h" />
     <ClInclude Include="include\dhorn\numeric.h" />
     <ClInclude Include="include\dhorn\instance.h" />
     <ClInclude Include="include\dhorn\synchronized_object.h" />

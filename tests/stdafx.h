@@ -17,4 +17,4 @@
 #include "CppUnitTest.h"
 #pragma warning(pop)
 
-// TODO: reference additional headers your program requires here
+#include "object_counter.h"

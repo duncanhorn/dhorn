@@ -144,5 +144,8 @@
     <ClInclude Include="include\dhorn\array_reference.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\nullable_value.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
