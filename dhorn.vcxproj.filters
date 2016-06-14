@@ -45,12 +45,6 @@
     <ClInclude Include="include\dhorn\functional.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\windows\windows_exception.h">
-      <Filter>include\windows</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\windows\com_ptr.h">
-      <Filter>include\windows</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\utf_string.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -145,6 +139,21 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\nullable_value.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\com_ptr.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\windows_exception.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\com_utility.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\hstring.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\winrt_utility.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

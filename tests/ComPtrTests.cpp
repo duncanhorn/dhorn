@@ -8,9 +8,8 @@
 
 #include "stdafx.h"
 
-#include "dhorn/windows/com_ptr.h"
+#include "dhorn/com_ptr.h"
 
-using namespace dhorn::win32;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace dhorn

@@ -180,7 +180,7 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (const dhorn::win32::win32_exception &e)
+                catch (const win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }
@@ -232,7 +232,7 @@ namespace dhorn
                         }
                         Assert::Fail(L"Expected an exception (TEST 1)");
                     }
-                    catch (dhorn::win32::win32_exception &e)
+                    catch (win32_exception &e)
                     {
                         Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                     }
@@ -252,7 +252,7 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception (TEST 3)");
                 }
-                catch (dhorn::win32::win32_exception &e)
+                catch (win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }
@@ -302,7 +302,7 @@ namespace dhorn
                         }
                         Assert::Fail(L"Expected an exception (TEST 7)");
                     }
-                    catch (dhorn::win32::win32_exception &e)
+                    catch (win32_exception &e)
                     {
                         Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                     }
@@ -338,7 +338,7 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::win32::win32_exception &e)
+                catch (win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }
@@ -433,7 +433,7 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::win32::win32_exception &e)
+                catch (win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }

@@ -17,12 +17,12 @@
 // Define the globals
 dhorn::d3d::camera globals::camera;
 dhorn::d3d11::d3d11_window globals::window;
-dhorn::win32::com_ptr<ID3D11VertexShader> globals::vertex_shader;
-dhorn::win32::com_ptr<ID3D11PixelShader> globals::pixel_shader;
-dhorn::win32::com_ptr<ID3D11InputLayout> globals::input_layout;
-dhorn::win32::com_ptr<ID3D11Buffer> globals::cuboid_vertices;
-dhorn::win32::com_ptr<ID3D11Buffer> globals::cuboid_indices;
-dhorn::win32::com_ptr<ID3D11Buffer> globals::object_data;
+dhorn::com_ptr<ID3D11VertexShader> globals::vertex_shader;
+dhorn::com_ptr<ID3D11PixelShader> globals::pixel_shader;
+dhorn::com_ptr<ID3D11InputLayout> globals::input_layout;
+dhorn::com_ptr<ID3D11Buffer> globals::cuboid_vertices;
+dhorn::com_ptr<ID3D11Buffer> globals::cuboid_indices;
+dhorn::com_ptr<ID3D11Buffer> globals::object_data;
 
 bool globals::forward = false;
 bool globals::backward = false;
@@ -58,7 +58,7 @@ static void load_shaders(void)
         dhorn::d3d11::input_element_desc(&vertex::normal, DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL"),
         dhorn::d3d11::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
     };
-    dhorn::win32::throw_if_failed(globals::window.device()->CreateInputLayout(
+    dhorn::throw_if_failed(globals::window.device()->CreateInputLayout(
         inputDesc, dhorn::array_size(inputDesc),
         vertexShaderBytecode.data(), vertexShaderBytecode.size(),
         &globals::input_layout));

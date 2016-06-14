@@ -13,10 +13,10 @@
 #include <fstream>
 #include <vector>
 
+#include "../com_ptr.h"
 #include "../d3d/d3d_utils.h"
 #include "../type_traits.h"
-#include "../windows/com_ptr.h"
-#include "../windows/windows_exception.h"
+#include "../windows_exception.h"
 
 namespace dhorn
 {
@@ -145,15 +145,15 @@ namespace dhorn
 #pragma region Shaders
 
         template <typename CharT>
-        win32::com_ptr<ID3D11VertexShader> load_vertex_shader(
+        com_ptr<ID3D11VertexShader> load_vertex_shader(
             _In_ ID3D11Device *device,
             _In_ const CharT *path,
             _Inout_ std::vector<uint8_t> &bytecode)
         {
             bytecode = d3d::read_shader_file(path);
 
-            win32::com_ptr<ID3D11VertexShader> vertexShader;
-            win32::throw_if_failed(device->CreateVertexShader(
+            com_ptr<ID3D11VertexShader> vertexShader;
+            throw_if_failed(device->CreateVertexShader(
                 bytecode.data(),
                 bytecode.size(),
                 nullptr, // Class linkage
@@ -163,19 +163,19 @@ namespace dhorn
         }
 
         template <typename CharT>
-        win32::com_ptr<ID3D11VertexShader> load_vertex_shader(_In_ ID3D11Device *device, _In_ const CharT *path)
+        com_ptr<ID3D11VertexShader> load_vertex_shader(_In_ ID3D11Device *device, _In_ const CharT *path)
         {
             std::vector<uint8_t> bytecode;
             return load_vertex_shader(device, path, bytecode);
         }
 
         template <typename CharT>
-        static win32::com_ptr<ID3D11PixelShader> load_pixel_shader(_In_ ID3D11Device *device, _In_ const CharT *path)
+        static com_ptr<ID3D11PixelShader> load_pixel_shader(_In_ ID3D11Device *device, _In_ const CharT *path)
         {
             auto bytecode = d3d::read_shader_file(path);
 
-            win32::com_ptr<ID3D11PixelShader> pixelShader;
-            win32::throw_if_failed(device->CreatePixelShader(
+            com_ptr<ID3D11PixelShader> pixelShader;
+            throw_if_failed(device->CreatePixelShader(
                 bytecode.data(),
                 bytecode.size(),
                 nullptr, // Class linkage
@@ -194,7 +194,7 @@ namespace dhorn
 #pragma region Buffers/Geometry
 
         template <typename Ty>
-        inline win32::com_ptr<ID3D11Buffer> create_buffer(
+        inline com_ptr<ID3D11Buffer> create_buffer(
             _In_ ID3D11Device *device,
             _In_ const Ty *bufferData,
             _In_ size_t length,
@@ -203,14 +203,14 @@ namespace dhorn
             D3D11_BUFFER_DESC desc = buffer_desc(length * sizeof(Ty), bindFlags);
             D3D11_SUBRESOURCE_DATA data = { bufferData };
 
-            win32::com_ptr<ID3D11Buffer> buffer;
-            win32::throw_if_failed(device->CreateBuffer(&desc, &data, &buffer));
+            com_ptr<ID3D11Buffer> buffer;
+            throw_if_failed(device->CreateBuffer(&desc, &data, &buffer));
 
             return buffer;
         }
 
         template <typename Ty>
-        inline win32::com_ptr<ID3D11Buffer> create_buffer(
+        inline com_ptr<ID3D11Buffer> create_buffer(
             _In_ ID3D11Device *device,
             _In_ const std::vector<Ty> &data,
             _In_ UINT bindFlags)
@@ -219,7 +219,7 @@ namespace dhorn
         }
 
         template <typename Ty, size_t Size>
-        inline win32::com_ptr<ID3D11Buffer> create_buffer(
+        inline com_ptr<ID3D11Buffer> create_buffer(
             _In_ ID3D11Device *device,
             _In_ const Ty(&data)[Size],
             _In_ UINT bindFlags)
@@ -228,13 +228,13 @@ namespace dhorn
         }
 
         template <typename Ty>
-        inline win32::com_ptr<ID3D11Buffer> create_constant_buffer(_In_ ID3D11Device *device)
+        inline com_ptr<ID3D11Buffer> create_constant_buffer(_In_ ID3D11Device *device)
         {
             auto desc = buffer_desc(sizeof(Ty), D3D11_BIND_CONSTANT_BUFFER);
             desc.Usage = D3D11_USAGE_DEFAULT;
 
-            win32::com_ptr<ID3D11Buffer> buffer;
-            win32::throw_if_failed(device->CreateBuffer(&desc, nullptr, &buffer));
+            com_ptr<ID3D11Buffer> buffer;
+            throw_if_failed(device->CreateBuffer(&desc, nullptr, &buffer));
 
             return buffer;
         }

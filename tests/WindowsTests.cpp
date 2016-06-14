@@ -57,7 +57,7 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::win32::win32_exception &e)
+                catch (win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_PATH_NOT_FOUND);
                 }
@@ -94,7 +94,7 @@ namespace dhorn
                     dhorn::win32::allow_set_foreground_window(87322456);
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::win32::win32_exception &)
+                catch (win32_exception &)
                 {
                 }
             }

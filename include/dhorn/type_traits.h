@@ -45,6 +45,9 @@ namespace dhorn
     {
     };
 
+    template <typename Lhs, typename Rhs>
+    constexpr bool is_comparable_v = is_comparable<Lhs, Rhs>::value;
+
 #pragma endregion
 
 
@@ -81,6 +84,9 @@ namespace dhorn
         public garbage::IsLessThanComparable<Lhs, Rhs>::type
     {
     };
+
+    template <typename Lhs, typename Rhs>
+    constexpr bool is_less_than_comparable_v = is_less_than_comparable<Lhs, Rhs>::value;
 
 #pragma endregion
 
@@ -224,6 +230,32 @@ namespace dhorn
     {
         using type = uint64_t;
     };
+
+#pragma endregion
+
+
+
+    /*
+     * is_c_string
+     */
+#pragma region is_c_string
+
+    template <typename Ty>
+    struct is_c_string :
+        public std::conjunction<
+            std::is_pointer<Ty>,
+            std::disjunction<
+                std::is_same<std::decay_t<std::remove_pointer_t<Ty>>, char>,
+                std::is_same<std::decay_t<std::remove_pointer_t<Ty>>, wchar_t>,
+                std::is_same<std::decay_t<std::remove_pointer_t<Ty>>, char16_t>,
+                std::is_same<std::decay_t<std::remove_pointer_t<Ty>>, char32_t>
+            >
+        >
+    {
+    };
+
+    template <typename Ty>
+    constexpr bool is_c_string_v = is_c_string<Ty>::value;
 
 #pragma endregion
 }

@@ -9,11 +9,11 @@
 
 #pragma comment(lib, "d3d11.lib")
 
-#include "d3d11_utils.h"
+#include "../com_ptr.h"
 #include "../functional.h"
 #include "../unique_any.h"
-#include "../windows/com_ptr.h"
 #include "../windows/window.h"
+#include "d3d11_utils.h"
 
 namespace dhorn
 {
@@ -156,11 +156,11 @@ namespace dhorn
                 }
                 else
                 {
-                    win32::throw_if_failed(this->_device->CheckMultisampleQualityLevels(
+                    throw_if_failed(this->_device->CheckMultisampleQualityLevels(
                         Traits::swap_chain_format,
                         this->_sampleCount,
                         &this->_sampleQuality));
-                    win32::throw_hr_if_false(this->_sampleQuality > 0, E_INVALIDARG);
+                    throw_hr_if_false(this->_sampleQuality > 0, E_INVALIDARG);
 
                     --this->_sampleQuality;
                 }
@@ -172,7 +172,7 @@ namespace dhorn
 
             virtual void create_device(void)
             {
-                win32::throw_if_failed(::D3D11CreateDevice(
+                throw_if_failed(::D3D11CreateDevice(
                     nullptr,                    // IDXGIAdapter
                     D3D_DRIVER_TYPE_HARDWARE,
                     nullptr,                    // HMODULE
@@ -184,7 +184,7 @@ namespace dhorn
                     &this->_deviceContext));
 
                 // D3D11 not supported
-                win32::throw_hr_if_false(this->_featureLevel == D3D_FEATURE_LEVEL_11_0, E_NOTIMPL);
+                throw_hr_if_false(this->_featureLevel == D3D_FEATURE_LEVEL_11_0, E_NOTIMPL);
             }
 
             virtual void create_swap_chain(_In_ const dhorn::rect<size_t> &size)
@@ -202,21 +202,21 @@ namespace dhorn
                     Traits::swap_chain_format,
                     Traits::back_buffer_count);
 
-                win32::com_ptr<IDXGIDevice> device = this->_device;
-                win32::com_ptr<IDXGIAdapter> adapter;
-                win32::com_ptr<IDXGIFactory> factory;
-                win32::throw_if_failed(device->GetParent(IID_PPV_ARGS(&adapter)));
-                win32::throw_if_failed(adapter->GetParent(IID_PPV_ARGS(&factory)));
-                win32::throw_if_failed(factory->CreateSwapChain(this->_device, &desc, &this->_swapChain));
+                com_ptr<IDXGIDevice> device = this->_device;
+                com_ptr<IDXGIAdapter> adapter;
+                com_ptr<IDXGIFactory> factory;
+                throw_if_failed(device->GetParent(IID_PPV_ARGS(&adapter)));
+                throw_if_failed(adapter->GetParent(IID_PPV_ARGS(&factory)));
+                throw_if_failed(factory->CreateSwapChain(this->_device, &desc, &this->_swapChain));
             }
 
             virtual void create_render_target_view()
             {
                 assert(!this->_renderTargetView);
 
-                win32::com_ptr<ID3D11Texture2D> backBuffer;
-                win32::throw_if_failed(this->_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
-                win32::throw_if_failed(this->_device->CreateRenderTargetView(
+                com_ptr<ID3D11Texture2D> backBuffer;
+                throw_if_failed(this->_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
+                throw_if_failed(this->_device->CreateRenderTargetView(
                     backBuffer,
                     nullptr,                    // D3D11_RENDER_TARGET_VIEW_DESC
                     &this->_renderTargetView));
@@ -233,7 +233,7 @@ namespace dhorn
                     this->_sampleQuality,
                     Traits::depth_stencil_format);
 
-                win32::throw_if_failed(this->_device->CreateTexture2D(
+                throw_if_failed(this->_device->CreateTexture2D(
                     &desc,
                     nullptr,                    // D3D11_SUBRESOURCE_DATA
                     &this->_depthStencilBuffer));
@@ -243,7 +243,7 @@ namespace dhorn
             {
                 assert(this->_depthStencilBuffer);
                 assert(!this->_depthStencilView);
-                win32::throw_if_failed(this->_device->CreateDepthStencilView(
+                throw_if_failed(this->_device->CreateDepthStencilView(
                     this->_depthStencilBuffer,
                     nullptr,                    // D3D11_DEPTH_STENCIL_VIEW_DESC
                     &this->_depthStencilView));
@@ -324,7 +324,7 @@ namespace dhorn
                     this->_drawFunc(this->_device, this->_deviceContext);
                 }
 
-                win32::throw_if_failed(this->_swapChain->Present(0, 0));
+                throw_if_failed(this->_swapChain->Present(0, 0));
             }
 
 
@@ -410,12 +410,12 @@ namespace dhorn
 
             // DirectX Interface Pointers
             D3D_FEATURE_LEVEL _featureLevel;
-            win32::com_ptr<ID3D11Device> _device;
-            win32::com_ptr<ID3D11DeviceContext> _deviceContext;
-            win32::com_ptr<IDXGISwapChain> _swapChain;
-            win32::com_ptr<ID3D11RenderTargetView> _renderTargetView;
-            win32::com_ptr<ID3D11Texture2D> _depthStencilBuffer;
-            win32::com_ptr<ID3D11DepthStencilView> _depthStencilView;
+            com_ptr<ID3D11Device> _device;
+            com_ptr<ID3D11DeviceContext> _deviceContext;
+            com_ptr<IDXGISwapChain> _swapChain;
+            com_ptr<ID3D11RenderTargetView> _renderTargetView;
+            com_ptr<ID3D11Texture2D> _depthStencilBuffer;
+            com_ptr<ID3D11DepthStencilView> _depthStencilView;
 
             // Data that can be set so that clients need not derive from this class unless actually needed
             QualityFunc _qualityFunc;

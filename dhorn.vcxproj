@@ -151,9 +151,12 @@
     <ClInclude Include="include\dhorn\array_reference.h" />
     <ClInclude Include="include\dhorn\bitmask.h" />
     <ClInclude Include="include\dhorn\command_line.h" />
+    <ClInclude Include="include\dhorn\com_ptr.h" />
+    <ClInclude Include="include\dhorn\com_utility.h" />
     <ClInclude Include="include\dhorn\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\d3d11\d3d11_window.h" />
     <ClInclude Include="include\dhorn\d3d\d3d_utils.h" />
+    <ClInclude Include="include\dhorn\hstring.h" />
     <ClInclude Include="include\dhorn\json.h" />
     <ClInclude Include="include\dhorn\nullable_value.h" />
     <ClInclude Include="include\dhorn\numeric.h" />
@@ -183,10 +186,10 @@
     <ClInclude Include="include\dhorn\sockets.h" />
     <ClInclude Include="include\dhorn\tree.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
-    <ClInclude Include="include\dhorn\windows\com_ptr.h" />
     <ClInclude Include="include\dhorn\windows\window.h" />
     <ClInclude Include="include\dhorn\windows\windows.h" />
-    <ClInclude Include="include\dhorn\windows\windows_exception.h" />
+    <ClInclude Include="include\dhorn\windows_exception.h" />
+    <ClInclude Include="include\dhorn\winrt_utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
