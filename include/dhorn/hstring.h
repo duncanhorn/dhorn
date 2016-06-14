@@ -1004,4 +1004,172 @@ namespace dhorn
     }
 
 #pragma endregion
+
+
+
+#pragma region less than or equals operators
+
+    // We need to explicitly define these four so that the generic functions don't cause ambiguity
+    bool operator<=(_In_ const hstring &lhs, _In_ const hstring &rhs)
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+    bool operator<=(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+    bool operator<=(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+    bool operator<=(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+    // Generic implementations
+    template <typename Ty>
+    auto operator<=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<=(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    {
+        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+    }
+
+#pragma endregion
+
+
+
+#pragma region greater than operators
+
+    // We need to explicitly define these four so that the generic functions don't cause ambiguity
+    bool operator>(_In_ const hstring &lhs, _In_ const hstring &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+    bool operator>(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+    bool operator>(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+    bool operator>(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+    // Generic implementations
+    template <typename Ty>
+    auto operator>(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+    }
+
+#pragma endregion
+
+
+
+#pragma region greater than or equals operators
+
+    // We need to explicitly define these four so that the generic functions don't cause ambiguity
+    bool operator>=(_In_ const hstring &lhs, _In_ const hstring &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    bool operator>=(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    bool operator>=(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    bool operator>=(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    // Generic implementations
+    template <typename Ty>
+    auto operator>=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>=(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
+        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    {
+        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+    }
+
+#pragma endregion
 }
