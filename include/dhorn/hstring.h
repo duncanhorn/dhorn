@@ -157,7 +157,7 @@ namespace dhorn
             this->_hstr = nullptr;
         }
 
-        void copy_to(_Out_ HSTRING* target) const
+        void copy_to(_Outptr_result_maybenull_ HSTRING* target) const
         {
             throw_if_failed(::WindowsDuplicateString(this->_hstr, target));
         }
@@ -272,7 +272,7 @@ namespace dhorn
             other.swap(*this);
         }
 
-        hstring(_In_ HSTRING str)
+        hstring(_In_opt_ HSTRING str)
         {
             Assign(str);
         }
@@ -338,7 +338,7 @@ namespace dhorn
             return *this;
         }
 
-        hstring &operator=(_In_ HSTRING str)
+        hstring &operator=(_In_opt_ HSTRING str)
         {
             Destroy();
             Assign(str);
@@ -382,7 +382,7 @@ namespace dhorn
             return *this;
         }
 
-        hstring &operator+=(_In_ HSTRING str)
+        hstring &operator+=(_In_opt_ HSTRING str)
         {
             Append(str);
             return *this;
@@ -437,7 +437,7 @@ namespace dhorn
             return *this;
         }
 
-        hstring &append(_In_ HSTRING str)
+        hstring &append(_In_opt_ HSTRING str)
         {
             Append(str);
             return *this;
@@ -493,7 +493,7 @@ namespace dhorn
             return *this;
         }
 
-        hstring &assign(_In_ HSTRING str)
+        hstring &assign(_In_opt_ HSTRING str)
         {
             Destroy();
             Assign(str);
@@ -546,7 +546,7 @@ namespace dhorn
             return *this;
         }
 
-        void attach(_In_ HSTRING str) noexcept
+        void attach(_In_opt_ HSTRING str) noexcept
         {
             Attach(str);
         }
@@ -561,7 +561,7 @@ namespace dhorn
             Destroy();
         }
 
-        void copy_to(_Out_ HSTRING* target) const
+        void copy_to(_Outptr_result_maybenull_ HSTRING* target) const
         {
             throw_if_failed(::WindowsDuplicateString(this->_hstr, target));
         }
@@ -617,7 +617,7 @@ namespace dhorn
 
     private:
 
-        void Assign(_In_ HSTRING str)
+        void Assign(_In_opt_ HSTRING str)
         {
             assert(!this->_hstr);
             throw_if_failed(::WindowsDuplicateString(str, &this->_hstr));
@@ -663,6 +663,7 @@ namespace dhorn
         void Destroy(void) noexcept
         {
             ::WindowsDeleteString(this->_hstr);
+            this->_hstr = nullptr;
         }
 
         void Attach(_In_opt_ HSTRING str)
@@ -671,7 +672,7 @@ namespace dhorn
             this->_hstr = str;
         }
 
-        void Append(_In_ HSTRING str)
+        void Append(_In_opt_ HSTRING str)
         {
             HSTRING result;
             throw_if_failed(::WindowsConcatString(this->_hstr, str, &result));
@@ -718,13 +719,16 @@ namespace dhorn
     namespace details
     {
         template <bool InhibitArrayReferences>
-        struct hstring_compare_helper
+        struct hstring_helper
         {
+            /*
+             * Comparison
+             */
             template <typename LhsTy, typename RhsTy>
             static int compare(LhsTy &&lhs, RhsTy &&rhs)
             {
                 int result;
-                throw_if_failed(::WindowsCompareStringOrdinal(get(as_hstring(lhs)), get(as_hstring(rhs)), &result));
+                ::WindowsCompareStringOrdinal(get(as_hstring(lhs)), get(as_hstring(rhs)), &result);
                 return result;
             }
 
@@ -767,9 +771,22 @@ namespace dhorn
 
 
             /*
+             * Append
+             */
+            template <typename LhsTy, typename RhsTy>
+            static hstring append(LhsTy &&lhs, RhsTy &&rhs)
+            {
+                hstring result;
+                throw_if_failed(::WindowsConcatString(get(as_hstring(lhs)), get(as_hstring(rhs)), &result));
+                return result;
+            }
+
+
+
+            /*
              * Helper Functions
              */
-            static constexpr HSTRING as_hstring(_In_ HSTRING hstr)
+            static constexpr HSTRING as_hstring(_In_opt_ HSTRING hstr)
             {
                 return hstr;
             }
@@ -818,7 +835,7 @@ namespace dhorn
 
 
 
-            static constexpr HSTRING get(_In_ HSTRING hstr)
+            static constexpr HSTRING get(_In_opt_ HSTRING hstr)
             {
                 return hstr;
             }
@@ -841,54 +858,68 @@ namespace dhorn
 
 #pragma region equality operators
 
-    // We need to explicitly define these four so that the generic functions don't cause ambiguity
-    bool operator==(_In_ const hstring &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
-    }
-
-    bool operator==(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
-    }
-
-    bool operator==(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
-    }
-
-    bool operator==(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
-    }
-
-    // Generic implementations
     template <typename Ty>
-    auto operator==(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator==(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
+        return details::hstring_helper<false>::equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator==(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator==(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
+        return details::hstring_helper<false>::equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator==(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator==(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
+        return details::hstring_helper<false>::equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator==(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator==(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::equals(lhs, rhs);
+        return details::hstring_helper<false>::equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator==(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator==(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator==(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator==(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::equals(lhs, rhs);
     }
 
 #pragma endregion
@@ -897,54 +928,68 @@ namespace dhorn
 
 #pragma region inequality operators
 
-    // We need to explicitly define these four so that the generic functions don't cause ambiguity
-    bool operator!=(_In_ const hstring &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
-    }
-
-    bool operator!=(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
-    }
-
-    bool operator!=(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
-    }
-
-    bool operator!=(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
-    }
-
-    // Generic implementations
     template <typename Ty>
-    auto operator!=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator!=(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::not_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator!=(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator!=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::not_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator!=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator!=(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::not_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator!=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator!=(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::not_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::not_equals(lhs, rhs);
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator!=(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::not_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator!=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::not_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator!=(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::not_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator!=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::not_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::not_equals(lhs, rhs);
     }
 
 #pragma endregion
@@ -953,54 +998,68 @@ namespace dhorn
 
 #pragma region less than operators
 
-    // We need to explicitly define these four so that the generic functions don't cause ambiguity
-    bool operator<(_In_ const hstring &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
-    }
-
-    bool operator<(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
-    }
-
-    bool operator<(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
-    }
-
-    bool operator<(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
-    }
-
-    // Generic implementations
     template <typename Ty>
-    auto operator<(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator<(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::less(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
+        return details::hstring_helper<false>::less(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator<(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::less(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
+        return details::hstring_helper<false>::less(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator<(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
+        return details::hstring_helper<false>::less(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator<(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less(lhs, rhs);
+        return details::hstring_helper<false>::less(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::less(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::less(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less(lhs, rhs);
     }
 
 #pragma endregion
@@ -1009,54 +1068,68 @@ namespace dhorn
 
 #pragma region less than or equals operators
 
-    // We need to explicitly define these four so that the generic functions don't cause ambiguity
-    bool operator<=(_In_ const hstring &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
-    }
-
-    bool operator<=(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
-    }
-
-    bool operator<=(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
-    }
-
-    bool operator<=(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
-    }
-
-    // Generic implementations
     template <typename Ty>
-    auto operator<=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator<=(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::less_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<=(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator<=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::less_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator<=(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator<=(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::less_equals(lhs, rhs);
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<=(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::less_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<=(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::less_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator<=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::less_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::less_equals(lhs, rhs);
     }
 
 #pragma endregion
@@ -1065,54 +1138,68 @@ namespace dhorn
 
 #pragma region greater than operators
 
-    // We need to explicitly define these four so that the generic functions don't cause ambiguity
-    bool operator>(_In_ const hstring &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
-    }
-
-    bool operator>(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
-    }
-
-    bool operator>(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
-    }
-
-    bool operator>(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
-    }
-
-    // Generic implementations
     template <typename Ty>
-    auto operator>(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator>(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::greater(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+        return details::hstring_helper<false>::greater(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator>(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::greater(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+        return details::hstring_helper<false>::greater(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator>(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+        return details::hstring_helper<false>::greater(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator>(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater(lhs, rhs);
+        return details::hstring_helper<false>::greater(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::greater(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::greater(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater(lhs, rhs);
     }
 
 #pragma endregion
@@ -1121,54 +1208,138 @@ namespace dhorn
 
 #pragma region greater than or equals operators
 
-    // We need to explicitly define these four so that the generic functions don't cause ambiguity
-    bool operator>=(_In_ const hstring &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
-    }
-
-    bool operator>=(_In_ const hstring_reference &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
-    }
-
-    bool operator>=(_In_ const hstring &lhs, _In_ const hstring_reference &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
-    }
-
-    bool operator>=(_In_ const hstring_reference &lhs, _In_ const hstring &rhs)
-    {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
-    }
-
-    // Generic implementations
     template <typename Ty>
-    auto operator>=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator>=(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>=(_In_ Ty &&lhs, _In_ const hstring &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator>=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(rhs), bool())
+    auto operator>=(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) ->
-        decltype(details::hstring_compare_helper<false>::as_hstring(lhs), bool())
+    auto operator>=(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
-        return details::hstring_compare_helper<false>::greater_equals(lhs, rhs);
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>=(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::greater_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>=(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::greater_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator>=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::greater_equals(lhs, rhs))
+    {
+        return details::hstring_helper<false>::greater_equals(lhs, rhs);
+    }
+
+#pragma endregion
+
+
+
+#pragma region append operators
+
+    template <typename Ty>
+    auto operator+(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator+(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+        decltype(details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator+(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator+(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator+(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator+(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator+(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
+    }
+
+    template <typename Ty>
+    auto operator+(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
+        std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
+        details::hstring_helper<false>::append(lhs, rhs))
+    {
+        return details::hstring_helper<false>::append(lhs, rhs);
     }
 
 #pragma endregion
