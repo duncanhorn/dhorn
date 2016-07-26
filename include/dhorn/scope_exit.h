@@ -34,6 +34,19 @@ namespace dhorn
             }
         }
 
+        // Can't copy, but can move
+        scope_exit(_In_ const scope_exit &) = delete;
+        scope_exit &operator=(_In_ const scope_exit &) = delete;
+
+        scope_exit(_Inout_ scope_exit &&other) :
+            _func(std::move(other._func))
+        {
+            this->_cancelled = other._cancelled;
+            other._cancelled = true;
+        }
+
+
+
         void cancel(void)
         {
             this->_cancelled = true;

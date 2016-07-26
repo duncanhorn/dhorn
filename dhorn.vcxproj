@@ -153,6 +153,7 @@
     <ClInclude Include="include\dhorn\command_line.h" />
     <ClInclude Include="include\dhorn\com_ptr.h" />
     <ClInclude Include="include\dhorn\com_utility.h" />
+    <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\d3d11\d3d11_window.h" />
     <ClInclude Include="include\dhorn\d3d\d3d_utils.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="include\dhorn\nullable_value.h" />
     <ClInclude Include="include\dhorn\numeric.h" />
     <ClInclude Include="include\dhorn\instance.h" />
+    <ClInclude Include="include\dhorn\string.h" />
     <ClInclude Include="include\dhorn\synchronized_object.h" />
     <ClInclude Include="include\dhorn\unique_event_cookie.h" />
     <ClInclude Include="include\dhorn\d3d\camera.h" />

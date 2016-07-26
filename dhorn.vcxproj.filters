@@ -156,5 +156,11 @@
     <ClInclude Include="include\dhorn\winrt_utility.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\console.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\string.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

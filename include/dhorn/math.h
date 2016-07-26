@@ -46,16 +46,6 @@ namespace dhorn
         /*
          * Operators
          */
-        bool operator==(_In_ const point &rhs) const
-        {
-            return (this->x == rhs.x) && (this->y == rhs.y);
-        }
-
-        bool operator!=(_In_ const point &rhs) const
-        {
-            return !(*this == rhs);
-        }
-
         point &operator+=(_In_ const point &rhs)
         {
             this->x += rhs.x;
@@ -82,6 +72,98 @@ namespace dhorn
             return pt -= rhs;
         }
     };
+
+    /*
+     * Operators
+     */
+    template <typename LhsTy, typename RhsTy>
+    inline auto operator==(_In_ const point<LhsTy> &lhs, _In_ const point<RhsTy> &rhs) ->
+        decltype(LhsTy() == RhsTy())
+    {
+        return (lhs.x == rhs.x) && (lhs.y == rhs.y);
+    }
+
+    template <typename LhsTy, typename RhsTy>
+    inline auto operator!=(_In_ const point<LhsTy> &lhs, _In_ const point<RhsTy> &rhs) ->
+        decltype(LhsTy() == RhsTy())
+    {
+        return !(lhs == rhs);
+    }
+
+
+
+    template <typename Ty>
+    struct size
+    {
+        /*
+         * Data
+         */
+        Ty width;
+        Ty height;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        size() : width{}, height{}
+        {
+        }
+
+        size(Ty width, Ty height) :
+            width(width),
+            height(height)
+        {
+        }
+
+
+
+        /*
+         * Operators
+         */
+        size &operator+=(_In_ const size &rhs)
+        {
+            this->width += rhs.width;
+            this->height += rhs.height;
+            return *this;
+        }
+
+        size operator+(_In_ const size &rhs) const
+        {
+            size result = *this;
+            return result += rhs;
+        }
+
+        size &operator-=(_In_ const size &rhs)
+        {
+            this->width -= rhs.width;
+            this->height -= rhs.height;
+            return *this;
+        }
+
+        size operator-(_In_ const size &rhs) const
+        {
+            size result = *this;
+            return result -= rhs;
+        }
+    };
+
+    /*
+     * Operators
+     */
+    template <typename LhsTy, typename RhsTy>
+    inline auto operator==(_In_ const size<LhsTy> &lhs, _In_ const size<RhsTy> &rhs) ->
+        decltype(LhsTy() == RhsTy())
+    {
+        return (lhs.width == rhs.width) && (lhs.height == rhs.height);
+    }
+
+    template <typename LhsTy, typename RhsTy>
+    inline auto operator!=(_In_ const size<LhsTy> &lhs, _In_ const size<RhsTy> &rhs) ->
+        decltype(LhsTy() == RhsTy())
+    {
+        return !(lhs == rhs);
+    }
 
 
 
@@ -155,7 +237,10 @@ namespace dhorn
             return *this;
         }
     };
-
+    
+    /*
+     * Operators
+     */
     template <typename RectTy, typename PointTy>
     rect<RectTy> operator+(_In_ const rect<RectTy> &lhs, _In_ const point<PointTy> &rhs)
     {
@@ -183,8 +268,6 @@ namespace dhorn
         rect<RectTy> result = rhs;
         return result -= lhs;
     }
-
-
 
 #pragma endregion
 

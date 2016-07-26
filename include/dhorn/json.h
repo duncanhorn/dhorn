@@ -358,7 +358,7 @@ namespace dhorn
 
         json_object &operator=(_Inout_ json_object &&) = default;
 
-        std::shared_ptr<json_value> operator[](_In_ const utf8_string &str)
+        std::shared_ptr<json_value> operator[](_In_ const utf8_string &str) const
         {
             auto itr = this->_map.find(str);
 
@@ -975,8 +975,7 @@ namespace dhorn
     {
         inline std::shared_ptr<json_value> operator()(_In_ const std::basic_string<CharT> &value) const
         {
-            utf_string<CharT> utfString = value.c_str();
-            return std::make_shared<json_string>(utfString);
+            return std::make_shared<json_string>(value);
         }
     };
 
