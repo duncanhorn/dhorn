@@ -177,3 +177,6 @@ UpgradeLog*.htm
 # Microsoft Fakes
 FakesAssemblies/
 *.db
+
+#Visual Studio Code
+.vscode/

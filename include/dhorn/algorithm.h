@@ -17,21 +17,21 @@ namespace dhorn
 #pragma region max
 
     template <typename T1>
-    inline auto max(_In_ T1 val)
+    inline auto max(T1 &&val) -> decltype(auto)
     {
-        return val;
+        return std::forward<T1>(val);
     }
 
     template <typename T1, typename T2>
-    inline auto max(_In_ T1 val1, _In_ T2 val2)
+    inline auto max(T1 &&val1, T2 &&val2) -> decltype(auto)
     {
-        return (val1 > val2) ? val1 : val2;
+        return (val1 > val2) ? std::forward<T1>(val1) : std::forward<T2>(val2);
     }
 
     template <typename T1, typename T2, typename... Args>
-    inline auto max(_In_ T1 val1, _In_ T2 val2, _In_ Args&&... args)
+    inline auto max(T1 &&val1, T2 &&val2, Args &&...args) -> decltype(auto)
     {
-        return max(max(val1, val2), std::forward<Args>(args)...);
+        return max(max(std::forward<T1>(val1), std::forward<T2>(val2)), std::forward<Args>(args)...);
     }
 
 #pragma endregion
@@ -44,21 +44,21 @@ namespace dhorn
 #pragma region min
 
     template <typename T1>
-    inline auto min(_In_ T1 val)
+    inline auto min(T1 &&val) -> decltype(auto)
     {
-        return val;
+        return std::forward<T1>(val);
     }
 
     template <typename T1, typename T2>
-    inline auto min(_In_ T1 val1, _In_ T2 val2)
+    inline auto min(T1 &&val1, T2 &&val2) -> decltype(auto)
     {
-        return (val1 < val2) ? val1 : val2;
+        return (val1 < val2) ? std::forward<T1>(val1) : std::forward<T2>(val2);
     }
 
     template <typename T1, typename T2, typename... Args>
-    inline auto min(_In_ T1 val1, _In_ T2 val2, _In_ Args&&... args)
+    inline auto min(T1 &&val1, T2 &&val2, Args &&...args) -> decltype(auto)
     {
-        return min(min(val1, val2), std::forward<Args>(args)...);
+        return min(min(std::forward<T1>(val1), std::forward<T2>(val2)), std::forward<Args>(args)...);
     }
 
 #pragma endregion

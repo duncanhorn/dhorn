@@ -97,7 +97,7 @@ namespace dhorn
 
         template <typename Ty, typename Struct>
         inline D3D11_INPUT_ELEMENT_DESC input_element_desc(
-            _In_ Ty Struct::*member,
+            Ty Struct::*member,
             _In_ DXGI_FORMAT format,
             _In_ LPCSTR semanticName,
             _In_ UINT semanticIndex = 0,

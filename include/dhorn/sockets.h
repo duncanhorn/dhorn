@@ -1186,7 +1186,7 @@ namespace dhorn
         // Invokes a function and closes the socket (if it's open) on failure. The destructor would otherwise take
         // care of closing the socket for us, but it would also throw another exception, which we don't want
         template <typename Func, typename... Args>
-        inline socket_error_t InvokeThrowOnError(_In_ Func &func, _In_ Args&&... args)
+        inline socket_error_t InvokeThrowOnError(const Func &func, Args &&...args)
         {
             auto result = func(std::forward<Args>(args)...);
             if (result == socket_error)

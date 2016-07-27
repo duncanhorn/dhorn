@@ -97,7 +97,7 @@ namespace dhorn
             this->_eventTargets.erase(this->FindEvent(cookie));
         }
 
-        void invoke_one(_In_ Args... args) const
+        void invoke_one(_In_ Args ...args) const
         {
             auto itr = std::begin(this->_eventTargets);
             if (itr != std::end(this->_eventTargets))
@@ -107,7 +107,7 @@ namespace dhorn
         }
 
         template <typename ResultFunc>
-        void invoke_one(_In_ Args... args, _In_ const ResultFunc &func) const
+        void invoke_one(_In_ Args ...args, _In_ const ResultFunc &func) const
         {
             // Allow callers to handle failures
             auto itr = std::begin(this->_eventTargets);
@@ -117,21 +117,21 @@ namespace dhorn
             }
         }
 
-        void invoke_all(_In_ Args... args) const
+        void invoke_all(Args ...args) const
         {
             for (auto &pair : this->_eventTargets)
             {
-                pair.second(args...);
+                pair.second(std::forward<Args>(args)...);
             }
         }
 
         template <typename ResultFunc>
-        void invoke_all(_In_ Args... args, _In_ const ResultFunc &func)
+        void invoke_all(Args ...args, _In_ const ResultFunc &func)
         {
             for (auto &pair : this->_eventTargets)
             {
                 // Allow callers to handle failures
-                func(pair.second(args...));
+                func(pair.second(std::forward<Args>(args)...));
             }
         }
 

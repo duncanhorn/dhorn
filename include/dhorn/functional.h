@@ -28,7 +28,7 @@ namespace dhorn
             {
             }
 
-            result_type operator()(_In_ Args&&... args)
+            result_type operator()(Args &&...args)
             {
                 return (ptr->*func)(std::forward<Args>(args)...);
             }

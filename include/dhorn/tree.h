@@ -216,7 +216,7 @@ namespace dhorn
         }
 
         template <typename... _Args>
-        pnode_pointer emplace(_In_ pnode_pointer pos, _In_ _Args&&... args)
+        pnode_pointer emplace(_In_ pnode_pointer pos, _Args &&...args)
         {
             pos = this->_BuySpot(pos);
             assert(*pos == nullptr);
@@ -379,7 +379,7 @@ namespace dhorn
 
         template <typename... _Args,
             typename = std::enable_if<std::is_constructible<value_type, _Args...>::value>::type>
-        explicit _dhorn_tree_node(_Inout_ _Args&&... args) :
+        explicit _dhorn_tree_node(_Args &&...args) :
             _value(std::forward<_Args>(args)...)
         {
         }
@@ -1110,7 +1110,7 @@ namespace dhorn
         }
 
         template <typename... _Args>
-        iterator emplace(_In_ const_iterator pos, _In_ _Args&&... args)
+        iterator emplace(_In_ const_iterator pos, _Args &&...args)
         {
             assert(pos._tree == this);
             auto parent = const_cast<_dhorn_tree_node<_TreeTypes, true> *>(pos._parent);
