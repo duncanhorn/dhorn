@@ -182,6 +182,7 @@
     <ClInclude Include="include\dhorn\task_pool.h" />
     <ClInclude Include="include\dhorn\unique_any.h" />
     <ClInclude Include="include\dhorn\units.h" />
+    <ClInclude Include="include\dhorn\utf_iterator.h" />
     <ClInclude Include="include\dhorn\uuid.h" />
     <ClInclude Include="include\dhorn\utf_string.h" />
     <ClInclude Include="include\dhorn\service_container.h" />

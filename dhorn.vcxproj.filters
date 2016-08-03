@@ -162,5 +162,8 @@
     <ClInclude Include="include\dhorn\string.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\utf_iterator.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

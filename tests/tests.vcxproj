@@ -135,6 +135,7 @@
     <ClCompile Include="TypeTraitsTests.cpp" />
     <ClCompile Include="UniqueAnyTests.cpp" />
     <ClCompile Include="UnitsTests.cpp" />
+    <ClCompile Include="UtfIteratorTests.cpp" />
     <ClCompile Include="UtfStringTests.cpp" />
     <ClCompile Include="UUIDTests.cpp" />
     <ClCompile Include="WindowsTests.cpp" />
