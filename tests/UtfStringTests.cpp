@@ -260,7 +260,7 @@ namespace dhorn
 
             static constexpr auto &test_string = test_string_utf8;
 
-            inline void EnsureCorrectString(_In_ const string_type &str)
+            inline void EnsureCorrectString(const string_type &str)
             {
                 Assert::IsTrue(str.c_str()[str.size()] == '\0');
             }
@@ -1391,7 +1391,7 @@ namespace dhorn
 
             static constexpr auto &test_string = test_string_utf16;
 
-            inline void EnsureCorrectString(_In_ const string_type &str)
+            inline void EnsureCorrectString(const string_type &str)
             {
                 Assert::IsTrue(str.c_str()[str.size()] == '\0');
             }
@@ -2504,7 +2504,7 @@ namespace dhorn
 
             static constexpr auto &test_string = test_string_utf32;
 
-            inline void EnsureCorrectString(_In_ const string_type &str)
+            inline void EnsureCorrectString(const string_type &str)
             {
                 Assert::IsTrue(str.c_str()[str.size()] == '\0');
             }

@@ -23,7 +23,7 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            render_node(_In_ std::shared_ptr<const garbage::render_state> state) :
+            render_node(std::shared_ptr<const garbage::render_state> state) :
                 _state(std::move(state))
             {
             }

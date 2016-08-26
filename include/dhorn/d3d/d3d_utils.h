@@ -23,16 +23,16 @@ namespace dhorn
 #pragma region Descriptors
 
         inline DXGI_SWAP_CHAIN_DESC swap_chain_desc(
-            _In_ UINT width,
-            _In_ UINT height,
-            _In_ HWND windowHandle,
-            _In_ UINT sampleCount = 4,
-            _In_ UINT sampleQuality = 1,
-            _In_ bool windowed = true,
-            _In_ DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM,
-            _In_ UINT backBufferCount = 1,
-            _In_ DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT_DISCARD,
-            _In_ DXGI_USAGE bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT) noexcept
+            UINT width,
+            UINT height,
+            HWND windowHandle,
+            UINT sampleCount = 4,
+            UINT sampleQuality = 1,
+            bool windowed = true,
+            DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            UINT backBufferCount = 1,
+            DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT_DISCARD,
+            DXGI_USAGE bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT) noexcept
         {
             DXGI_SWAP_CHAIN_DESC desc = {};
             desc.BufferDesc.Width = width;
@@ -54,18 +54,18 @@ namespace dhorn
         }
 
         inline DXGI_SWAP_CHAIN_DESC1 swap_chain_desc_1(
-            _In_ UINT width,
-            _In_ UINT height,
-            _In_ DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
-            _In_ UINT sampleCount = 1,
-            _In_ UINT sampleQuality = 0,
-            _In_ UINT bufferCount = 2,
-            _In_ bool stereo = false,
-            _In_ UINT flags = 0,
-            _In_ DXGI_SCALING scaling = DXGI_SCALING_NONE,
-            _In_ DXGI_ALPHA_MODE alphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
-            _In_ DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM,
-            _In_ DXGI_USAGE bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT) noexcept
+            UINT width,
+            UINT height,
+            DXGI_SWAP_EFFECT swapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
+            UINT sampleCount = 1,
+            UINT sampleQuality = 0,
+            UINT bufferCount = 2,
+            bool stereo = false,
+            UINT flags = 0,
+            DXGI_SCALING scaling = DXGI_SCALING_NONE,
+            DXGI_ALPHA_MODE alphaMode = DXGI_ALPHA_MODE_UNSPECIFIED,
+            DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM,
+            DXGI_USAGE bufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT) noexcept
         {
             // If DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is specified, then MSAA is not allowed
             assert(((sampleCount == 1) && (sampleQuality == 0)) || (swapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL));
@@ -110,10 +110,10 @@ namespace dhorn
 
         // NOTE: Assumes that forward, right, and up are all normal vectors orthogonal to each other
         inline DirectX::XMMATRIX XM_CALLCONV create_view_matrix(
-            _In_ DirectX::FXMVECTOR right,
-            _In_ DirectX::FXMVECTOR up,
-            _In_ DirectX::FXMVECTOR forward,
-            _In_ DirectX::GXMVECTOR position) noexcept
+            DirectX::FXMVECTOR right,
+            DirectX::FXMVECTOR up,
+            DirectX::FXMVECTOR forward,
+            DirectX::GXMVECTOR position) noexcept
         {
             using namespace DirectX;
 
@@ -139,7 +139,7 @@ namespace dhorn
 #pragma region Shaders
 
         template <typename CharT>
-        std::vector<uint8_t> read_shader_file(_In_ const CharT *path)
+        std::vector<uint8_t> read_shader_file(const CharT *path)
         {
             std::fstream fileStream(path, std::ios::in | std::ios::binary);
             if (fileStream.fail() || fileStream.bad())

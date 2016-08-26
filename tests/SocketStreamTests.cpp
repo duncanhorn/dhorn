@@ -24,7 +24,7 @@ namespace dhorn
         TEST_CLASS(SocketStreamBufTests)
         {
             template <typename ServerFunc, typename ClientFunc>
-            void RunServerTest(_In_ const ServerFunc &serverFunc, _In_ const ClientFunc &clientFunc)
+            void RunServerTest(const ServerFunc &serverFunc, const ClientFunc &clientFunc)
             {
                 static const uint16_t port = 1337;
 
@@ -49,7 +49,7 @@ namespace dhorn
             }
 
             template <typename ServerFunc, typename ClientFunc>
-            void RunSingleClientServerTest(_In_ const ServerFunc &serverFunc, _In_ const ClientFunc &clientFunc)
+            void RunSingleClientServerTest(const ServerFunc &serverFunc, const ClientFunc &clientFunc)
             {
                 RunServerTest([&](dhorn::server_socket &server)
                 {
@@ -212,7 +212,7 @@ namespace dhorn
         TEST_CLASS(SocketStreamTests)
         {
             template <typename ServerFunc, typename ClientFunc>
-            void RunServerTest(_In_ const ServerFunc &serverFunc, _In_ const ClientFunc &clientFunc)
+            void RunServerTest(const ServerFunc &serverFunc, const ClientFunc &clientFunc)
             {
                 static const uint16_t port = 1337;
 
@@ -237,7 +237,7 @@ namespace dhorn
             }
 
             template <typename ServerFunc, typename ClientFunc>
-            void RunSingleClientServerTest(_In_ const ServerFunc &serverFunc, _In_ const ClientFunc &clientFunc)
+            void RunSingleClientServerTest(const ServerFunc &serverFunc, const ClientFunc &clientFunc)
             {
                 RunServerTest([&](dhorn::server_socket &server)
                 {

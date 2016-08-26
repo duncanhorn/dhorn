@@ -41,22 +41,22 @@ namespace dhorn
     {
         // Helpers surrounding animation_state in case the enum ever expands. We have four conceptual states: pending,
         // running, paused, and completed, though we have more than four "true" states
-        inline constexpr bool is_complete(_In_ animation_state state)
+        inline constexpr bool is_complete(animation_state state)
         {
             return (state == animation_state::completed) || (state == animation_state::canceled);
         }
 
-        inline constexpr bool is_running(_In_ animation_state state)
+        inline constexpr bool is_running(animation_state state)
         {
             return state == animation_state::running;
         }
 
-        inline constexpr bool is_paused(_In_ animation_state state)
+        inline constexpr bool is_paused(animation_state state)
         {
             return state == animation_state::paused;
         }
 
-        inline constexpr bool is_pending(_In_ animation_state state)
+        inline constexpr bool is_pending(animation_state state)
         {
             return state == animation_state::pending;
         }
@@ -97,12 +97,12 @@ namespace dhorn
         /*
          * Non-virtual public function(s)
          */
-        event_cookie add_state_change(_In_ const CallbackType &callback)
+        event_cookie add_state_change(const CallbackType &callback)
         {
             return this->_stateChangeEventSource.add(callback);
         }
 
-        void remove_state_change(_In_ event_cookie cookie)
+        void remove_state_change(event_cookie cookie)
         {
             this->_stateChangeEventSource.remove(cookie);
         }
@@ -112,13 +112,13 @@ namespace dhorn
         /*
          * Public virtual Function(s)
          */
-        virtual animation_state on_update(_In_ duration /*elapsedTime*/)
+        virtual animation_state on_update(duration /*elapsedTime*/)
         {
             // By default, immediately transition to the completed state
             return animation_state::completed;
         }
 
-        virtual void on_state_change(_In_ animation_state newState)
+        virtual void on_state_change(animation_state newState)
         {
             auto oldState = this->_currentState;
             if (oldState != newState)
@@ -179,7 +179,7 @@ namespace dhorn
             {
             }
 
-            key_frame_animation(_In_ update_function func) :
+            key_frame_animation(update_function func) :
                 key_frame_animation()
             {
                 this->set_callback(std::move(func));
@@ -190,7 +190,7 @@ namespace dhorn
             /*
              * Overloaded on_update. Any derived class should call this function to ensure proper state
              */
-            virtual animation_state on_update(_In_ duration elapsedTime)
+            virtual animation_state on_update(duration elapsedTime)
             {
                 this->_totalElapsedTime += elapsedTime;
                 return this->completed() ? animation_state::completed : animation_state::running;
@@ -201,12 +201,12 @@ namespace dhorn
             /*
              * Public functions
              */
-            void set_callback(_In_ const update_function &func)
+            void set_callback(const update_function &func)
             {
                 this->_updateFunc = func;
             }
 
-            void add_key_frame(_In_ duration time, _In_ const Ty &value)
+            void add_key_frame(duration time, const Ty &value)
             {
                 this->_keyFrames.emplace(time, value);
 
@@ -220,7 +220,7 @@ namespace dhorn
                 this->next();
             }
 
-            void add_key_frame(_In_ duration time, _In_ Ty &&value)
+            void add_key_frame(duration time, Ty &&value)
             {
                 this->_keyFrames.emplace(time, std::move(value));
 
@@ -263,7 +263,7 @@ namespace dhorn
                 return this->_totalElapsedTime;
             }
 
-            void update(_In_ const Ty &value)
+            void update(const Ty &value)
             {
                 if (this->_updateFunc)
                 {

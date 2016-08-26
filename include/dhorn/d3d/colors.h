@@ -17,11 +17,7 @@ namespace dhorn
     {
         namespace colors
         {
-            inline constexpr DirectX::XMVECTORF32 from_rgba(
-                _In_ size_t red,
-                _In_ size_t green,
-                _In_ size_t blue,
-                _In_ size_t alpha = 255)
+            inline constexpr DirectX::XMVECTORF32 from_rgba(size_t red, size_t green, size_t blue, size_t alpha = 255)
             {
                 return DirectX::XMVECTORF32
                 {

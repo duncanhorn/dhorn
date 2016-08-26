@@ -62,7 +62,7 @@ namespace dhorn
      * Default is_command_line_switch implementation
      */
     template <typename StringTy>
-    inline constexpr bool is_command_line_switch(_In_ const StringTy &str) noexcept
+    inline constexpr bool is_command_line_switch(const StringTy &str) noexcept
     {
         return !str.empty() && ((str[0] == '/') || (str[0] == '-'));
     }
@@ -70,7 +70,7 @@ namespace dhorn
     template <typename StringTy>
     struct is_command_line_switch_t
     {
-        inline constexpr bool operator()(_In_ const StringTy &str) const noexcept
+        inline constexpr bool operator()(const StringTy &str) const noexcept
         {
             return is_command_line_switch(str);
         }
@@ -117,23 +117,23 @@ namespace dhorn
         {
         }
 
-        basic_command_line(_In_ const container &data) :
+        basic_command_line(const container &data) :
             _data(data)
         {
         }
 
-        basic_command_line(_Inout_ container &&data) :
+        basic_command_line(container &&data) :
             _data(std::move(data))
         {
         }
 
         template <typename Itr>
-        basic_command_line(_In_ Itr front, _In_ Itr back) :
+        basic_command_line(Itr front, Itr back) :
             _data(front, back)
         {
         }
 
-        basic_command_line(_In_ const std::initializer_list<value_type> &data) :
+        basic_command_line(const std::initializer_list<value_type> &data) :
             _data(data)
         {
         }
@@ -159,7 +159,7 @@ namespace dhorn
         }
 
         template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> begin(_In_ const CustomIsSwitch &isSwitch) const
+        command_line_iterator<my_type, CustomIsSwitch> begin(const CustomIsSwitch &isSwitch) const
         {
             return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
         }
@@ -170,7 +170,7 @@ namespace dhorn
         }
 
         template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> cbegin(_In_ const CustomIsSwitch &isSwitch) const
+        command_line_iterator<my_type, CustomIsSwitch> cbegin(const CustomIsSwitch &isSwitch) const
         {
             return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
         }
@@ -181,7 +181,7 @@ namespace dhorn
         }
 
         template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> end(_In_ const CustomIsSwitch &isSwitch) const
+        command_line_iterator<my_type, CustomIsSwitch> end(const CustomIsSwitch &isSwitch) const
         {
             return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
         }
@@ -192,7 +192,7 @@ namespace dhorn
         }
 
         template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> cend(_In_ const CustomIsSwitch &isSwitch) const
+        command_line_iterator<my_type, CustomIsSwitch> cend(const CustomIsSwitch &isSwitch) const
         {
             return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
         }
@@ -234,14 +234,14 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        command_line_switch_iterator(_In_ const IsSwitch &isSwitch) :
+        command_line_switch_iterator(const IsSwitch &isSwitch) :
             _parent(nullptr),
             _isEnd(true),
             _isSwitch(isSwitch)
         {
         }
 
-        command_line_switch_iterator(_In_ parent_type *parent, _In_ const IsSwitch &isSwitch) :
+        command_line_switch_iterator(parent_type *parent, const IsSwitch &isSwitch) :
             _parent(parent),
             _isEnd(false),
             _isSwitch(isSwitch)
@@ -260,7 +260,7 @@ namespace dhorn
         /*
          * Forward Iterator Functions
          */
-        bool operator==(_In_ const command_line_switch_iterator &other) const
+        bool operator==(const command_line_switch_iterator &other) const
         {
             if (!this->_isEnd && !other._isEnd)
             {
@@ -271,7 +271,7 @@ namespace dhorn
             return this->_isEnd && other._isEnd;
         }
 
-        bool operator!=(_In_ const command_line_switch_iterator &other) const
+        bool operator!=(const command_line_switch_iterator &other) const
         {
             return !(*this == other);
         }
@@ -293,7 +293,7 @@ namespace dhorn
             return *this;
         }
 
-        command_line_switch_iterator operator++(_In_ int /*unused*/)
+        command_line_switch_iterator operator++(int /*unused*/)
         {
             auto copy = *this;
             ++(*this);
@@ -350,20 +350,20 @@ namespace dhorn
         {
         }
 
-        command_line_iterator(_In_ const IsSwitch &isSwitch) :
+        command_line_iterator(const IsSwitch &isSwitch) :
             _container(nullptr),
             _index(0),
             _isSwitch(isSwitch)
         {
         }
 
-        command_line_iterator(_In_ container *container, _In_ index_t index) :
+        command_line_iterator(container *container, index_t index) :
             _container(container),
             _index(index)
         {
         }
 
-        command_line_iterator(_In_ container *container, _In_ index_t index, _In_ const IsSwitch &isSwitch) :
+        command_line_iterator(container *container, index_t index, const IsSwitch &isSwitch) :
             _container(container),
             _index(index),
             _isSwitch(isSwitch)
@@ -401,12 +401,12 @@ namespace dhorn
         /*
          * Forward Iterator Functions
          */
-        bool operator==(_In_ const command_line_iterator &other) const
+        bool operator==(const command_line_iterator &other) const
         {
             return (other._container == this->_container) && (other._index == this->_index);
         }
 
-        bool operator!=(_In_ const command_line_iterator &other) const
+        bool operator!=(const command_line_iterator &other) const
         {
             return !(*this == other);
         }
@@ -427,7 +427,7 @@ namespace dhorn
             return *this;
         }
 
-        command_line_iterator operator++(_In_ int /*unused*/)
+        command_line_iterator operator++(int /*unused*/)
         {
             auto copy = *this;
             ++(*this);

@@ -37,9 +37,9 @@ namespace dhorn
         }
 
         array_reference_iterator(
-            _In_ pointer ptr
+            pointer ptr
 #if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-            , _In_ pointer end
+            , pointer end
 #endif
             ) :
             _ptr(ptr)
@@ -60,7 +60,7 @@ namespace dhorn
             return *this->_ptr;
         }
 
-        reference operator[](_In_ difference_type index) const
+        reference operator[](difference_type index) const
         {
             return this->_ptr[index];
         }
@@ -77,21 +77,21 @@ namespace dhorn
             return *this;
         }
 
-        array_reference_iterator operator++(_In_ int /*unused*/)
+        array_reference_iterator operator++(int /*unused*/)
         {
             auto copy = *this;
             ++(*this);
             return copy;
         }
 
-        array_reference_iterator &operator+=(_In_ difference_type diff)
+        array_reference_iterator &operator+=(difference_type diff)
         {
             this->_ptr += diff;
             CheckBounds();
             return *this;
         }
 
-        array_reference_iterator operator+(_In_ difference_type diff)
+        array_reference_iterator operator+(difference_type diff)
         {
             auto copy = *this;
             copy += diff;
@@ -105,28 +105,28 @@ namespace dhorn
             return *this;
         }
 
-        array_reference_iterator operator--(_In_ int /*unused*/)
+        array_reference_iterator operator--(int /*unused*/)
         {
             auto copy = *this;
             --(*this);
             return copy;
         }
 
-        array_reference_iterator &operator-=(_In_ difference_type diff)
+        array_reference_iterator &operator-=(difference_type diff)
         {
             // No bounds check since we can only ever move away from our limit
             this->_ptr -= diff;
             return *this;
         }
 
-        array_reference_iterator operator-(_In_ difference_type diff)
+        array_reference_iterator operator-(difference_type diff)
         {
             auto copy = *this;
             copy -= diff;
             return copy;
         }
 
-        difference_type operator-(_In_ const array_reference_iterator &other)
+        difference_type operator-(const array_reference_iterator &other)
         {
             return this->_ptr - other._ptr;
         }
@@ -164,9 +164,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
-    inline bool operator==(
-        _In_ const array_reference_iterator<LhsTy> &lhs,
-        _In_ const array_reference_iterator<RhsTy> &rhs)
+    inline bool operator==(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
     {
         // We don't really care if their ends are different since we could be comparing sub-arrays
         return &(*lhs) == &(*rhs);
@@ -176,9 +174,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
-    inline bool operator!=(
-        _In_ const array_reference_iterator<LhsTy> &lhs,
-        _In_ const array_reference_iterator<RhsTy> &rhs)
+    inline bool operator!=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
     {
         return &(*lhs) != &(*rhs);
     }
@@ -187,9 +183,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
-    inline bool operator<(
-        _In_ const array_reference_iterator<LhsTy> &lhs,
-        _In_ const array_reference_iterator<RhsTy> &rhs)
+    inline bool operator<(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
     {
         return &(*lhs) < &(*rhs);
     }
@@ -198,9 +192,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
-    inline bool operator<=(
-        _In_ const array_reference_iterator<LhsTy> &lhs,
-        _In_ const array_reference_iterator<RhsTy> &rhs)
+    inline bool operator<=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
     {
         return &(*lhs) <= &(*rhs);
     }
@@ -209,9 +201,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
-    inline bool operator>(
-        _In_ const array_reference_iterator<LhsTy> &lhs,
-        _In_ const array_reference_iterator<RhsTy> &rhs)
+    inline bool operator>(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
     {
         return &(*lhs) > &(*rhs);
     }
@@ -220,9 +210,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
-    inline bool operator>=(
-        _In_ const array_reference_iterator<LhsTy> &lhs,
-        _In_ const array_reference_iterator<RhsTy> &rhs)
+    inline bool operator>=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
     {
         return &(*lhs) >= &(*rhs);
     }
@@ -264,14 +252,14 @@ namespace dhorn
         {
         }
 
-        array_reference(_In_ pointer ptr, _In_ size_type size) :
+        array_reference(pointer ptr, size_type size) :
             _ptr(ptr),
             _size(size)
         {
         }
 
         template <size_t Size>
-        array_reference(_In_ Ty(&arr)[Size]) :
+        array_reference(Ty(&arr)[Size]) :
             _ptr(arr),
             _size(Size)
         {
@@ -284,13 +272,13 @@ namespace dhorn
         /*
          * Operators
          */
-        reference operator[](_In_ size_type pos)
+        reference operator[](size_type pos)
         {
             assert(pos < this->_size);
             return this->_ptr[pos];
         }
 
-        const_reference operator[](_In_ size_type pos) const
+        const_reference operator[](size_type pos) const
         {
             assert(pos < this->_size);
             return this->_ptr[pos];
@@ -308,7 +296,7 @@ namespace dhorn
             return *this->_ptr;
         }
 
-        array_reference &operator+=(_In_ difference_type delta)
+        array_reference &operator+=(difference_type delta)
         {
             assert((delta < 0) || (static_cast<size_t>(delta) <= this->_size));
             this->_ptr += delta;
@@ -317,7 +305,7 @@ namespace dhorn
             return *this;
         }
 
-        array_reference &operator-=(_In_ difference_type delta)
+        array_reference &operator-=(difference_type delta)
         {
             assert((delta > 0) || (static_cast<size_t>(-delta) <= this->_size));
             this->_ptr -= delta;
@@ -331,7 +319,7 @@ namespace dhorn
             return *this += 1;
         }
 
-        array_reference operator++(_In_ int /*unused*/)
+        array_reference operator++(int /*unused*/)
         {
             auto copy = *this;
             ++(*this);
@@ -343,21 +331,21 @@ namespace dhorn
             return *this -= 1;
         }
 
-        array_reference operator--(_In_ int /*unused*/)
+        array_reference operator--(int /*unused*/)
         {
             auto copy = *this;
             --(*this);
             return copy;
         }
 
-        array_reference operator+(_In_ difference_type delta) const
+        array_reference operator+(difference_type delta) const
         {
             auto copy = *this;
             copy += delta;
             return copy;
         }
 
-        array_reference operator-(_In_ difference_type delta) const
+        array_reference operator-(difference_type delta) const
         {
             auto copy = *this;
             copy -= delta;
@@ -369,7 +357,7 @@ namespace dhorn
         /*
          * Functions
          */
-        reference at(_In_ size_type pos)
+        reference at(size_type pos)
         {
             if (pos >= this->_size)
             {
@@ -379,7 +367,7 @@ namespace dhorn
             return this->_ptr[pos];
         }
 
-        const_reference at(_In_ size_type pos) const
+        const_reference at(size_type pos) const
         {
             if (pos >= this->_size)
             {
@@ -439,7 +427,7 @@ namespace dhorn
         /*
          * Resizing/casting
          */
-        void resize(_In_ size_type size)
+        void resize(size_type size)
         {
             // It's impossible to check the safety of this operation since it is, by definition, already unsafe
             this->_size = size;
@@ -526,7 +514,7 @@ namespace dhorn
 
     private:
 
-        iterator MakeIterator(_In_ pointer ptr)
+        iterator MakeIterator(pointer ptr)
         {
             return iterator(
                 ptr
@@ -536,7 +524,7 @@ namespace dhorn
                 );
         }
 
-        const_iterator MakeIterator(_In_ const_pointer ptr) const
+        const_iterator MakeIterator(const_pointer ptr) const
         {
             return const_iterator(
                 ptr
@@ -563,7 +551,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-    inline bool operator==(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
+    inline bool operator==(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
     {
         if (lhs.data() == rhs.data() && lhs.size() == rhs.size())
         {
@@ -581,7 +569,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-    inline bool operator!=(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
+    inline bool operator!=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
     {
         return !(lhs == rhs);
     }
@@ -590,7 +578,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-    inline bool operator<(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
+    inline bool operator<(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
     {
         return std::lexicographical_compare(
             std::begin(lhs), std::end(lhs),
@@ -602,7 +590,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-    inline bool operator>(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
+    inline bool operator>(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
     {
         return std::lexicographical_compare(
             std::begin(rhs), std::end(rhs),
@@ -614,7 +602,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-    inline bool operator<=(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
+    inline bool operator<=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
     {
         return !(lhs > rhs);
     }
@@ -623,7 +611,7 @@ namespace dhorn
         typename LhsTy,
         typename RhsTy,
         typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-    inline bool operator>=(_In_ const array_reference<LhsTy> &lhs, _In_ const array_reference<RhsTy> &rhs)
+    inline bool operator>=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
     {
         return !(lhs < rhs);
     }

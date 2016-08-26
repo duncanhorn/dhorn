@@ -67,7 +67,7 @@ namespace dhorn
 
     namespace details
     {
-        inline CONSOLE_SCREEN_BUFFER_INFO console_info(_In_ HANDLE device)
+        inline CONSOLE_SCREEN_BUFFER_INFO console_info(HANDLE device)
         {
             CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
             if (!::GetConsoleScreenBufferInfo(device, &bufferInfo))
@@ -78,7 +78,7 @@ namespace dhorn
             return bufferInfo;
         }
 
-        inline CONSOLE_SCREEN_BUFFER_INFO console_info(_In_ console_device device)
+        inline CONSOLE_SCREEN_BUFFER_INFO console_info(console_device device)
         {
             return console_info(::GetStdHandle(static_cast<DWORD>(device)));
         }
@@ -93,25 +93,25 @@ namespace dhorn
      */
 #pragma region Console Size
 
-    inline size<int16_t> console_size(_In_ console_device device = console_device::output)
+    inline size<int16_t> console_size(console_device device = console_device::output)
     {
         auto info = details::console_info(device);
         return { info.dwSize.X, info.dwSize.Y };
     }
 
-    inline point<int16_t> console_cursor_position(_In_ console_device device = console_device::output)
+    inline point<int16_t> console_cursor_position(console_device device = console_device::output)
     {
         auto info = details::console_info(device);
         return { info.dwCursorPosition.X, info.dwCursorPosition.Y };
     }
 
-    inline console_color console_foreground_color(_In_ console_device device = console_device::output)
+    inline console_color console_foreground_color(console_device device = console_device::output)
     {
         auto info = details::console_info(device);
         return static_cast<console_color>(info.wAttributes & 0x0F);
     }
 
-    inline console_color console_background_color(_In_ console_device device = console_device::output)
+    inline console_color console_background_color(console_device device = console_device::output)
     {
         auto info = details::console_info(device);
         return static_cast<console_color>((info.wAttributes >> 4) & 0x0F);
@@ -126,9 +126,7 @@ namespace dhorn
      */
 #pragma region Console Text Modifications
 
-    inline auto change_console_foreground(
-        _In_ console_color color,
-        _In_ console_device device = console_device::output)
+    inline auto change_console_foreground(console_color color, console_device device = console_device::output)
     {
         auto handle = ::GetStdHandle(static_cast<DWORD>(device));
         auto info = details::console_info(handle);
@@ -148,9 +146,7 @@ namespace dhorn
         return result;
     }
 
-    inline auto change_console_background(
-        _In_ console_color color,
-        _In_ console_device device = console_device::output)
+    inline auto change_console_background(console_color color, console_device device = console_device::output)
     {
         auto handle = ::GetStdHandle(static_cast<DWORD>(device));
         auto info = details::console_info(handle);
@@ -171,9 +167,9 @@ namespace dhorn
     }
 
     inline auto change_console_colors(
-        _In_ console_color foregroundColor,
-        _In_ console_color backgroundColor,
-        _In_ console_device device = console_device::output)
+        console_color foregroundColor,
+        console_color backgroundColor,
+        console_device device = console_device::output)
     {
         auto handle = ::GetStdHandle(static_cast<DWORD>(device));
         auto info = details::console_info(handle);

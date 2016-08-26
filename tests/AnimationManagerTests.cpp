@@ -39,7 +39,7 @@ namespace dhorn
                 }
 
                 // animation
-                virtual animation_state on_update(_In_ duration /*delta*/) override
+                virtual animation_state on_update(duration /*delta*/) override
                 {
                     if (this->_onUpdate)
                     {
@@ -50,17 +50,17 @@ namespace dhorn
                 }
 
                 // Test functions
-                void set_next_state(_In_ animation_state state)
+                void set_next_state(animation_state state)
                 {
                     this->_nextState = state;
                 }
 
-                void on_destroy(_In_ std::function<void(void)> fn)
+                void on_destroy(std::function<void(void)> fn)
                 {
                     this->_onDestroy = std::move(fn);
                 }
 
-                void on_update(_In_ std::function<void(void)> fn)
+                void on_update(std::function<void(void)> fn)
                 {
                     this->_onUpdate = std::move(fn);
                 }

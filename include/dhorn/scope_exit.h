@@ -21,7 +21,7 @@ namespace dhorn
     class scope_exit
     {
     public:
-        scope_exit(_In_ FuncTy func) :
+        scope_exit(FuncTy func) :
             _func(std::move(func))
         {
         }
@@ -35,10 +35,10 @@ namespace dhorn
         }
 
         // Can't copy, but can move
-        scope_exit(_In_ const scope_exit &) = delete;
-        scope_exit &operator=(_In_ const scope_exit &) = delete;
+        scope_exit(const scope_exit &) = delete;
+        scope_exit &operator=(const scope_exit &) = delete;
 
-        scope_exit(_Inout_ scope_exit &&other) :
+        scope_exit(scope_exit &&other) :
             _func(std::move(other._func))
         {
             this->_cancelled = other._cancelled;
@@ -59,7 +59,7 @@ namespace dhorn
     };
 
     template <typename FuncTy>
-    inline scope_exit<std::decay_t<FuncTy>> make_scope_exit(_Inout_ FuncTy&& func)
+    inline scope_exit<std::decay_t<FuncTy>> make_scope_exit(FuncTy&& func)
     {
         return scope_exit<std::decay_t<FuncTy>>(std::forward<FuncTy>(func));
     }

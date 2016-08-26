@@ -44,7 +44,7 @@ namespace dhorn
         public windows_exception
     {
     public:
-        explicit hresult_exception(_In_ HRESULT hr) :
+        explicit hresult_exception(HRESULT hr) :
             _hr(hr)
         {
         }
@@ -64,7 +64,7 @@ namespace dhorn
         HRESULT _hr;
     };
 
-    inline void throw_if_failed(_In_ HRESULT hr)
+    inline void throw_if_failed(HRESULT hr)
     {
         if (FAILED(hr))
         {
@@ -72,7 +72,7 @@ namespace dhorn
         }
     }
 
-    inline void throw_hr_if_false(_In_ bool expression, _In_ HRESULT hr)
+    inline void throw_hr_if_false(bool expression, HRESULT hr)
     {
         if (!expression)
         {
@@ -80,7 +80,7 @@ namespace dhorn
         }
     }
 
-    inline void throw_hr_if_true(_In_ bool expression, _In_ HRESULT hr)
+    inline void throw_hr_if_true(bool expression, HRESULT hr)
     {
         if (expression)
         {
@@ -89,7 +89,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    inline void throw_hr_if_null(_In_ const Ty &ptr, _In_ HRESULT hr = E_OUTOFMEMORY)
+    inline void throw_hr_if_null(const Ty &ptr, HRESULT hr = E_OUTOFMEMORY)
     {
         throw_hr_if_true(ptr == nullptr, hr);
     }
@@ -107,7 +107,7 @@ namespace dhorn
         public windows_exception
     {
     public:
-        explicit win32_exception(_In_ uint32_t status) :
+        explicit win32_exception(uint32_t status) :
             _status(status)
         {
         }
@@ -140,7 +140,7 @@ namespace dhorn
         }
     }
 
-    inline void expect_error(_In_ uint32_t expect)
+    inline void expect_error(uint32_t expect)
     {
         auto error = ::GetLastError();
 

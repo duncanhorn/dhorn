@@ -48,7 +48,7 @@ namespace dhorn
             {
             }
 
-            message_queue_node(_In_ function_type func) :
+            message_queue_node(function_type func) :
                 func(std::move(func)),
                 next(nullptr)
             {
@@ -85,8 +85,8 @@ namespace dhorn
         }
 
         // Cannot copy
-        message_queue(_In_ const message_queue &other) = delete;
-        message_queue &operator=(_In_ const message_queue &other) = delete;
+        message_queue(const message_queue &other) = delete;
+        message_queue &operator=(const message_queue &other) = delete;
 
 
         /*
@@ -102,7 +102,7 @@ namespace dhorn
             return this->_size;
         }
 
-        void push_back(_In_ const FunctionType &func)
+        void push_back(const FunctionType &func)
         {
             // Do all initialization work that does not need to occur under lock first
             auto pNode = new garbage::message_queue_node<MyTypes>(func);
@@ -147,7 +147,7 @@ namespace dhorn
             return this->PopFront();
         }
 
-        bool try_pop_front(_Inout_ FunctionType &func)
+        bool try_pop_front(FunctionType &func)
         {
             { // Acquire _sizeMutex
                 std::unique_lock<std::mutex> lock(this->_sizeMutex);

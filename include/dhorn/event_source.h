@@ -58,22 +58,22 @@ namespace dhorn
         {
         }
 
-        event_source(_Inout_ event_source &&other) :
+        event_source(event_source &&other) :
             _eventTargets(std::move(other._eventTargets)),
             _nextEventCookie(other._nextEventCookie)
         {
         }
 
         // Cannot copy (does not make sense to...)
-        event_source(_In_ const event_source &) = delete;
-        event_source &operator=(_In_ const event_source &) = delete;
+        event_source(const event_source &) = delete;
+        event_source &operator=(const event_source &) = delete;
 
 
 
         /*
          * Operators
          */
-        event_source &operator=(_Inout_ event_source &&other)
+        event_source &operator=(event_source &&other)
         {
             this->_eventTargets = std::move(other._eventTargets);
             this->_nextEventCookie = other._nextEventCookie;
@@ -84,7 +84,7 @@ namespace dhorn
         /*
          * Public Functions
          */
-        event_cookie add(_In_ const callback_type &func)
+        event_cookie add(const callback_type &func)
         {
             auto itr = this->_eventTargets.emplace(++this->_nextEventCookie, func);
             assert(itr.second);
@@ -92,12 +92,12 @@ namespace dhorn
             return this->_nextEventCookie;
         }
 
-        void remove(_In_ event_cookie cookie)
+        void remove(event_cookie cookie)
         {
             this->_eventTargets.erase(this->FindEvent(cookie));
         }
 
-        void invoke_one(_In_ Args ...args) const
+        void invoke_one(Args ...args) const
         {
             auto itr = std::begin(this->_eventTargets);
             if (itr != std::end(this->_eventTargets))
@@ -107,7 +107,7 @@ namespace dhorn
         }
 
         template <typename ResultFunc>
-        void invoke_one(_In_ Args ...args, _In_ const ResultFunc &func) const
+        void invoke_one(Args ...args, const ResultFunc &func) const
         {
             // Allow callers to handle failures
             auto itr = std::begin(this->_eventTargets);
@@ -126,7 +126,7 @@ namespace dhorn
         }
 
         template <typename ResultFunc>
-        void invoke_all(Args ...args, _In_ const ResultFunc &func)
+        void invoke_all(Args ...args, const ResultFunc &func)
         {
             for (auto &pair : this->_eventTargets)
             {
@@ -149,7 +149,7 @@ namespace dhorn
 
     private:
 
-        typename storage_type::const_iterator FindEvent(_In_ event_cookie cookie) const
+        typename storage_type::const_iterator FindEvent(event_cookie cookie) const
         {
             auto itr = this->_eventTargets.find(cookie);
 

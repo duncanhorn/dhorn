@@ -27,7 +27,7 @@ namespace dhorn
             {
                 float value = 42;
                 animation_type anim;
-                anim.set_callback([&](_In_ float val)
+                anim.set_callback([&](float val)
                 {
                     value = val;
                 });
@@ -41,7 +41,7 @@ namespace dhorn
             {
                 float value = 42;
                 animation_type anim;
-                anim.set_callback([&](_In_ float val)
+                anim.set_callback([&](float val)
                 {
                     value = val;
                 });
@@ -62,7 +62,7 @@ namespace dhorn
             {
                 float value = 42;
                 animation_type anim;
-                anim.set_callback([&](_In_ float val)
+                anim.set_callback([&](float val)
                 {
                     value = val;
                 });
@@ -94,7 +94,7 @@ namespace dhorn
             {
                 float value = 42;
                 animation_type anim;
-                anim.set_callback([&](_In_ float val)
+                anim.set_callback([&](float val)
                 {
                     value = val;
                 });
@@ -125,7 +125,7 @@ namespace dhorn
             TEST_METHOD(InsertDuringTest)
             {
                 float value = 42;
-                animation_type anim([&](_In_ float val)
+                animation_type anim([&](float val)
                 {
                     value = val;
                 });
@@ -174,7 +174,7 @@ namespace dhorn
             TEST_METHOD(NoValueTest)
             {
                 float value = 42.0;
-                animation_type anim([&](_In_ float val)
+                animation_type anim([&](float val)
                 {
                     value = val;
                 });
@@ -187,7 +187,7 @@ namespace dhorn
             TEST_METHOD(SingleValueTest)
             {
                 float value = 42.0;
-                animation_type anim([&](_In_ float val)
+                animation_type anim([&](float val)
                 {
                     value = val;
                 });
@@ -208,7 +208,7 @@ namespace dhorn
             TEST_METHOD(TwoValueSimpleTest)
             {
                 float value = 42.0;
-                animation_type anim([&](_In_ float val)
+                animation_type anim([&](float val)
                 {
                     value = val;
                 });
@@ -234,7 +234,7 @@ namespace dhorn
             TEST_METHOD(TwoValueComplexTest)
             {
                 float value = 42.0;
-                animation_type anim([&](_In_ float val)
+                animation_type anim([&](float val)
                 {
                     value = val;
                 });
@@ -266,7 +266,7 @@ namespace dhorn
             {
                 float value = 42.0;
                 animation_type anim;
-                anim.set_callback([&](_In_ float val)
+                anim.set_callback([&](float val)
                 {
                     value = val;
                 });
@@ -343,7 +343,7 @@ namespace dhorn
             {
                 float value = 42.0;
                 animation_type anim;
-                anim.set_callback([&](_In_ float val)
+                anim.set_callback([&](float val)
                 {
                     value = val;
                 });

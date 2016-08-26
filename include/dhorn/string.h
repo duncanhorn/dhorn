@@ -19,7 +19,7 @@ namespace dhorn
 #pragma region trim
 
     template <typename CharT, typename Traits, typename Alloc>
-    inline void trim(_Inout_ std::basic_string<CharT, Traits, Alloc> &str)
+    inline void trim(std::basic_string<CharT, Traits, Alloc> &str)
     {
         // It's more efficient to remove from the end of the string first so that we have fewer characters to shift
         // when removing from the front
@@ -35,7 +35,7 @@ namespace dhorn
     }
 
     template <typename CharT, typename Traits, typename Alloc, typename Itr>
-    inline void trim(_Inout_ std::basic_string<CharT, Traits, Alloc> &str, _In_ Itr begin, _In_ Itr end)
+    inline void trim(std::basic_string<CharT, Traits, Alloc> &str, Itr begin, Itr end)
     {
         // It's more efficient to remove from the end of the string first so that we have fewer characters to shift
         // when removing from the front
@@ -61,9 +61,9 @@ namespace dhorn
 
     template <typename CharT, typename Traits, typename Alloc, typename Itr>
     inline std::vector<std::basic_string<CharT, Traits, Alloc>> split(
-        _In_ const std::basic_string<CharT, Traits, Alloc> &str,
-        _In_ Itr begin,
-        _In_ Itr end)
+        const std::basic_string<CharT, Traits, Alloc> &str,
+        Itr begin,
+        Itr end)
     {
         using string_type = std::basic_string<CharT, Traits, Alloc>;
         std::vector<string_type> result;
@@ -89,8 +89,8 @@ namespace dhorn
 
     template <typename CharT, typename Traits, typename Alloc>
     inline std::vector<std::basic_string<CharT, Traits, Alloc>> split(
-        _In_ const std::basic_string<CharT, Traits, Alloc> &str,
-        _In_ CharT ch)
+        const std::basic_string<CharT, Traits, Alloc> &str,
+        CharT ch)
     {
         const CharT arr[] = { ch };
         return split(str, std::begin(arr), std::end(arr));

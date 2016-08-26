@@ -40,11 +40,11 @@ namespace dhorn
          * cuboid
          */
         void cuboid(
-            _In_ float width,
-            _In_ float height,
-            _In_ float depth,
-            _Inout_ std::vector<vertex> &vertices,
-            _Inout_ std::vector<unsigned> &indices)
+            float width,
+            float height,
+            float depth,
+            std::vector<vertex> &vertices,
+            std::vector<unsigned> &indices)
         {
             vertices.clear();
             indices.clear();

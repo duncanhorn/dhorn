@@ -66,12 +66,12 @@ namespace dhorn
             drop_shadow             = CS_DROPSHADOW,
         };
 
-        inline window_class_style operator|(_In_ window_class_style lhs, _In_ window_class_style rhs)
+        inline window_class_style operator|(window_class_style lhs, window_class_style rhs)
         {
             return static_cast<window_class_style>(static_cast<unsigned>(lhs) | static_cast<unsigned>(rhs));
         }
 
-        inline window_class_style operator&(_In_ window_class_style lhs, _In_ window_class_style rhs)
+        inline window_class_style operator&(window_class_style lhs, window_class_style rhs)
         {
             return static_cast<window_class_style>(static_cast<unsigned>(lhs) & static_cast<unsigned>(rhs));
         }
@@ -132,12 +132,12 @@ namespace dhorn
             vertical_scroll         = WS_VSCROLL,
         };
 
-        inline window_style operator|(_In_ window_style lhs, _In_ window_style rhs)
+        inline window_style operator|(window_style lhs, window_style rhs)
         {
             return static_cast<window_style>(static_cast<uint32_t>(lhs) | static_cast<uint32_t>(rhs));
         }
 
-        inline window_style operator&(_In_ window_style lhs, _In_ window_style rhs)
+        inline window_style operator&(window_style lhs, window_style rhs)
         {
             return static_cast<window_style>(static_cast<uint32_t>(lhs) & static_cast<uint32_t>(rhs));
         }
@@ -530,7 +530,7 @@ namespace dhorn
             icon_handle         small_icon;
 
             // Default construct all members (to null/nullptr/etc.)
-            window_class(_In_ const tstring &className) :
+            window_class(const tstring &className) :
                 style{},
                 class_extra{},
                 instance{},
@@ -578,7 +578,7 @@ namespace dhorn
          */
         struct window_options
         {
-            window_options(_In_ const tstring &windowName) :
+            window_options(const tstring &windowName) :
                 window_name(windowName),
                 style(window_style::overlapped_window),
                 x(CW_USEDEFAULT),
@@ -620,7 +620,7 @@ namespace dhorn
             {
             }
 
-            paint_struct(_In_ window_handle window) :
+            paint_struct(window_handle window) :
                 _window(window)
             {
                 this->device_context = begin_paint(window, &this->ps);
@@ -635,17 +635,17 @@ namespace dhorn
             }
 
             // Cannot copy
-            paint_struct(_In_ const paint_struct &) = delete;
-            paint_struct &operator=(_In_ const paint_struct &) = delete;
+            paint_struct(const paint_struct &) = delete;
+            paint_struct &operator=(const paint_struct &) = delete;
 
             // Can move
-            paint_struct(_Inout_ paint_struct &&other) :
+            paint_struct(paint_struct &&other) :
                 paint_struct()
             {
                 this->swap(other);
             }
 
-            paint_struct &operator=(_Inout_ paint_struct &&rhs)
+            paint_struct &operator=(paint_struct &&rhs)
             {
                 assert(this != &rhs);
                 this->swap(rhs);
@@ -655,7 +655,7 @@ namespace dhorn
 
 
 
-            void swap(_Inout_ paint_struct &other)
+            void swap(paint_struct &other)
             {
                 std::swap(this->_window, other._window);
                 std::swap(this->device_context, other.device_context);
@@ -689,16 +689,12 @@ namespace dhorn
             /*
              * Construction
              */
-            callback_handler(_In_ window_message message, _In_ callback_type callback) :
+            callback_handler(window_message message, callback_type callback) :
                 callback_handler(message, repeat_infinite, false, std::move(callback))
             {
             }
 
-            callback_handler(
-                _In_ window_message message,
-                _In_ size_t repeatCount,
-                _In_ bool eatMessage,
-                _In_ callback_type callback) :
+            callback_handler(window_message message, size_t repeatCount, bool eatMessage, callback_type callback) :
                 message(message),
                 repeat_count(repeatCount),
                 eat_message(eatMessage),
@@ -743,7 +739,7 @@ namespace dhorn
 
             struct deferred_invoke_handler
             {
-                deferred_invoke_handler(_In_ deferred_callback_type func) :
+                deferred_invoke_handler(deferred_callback_type func) :
                     _func(std::move(func))
                 {
                 }
@@ -797,7 +793,7 @@ namespace dhorn
 
 
 
-            uintptr_t run(_In_ const window_class &windowClass, _In_ const window_options &options, _In_ int cmdShow)
+            uintptr_t run(const window_class &windowClass, const window_options &options, int cmdShow)
             {
                 // Can only call run once
                 this->EnsureWindowUninitialized();
@@ -885,7 +881,7 @@ namespace dhorn
                 return paint_struct(this->_window);
             }
 
-            void invalidate(_In_opt_ bool eraseBackground = true, _In_opt_ rect<size_t> *area = nullptr)
+            void invalidate(bool eraseBackground = true, rect<size_t> *area = nullptr)
             {
                 EnsureWindowInitialized();
                 if (area)
@@ -912,13 +908,13 @@ namespace dhorn
              */
 #pragma region Callbacks
 
-            void post_async(_In_ const deferred_callback_type &func)
+            void post_async(const deferred_callback_type &func)
             {
                 auto handler = std::make_unique<deferred_invoke_handler>(func);
                 this->Post(std::move(handler));
             }
 
-            void post_and_wait(_In_ const deferred_callback_type &func)
+            void post_and_wait(const deferred_callback_type &func)
             {
                 std::mutex lock;
                 std::unique_lock<std::mutex> guard(lock);
@@ -939,7 +935,7 @@ namespace dhorn
                 cond.wait(guard, [&]() -> bool { return completed; });
             }
 
-            size_t add_callback_handler(_In_ const callback_handler &handler)
+            size_t add_callback_handler(const callback_handler &handler)
             {
                 size_t callbackId = ++this->_nextCallbackId;
 
@@ -963,12 +959,12 @@ namespace dhorn
                 return callbackId;
             }
 
-            size_t add_callback_handler(_In_ window_message message, _In_ const message_callback_type &func)
+            size_t add_callback_handler(window_message message, const message_callback_type &func)
             {
                 return this->add_callback_handler(callback_handler(message, func));
             }
 
-            void on_initialized(_In_ const deferred_callback_type &callback)
+            void on_initialized(const deferred_callback_type &callback)
             {
                 // There can only be one initialize callback
                 this->_initializeCallback = callback;
@@ -1022,7 +1018,7 @@ namespace dhorn
 
 
 
-            virtual intptr_t window_procedure(_In_ window_message message, _In_ uintptr_t wparam, _In_ intptr_t lparam)
+            virtual intptr_t window_procedure(window_message message, uintptr_t wparam, intptr_t lparam)
             {
                 message_result_type result(false, 0);
 
@@ -1103,12 +1099,12 @@ namespace dhorn
             /*
              * Private/Non-Override-able Message Handling
              */
-            void AddCallbackHandler(_Inout_ callback_handler &&handler, _In_ size_t callbackId)
+            void AddCallbackHandler(callback_handler &&handler, size_t callbackId)
             {
                 this->_callbackHandlers[handler.message].emplace_back(callbackId, std::move(handler));
             }
 
-            message_result_type OnDeferredCallback(_In_ uintptr_t wparam)
+            message_result_type OnDeferredCallback(uintptr_t wparam)
             {
                 std::unique_ptr<deferred_invoke_handler> handler(reinterpret_cast<deferred_invoke_handler *>(wparam));
 
@@ -1118,7 +1114,7 @@ namespace dhorn
                 return std::make_pair(true, 0);
             }
 
-            void Post(_Inout_ std::unique_ptr<deferred_invoke_handler> handler)
+            void Post(std::unique_ptr<deferred_invoke_handler> handler)
             {
                 // Cannot post before the window is created
                 this->EnsureWindowInitialized();
@@ -1139,10 +1135,10 @@ namespace dhorn
              * Window Procedure
              */
             static LRESULT CALLBACK uninitialized_window_procedure(
-                _In_ window_handle window,
-                _In_ unsigned int message,
-                _In_ WPARAM wparam,
-                _In_ LPARAM lparam)
+                window_handle window,
+                unsigned int message,
+                WPARAM wparam,
+                LPARAM lparam)
             {
                 auto msg = static_cast<window_message>(message);
                 if (msg == window_message::create)
@@ -1160,10 +1156,10 @@ namespace dhorn
             }
 
             static LRESULT CALLBACK initialized_window_procedure(
-                _In_ window_handle windowHandle,
-                _In_ unsigned int message,
-                _In_ WPARAM wparam,
-                _In_ LPARAM lparam)
+                window_handle windowHandle,
+                unsigned int message,
+                WPARAM wparam,
+                LPARAM lparam)
             {
                 window *ptr = reinterpret_cast<window *>(get_window_long_ptr(windowHandle, GWL_USERDATA));
                 assert(ptr);

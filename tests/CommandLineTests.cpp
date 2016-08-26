@@ -142,9 +142,9 @@ namespace dhorn
             }
 
             void DoComplexIterteTest(
-                _In_ const std::vector<std::string> &input,
-                _In_ const std::vector<std::string> &switches,
-                _In_ const std::vector<std::string> &args)
+                const std::vector<std::string> &input,
+                const std::vector<std::string> &switches,
+                const std::vector<std::string> &args)
             {
                 std::vector<std::string> output;
                 std::vector<std::string> outSwitches;

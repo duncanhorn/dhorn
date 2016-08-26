@@ -19,9 +19,9 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 #define TEST_COUNT      100
 
 #pragma warning(push)
-#pragma warning(disable:6387) // We wish to test _In_ parameters with nullptr
+#pragma warning(disable:6387) // We wish to test parameters with nullptr
 
-bool operator==(_In_ const in6_addr &addr1, _In_ const in6_addr &addr2)
+bool operator==(const in6_addr &addr1, const in6_addr &addr2)
 {
     for (int i = 0; i < 8; i++)
     {
@@ -1274,7 +1274,7 @@ namespace dhorn
         TEST_CLASS(SocketBaseTests)
         {
             template <typename Func>
-            void ExecuteSocketTest(_In_ const Func &func, _In_ bool closeSocket = true)
+            void ExecuteSocketTest(const Func &func, bool closeSocket = true)
             {
                 // Construct a socket. This is the one that we'll be using for the test
                 dhorn::socket_t rawSocket = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -1291,9 +1291,9 @@ namespace dhorn
 
             template <typename ServerFunc, typename ClientFunc>
             void ExecuteServerTest(
-                _In_ const dhorn::socket_address &serverAddress,
-                _In_ const ServerFunc &serverFunc,
-                _In_ const ClientFunc &clientFunc)
+                const dhorn::socket_address &serverAddress,
+                const ServerFunc &serverFunc,
+                const ClientFunc &clientFunc)
             {
                 dhorn::socket_base server(
                     dhorn::address_family::internetwork_version_4,
@@ -1944,7 +1944,7 @@ namespace dhorn
                 packet1.set_data(std::begin(vals1), std::end(vals1));
                 packet2.set_data(std::begin(vals2), std::end(vals2));
 
-                auto checkFunc = [&](_In_ const dhorn::udp_packet<int> &p1, _In_ const dhorn::udp_packet<int> &p2)
+                auto checkFunc = [&](const dhorn::udp_packet<int> &p1, const dhorn::udp_packet<int> &p2)
                 {
                     Assert::AreEqual(static_cast<size_t>(5), p1.size());
                     Assert::AreEqual(static_cast<size_t>(10), p1.capacity());

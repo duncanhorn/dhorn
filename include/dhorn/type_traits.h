@@ -126,7 +126,7 @@ namespace dhorn
      * array_size
      */
     template <typename Ty, size_t size>
-    inline constexpr size_t array_size(_In_ const Ty(&)[size])
+    inline constexpr size_t array_size(const Ty(&)[size])
     {
         return size;
     }
@@ -137,7 +137,7 @@ namespace dhorn
      * byte_offset
      */
     template <typename Ty, typename Struct>
-    inline constexpr size_t byte_offset(_In_ Ty Struct::*member)
+    inline constexpr size_t byte_offset(Ty Struct::*member)
     {
         return
             reinterpret_cast<uint8_t *>(&(reinterpret_cast<Struct *>(nullptr)->*member)) -

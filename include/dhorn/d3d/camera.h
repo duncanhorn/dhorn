@@ -106,11 +106,7 @@ namespace dhorn
             /*
              * Projection Matrix
              */
-            void configure_frustum(
-                _In_ float nearZ,
-                _In_ float farZ,
-                _In_ float verticalFov,
-                _In_ float aspectRatioWidthDivHeight)
+            void configure_frustum(float nearZ, float farZ, float verticalFov, float aspectRatioWidthDivHeight)
             {
                 this->_nearZ = nearZ;
                 this->_farZ = farZ;
@@ -120,25 +116,25 @@ namespace dhorn
                 this->InvalidateProjectionMatrix();
             }
 
-            void set_near_z(_In_ float z)
+            void set_near_z(float z)
             {
                 this->_nearZ = z;
                 this->InvalidateProjectionMatrix();
             }
 
-            void set_far_z(_In_ float z)
+            void set_far_z(float z)
             {
                 this->_farZ = z;
                 this->InvalidateProjectionMatrix();
             }
 
-            void set_vertical_fov(_In_ float verticalFov)
+            void set_vertical_fov(float verticalFov)
             {
                 this->_verticalFov = verticalFov;
                 this->InvalidateProjectionMatrix();
             }
 
-            void set_aspect_ratio(_In_ float aspectRatio)
+            void set_aspect_ratio(float aspectRatio)
             {
                 this->_aspectRatio = aspectRatio;
                 this->InvalidateProjectionMatrix();
@@ -149,7 +145,7 @@ namespace dhorn
             /*
              * Rotation
              */
-            void XM_CALLCONV look_at(_In_ DirectX::FXMVECTOR targetPoint, _In_ DirectX::FXMVECTOR worldUp)
+            void XM_CALLCONV look_at(DirectX::FXMVECTOR targetPoint, DirectX::FXMVECTOR worldUp)
             {
                 using namespace DirectX;
 
@@ -163,35 +159,35 @@ namespace dhorn
                 this->InvalidateViewMatrix();
             }
 
-            void XM_CALLCONV rotate(_In_ DirectX::FXMVECTOR axis, _In_ float angle)
+            void XM_CALLCONV rotate(DirectX::FXMVECTOR axis, float angle)
             {
                 // angle is in units of radians
                 auto transform = DirectX::XMMatrixRotationAxis(axis, angle);
                 ApplyRotation(transform);
             }
 
-            void rotate_x(_In_ float angle)
+            void rotate_x(float angle)
             {
                 // angle is in units of radians
                 auto transform = DirectX::XMMatrixRotationX(angle);
                 ApplyRotation(transform);
             }
 
-            void rotate_y(_In_ float angle)
+            void rotate_y(float angle)
             {
                 // angle is in units of radians
                 auto transform = DirectX::XMMatrixRotationY(angle);
                 ApplyRotation(transform);
             }
 
-            void rotate_z(_In_ float angle)
+            void rotate_z(float angle)
             {
                 // angle is in units of radians
                 auto transform = DirectX::XMMatrixRotationZ(angle);
                 ApplyRotation(transform);
             }
 
-            void pitch(_In_ float angle)
+            void pitch(float angle)
             {
                 using namespace DirectX;
 
@@ -205,7 +201,7 @@ namespace dhorn
                 this->InvalidateViewMatrix();
             }
 
-            void yaw(_In_ float angle)
+            void yaw(float angle)
             {
                 using namespace DirectX;
 
@@ -219,7 +215,7 @@ namespace dhorn
                 this->InvalidateViewMatrix();
             }
 
-            void roll(_In_ float angle)
+            void roll(float angle)
             {
                 using namespace DirectX;
 
@@ -238,13 +234,13 @@ namespace dhorn
             /*
              * Translation
              */
-            void XM_CALLCONV set_position(_In_ DirectX::FXMVECTOR pos)
+            void XM_CALLCONV set_position(DirectX::FXMVECTOR pos)
             {
                 DirectX::XMStoreFloat3(&this->_pos, pos);
                 this->InvalidateViewMatrix();
             }
 
-            void XM_CALLCONV translate(_In_ DirectX::FXMVECTOR delta)
+            void XM_CALLCONV translate(DirectX::FXMVECTOR delta)
             {
                 auto pos = this->position();
                 pos = DirectX::XMVectorAdd(pos, delta);
@@ -253,7 +249,7 @@ namespace dhorn
                 this->InvalidateViewMatrix();
             }
 
-            void translate_forward(_In_ float distance)
+            void translate_forward(float distance)
             {
                 auto pos = this->position();
                 auto forward = this->forward();
@@ -264,7 +260,7 @@ namespace dhorn
                 this->InvalidateViewMatrix();
             }
 
-            void translate_right(_In_ float distance)
+            void translate_right(float distance)
             {
                 auto pos = this->position();
                 auto right = this->right();
@@ -275,7 +271,7 @@ namespace dhorn
                 this->InvalidateViewMatrix();
             }
 
-            void translate_up(_In_ float distance)
+            void translate_up(float distance)
             {
                 auto pos = this->position();
                 auto up = this->up();
@@ -290,7 +286,7 @@ namespace dhorn
 
         private:
 
-            inline void XM_CALLCONV ApplyRotation(_In_ DirectX::FXMMATRIX transform)
+            inline void XM_CALLCONV ApplyRotation(DirectX::FXMMATRIX transform)
             {
                 using namespace DirectX;
 

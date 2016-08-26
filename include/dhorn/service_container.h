@@ -37,12 +37,12 @@ namespace dhorn
         public:
             service_derived(void) = default;
 
-            service_derived(_Inout_ std::shared_ptr<Ty> ptr) :
+            service_derived(std::shared_ptr<Ty> ptr) :
                 _ptr(std::move(ptr))
             {
             }
 
-            service_derived(_Inout_ service_derived &&other) :
+            service_derived(service_derived &&other) :
                 _ptr(std::move(other._ptr))
             {
             }
@@ -50,27 +50,27 @@ namespace dhorn
 
 
             // Cannot copy
-            service_derived(_In_ const service_derived &) = delete;
-            service_derived &operator=(_In_ const service_derived &) = delete;
+            service_derived(const service_derived &) = delete;
+            service_derived &operator=(const service_derived &) = delete;
 
 
 
             /*
              * Assignment
              */
-            service_derived &operator=(_Inout_ service_derived &&other)
+            service_derived &operator=(service_derived &&other)
             {
                 this->_ptr = std::move(other._ptr);
                 return *this;
             }
 
-            service_derived &operator=(_In_ const std::shared_ptr<Ty> &other)
+            service_derived &operator=(const std::shared_ptr<Ty> &other)
             {
                 this->_ptr = other;
                 return *this;
             }
 
-            service_derived &operator=(_Inout_ std::shared_ptr<Ty> &&other)
+            service_derived &operator=(std::shared_ptr<Ty> &&other)
             {
                 this->_ptr = std::move(other);
                 return *this;
@@ -105,7 +105,7 @@ namespace dhorn
         public std::exception
     {
     public:
-        service_exception(_In_ const std::string &exceptionType, _In_ const std::string &typeName) :
+        service_exception(const std::string &exceptionType, const std::string &typeName) :
             _message(exceptionType + " : " + typeName)
         {
         }
@@ -126,7 +126,7 @@ namespace dhorn
         public service_exception
     {
     public:
-        service_published(_In_ const std::string &serviceName) :
+        service_published(const std::string &serviceName) :
             service_exception("service_published", serviceName)
         {
         }
@@ -138,7 +138,7 @@ namespace dhorn
         public service_exception
     {
     public:
-        service_not_published(_In_ const std::string &serviceName) :
+        service_not_published(const std::string &serviceName) :
             service_exception("service_not_published", serviceName)
         {
         }
@@ -173,7 +173,7 @@ namespace dhorn
         {
         }
 
-        service_container(_Inout_ service_container &&other) :
+        service_container(service_container &&other) :
             _map(std::move(other._map))
         {
         }
@@ -181,15 +181,15 @@ namespace dhorn
 
 
         // Cannot copy
-        service_container(_In_ const service_container &) = delete;
-        service_container &operator=(_In_ const service_container &) = delete;
+        service_container(const service_container &) = delete;
+        service_container &operator=(const service_container &) = delete;
 
 
 
         /*
          * Operators
          */
-        service_container &operator=(_Inout_ service_container &&other)
+        service_container &operator=(service_container &&other)
         {
             this->_map = std::move(other._map);
             return *this;
@@ -201,37 +201,37 @@ namespace dhorn
          * Insertion
          */
         template <typename Ty>
-        std::shared_ptr<Ty> insert(_In_ Ty *ptr)
+        std::shared_ptr<Ty> insert(Ty *ptr)
         {
             return this->Insert(std::shared_ptr<Ty>(ptr));
         }
 
         template <typename Ty, typename Deleter>
-        std::shared_ptr<Ty> insert(_In_ Ty *ptr, _In_ const Deleter &del)
+        std::shared_ptr<Ty> insert(Ty *ptr, const Deleter &del)
         {
             return this->Insert(std::shared_ptr<Ty>(ptr, del));
         }
 
         template <typename Ty, typename Deleter, typename Alloc>
-        std::shared_ptr<Ty> insert(_In_ Ty *ptr, _In_ const Deleter &del, _In_ const Alloc &alloc)
+        std::shared_ptr<Ty> insert(Ty *ptr, const Deleter &del, const Alloc &alloc)
         {
             return this->Insert(std::shared_ptr<Ty>(ptr, del, alloc));
         }
 
         template <typename Ty>
-        std::shared_ptr<Ty> insert(_In_ const std::shared_ptr<Ty> &ptr)
+        std::shared_ptr<Ty> insert(const std::shared_ptr<Ty> &ptr)
         {
             return this->Insert(ptr);
         }
 
         template <typename Ty, typename... Args>
-        std::shared_ptr<Ty> emplace(_Inout_ Args&&... args)
+        std::shared_ptr<Ty> emplace(Args&&... args)
         {
             return this->Insert(std::make_shared<Ty>(std::forward<Args>(args)...));
         }
 
         template <typename Ty, typename Alloc, typename... Args>
-        std::shared_ptr<Ty> allocate(_In_ const Alloc &alloc, _Inout_ Args&&... args)
+        std::shared_ptr<Ty> allocate(const Alloc &alloc, Args&&... args)
         {
             return this->Insert(std::allocate_shared<Ty>(alloc, std::forward<Args>(args)...));
         }
@@ -292,7 +292,7 @@ namespace dhorn
             return this->_map.empty();
         }
 
-        void swap(_Inout_ service_container &other)
+        void swap(service_container &other)
         {
             std::swap(this->_map, other._map);
         }
@@ -302,7 +302,7 @@ namespace dhorn
     private:
 
         template <typename Ty>
-        const std::shared_ptr<Ty> &Insert(_In_ const std::shared_ptr<Ty> &ptr)
+        const std::shared_ptr<Ty> &Insert(const std::shared_ptr<Ty> &ptr)
         {
             auto result = this->_map.insert(std::make_pair(
                 service_type_traits<Ty>::id(),
@@ -340,7 +340,7 @@ namespace dhorn
 
 namespace std
 {
-    void swap(_Inout_ dhorn::service_container &lhs, _Inout_ dhorn::service_container &rhs)
+    void swap(dhorn::service_container &lhs, dhorn::service_container &rhs)
     {
         lhs.swap(rhs);
     }

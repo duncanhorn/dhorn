@@ -81,7 +81,7 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        animation_handle(_In_ animation_cookie cookie, _In_ DestroyCallback callback) :
+        animation_handle(animation_cookie cookie, DestroyCallback callback) :
             _cookie(cookie),
             _callback(std::move(callback))
         {
@@ -93,8 +93,8 @@ namespace dhorn
         }
 
         // Cannot copy (otherwise we screw up the reference count)
-        animation_handle(_In_ const animation_handle &) = delete;
-        animation_handle &operator=(_In_ const animation_handle &) = delete;
+        animation_handle(const animation_handle &) = delete;
+        animation_handle &operator=(const animation_handle &) = delete;
 
 
 
@@ -147,7 +147,7 @@ namespace dhorn
             bool has_references;
 
             // Constructor
-            animation_info(_In_ std::shared_ptr<animation> animation, _In_ std::function<void(void)> notifyDestroyed) :
+            animation_info(std::shared_ptr<animation> animation, std::function<void(void)> notifyDestroyed) :
                 instance(std::move(animation)),
                 notify_destroyed(std::move(notifyDestroyed)),
                 state(animation_state::running),
@@ -157,7 +157,7 @@ namespace dhorn
                 instance->on_state_change(animation_state::running);
             }
 
-            void update_state(_In_ animation_state newState)
+            void update_state(animation_state newState)
             {
                 if (newState != this->state)
                 {
@@ -230,12 +230,12 @@ namespace dhorn
             }
         }
 
-        std::shared_ptr<animation_handle> submit(_In_ animation *instance)
+        std::shared_ptr<animation_handle> submit(animation *instance)
         {
             return this->submit(std::shared_ptr<animation>(instance));
         }
 
-        std::shared_ptr<animation_handle> submit(_In_ std::shared_ptr<animation> instance)
+        std::shared_ptr<animation_handle> submit(std::shared_ptr<animation> instance)
         {
             auto cookie = this->NextCookie();
             auto result = std::make_shared<animation_handle>(
@@ -253,7 +253,7 @@ namespace dhorn
             return result;
         }
 
-        bool pause(_In_ animation_handle *handle)
+        bool pause(animation_handle *handle)
         {
             auto itr = this->FindInfo(handle->id());
             auto &info = itr->second;
@@ -267,7 +267,7 @@ namespace dhorn
             return true;
         }
 
-        bool resume(_In_ animation_handle *handle)
+        bool resume(animation_handle *handle)
         {
             auto itr = this->FindInfo(handle->id());
             auto &info = itr->second;
@@ -281,7 +281,7 @@ namespace dhorn
             return true;
         }
 
-        bool cancel(_In_ animation_handle *handle)
+        bool cancel(animation_handle *handle)
         {
             auto itr = this->FindInfo(handle->id());
             auto &info = itr->second;
@@ -295,7 +295,7 @@ namespace dhorn
             return true;
         }
 
-        animation_state query_state(_In_ animation_handle *handle) const
+        animation_state query_state(animation_handle *handle) const
         {
             return this->FindInfo(handle->id())->second.state;
         }
@@ -315,7 +315,7 @@ namespace dhorn
             return this->_nextCookie;
         }
 
-        AnimationMap::iterator FindInfo(_In_ animation_cookie cookie)
+        AnimationMap::iterator FindInfo(animation_cookie cookie)
         {
             auto itr = this->_animationInfo.find(cookie);
             if (itr == std::end(this->_animationInfo))
@@ -326,7 +326,7 @@ namespace dhorn
             return itr;
         }
 
-        AnimationMap::const_iterator FindInfo(_In_ animation_cookie cookie) const
+        AnimationMap::const_iterator FindInfo(animation_cookie cookie) const
         {
             auto itr = this->_animationInfo.find(cookie);
             if (itr == std::end(this->_animationInfo))
@@ -337,7 +337,7 @@ namespace dhorn
             return itr;
         }
 
-        void AnimationHandleDestroyedCallback(_In_ animation_cookie cookie)
+        void AnimationHandleDestroyedCallback(animation_cookie cookie)
         {
             // We don't call TryRemove here since it could be possible that the last reference to the animation_handle
             // was released off of the UI thread (which is not desired, but is a lot harder for clients to control). If
@@ -349,7 +349,7 @@ namespace dhorn
             info.has_references = false;
         }
 
-        bool TryRemove(_In_ const AnimationMap::iterator &pos)
+        bool TryRemove(const AnimationMap::iterator &pos)
         {
             auto &info = pos->second;
             if (!info.has_references && garbage::is_complete(info.state))

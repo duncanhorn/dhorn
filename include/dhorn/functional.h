@@ -40,17 +40,13 @@ namespace dhorn
     }
 
     template <typename Ty, typename ResultType, typename... Args>
-    garbage::member_function<Ty, ResultType, Args...> bind_member_function(
-        _In_ ResultType(Ty::*func)(Args...),
-        _In_ Ty &obj)
+    garbage::member_function<Ty, ResultType, Args...> bind_member_function(ResultType(Ty::*func)(Args...), Ty &obj)
     {
         return garbage::member_function<Ty, ResultType, Args...>(&obj, func);
     }
 
     template <typename Ty, typename ResultType, typename... Args>
-    garbage::member_function<Ty, ResultType, Args...> bind_member_function(
-        _In_ ResultType(Ty::*func)(Args...),
-        _In_ Ty *ptr)
+    garbage::member_function<Ty, ResultType, Args...> bind_member_function(ResultType(Ty::*func)(Args...), Ty *ptr)
     {
         return garbage::member_function<Ty, ResultType, Args...>(ptr, func);
     }

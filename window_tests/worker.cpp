@@ -68,7 +68,7 @@ void worker::exit(void)
     this->_threads.clear();
 }
 
-COLORREF DecideColor(_In_ size_t iterations)
+COLORREF DecideColor(size_t iterations)
 {
     if (iterations)
     {
@@ -211,10 +211,7 @@ void worker::update_size(void)
 
 }
 
-callback_handler::result_type worker::on_paint(
-    _In_ window *pWindow,
-    _In_ uintptr_t /*wparam*/,
-    _In_ intptr_t /*lparam*/)
+callback_handler::result_type worker::on_paint(window *pWindow, uintptr_t /*wparam*/, intptr_t /*lparam*/)
 {
     pWindow;
     //auto ps = pWindow->begin_paint();
@@ -255,27 +252,27 @@ callback_handler::result_type worker::on_paint(
 }
 
 callback_handler::result_type worker::on_resize(
-    _In_ dhorn::win32::window * /*pWindow*/,
-    _In_ uintptr_t /*wparam*/,
-    _In_ intptr_t /*lparam*/)
+    dhorn::win32::window * /*pWindow*/,
+    uintptr_t /*wparam*/,
+    intptr_t /*lparam*/)
 {
     this->_sizeUpdatePending = true;
     return std::make_pair(true, 0);
 }
 
 callback_handler::result_type worker::on_erase_background(
-    _In_ dhorn::win32::window * /*pWindow*/,
-    _In_ uintptr_t /*wparam*/,
-    _In_ intptr_t /*lparam*/)
+    dhorn::win32::window * /*pWindow*/,
+    uintptr_t /*wparam*/,
+    intptr_t /*lparam*/)
 {
     // Return true so that the background will not get cleared
     return std::make_pair(true, 1);
 }
 
 callback_handler::result_type worker::on_scrollwheel(
-    _In_ dhorn::win32::window * /*pWindow*/,
-    _In_ uintptr_t wparam,
-    _In_ intptr_t lparam)
+    dhorn::win32::window * /*pWindow*/,
+    uintptr_t wparam,
+    intptr_t lparam)
 {
     POINT pt = { LOWORD(lparam), HIWORD(lparam) };
     ScreenToClient(globals::window.handle(), &pt);

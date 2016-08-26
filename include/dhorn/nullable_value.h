@@ -20,7 +20,7 @@ namespace dhorn
     public:
         nullable_value(void) = default;
 
-        nullable_value(_In_ const nullable_value &other)
+        nullable_value(const nullable_value &other)
         {
             if (other)
             {
@@ -28,7 +28,7 @@ namespace dhorn
             }
         }
 
-        nullable_value(_Inout_ nullable_value &&other)
+        nullable_value(nullable_value &&other)
         {
             swap(other);
         }
@@ -43,7 +43,7 @@ namespace dhorn
         /*
          * Operators
          */
-        nullable_value &operator=(_In_ const nullable_value &other)
+        nullable_value &operator=(const nullable_value &other)
         {
             if (&other == this)
             {
@@ -59,7 +59,7 @@ namespace dhorn
             return *this;
         }
 
-        nullable_value &operator=(_Inout_ nullable_value &&other)
+        nullable_value &operator=(nullable_value &&other)
         {
             swap(other);
             return *this;
@@ -105,27 +105,27 @@ namespace dhorn
             Reset();
         }
 
-        void reset(_In_ const Ty &value)
+        void reset(const Ty &value)
         {
             Set(value);
         }
 
-        void reset(_Inout_ Ty &&value)
+        void reset(Ty &&value)
         {
             Set(std::move(value));
         }
 
-        void set(_In_ const Ty &value)
+        void set(const Ty &value)
         {
             Set(value);
         }
 
-        void set(_Inout_ Ty &&value)
+        void set(Ty &&value)
         {
             Set(std::move(value));
         }
 
-        void swap(_Inout_ nullable_value &other)
+        void swap(nullable_value &other)
         {
             if (other && has_value())
             {
@@ -155,7 +155,7 @@ namespace dhorn
             this->_ptr = reinterpret_cast<Ty *>(&this->_data);
         }
 
-        void Set(_In_ const Ty &value)
+        void Set(const Ty &value)
         {
             if (!this->_ptr)
             {
@@ -170,7 +170,7 @@ namespace dhorn
             }
         }
 
-        void Set(_Inout_ Ty &&value)
+        void Set(Ty &&value)
         {
             if (!this->_ptr)
             {

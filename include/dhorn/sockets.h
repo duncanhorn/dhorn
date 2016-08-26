@@ -142,12 +142,12 @@ namespace dhorn
         wait_all        = MSG_WAITALL,
     };
 
-    inline message_flags operator|(_In_ message_flags lhs, _In_ message_flags rhs)
+    inline message_flags operator|(message_flags lhs, message_flags rhs)
     {
         return static_cast<message_flags>(static_cast<int>(lhs) | static_cast<int>(rhs));
     }
 
-    inline message_flags operator&(_In_ message_flags lhs, _In_ message_flags rhs)
+    inline message_flags operator&(message_flags lhs, message_flags rhs)
     {
         return static_cast<message_flags>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
@@ -197,12 +197,12 @@ namespace dhorn
         conditional_accept              = SO_CONDITIONAL_ACCEPT,
     };
 
-    inline socket_option operator|(_In_ socket_option lhs, _In_ socket_option rhs)
+    inline socket_option operator|(socket_option lhs, socket_option rhs)
     {
         return static_cast<socket_option>(static_cast<int>(lhs) | static_cast<int>(rhs));
     }
 
-    inline socket_option operator&(_In_ socket_option lhs, _In_ socket_option rhs)
+    inline socket_option operator&(socket_option lhs, socket_option rhs)
     {
         return static_cast<socket_option>(static_cast<int>(lhs) & static_cast<int>(rhs));
     }
@@ -232,7 +232,7 @@ namespace dhorn
         public std::exception
     {
     public:
-        socket_exception(_In_ socket_error_t error) :
+        socket_exception(socket_error_t error) :
             _error(error)
         {
         }
@@ -264,7 +264,7 @@ namespace dhorn
         }
 
         template <typename Ty>
-        inline void wsa_throw_if_null(_In_ Ty *ptr)
+        inline void wsa_throw_if_null(Ty *ptr)
         {
             if (!ptr)
             {
@@ -272,7 +272,7 @@ namespace dhorn
             }
         }
 
-        inline socket_error_t wsa_throw_if_error(_In_ socket_error_t val)
+        inline socket_error_t wsa_throw_if_error(socket_error_t val)
         {
             if (val == socket_error)
             {
@@ -282,7 +282,7 @@ namespace dhorn
             return val;
         }
 
-        inline void wsa_throw_if_false(_In_ bool expr, _In_ socket_error_t error)
+        inline void wsa_throw_if_false(bool expr, socket_error_t error)
         {
             if (!expr)
             {
@@ -290,7 +290,7 @@ namespace dhorn
             }
         }
 
-        inline void wsa_throw_if_true(_In_ bool expr, _In_ socket_error_t error)
+        inline void wsa_throw_if_true(bool expr, socket_error_t error)
         {
             if (expr)
             {
@@ -323,13 +323,13 @@ namespace dhorn
             static const address_family family = address_family::internetwork_version_4;
             static const int max_string_len = 16;
 
-            static inline const ip_addr &create(_In_ const sock_addr &addr)
+            static inline const ip_addr &create(const sock_addr &addr)
             {
                 garbage::wsa_throw_if_false(addr.sin_family == static_cast<int>(family), WSAEINVAL);
                 return addr.sin_addr;
             }
 
-            static inline ip_addr create(_In_ create_type val)
+            static inline ip_addr create(create_type val)
             {
                 ip_addr result;
                 result.s_addr = htonl(val);
@@ -346,13 +346,13 @@ namespace dhorn
             static const address_family family = address_family::internetwork_version_6;
             static const int max_string_len = 46;
 
-            static inline const ip_addr &create(_In_ const sock_addr &addr)
+            static inline const ip_addr &create(const sock_addr &addr)
             {
                 garbage::wsa_throw_if_false(addr.sin6_family == static_cast<int>(family), WSAEINVAL);
                 return addr.sin6_addr;
             }
 
-            static inline ip_addr create(_In_ const create_type &val)
+            static inline ip_addr create(const create_type &val)
             {
                 // create_type is already in network-byte-order, so we can just copy as-is
                 ip_addr result;
@@ -375,7 +375,7 @@ namespace dhorn
             using MyTraits = address_family_traits<Family>;
             using ip_addr = typename MyTraits::ip_addr;
 
-            inline static std::string n_to_p(_In_ const ip_addr &addr)
+            inline static std::string n_to_p(const ip_addr &addr)
             {
                 char buff[MyTraits::max_string_len + 1];
 
@@ -396,7 +396,7 @@ namespace dhorn
             using MyTraits = address_family_traits<Family>;
             using ip_addr = typename MyTraits::ip_addr;
 
-            inline static std::wstring n_to_p(_In_ const ip_addr &addr)
+            inline static std::wstring n_to_p(const ip_addr &addr)
             {
                 wchar_t buff[MyTraits::max_string_len + 1];
 
@@ -443,29 +443,29 @@ namespace dhorn
         {
         }
 
-        ip_address(_In_ const typename MyTraits::create_type &val) :
+        ip_address(const typename MyTraits::create_type &val) :
             _addr(MyTraits::create(val))
         {
         }
 
-        ip_address(_In_ const ip_addr &ip) :
+        ip_address(const ip_addr &ip) :
             _addr(ip)
         {
         }
 
-        ip_address(_In_ const sock_addr &addr) :
+        ip_address(const sock_addr &addr) :
             _addr(MyTraits::create(addr))
         {
         }
 
         template <typename CharType>
-        ip_address(_In_ const CharType *ip)
+        ip_address(const CharType *ip)
         {
             this->Set(ip);
         }
 
         template <typename CharType>
-        ip_address(_In_ const std::basic_string<CharType> &ip)
+        ip_address(const std::basic_string<CharType> &ip)
         {
             this->Set(ip.c_str());
         }
@@ -475,33 +475,33 @@ namespace dhorn
         /*
          * Assignment Operators
          */
-        ip_address &operator=(_In_ const typename MyTraits::create_type &val)
+        ip_address &operator=(const typename MyTraits::create_type &val)
         {
             this->_addr = MyTraits::create(val);
             return *this;
         }
 
-        ip_address &operator=(_In_ const ip_addr &ip)
+        ip_address &operator=(const ip_addr &ip)
         {
             this->_addr = ip;
             return *this;
         }
 
-        ip_address &operator=(_In_ const typename MyTraits::sock_addr &addr)
+        ip_address &operator=(const typename MyTraits::sock_addr &addr)
         {
             this->_addr = MyTraits::create(addr);
             return *this;
         }
 
         template <typename CharType>
-        ip_address &operator=(_In_ const CharType *ip)
+        ip_address &operator=(const CharType *ip)
         {
             this->Set(ip);
             return *this;
         }
 
         template <typename CharType>
-        ip_address &operator=(_In_ const std::basic_string<CharType> &ip)
+        ip_address &operator=(const std::basic_string<CharType> &ip)
         {
             this->Set(ip.c_str());
             return *this;
@@ -543,7 +543,7 @@ namespace dhorn
 
     private:
 
-        void Set(_In_ const char *ip)
+        void Set(const char *ip)
         {
             auto result = garbage::wsa_throw_if_error(InetPtonA(static_cast<int>(Family), ip, &this->_addr));
             if (result == 0)
@@ -553,7 +553,7 @@ namespace dhorn
             }
         }
 
-        void Set(_In_ const wchar_t *ip)
+        void Set(const wchar_t *ip)
         {
             auto result = garbage::wsa_throw_if_error(InetPtonW(static_cast<int>(Family), ip, &this->_addr));
             if (result == 0)
@@ -591,16 +591,12 @@ namespace dhorn
         {
         }
 
-        socket_address(_In_ const ipv4_address &addr, _In_ uint16_t port)
+        socket_address(const ipv4_address &addr, uint16_t port)
         {
             this->assign(addr, port);
         }
 
-        socket_address(
-            _In_ const ipv6_address &addr,
-            _In_ uint16_t port,
-            _In_ uint32_t flowInfo,
-            _In_ uint32_t scopeId)
+        socket_address(const ipv6_address &addr, uint16_t port, uint32_t flowInfo, uint32_t scopeId)
         {
             this->assign(addr, port, flowInfo, scopeId);
         }
@@ -650,7 +646,7 @@ namespace dhorn
             return this->_ipv6Addr;
         }
 
-        bool operator==(_In_ const socket_address &other) const
+        bool operator==(const socket_address &other) const
         {
             if (this->_size != other._size)
             {
@@ -660,7 +656,7 @@ namespace dhorn
             return std::memcmp(&this->_addr, &other._addr, this->_size) == 0;
         }
 
-        bool operator!=(_In_ const socket_address &other) const
+        bool operator!=(const socket_address &other) const
         {
             return !(*this == other);
         }
@@ -670,7 +666,7 @@ namespace dhorn
         /*
          * Public Functions
          */
-        void assign(_In_ const ipv4_address &addr, _In_ uint16_t port)
+        void assign(const ipv4_address &addr, uint16_t port)
         {
             this->_ipv4Addr =
             {
@@ -682,7 +678,7 @@ namespace dhorn
             this->_size = sizeof(this->_ipv4Addr);
         }
 
-        void assign(_In_ const ipv6_address &addr, _In_ uint16_t port, _In_ uint32_t flowInfo, _In_ uint32_t scopeId)
+        void assign(const ipv6_address &addr, uint16_t port, uint32_t flowInfo, uint32_t scopeId)
         {
             this->_ipv6Addr =
             {
@@ -809,19 +805,19 @@ namespace dhorn
             static const garbage::socket_initializer _init;
         }
 
-        socket_base(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol) :
+        socket_base(address_family family, socket_type type, ip_protocol protocol) :
             socket_base()
         {
             this->open(family, type, protocol);
         }
 
-        socket_base(_In_ socket_t sock) :
+        socket_base(socket_t sock) :
             socket_base()
         {
             this->_socket = sock;
         }
 
-        socket_base(_Inout_ socket_base &&other) :
+        socket_base(socket_base &&other) :
             socket_base()
         {
             this->swap(other);
@@ -833,21 +829,21 @@ namespace dhorn
         }
 
         // Cannot copy
-        socket_base(_In_ const socket_base &other) = delete;
-        socket_base &operator=(_In_ const socket_base &other) = delete;
+        socket_base(const socket_base &other) = delete;
+        socket_base &operator=(const socket_base &other) = delete;
 
 
 
         /*
          * Operators
          */
-        socket_base &operator=(_Inout_ socket_base &&other)
+        socket_base &operator=(socket_base &&other)
         {
             this->swap(other);
             return *this;
         }
 
-        socket_base &operator=(_In_ socket_t sock)
+        socket_base &operator=(socket_t sock)
         {
             this->Destroy(); // Throws if the socket is still open. This is desired
             this->_socket = sock;
@@ -870,7 +866,7 @@ namespace dhorn
         /*
          * Socket functions
          */
-        socket_base accept(_Inout_ socket_address &addr)
+        socket_base accept(socket_address &addr)
         {
             // We assume the size of sockaddr_in6 since that's the largest member of socket_address
             int size = sizeof(sockaddr_in6);
@@ -885,7 +881,7 @@ namespace dhorn
             return result;
         }
 
-        void bind(_In_ const socket_address &addr)
+        void bind(const socket_address &addr)
         {
             this->InvokeThrowOnError(::bind, this->_socket, addr, addr.size());
         }
@@ -896,7 +892,7 @@ namespace dhorn
             this->_socket = invalid_socket;
         }
 
-        void connect(_In_ const socket_address &addr)
+        void connect(const socket_address &addr)
         {
             this->InvokeThrowOnError(::connect, this->_socket, addr, addr.size());
         }
@@ -932,7 +928,7 @@ namespace dhorn
         }
 
         template <typename Ty>
-        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        Ty get_socket_option(socket_level level, socket_option opt)
         {
             Ty value;
             int len = static_cast<int>(sizeof(value));
@@ -948,20 +944,18 @@ namespace dhorn
             return value;
         }
 
-        unsigned long io_control(
-            _In_ io_control_command cmd,
-            _In_opt_ unsigned long value = 0)
+        unsigned long io_control(io_control_command cmd, unsigned long value = 0)
         {
             this->InvokeThrowOnError(::ioctlsocket, this->_socket, static_cast<long>(cmd), &value);
             return value;
         }
 
-        void listen(_In_ int backlog)
+        void listen(int backlog)
         {
             this->InvokeThrowOnError(::listen, this->_socket, backlog);
         }
 
-        void open(_In_ address_family family, _In_ socket_type type, _In_ ip_protocol protocol)
+        void open(address_family family, socket_type type, ip_protocol protocol)
         {
             garbage::wsa_throw_if_false(this->_socket == invalid_socket, WSAEISCONN);
 
@@ -972,17 +966,14 @@ namespace dhorn
             }
         }
 
-        socket_error_t receive(
-            _Out_writes_bytes_to_(length, return) void *buffer,
-            _In_ int length,
-            _In_ message_flags flags = message_flags::none)
+        socket_error_t receive(void *buffer, int length, message_flags flags = message_flags::none)
         {
             auto buff = static_cast<char *>(buffer);
             return this->InvokeThrowOnError(::recv, this->_socket, buff, length, static_cast<int>(flags));
         }
 
         template <typename Itr>
-        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        Itr receive(Itr front, Itr back, message_flags flags = message_flags::none)
         {
             // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
             // they are random access iterators. Hence, we use std::vector for the call to ::recv
@@ -1004,18 +995,12 @@ namespace dhorn
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive(
-            _Out_writes_bytes_to_(len, return) Ty (&buffer)[len],
-            _In_ message_flags flags = message_flags::none)
+        socket_error_t receive(Ty (&buffer)[len], message_flags flags = message_flags::none)
         {
             return this->receive(static_cast<void *>(buffer), len * sizeof(Ty), flags);
         }
 
-        socket_error_t receive_from(
-            _Out_writes_bytes_to_(length, return) void *buffer,
-            _In_ int length,
-            _In_ message_flags flags,
-            _Out_ socket_address &addr)
+        socket_error_t receive_from(void *buffer, int length, message_flags flags, socket_address &addr)
         {
             // We assume the size of sockaddr_in6 since that's the largest member of socket_address
             int size = sizeof(sockaddr_in6);
@@ -1037,11 +1022,7 @@ namespace dhorn
         }
 
         template <typename Itr>
-        Itr receive_from(
-            _In_ Itr front,
-            _In_ Itr back,
-            _In_ message_flags flags,
-            _Out_ socket_address &addr)
+        Itr receive_from(Itr front, Itr back, message_flags flags, socket_address &addr)
         {
             // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
             // they are random access iterators. Hence, we use std::vector for the call to ::recvfrom
@@ -1065,25 +1046,19 @@ namespace dhorn
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive_from(
-            _Out_writes_bytes_to_(len, return) Ty (&buffer)[len],
-            _In_ message_flags flags,
-            _Out_ socket_address &addr)
+        socket_error_t receive_from(Ty (&buffer)[len], message_flags flags, socket_address &addr)
         {
             return this->receive_from(static_cast<void *>(buffer), len * sizeof(Ty), flags, addr);
         }
 
-        socket_error_t send(
-            _In_reads_bytes_(length) const void *buffer,
-            _In_ size_t length,
-            _In_ message_flags flags = message_flags::none)
+        socket_error_t send(const void *buffer, size_t length, message_flags flags = message_flags::none)
         {
             auto buff = static_cast<const char *>(buffer);
             return this->InvokeThrowOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
         }
 
         template <typename Itr>
-        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        socket_error_t send(Itr front, Itr back, message_flags flags = message_flags::none)
         {
             // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
             // they are random access iterators. Hence, we transfer the contents to std::vector
@@ -1094,16 +1069,12 @@ namespace dhorn
         }
 
         template <typename Ty, size_t len>
-        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
+        socket_error_t send(const Ty (&buffer)[len], message_flags flags = message_flags::none)
         {
             return this->send(static_cast<const void *>(buffer), len * sizeof(Ty), flags);
         }
 
-        socket_error_t send_to(
-            _In_reads_bytes_(length) const void *buffer,
-            _In_ size_t length,
-            _In_ message_flags flags,
-            _In_ const socket_address &addr)
+        socket_error_t send_to(const void *buffer, size_t length, message_flags flags, const socket_address &addr)
         {
             return this->InvokeThrowOnError(
                 ::sendto,
@@ -1116,11 +1087,7 @@ namespace dhorn
         }
 
         template <typename Itr>
-        socket_error_t send_to(
-            _In_ Itr front,
-            _In_ Itr back,
-            _In_ message_flags flags,
-            _In_ const socket_address &addr)
+        socket_error_t send_to(Itr front, Itr back, message_flags flags, const socket_address &addr)
         {
             // We cannot guarantee that the collection [front, back) exists in contiguous memory locations, even if
             // they are random access iterators. Hence, we transfer the contents to std::vector
@@ -1135,16 +1102,13 @@ namespace dhorn
         }
 
         template <typename Ty, size_t len>
-        socket_error_t send_to(
-            _In_ const Ty(&buffer)[len],
-            _In_ message_flags flags,
-            _In_ const socket_address &addr)
+        socket_error_t send_to(const Ty(&buffer)[len], message_flags flags, const socket_address &addr)
         {
             return this->send_to(static_cast<const void *>(buffer), len * sizeof(Ty), flags, addr);
         }
 
         template <typename Ty>
-        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        void set_socket_option(socket_level level, socket_option opt, const Ty &val)
         {
             this->InvokeThrowOnError(
                 ::setsockopt,
@@ -1155,7 +1119,7 @@ namespace dhorn
                 sizeof(val));
         }
 
-        void shutdown(_In_ shutdown_options options = shutdown_options::both)
+        void shutdown(shutdown_options options = shutdown_options::both)
         {
             this->InvokeThrowOnError(::shutdown, this->_socket, static_cast<int>(options));
         }
@@ -1165,7 +1129,7 @@ namespace dhorn
         /*
          * Other functions
          */
-        void swap(_Inout_ socket_base &other)
+        void swap(socket_base &other)
         {
             auto temp = this->_socket;
             this->_socket = other._socket;
@@ -1229,25 +1193,25 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        udp_packet(_In_ size_t capacity)
+        udp_packet(size_t capacity)
         {
             this->reset(capacity);
         }
 
         // Cannot copy
-        udp_packet(_In_ const udp_packet &) = delete;
-        udp_packet &operator=(_In_ const udp_packet &) = delete;
+        udp_packet(const udp_packet &) = delete;
+        udp_packet &operator=(const udp_packet &) = delete;
 
         // Default move
-        udp_packet(_Inout_ udp_packet &&) = default;
-        udp_packet &operator=(_Inout_ udp_packet &&) = default;
+        udp_packet(udp_packet &&) = default;
+        udp_packet &operator=(udp_packet &&) = default;
 
 
 
         /*
          * Public Functions
          */
-        void reset(_In_ size_t capacity)
+        void reset(size_t capacity)
         {
             this->_dataLength = 0;
             this->_bufferLength = capacity;
@@ -1274,18 +1238,18 @@ namespace dhorn
             return this->_addr;
         }
 
-        void set_addr(_In_ const socket_address &addr)
+        void set_addr(const socket_address &addr)
         {
             this->_addr = addr;
         }
 
-        void set_data(_In_ Ty *buffer, _In_ size_t size)
+        void set_data(Ty *buffer, size_t size)
         {
             this->set_data(buffer, buffer + size);
         }
 
         template <typename Itr>
-        void set_data(_In_ Itr front, _In_ Itr back)
+        void set_data(Itr front, Itr back)
         {
             this->_dataLength = 0; // Expect the worst
             size_t size = std::distance(front, back);
@@ -1302,7 +1266,7 @@ namespace dhorn
             this->_dataLength = size;
         }
 
-        void swap(_Inout_ udp_packet &other)
+        void swap(udp_packet &other)
         {
             // Swap the buffers
             this->_buffer.swap(other._buffer);
@@ -1339,26 +1303,26 @@ namespace dhorn
         {
         }
 
-        udp_socket(_In_ socket_t sock) :
+        udp_socket(socket_t sock) :
             _baseSocket(sock)
         {
         }
 
-        udp_socket(_Inout_ udp_socket &&other) :
+        udp_socket(udp_socket &&other) :
             _baseSocket(std::move(other._baseSocket))
         {
         }
 
         // Cannot copy
-        udp_socket(_In_ const udp_socket &) = delete;
-        udp_socket &operator=(_In_ const udp_socket &) = delete;
+        udp_socket(const udp_socket &) = delete;
+        udp_socket &operator=(const udp_socket &) = delete;
 
 
 
         /*
          * Operators
          */
-        udp_socket &operator=(_Inout_ udp_socket &&other)
+        udp_socket &operator=(udp_socket &&other)
         {
             this->swap(other);
             return *this;
@@ -1369,7 +1333,7 @@ namespace dhorn
         /*
          * Socket Functions
          */
-        void bind(_In_ const socket_address &addr)
+        void bind(const socket_address &addr)
         {
             this->_baseSocket.bind(addr);
         }
@@ -1382,47 +1346,35 @@ namespace dhorn
         // TODO: get_peer_name/get_socket_name??
 
         template <typename Ty>
-        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        Ty get_socket_option(socket_level level, socket_option opt)
         {
             return this->_baseSocket.get_socket_name<Ty>(level, opt);
         }
 
-        unsigned long io_control(
-            _In_ io_control_command cmd,
-            _In_opt_ unsigned long value = 0)
+        unsigned long io_control(io_control_command cmd, unsigned long value = 0)
         {
             return this->_baseSocket.io_control(cmd, value);
         }
 
-        socket_error_t receive(
-            _Out_writes_bytes_to_(length, return) void *buffer,
-            _In_ int length,
-            _In_ message_flags flags,
-            _Out_ socket_address &addr)
+        socket_error_t receive(void *buffer, int length, message_flags flags, socket_address &addr)
         {
             return this->_baseSocket.receive_from(buffer, length, flags, addr);
         }
 
         template <typename Itr>
-        Itr receive(
-            _In_ Itr front,
-            _In_ Itr back,
-            _In_ message_flags flags,
-            _Out_ socket_address &addr)
+        Itr receive(Itr front, Itr back, message_flags flags, socket_address &addr)
         {
             return this->_baseSocket.receive_from<Itr>(front, back, flags, addr);
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive(_Out_ Ty(&buffer)[len], _In_ message_flags flags, _Out_ socket_address &addr)
+        socket_error_t receive(Ty(&buffer)[len], message_flags flags, socket_address &addr)
         {
             return this->_baseSocket.receive_from<Ty, len>(buffer, flags, addr);
         }
 
         template <typename Ty>
-        void receive(
-            _Inout_ udp_packet<Ty> &packet,
-            _In_opt_ message_flags flags = message_flags::none)
+        void receive(udp_packet<Ty> &packet, message_flags flags = message_flags::none)
         {
             auto length = this->_baseSocket.receive_from(
                 reinterpret_cast<void *>(packet._buffer.get()),
@@ -1434,38 +1386,25 @@ namespace dhorn
             packet._dataLength = length / sizeof(Ty);
         }
 
-        socket_error_t send(
-            _In_reads_bytes_(length) const void *buffer,
-            _In_ size_t length,
-            _In_ message_flags flags,
-            _In_ const socket_address &addr)
+        socket_error_t send(const void *buffer, size_t length, message_flags flags, const socket_address &addr)
         {
             return this->_baseSocket.send_to(buffer, length, flags, addr);
         }
 
         template <typename Itr>
-        socket_error_t send(
-            _In_ Itr front,
-            _In_ Itr back,
-            _In_ message_flags flags,
-            _In_ const socket_address &addr)
+        socket_error_t send(Itr front, Itr back, message_flags flags, const socket_address &addr)
         {
             return this->_baseSocket.send_to<Itr>(front, back, flags, addr);
         }
 
         template <typename Ty, size_t len>
-        socket_error_t send(
-            _In_ const Ty(&buffer)[len],
-            _In_ message_flags flags,
-            _In_ const socket_address &addr)
+        socket_error_t send(const Ty(&buffer)[len], message_flags flags, const socket_address &addr)
         {
             return this->_baseSocket.send_to<Ty, len>(buffer, flags, addr);
         }
 
         template <typename Ty>
-        socket_error_t send(
-            _In_ const udp_packet<Ty> &packet,
-            _In_opt_ message_flags flags = message_flags::none)
+        socket_error_t send(const udp_packet<Ty> &packet, message_flags flags = message_flags::none)
         {
             // TODO: Fail if we don't send all bytes? The design is that most callers shouldn't need to check this...
             return this->_baseSocket.send_to(
@@ -1476,7 +1415,7 @@ namespace dhorn
         }
 
         template <typename Ty>
-        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        void set_socket_option(socket_level level, socket_option opt, const Ty &val)
         {
             this->_baseSocket.set_socket_option<Ty>(level, opt, val);
         }
@@ -1486,7 +1425,7 @@ namespace dhorn
         /*
          * Other Functions
          */
-        void swap(_Inout_ udp_socket &other)
+        void swap(udp_socket &other)
         {
             this->_baseSocket.swap(other._baseSocket);
         }
@@ -1521,26 +1460,26 @@ namespace dhorn
         {
         }
 
-        tcp_socket(_In_ socket_t sock) :
+        tcp_socket(socket_t sock) :
             _baseSocket(sock)
         {
         }
 
-        tcp_socket(_Inout_ tcp_socket &&other) :
+        tcp_socket(tcp_socket &&other) :
             _baseSocket(std::move(other._baseSocket))
         {
         }
 
         // Cannot copy
-        tcp_socket(_In_ const tcp_socket &other) = delete;
-        tcp_socket&operator=(_In_ const tcp_socket &other) = delete;
+        tcp_socket(const tcp_socket &other) = delete;
+        tcp_socket&operator=(const tcp_socket &other) = delete;
 
 
 
         /*
          * Socket Functions
          */
-        void bind(_In_ const socket_address &addr)
+        void bind(const socket_address &addr)
         {
             // Needed...?
             this->_baseSocket.bind(addr);
@@ -1551,7 +1490,7 @@ namespace dhorn
             this->_baseSocket.close();
         }
 
-        void connect(_In_ const socket_address &addr)
+        void connect(const socket_address &addr)
         {
             this->_baseSocket.connect(addr);
         }
@@ -1567,65 +1506,57 @@ namespace dhorn
         }
 
         template <typename Ty>
-        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        Ty get_socket_option(socket_level level, socket_option opt)
         {
             return this->_baseSocket.get_socket_option<Ty>(level, opt);
         }
 
-        unsigned long io_control(
-            _In_ io_control_command cmd,
-            _In_opt_ unsigned long value = 0)
+        unsigned long io_control(io_control_command cmd, unsigned long value = 0)
         {
             return this->_baseSocket.io_control(cmd, value);
         }
 
-        socket_error_t receive(
-            _Out_writes_bytes_to_(length, return) void *buffer,
-            _In_ int length,
-            _In_ message_flags flags = message_flags::none)
+        socket_error_t receive(void *buffer, int length, message_flags flags = message_flags::none)
         {
             return this->_baseSocket.receive(buffer, length, flags);
         }
 
         template <typename Itr>
-        Itr receive(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        Itr receive(Itr front, Itr back, message_flags flags = message_flags::none)
         {
             return this->_baseSocket.receive<Itr>(front, back, flags);
         }
 
         template <typename Ty, size_t len>
-        socket_error_t receive(_Out_ Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
+        socket_error_t receive(Ty (&buffer)[len], message_flags flags = message_flags::none)
         {
             return this->_baseSocket.receive<Ty, len>(buffer, flags);
         }
 
-        socket_error_t send(
-            _In_reads_bytes_(length) const void *buffer,
-            _In_ size_t length,
-            _In_ message_flags flags = message_flags::none)
+        socket_error_t send(const void *buffer, size_t length, message_flags flags = message_flags::none)
         {
             return this->_baseSocket.send(buffer, length, flags);
         }
 
         template <typename Itr>
-        socket_error_t send(_In_ Itr front, _In_ Itr back, _In_ message_flags flags = message_flags::none)
+        socket_error_t send(Itr front, Itr back, message_flags flags = message_flags::none)
         {
             return this->_baseSocket.send<Itr>(front, back, flags);
         }
 
         template <typename Ty, size_t len>
-        socket_error_t send(_In_ const Ty (&buffer)[len], _In_ message_flags flags = message_flags::none)
+        socket_error_t send(const Ty (&buffer)[len], message_flags flags = message_flags::none)
         {
             return this->_baseSocket.send<Ty, len>(buffer, flags);
         }
 
         template <typename Ty>
-        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        void set_socket_option(socket_level level, socket_option opt, const Ty &val)
         {
             this->_baseSocket.set_socket_option<Ty>(level, opt, val);
         }
 
-        void shutdown(_In_ shutdown_options options = shutdown_options::both)
+        void shutdown(shutdown_options options = shutdown_options::both)
         {
             this->_baseSocket.shutdown(options);
         }
@@ -1635,7 +1566,7 @@ namespace dhorn
         /*
          * Other Functions
          */
-        void swap(_Inout_ tcp_socket &other)
+        void swap(tcp_socket &other)
         {
             this->_baseSocket.swap(other._baseSocket);
         }
@@ -1670,26 +1601,26 @@ namespace dhorn
         {
         }
 
-        server_socket(_In_ socket_t sock) :
+        server_socket(socket_t sock) :
             _baseSocket(sock)
         {
         }
 
-        server_socket(_Inout_ server_socket &&other) :
+        server_socket(server_socket &&other) :
             _baseSocket(std::move(other._baseSocket))
         {
         }
 
         // Cannot copy
-        server_socket(_In_ const server_socket &other) = delete;
-        server_socket &operator=(_In_ const server_socket &other) = delete;
+        server_socket(const server_socket &other) = delete;
+        server_socket &operator=(const server_socket &other) = delete;
 
 
 
         /*
          * Operators
          */
-        server_socket &operator=(_Inout_ server_socket &&other)
+        server_socket &operator=(server_socket &&other)
         {
             this->swap(other);
             return *this;
@@ -1700,13 +1631,13 @@ namespace dhorn
         /*
          * Socket Functions
          */
-        tcp_socket accept(_Inout_ socket_address &addr)
+        tcp_socket accept(socket_address &addr)
         {
             auto socket = this->_baseSocket.accept(addr);
             return tcp_socket(socket.detach()); // "Promote" as tcp_socket
         }
 
-        void bind(_In_ const socket_address &addr)
+        void bind(const socket_address &addr)
         {
             this->_baseSocket.bind(addr);
         }
@@ -1719,27 +1650,25 @@ namespace dhorn
         // TODO: get_peer_name/get_socket_name
 
         template <typename Ty>
-        Ty get_socket_option(_In_ socket_level level, _In_ socket_option opt)
+        Ty get_socket_option(socket_level level, socket_option opt)
         {
             // TODO: needed...?
             return this->_baseSocket.get_socket_option<Ty>(level, opt);
         }
 
-        unsigned long io_control(
-            _In_ io_control_command cmd,
-            _In_opt_ unsigned long value = 0)
+        unsigned long io_control(io_control_command cmd, unsigned long value = 0)
         {
             // TODO: needed...?
             return this->_baseSocket.io_control(cmd, value);
         }
 
-        void listen(_In_ int backlog)
+        void listen(int backlog)
         {
             this->_baseSocket.listen(backlog);
         }
 
         template <typename Ty>
-        void set_socket_option(_In_ socket_level level, _In_ socket_option opt, _In_ const Ty &val)
+        void set_socket_option(socket_level level, socket_option opt, const Ty &val)
         {
             // TODO: needed...?
             this->_baseSocket.set_socket_option<Ty>(level, opt, val);
@@ -1750,7 +1679,7 @@ namespace dhorn
         /*
          * Other Functions
          */
-        void swap(_Inout_ server_socket &other)
+        void swap(server_socket &other)
         {
             this->_baseSocket.swap(other._baseSocket);
         }
@@ -1773,7 +1702,7 @@ namespace dhorn
 
     namespace garbage
     {
-        inline void create_fd_set(_In_ const std::set<socket_t> &sockets, _Inout_ fd_set &fdSet)
+        inline void create_fd_set(const std::set<socket_t> &sockets, fd_set &fdSet)
         {
             FD_ZERO(&fdSet);
 
@@ -1809,28 +1738,28 @@ namespace dhorn
 namespace std
 {
     // Overload of std::swap for the socket types
-    inline void swap(_Inout_ dhorn::socket_base &lhs, _Inout_ dhorn::socket_base &rhs)
+    inline void swap(dhorn::socket_base &lhs, dhorn::socket_base &rhs)
     {
         lhs.swap(rhs);
     }
 
     template <typename Ty>
-    inline void swap(_Inout_ dhorn::udp_packet<Ty> &lhs, _Inout_ dhorn::udp_packet<Ty> &rhs)
+    inline void swap(dhorn::udp_packet<Ty> &lhs, dhorn::udp_packet<Ty> &rhs)
     {
         lhs.swap(rhs);
     }
 
-    inline void swap(_Inout_ dhorn::udp_socket &lhs, _Inout_ dhorn::udp_socket &rhs)
+    inline void swap(dhorn::udp_socket &lhs, dhorn::udp_socket &rhs)
     {
         lhs.swap(rhs);
     }
 
-    inline void swap(_Inout_ dhorn::tcp_socket &lhs, _Inout_ dhorn::tcp_socket &rhs)
+    inline void swap(dhorn::tcp_socket &lhs, dhorn::tcp_socket &rhs)
     {
         lhs.swap(rhs);
     }
 
-    inline void swap(_Inout_ dhorn::server_socket &lhs, _Inout_ dhorn::server_socket &rhs)
+    inline void swap(dhorn::server_socket &lhs, dhorn::server_socket &rhs)
     {
         lhs.swap(rhs);
     }

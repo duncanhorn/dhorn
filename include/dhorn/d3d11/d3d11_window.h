@@ -44,7 +44,7 @@ namespace dhorn
         class basic_d3d11_window :
             public dhorn::win32::window
         {
-            using QualityFunc = std::function<UINT(_In_ ID3D11Device *, _Inout_ UINT *)>;
+            using QualityFunc = std::function<UINT(ID3D11Device *, UINT *)>;
             using UpdateFunc = std::function<void(void)>;
             using DrawFunc = std::function<void(ID3D11Device *, ID3D11DeviceContext *)>;
             using SizeChangeFunc = std::function<void(const rect<size_t> &)>;
@@ -83,7 +83,7 @@ namespace dhorn
                 return this->_featureLevel;
             }
 
-            void XM_CALLCONV set_background(_In_ DirectX::FXMVECTOR color)
+            void XM_CALLCONV set_background(DirectX::FXMVECTOR color)
             {
                 DirectX::XMStoreFloat4(&this->_backgroundColor, color);
             }
@@ -109,22 +109,22 @@ namespace dhorn
             /*
              * Custom initialization values
              */
-            void msaa_quality_callback(_In_ const QualityFunc &func)
+            void msaa_quality_callback(const QualityFunc &func)
             {
                 this->_qualityFunc = func;
             }
 
-            void on_update(_In_ const UpdateFunc &func)
+            void on_update(const UpdateFunc &func)
             {
                 this->_updateFunc = func;
             }
 
-            void on_draw(_In_ const DrawFunc &func)
+            void on_draw(const DrawFunc &func)
             {
                 this->_drawFunc = func;
             }
 
-            void on_resize(_In_ const SizeChangeFunc &func)
+            void on_resize(const SizeChangeFunc &func)
             {
                 this->_sizeChangeFunc = func;
             }
@@ -187,7 +187,7 @@ namespace dhorn
                 throw_hr_if_false(this->_featureLevel == D3D_FEATURE_LEVEL_11_0, E_NOTIMPL);
             }
 
-            virtual void create_swap_chain(_In_ const dhorn::rect<size_t> &size)
+            virtual void create_swap_chain(const dhorn::rect<size_t> &size)
             {
                 assert(this->_device);
                 assert(!this->_swapChain);
@@ -222,7 +222,7 @@ namespace dhorn
                     &this->_renderTargetView));
             }
 
-            virtual void create_depth_stencil(_In_ const dhorn::rect<size_t> &size)
+            virtual void create_depth_stencil(const dhorn::rect<size_t> &size)
             {
                 assert(!this->_depthStencilBuffer);
 
@@ -249,14 +249,14 @@ namespace dhorn
                     &this->_depthStencilView));
             }
 
-            virtual void set_viewports(_In_ const dhorn::rect<size_t> &size)
+            virtual void set_viewports(const dhorn::rect<size_t> &size)
             {
                 // By default, create one view port that is the size of the window
                 D3D11_VIEWPORT viewPort = view_port(static_cast<float>(size.width), static_cast<float>(size.height));
                 this->_deviceContext->RSSetViewports(1, &viewPort);
             }
 
-            virtual void resize(_In_ const rect<size_t> &clientArea)
+            virtual void resize(const rect<size_t> &clientArea)
             {
                 // We don't care if only the coordinates change
                 if ((this->_previousClientArea.width == clientArea.width) &&
@@ -359,18 +359,18 @@ namespace dhorn
              * Custom message handling
              */
             virtual win32::callback_handler::result_type on_enter_size_move(
-                _In_ win32::window * /*sender*/,
-                _In_ uintptr_t /*wparam*/,
-                _In_ intptr_t /*lparam*/)
+                win32::window * /*sender*/,
+                uintptr_t /*wparam*/,
+                intptr_t /*lparam*/)
             {
                 this->_resizing = true;
                 return std::make_pair(true, 0);
             }
 
             virtual win32::callback_handler::result_type on_exit_size_move(
-                _In_ win32::window * /*sender*/,
-                _In_ uintptr_t /*wparam*/,
-                _In_ intptr_t /*lparam*/)
+                win32::window * /*sender*/,
+                uintptr_t /*wparam*/,
+                intptr_t /*lparam*/)
             {
                 this->_resizing = false;
                 this->resize(this->client_rect());
@@ -379,9 +379,9 @@ namespace dhorn
             }
 
             virtual win32::callback_handler::result_type on_size_change(
-                _In_ win32::window * /*sender*/,
-                _In_ uintptr_t wparam,
-                _In_ intptr_t lparam)
+                win32::window * /*sender*/,
+                uintptr_t wparam,
+                intptr_t lparam)
             {
                 rect<size_t> clientArea = { 0, 0, LOWORD(lparam), HIWORD(lparam) };
 

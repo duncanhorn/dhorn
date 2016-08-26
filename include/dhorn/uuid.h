@@ -59,7 +59,7 @@ namespace dhorn
         }
 
         template <size_t N, typename = typename std::enable_if<N == 16>::type>
-        uuid(_In_ const uint8_t (&arr)[N])
+        uuid(const uint8_t (&arr)[N])
         {
             const uint32_t *target = reinterpret_cast<const uint32_t *>(arr);
 
@@ -70,7 +70,7 @@ namespace dhorn
         }
 
         template <size_t N, typename = typename std::enable_if<N == 4>::type>
-        uuid(_In_ const uint32_t (&arr)[N])
+        uuid(const uint32_t (&arr)[N])
         {
             for (size_t i = 0; i < 4; i++)
             {
@@ -80,10 +80,10 @@ namespace dhorn
 
         // We can't use std::initializer_list because we accept two separate types that can't easily be differentiated
         // in client code, and we are very strict on the size of the initialization list we accept
-        uuid(_In_ uint8_t val0,  _In_ uint8_t val1,  _In_ uint8_t val2,  _In_ uint8_t val3,
-             _In_ uint8_t val4,  _In_ uint8_t val5,  _In_ uint8_t val6,  _In_ uint8_t val7,
-             _In_ uint8_t val8,  _In_ uint8_t val9,  _In_ uint8_t val10, _In_ uint8_t val11,
-             _In_ uint8_t val12, _In_ uint8_t val13, _In_ uint8_t val14, _In_ uint8_t val15)// :
+        uuid(uint8_t val0,  uint8_t val1,  uint8_t val2,  uint8_t val3,
+             uint8_t val4,  uint8_t val5,  uint8_t val6,  uint8_t val7,
+             uint8_t val8,  uint8_t val9,  uint8_t val10, uint8_t val11,
+             uint8_t val12, uint8_t val13, uint8_t val14, uint8_t val15)// :
 //             data{ val0, val1, val2,  val3,  val4,  val5,  val6,  val7,
 //                   val8, val9, val10, val11, val12, val13, val14, val15 }
         {
@@ -96,7 +96,7 @@ namespace dhorn
             this->data[15] = val15;
         }
 
-        uuid(_In_ uint32_t val0, _In_ uint32_t val1, _In_ uint32_t val2, _In_ uint32_t val3)// :
+        uuid(uint32_t val0, uint32_t val1, uint32_t val2, uint32_t val3)// :
 //            data32{ val0, val1, val2, val3 }
         {
             data32[0] = val0;
@@ -119,7 +119,7 @@ namespace dhorn
 
 #ifdef  WIN32
 
-        uuid(_In_ const GUID &guid) :
+        uuid(const GUID &guid) :
             Data1(guid.Data1),
             Data2(guid.Data2),
             Data3(guid.Data3)
@@ -149,24 +149,24 @@ namespace dhorn
         /*
          * Operators
          */
-        inline bool operator==(_In_ const uuid &other) const
+        inline bool operator==(const uuid &other) const
         {
             return this->Compare(other) == 0;
         }
 
-        inline bool operator<(_In_ const uuid &other) const
+        inline bool operator<(const uuid &other) const
         {
             return this->Compare(other) < 0;
         }
 
-        inline bool operator>(_In_ const uuid &other) const
+        inline bool operator>(const uuid &other) const
         {
             return this->Compare(other) > 0;
         }
 
-        inline bool operator!=(_In_ const uuid &other) const { return !(*this == other); }
-        inline bool operator>=(_In_ const uuid &other) const { return !(*this < other); }
-        inline bool operator<=(_In_ const uuid &other) const { return !(*this > other); }
+        inline bool operator!=(const uuid &other) const { return !(*this == other); }
+        inline bool operator>=(const uuid &other) const { return !(*this < other); }
+        inline bool operator<=(const uuid &other) const { return !(*this > other); }
 
 
 
@@ -191,7 +191,7 @@ namespace dhorn
 
     private:
 
-        inline int Compare(_In_ const uuid &other) const
+        inline int Compare(const uuid &other) const
         {
             for (size_t i = 0; i < 4; i++)
             {
@@ -223,7 +223,7 @@ namespace std
         using argument_type = dhorn::uuid;
         using result_type = size_t;
 
-        size_t operator()(_In_ const dhorn::uuid &obj)
+        size_t operator()(const dhorn::uuid &obj)
         {
             return obj.hash();
         }

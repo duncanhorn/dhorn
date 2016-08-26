@@ -23,45 +23,45 @@ namespace dhorn
     {
         template <typename NumericType>
         inline constexpr typename std::enable_if<std::is_signed<NumericType>::value, NumericType>::type
-        negate(_In_ NumericType val)
+        negate(NumericType val)
         {
             return -val;
         }
 
         template <typename NumericType>
         inline constexpr typename std::enable_if<std::is_unsigned<NumericType>::value, NumericType>::type
-        negate(_In_ NumericType)
+        negate(NumericType)
         {
             throw std::invalid_argument("Cannot negate an unsigned type");
         }
 
         template <typename CharT>
-        inline constexpr bool is_digit(_In_ CharT ch) noexcept
+        inline constexpr bool is_digit(CharT ch) noexcept
         {
             return (ch >= '0') && (ch <= '9');
         }
 
         template <typename CharT>
-        inline const CharT *skip_digits(_In_ const CharT *str) noexcept
+        inline const CharT *skip_digits(const CharT *str) noexcept
         {
             for (; is_digit(*str); ++str);
             return str;
         }
 
         template <typename NumericType, typename CharT>
-        inline constexpr NumericType to_digit(_In_ CharT ch) noexcept
+        inline constexpr NumericType to_digit(CharT ch) noexcept
         {
             return static_cast<NumericType>(ch - '0');
         }
 
         template <typename CharT>
-        inline constexpr bool is_sign(_In_ CharT ch) noexcept
+        inline constexpr bool is_sign(CharT ch) noexcept
         {
             return (ch == '+') || (ch == '-');
         }
 
         template <typename CharT>
-        inline const CharT *skip_sign(_In_ CharT *str) noexcept
+        inline const CharT *skip_sign(CharT *str) noexcept
         {
             if (is_sign(*str))
             {
@@ -71,13 +71,13 @@ namespace dhorn
         }
 
         template <typename CharT>
-        inline constexpr bool is_decimal(_In_ CharT ch) noexcept
+        inline constexpr bool is_decimal(CharT ch) noexcept
         {
             return ch == '.';
         }
 
         template <typename CharT>
-        inline const CharT *skip_decimal(_In_ CharT *str) noexcept
+        inline const CharT *skip_decimal(CharT *str) noexcept
         {
             if (is_decimal(*str))
             {
@@ -87,13 +87,13 @@ namespace dhorn
         }
 
         template <typename CharT>
-        inline constexpr bool is_exponential(_In_ CharT ch) noexcept
+        inline constexpr bool is_exponential(CharT ch) noexcept
         {
             return (ch == 'e') || (ch == 'E');
         }
 
         template <typename CharT>
-        inline const CharT *skip_exponential(_In_ CharT *str) noexcept
+        inline const CharT *skip_exponential(CharT *str) noexcept
         {
             if (is_exponential(*str))
             {
@@ -103,10 +103,7 @@ namespace dhorn
         }
 
         template <typename NumericType, typename CharT>
-        const CharT *read_integer_value(
-            _In_ const CharT *front,
-            _In_opt_ const CharT *back,
-            _Inout_ NumericType *value)
+        const CharT *read_integer_value(const CharT *front, const CharT *back, NumericType *value)
         {
             for (; (front != back) && is_digit(*front); ++front)
             {
@@ -117,11 +114,7 @@ namespace dhorn
         }
 
         template <typename NumericType, typename CharT>
-        const CharT *read_fractional_value(
-            _In_ const CharT *front,
-            _In_opt_ const CharT *back,
-            _Inout_ NumericType *value,
-            _Inout_ bool* isNonZero)
+        const CharT *read_fractional_value(const CharT *front, const CharT *back, NumericType *value, bool* isNonZero)
         {
             if (back == nullptr)
             {
@@ -149,7 +142,7 @@ namespace dhorn
 #pragma region String Literal Conversion
 
      template <typename NumericType, typename CharT>
-     NumericType numeric_cast(_In_ const CharT *str)
+     NumericType numeric_cast(const CharT *str)
      {
          // Since the string could be of some crazy form like 10000000000000e-13, we need to keep the value in string
          // form for as long as possible and shift the decimal via string pointers
@@ -262,7 +255,7 @@ namespace dhorn
 #pragma region std::basic_string Conversion
 
      template <typename NumericType, typename CharT, typename Traits, typename Alloc>
-     NumericType numeric_cast(_In_ const std::basic_string<CharT, Traits, Alloc> &str)
+     NumericType numeric_cast(const std::basic_string<CharT, Traits, Alloc> &str)
      {
          return numeric_cast<NumericType>(str.c_str());
      }
@@ -274,7 +267,7 @@ namespace dhorn
 #pragma region dhorn::utf_string Conversion
 
      template <typename NumericType, typename CharT>
-     NumericType numeric_cast(_In_ const utf_string<CharT> &str)
+     NumericType numeric_cast(const utf_string<CharT> &str)
      {
          return numeric_cast<NumericType>(str.c_str());
      }

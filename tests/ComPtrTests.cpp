@@ -47,9 +47,7 @@ namespace dhorn
             }
 
             // IUnknown
-            STDMETHODIMP QueryInterface(
-                _In_ REFIID riid,
-                _COM_Outptr_ void **ppvObject)
+            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
             {
                 if (riid == __uuidof(IUnknown))
                 {
@@ -102,9 +100,7 @@ namespace dhorn
         {
         public:
             // IUnknown
-            STDMETHODIMP QueryInterface(
-                _In_ REFIID riid,
-                _COM_Outptr_ void **ppvObject)
+            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
             {
                 if (riid == __uuidof(IFoo))
                 {
@@ -149,9 +145,7 @@ namespace dhorn
         public:
 
             // IUnknown
-            STDMETHODIMP QueryInterface(
-                _In_ REFIID riid,
-                _COM_Outptr_ void **ppvObject)
+            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
             {
                 if (riid == __uuidof(IBar))
                 {
@@ -180,7 +174,7 @@ namespace dhorn
             }
         };
 
-        void GetFoo(_In_ REFIID iid, _Outptr_result_maybenull_ void **ppOut)
+        void GetFoo(REFIID iid, void **ppOut)
         {
             static IFoo *pFoo = new Foo();
             com_ptr<IFoo>(pFoo).copy_to(iid, ppOut);
@@ -194,9 +188,7 @@ namespace dhorn
         public:
 
             // IUnknown
-            STDMETHODIMP QueryInterface(
-                _In_ REFIID riid,
-                _COM_Outptr_ void **ppvObject)
+            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
             {
                 if (riid == __uuidof(IFoo))
                 {

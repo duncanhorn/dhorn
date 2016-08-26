@@ -38,7 +38,7 @@ namespace dhorn
                 constructed++;
             }
 
-            node_test_class(_In_ const node_test_class &other) :
+            node_test_class(const node_test_class &other) :
                 _moved(false),
                 _val(other._val)
             {
@@ -49,7 +49,7 @@ namespace dhorn
                 copies++;
             }
 
-            node_test_class(_In_ node_test_class &&other) :
+            node_test_class(node_test_class &&other) :
                 _moved(false),
                 _val(other._val)
             {
@@ -69,7 +69,7 @@ namespace dhorn
 
 
 
-            node_test_class &operator=(_In_ const node_test_class &other)
+            node_test_class &operator=(const node_test_class &other)
             {
                 (void)other;
                 copies++;
@@ -77,7 +77,7 @@ namespace dhorn
                 return *this;
             }
 
-            node_test_class &operator=(_In_ const node_test_class &&other)
+            node_test_class &operator=(const node_test_class &&other)
             {
                 (void)other;
                 moves++;
@@ -119,7 +119,7 @@ namespace dhorn
             }
 
             template <typename _Func>
-            static void test(_In_ _Func func)
+            static void test(_Func func)
             {
                 reset();
                 {
@@ -468,7 +468,7 @@ namespace dhorn
             }
 
             template <bool _IsEqual, typename _Less, typename _Greater>
-            void _TestComparisons(_In_ _Less less, _In_ _Greater greater)
+            void _TestComparisons(_Less less, _Greater greater)
             {
                 Assert::IsTrue(less <= greater);
                 Assert::IsFalse(less > greater);
@@ -571,7 +571,7 @@ namespace dhorn
             }
 
             template <bool _IsConst, typename _It>
-            void _IncrementTest(_In_ _It itr)
+            void _IncrementTest(_It itr)
             {
                 Assert::IsTrue(std::is_assignable<decltype(*(++itr)), std::string>::value == !_IsConst);
                 Assert::IsTrue(std::is_assignable<decltype(*(itr++)), std::string>::value == !_IsConst);
@@ -602,7 +602,7 @@ namespace dhorn
             }
 
             template <bool _IsConst, typename _It>
-            void _DecrementTest(_In_ _It itr)
+            void _DecrementTest(_It itr)
             {
                 Assert::IsTrue(std::is_assignable<decltype(*(--itr)), std::string>::value == !_IsConst);
                 Assert::IsTrue(std::is_assignable<decltype(*(itr--)), std::string>::value == !_IsConst);
@@ -636,7 +636,7 @@ namespace dhorn
             }
 
             template <bool _IsConst, typename _It>
-            void _AdditionTest(_In_ _It itr)
+            void _AdditionTest(_It itr)
             {
                 Assert::IsTrue(std::is_assignable<decltype(*(itr + 4)), std::string>::value == !_IsConst);
                 Assert::IsTrue(std::is_assignable<decltype(*(itr += 4)), std::string>::value == !_IsConst);
@@ -668,7 +668,7 @@ namespace dhorn
             }
 
             template <bool _IsConst, typename _It>
-            void _SubtractionTest(_In_ _It itr)
+            void _SubtractionTest(_It itr)
             {
                 Assert::IsTrue(std::is_assignable<decltype(*(itr - 5)), std::string>::value == !_IsConst);
                 Assert::IsTrue(std::is_assignable<decltype(*(itr -= 5)), std::string>::value == !_IsConst);
@@ -701,7 +701,7 @@ namespace dhorn
             }
 
             template <bool _IsConst, bool _IsReverse, typename _It>
-            void _IndexingTest(_In_ _It itr)
+            void _IndexingTest(_It itr)
             {
                 Assert::IsTrue(std::is_assignable<decltype(itr[0]), std::string>::value == !_IsConst);
 
@@ -815,7 +815,7 @@ namespace dhorn
                 return tree;
             }
 
-            static void verify_test_tree(_In_ const test_type &tree)
+            static void verify_test_tree(const test_type &tree)
             {
                 Assert::IsTrue(tree.size() == 58);
 

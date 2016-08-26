@@ -27,35 +27,35 @@ namespace dhorn
          */
         hstring_reference(void) = default;
 
-        hstring_reference(_In_ const hstring_reference &other)
+        hstring_reference(const hstring_reference &other)
         {
             Assign(other);
         }
 
-        hstring_reference(_In_ const wchar_t *str, _In_ size_t length)
+        hstring_reference(const wchar_t *str, size_t length)
         {
             Assign(str, length);
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring_reference(_In_ StringT str)
+        hstring_reference(StringT str)
         {
             Assign(str);
         }
 
         template <size_t Size>
-        hstring_reference(_In_ const wchar_t (&str)[Size])
+        hstring_reference(const wchar_t (&str)[Size])
         {
             Assign(str);
         }
 
         template <size_t Size>
-        hstring_reference(_In_ wchar_t (&str)[Size])
+        hstring_reference(wchar_t (&str)[Size])
         {
             Assign(str);
         }
 
-        hstring_reference(_In_ const std::wstring &str)
+        hstring_reference(const std::wstring &str)
         {
             Assign(str);
         }
@@ -65,34 +65,34 @@ namespace dhorn
         /*
          * Operators
          */
-        hstring_reference &operator=(_In_ const hstring_reference &other)
+        hstring_reference &operator=(const hstring_reference &other)
         {
             Assign(other);
             return *this;
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring_reference &operator=(_In_ StringT str)
+        hstring_reference &operator=(StringT str)
         {
             Assign(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring_reference &operator=(_In_ const wchar_t (&str)[Size])
+        hstring_reference &operator=(const wchar_t (&str)[Size])
         {
             Assign(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring_reference &operator=(_In_ wchar_t (&str)[Size])
+        hstring_reference &operator=(wchar_t (&str)[Size])
         {
             Assign(str);
             return *this;
         }
 
-        hstring_reference &operator=(_In_ const std::wstring &str)
+        hstring_reference &operator=(const std::wstring &str)
         {
             Assign(str);
             return *this;
@@ -108,40 +108,40 @@ namespace dhorn
         /*
          * Functions
          */
-        hstring_reference &assign(_In_ const hstring_reference &other)
+        hstring_reference &assign(const hstring_reference &other)
         {
             Assign(other);
             return *this;
         }
 
-        hstring_reference &assign(_In_ const wchar_t *str, _In_ size_t length)
+        hstring_reference &assign(const wchar_t *str, size_t length)
         {
             Assign(str, length);
             return *this;
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring_reference &assign(_In_ StringT str)
+        hstring_reference &assign(StringT str)
         {
             Assign(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring_reference &assign(_In_ const wchar_t (&str)[Size])
+        hstring_reference &assign(const wchar_t (&str)[Size])
         {
             Assign(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring_reference &assign(_In_ wchar_t (&str)[Size])
+        hstring_reference &assign(wchar_t (&str)[Size])
         {
             Assign(str);
             return *this;
         }
 
-        hstring_reference &assign(_In_ const std::wstring &str)
+        hstring_reference &assign(const std::wstring &str)
         {
             Assign(str);
             return *this;
@@ -157,7 +157,7 @@ namespace dhorn
             this->_hstr = nullptr;
         }
 
-        void copy_to(_Outptr_result_maybenull_ HSTRING* target) const
+        void copy_to(HSTRING* target) const
         {
             throw_if_failed(::WindowsDuplicateString(this->_hstr, target));
         }
@@ -192,7 +192,7 @@ namespace dhorn
             return length();
         }
 
-        void swap(_Inout_ hstring_reference &other)
+        void swap(hstring_reference &other)
         {
             // HSTRING holds a reference to the HSTRING_HEADER. Therefore we cannot just do a normal swap. This needs
             // to be full fledged copies
@@ -205,7 +205,7 @@ namespace dhorn
 
     private:
 
-        void Assign(_In_ const hstring_reference &other)
+        void Assign(const hstring_reference &other)
         {
             if (this != &other)
             {
@@ -215,30 +215,30 @@ namespace dhorn
             }
         }
 
-        void Assign(_In_ const wchar_t *str, _In_ size_t length)
+        void Assign(const wchar_t *str, size_t length)
         {
             throw_if_failed(::WindowsCreateStringReference(str, length, &this->_header, &this->_hstr));
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        void Assign(_In_ StringT str)
+        void Assign(StringT str)
         {
             Assign(str, wcslen(str));
         }
 
         template <size_t Size>
-        void Assign(_In_ const wchar_t (&str)[Size])
+        void Assign(const wchar_t (&str)[Size])
         {
             Assign(str, Size - 1);
         }
 
         template <size_t Size>
-        void Assign(_In_ wchar_t (&str)[Size])
+        void Assign(wchar_t (&str)[Size])
         {
             Assign(static_cast<const wchar_t *>(str));
         }
 
-        void Assign(_In_ const std::wstring &str)
+        void Assign(const std::wstring &str)
         {
             Assign(str.c_str(), str.length());
         }
@@ -262,51 +262,51 @@ namespace dhorn
          */
         hstring(void) = default;
 
-        hstring(_In_ const hstring &other) :
+        hstring(const hstring &other) :
             hstring(other._hstr)
         {
         }
 
-        hstring(_Inout_ hstring &&other) noexcept
+        hstring(hstring &&other) noexcept
         {
             other.swap(*this);
         }
 
-        hstring(_In_opt_ HSTRING str)
+        hstring(HSTRING str)
         {
             Assign(str);
         }
 
-        hstring(_In_ const wchar_t *str, _In_ size_t length)
+        hstring(const wchar_t *str, size_t length)
         {
             Assign(str, length);
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring(_In_ StringT str)
+        hstring(StringT str)
         {
             Assign(str);
         }
 
         template <size_t Size>
-        hstring(_In_ const wchar_t (&str)[Size])
+        hstring(const wchar_t (&str)[Size])
         {
             Assign(str);
         }
 
         template <size_t Size>
-        hstring(_In_ wchar_t (&str)[Size])
+        hstring(wchar_t (&str)[Size])
         {
             Assign(str);
         }
 
-        hstring(_In_ const std::wstring &str)
+        hstring(const std::wstring &str)
         {
             Assign(str);
         }
 
         template <typename Itr>
-        hstring(_In_ Itr front, _In_ Itr back)
+        hstring(Itr front, Itr back)
         {
             Assign(front, back);
         }
@@ -321,7 +321,7 @@ namespace dhorn
         /*
          * Operators
          */
-        hstring &operator=(_In_ const hstring &other)
+        hstring &operator=(const hstring &other)
         {
             if (this != &other)
             {
@@ -332,13 +332,13 @@ namespace dhorn
             return *this;
         }
 
-        hstring &operator=(_Inout_ hstring &&other) noexcept
+        hstring &operator=(hstring &&other) noexcept
         {
             other.swap(*this);
             return *this;
         }
 
-        hstring &operator=(_In_opt_ HSTRING str)
+        hstring &operator=(HSTRING str)
         {
             Destroy();
             Assign(str);
@@ -346,7 +346,7 @@ namespace dhorn
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring &operator=(_In_ StringT str)
+        hstring &operator=(StringT str)
         {
             Destroy();
             Assign(str);
@@ -354,7 +354,7 @@ namespace dhorn
         }
 
         template <size_t Size>
-        hstring &operator=(_In_ const wchar_t (&str)[Size])
+        hstring &operator=(const wchar_t (&str)[Size])
         {
             Destroy();
             Assign(str);
@@ -362,54 +362,54 @@ namespace dhorn
         }
 
         template <size_t Size>
-        hstring &operator=(_In_ wchar_t (&str)[Size])
+        hstring &operator=(wchar_t (&str)[Size])
         {
             Destroy();
             Assign(str);
             return *this;
         }
 
-        hstring &operator=(_In_ const std::wstring &str)
+        hstring &operator=(const std::wstring &str)
         {
             Destroy();
             Assign(str);
             return *this;
         }
 
-        hstring &operator+=(_In_ const hstring &other)
+        hstring &operator+=(const hstring &other)
         {
             Append(other._hstr);
             return *this;
         }
 
-        hstring &operator+=(_In_opt_ HSTRING str)
+        hstring &operator+=(HSTRING str)
         {
             Append(str);
             return *this;
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring &operator+=(_In_ StringT str)
+        hstring &operator+=(StringT str)
         {
             Append(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring &operator+=(_In_ const wchar_t (&str)[Size])
+        hstring &operator+=(const wchar_t (&str)[Size])
         {
             Append(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring &operator+=(_In_ wchar_t (&str)[Size])
+        hstring &operator+=(wchar_t (&str)[Size])
         {
             Append(str);
             return *this;
         }
 
-        hstring &operator+=(_In_ const std::wstring &str)
+        hstring &operator+=(const std::wstring &str)
         {
             Append(str);
             return *this;
@@ -431,52 +431,52 @@ namespace dhorn
         /*
          * Functions
          */
-        hstring &append(_In_ const hstring &str)
+        hstring &append(const hstring &str)
         {
             Append(str._hstr);
             return *this;
         }
 
-        hstring &append(_In_opt_ HSTRING str)
+        hstring &append(HSTRING str)
         {
             Append(str);
             return *this;
         }
 
-        hstring &append(_In_ const wchar_t *str, _In_ size_t length)
+        hstring &append(const wchar_t *str, size_t length)
         {
             Append(str, length);
             return *this;
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring &append(_In_ StringT str)
+        hstring &append(StringT str)
         {
             Append(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring &append(_In_ const wchar_t (&str)[Size])
+        hstring &append(const wchar_t (&str)[Size])
         {
             Append(str);
             return *this;
         }
 
         template <size_t Size>
-        hstring &append(_In_ wchar_t (&str)[Size])
+        hstring &append(wchar_t (&str)[Size])
         {
             Append(str);
             return *this;
         }
 
-        hstring &append(_In_ const std::wstring &str)
+        hstring &append(const std::wstring &str)
         {
             Append(str);
             return *this;
         }
 
-        hstring &assign(_In_ const hstring &other)
+        hstring &assign(const hstring &other)
         {
             if (this != &other)
             {
@@ -487,20 +487,20 @@ namespace dhorn
             return *this;
         }
 
-        hstring &assign(_Inout_ hstring &&other) noexcept
+        hstring &assign(hstring &&other) noexcept
         {
             other.swap(*this);
             return *this;
         }
 
-        hstring &assign(_In_opt_ HSTRING str)
+        hstring &assign(HSTRING str)
         {
             Destroy();
             Assign(str);
             return *this;
         }
 
-        hstring &assign(_In_ const wchar_t *str, _In_ size_t length)
+        hstring &assign(const wchar_t *str, size_t length)
         {
             Destroy();
             Assign(str, length);
@@ -508,7 +508,7 @@ namespace dhorn
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        hstring &assign(_In_ StringT str)
+        hstring &assign(StringT str)
         {
             Destroy();
             Assign(str);
@@ -516,7 +516,7 @@ namespace dhorn
         }
 
         template <size_t Size>
-        hstring &assign(_In_ const wchar_t (&str)[Size])
+        hstring &assign(const wchar_t (&str)[Size])
         {
             Destroy();
             Assign(str);
@@ -524,7 +524,7 @@ namespace dhorn
         }
 
         template <size_t Size>
-        hstring &assign(_In_ wchar_t (&str)[Size])
+        hstring &assign(wchar_t (&str)[Size])
         {
             Destroy();
             Assign(str);
@@ -532,21 +532,21 @@ namespace dhorn
         }
 
         template <typename Itr>
-        hstring &assign(_In_ Itr front, _In_ Itr back)
+        hstring &assign(Itr front, Itr back)
         {
             Destroy();
             Assign(front, back);
             return *this;
         }
 
-        hstring &assign(_In_ const std::wstring &str)
+        hstring &assign(const std::wstring &str)
         {
             Destroy();
             Assign(str);
             return *this;
         }
 
-        void attach(_In_opt_ HSTRING str) noexcept
+        void attach(HSTRING str) noexcept
         {
             Attach(str);
         }
@@ -561,7 +561,7 @@ namespace dhorn
             Destroy();
         }
 
-        void copy_to(_Outptr_result_maybenull_ HSTRING* target) const
+        void copy_to(HSTRING* target) const
         {
             throw_if_failed(::WindowsDuplicateString(this->_hstr, target));
         }
@@ -608,7 +608,7 @@ namespace dhorn
             return length();
         }
 
-        void swap(_Inout_ hstring &other) noexcept
+        void swap(hstring &other) noexcept
         {
             std::swap(this->_hstr, other._hstr);
         }
@@ -617,43 +617,43 @@ namespace dhorn
 
     private:
 
-        void Assign(_In_opt_ HSTRING str)
+        void Assign(HSTRING str)
         {
             assert(!this->_hstr);
             throw_if_failed(::WindowsDuplicateString(str, &this->_hstr));
         }
 
-        void Assign(_In_ const wchar_t *str, _In_ size_t length)
+        void Assign(const wchar_t *str, size_t length)
         {
             assert(!this->_hstr);
             throw_if_failed(::WindowsCreateString(str, length, &this->_hstr));
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        void Assign(_In_ StringT str)
+        void Assign(StringT str)
         {
             Assign(str, wcslen(str));
         }
 
         template <size_t Size>
-        void Assign(_In_ const wchar_t (&str)[Size])
+        void Assign(const wchar_t (&str)[Size])
         {
             Assign(str, Size - 1);
         }
 
         template <size_t Size>
-        void Assign(_In_ wchar_t (&str)[Size])
+        void Assign(wchar_t (&str)[Size])
         {
             Assign(static_cast<const wchar_t *>(str));
         }
 
-        void Assign(_In_ const std::wstring &str)
+        void Assign(const std::wstring &str)
         {
             Assign(str.c_str(), str.length());
         }
 
         template <typename Itr>
-        void Assign(_In_ Itr front, _In_ Itr back)
+        void Assign(Itr front, Itr back)
         {
             // We can't guarantee that front and back are located in contiguous memory locations
             std::wstring str(front, back);
@@ -666,43 +666,43 @@ namespace dhorn
             this->_hstr = nullptr;
         }
 
-        void Attach(_In_opt_ HSTRING str)
+        void Attach(HSTRING str)
         {
             Destroy();
             this->_hstr = str;
         }
 
-        void Append(_In_opt_ HSTRING str)
+        void Append(HSTRING str)
         {
             HSTRING result;
             throw_if_failed(::WindowsConcatString(this->_hstr, str, &result));
             Attach(result);
         }
 
-        void Append(_In_ const wchar_t *str, _In_ size_t length)
+        void Append(const wchar_t *str, size_t length)
         {
             Append(hstring_reference(str, length).get());
         }
 
         template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
-        void Append(_In_ StringT str)
+        void Append(StringT str)
         {
             Append(hstring_reference(str).get());
         }
 
         template <size_t Size>
-        void Append(_In_ const wchar_t (&str)[Size])
+        void Append(const wchar_t (&str)[Size])
         {
             Append(hstring_reference(str).get());
         }
 
         template <size_t Size>
-        void Append(_In_ wchar_t (&str)[Size])
+        void Append(wchar_t (&str)[Size])
         {
             Append(hstring_reference(str).get());
         }
 
-        void Append(_In_ const std::wstring &str)
+        void Append(const std::wstring &str)
         {
             Append(hstring_reference(str).get());
         }
@@ -786,23 +786,23 @@ namespace dhorn
             /*
              * Helper Functions
              */
-            static constexpr HSTRING as_hstring(_In_opt_ HSTRING hstr)
+            static constexpr HSTRING as_hstring(HSTRING hstr)
             {
                 return hstr;
             }
 
-            static constexpr const hstring &as_hstring(_In_ const hstring &hstr)
+            static constexpr const hstring &as_hstring(const hstring &hstr)
             {
                 return hstr;
             }
 
-            static constexpr const hstring_reference &as_hstring(_In_ const hstring_reference &hstr)
+            static constexpr const hstring_reference &as_hstring(const hstring_reference &hstr)
             {
                 return hstr;
             }
 
             template <typename = std::enable_if_t<InhibitArrayReferences>>
-            static hstring_reference as_hstring(_In_ const wchar_t *str)
+            static hstring_reference as_hstring(const wchar_t *str)
             {
                 return hstring_reference(str);
             }
@@ -811,41 +811,41 @@ namespace dhorn
                 typename StringT,
                 typename = std::enable_if_t<is_c_string<StringT>::value>,
                 typename = std::enable_if_t<!InhibitArrayReferences>>
-            static hstring_reference as_hstring(_In_ StringT str)
+            static hstring_reference as_hstring(StringT str)
             {
                 return hstring_reference(str);
             }
 
             template <size_t Size, typename = std::enable_if_t<!InhibitArrayReferences>>
-            static hstring_reference as_hstring(_In_ const wchar_t (&str)[Size])
+            static hstring_reference as_hstring(const wchar_t (&str)[Size])
             {
                 return hstring_reference(str);
             }
 
             template <size_t Size, typename = std::enable_if_t<!InhibitArrayReferences>>
-            static hstring_reference as_hstring(_In_ wchar_t (&str)[Size])
+            static hstring_reference as_hstring(wchar_t (&str)[Size])
             {
                 return hstring_reference(str);
             }
 
-            static hstring_reference as_hstring(_In_ const std::wstring &str)
+            static hstring_reference as_hstring(const std::wstring &str)
             {
                 return hstring_reference(str);
             }
 
 
 
-            static constexpr HSTRING get(_In_opt_ HSTRING hstr)
+            static constexpr HSTRING get(HSTRING hstr)
             {
                 return hstr;
             }
 
-            static HSTRING get(_In_ const hstring &hstr)
+            static HSTRING get(const hstring &hstr)
             {
                 return hstr.get();
             }
 
-            static HSTRING get(_In_ const hstring_reference &hstr)
+            static HSTRING get(const hstring_reference &hstr)
             {
                 return hstr.get();
             }
@@ -859,21 +859,21 @@ namespace dhorn
 #pragma region equality operators
 
     template <typename Ty>
-    auto operator==(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator==(hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::equals(lhs, rhs))
     {
         return details::hstring_helper<false>::equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator==(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator==(const hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::equals(lhs, rhs))
     {
         return details::hstring_helper<false>::equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator==(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+    auto operator==(Ty &&lhs, hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::equals(lhs, rhs))
     {
@@ -881,7 +881,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator==(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+    auto operator==(Ty &&lhs, const hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::equals(lhs, rhs))
     {
@@ -889,7 +889,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator==(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator==(hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::equals(lhs, rhs))
     {
@@ -897,7 +897,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator==(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator==(const hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::equals(lhs, rhs))
     {
@@ -905,7 +905,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator==(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+    auto operator==(Ty &&lhs, hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::equals(lhs, rhs))
@@ -914,7 +914,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator==(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+    auto operator==(Ty &&lhs, const hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::equals(lhs, rhs))
@@ -929,21 +929,21 @@ namespace dhorn
 #pragma region inequality operators
 
     template <typename Ty>
-    auto operator!=(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator!=(hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::not_equals(lhs, rhs))
     {
         return details::hstring_helper<false>::not_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator!=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator!=(const hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::not_equals(lhs, rhs))
     {
         return details::hstring_helper<false>::not_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator!=(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+    auto operator!=(Ty &&lhs, hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::not_equals(lhs, rhs))
     {
@@ -951,7 +951,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator!=(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+    auto operator!=(Ty &&lhs, const hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::not_equals(lhs, rhs))
     {
@@ -959,7 +959,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator!=(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator!=(hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::not_equals(lhs, rhs))
     {
@@ -967,7 +967,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator!=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator!=(const hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::not_equals(lhs, rhs))
     {
@@ -975,7 +975,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator!=(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+    auto operator!=(Ty &&lhs, hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::not_equals(lhs, rhs))
@@ -984,7 +984,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator!=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+    auto operator!=(Ty &&lhs, const hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::not_equals(lhs, rhs))
@@ -999,21 +999,21 @@ namespace dhorn
 #pragma region less than operators
 
     template <typename Ty>
-    auto operator<(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator<(hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::less(lhs, rhs))
     {
         return details::hstring_helper<false>::less(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator<(const hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::less(lhs, rhs))
     {
         return details::hstring_helper<false>::less(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+    auto operator<(Ty &&lhs, hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less(lhs, rhs))
     {
@@ -1021,7 +1021,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+    auto operator<(Ty &&lhs, const hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less(lhs, rhs))
     {
@@ -1029,7 +1029,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator<(hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less(lhs, rhs))
     {
@@ -1037,7 +1037,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator<(const hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less(lhs, rhs))
     {
@@ -1045,7 +1045,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+    auto operator<(Ty &&lhs, hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::less(lhs, rhs))
@@ -1054,7 +1054,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+    auto operator<(Ty &&lhs, const hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::less(lhs, rhs))
@@ -1069,21 +1069,21 @@ namespace dhorn
 #pragma region less than or equals operators
 
     template <typename Ty>
-    auto operator<=(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator<=(hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::less_equals(lhs, rhs))
     {
         return details::hstring_helper<false>::less_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator<=(const hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::less_equals(lhs, rhs))
     {
         return details::hstring_helper<false>::less_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator<=(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+    auto operator<=(Ty &&lhs, hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less_equals(lhs, rhs))
     {
@@ -1091,7 +1091,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<=(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+    auto operator<=(Ty &&lhs, const hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less_equals(lhs, rhs))
     {
@@ -1099,7 +1099,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<=(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator<=(hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less_equals(lhs, rhs))
     {
@@ -1107,7 +1107,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator<=(const hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::less_equals(lhs, rhs))
     {
@@ -1115,7 +1115,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<=(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+    auto operator<=(Ty &&lhs, hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::less_equals(lhs, rhs))
@@ -1124,7 +1124,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator<=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+    auto operator<=(Ty &&lhs, const hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::less_equals(lhs, rhs))
@@ -1139,21 +1139,21 @@ namespace dhorn
 #pragma region greater than operators
 
     template <typename Ty>
-    auto operator>(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator>(hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::greater(lhs, rhs))
     {
         return details::hstring_helper<false>::greater(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator>(const hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::greater(lhs, rhs))
     {
         return details::hstring_helper<false>::greater(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+    auto operator>(Ty &&lhs, hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater(lhs, rhs))
     {
@@ -1161,7 +1161,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+    auto operator>(Ty &&lhs, const hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater(lhs, rhs))
     {
@@ -1169,7 +1169,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator>(hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater(lhs, rhs))
     {
@@ -1177,7 +1177,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator>(const hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater(lhs, rhs))
     {
@@ -1185,7 +1185,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+    auto operator>(Ty &&lhs, hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::greater(lhs, rhs))
@@ -1194,7 +1194,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+    auto operator>(Ty &&lhs, const hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::greater(lhs, rhs))
@@ -1209,21 +1209,21 @@ namespace dhorn
 #pragma region greater than or equals operators
 
     template <typename Ty>
-    auto operator>=(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator>=(hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
         return details::hstring_helper<false>::greater_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>=(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator>=(const hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
         return details::hstring_helper<false>::greater_equals(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator>=(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+    auto operator>=(Ty &&lhs, hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
@@ -1231,7 +1231,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>=(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+    auto operator>=(Ty &&lhs, const hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
@@ -1239,7 +1239,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>=(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator>=(hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
@@ -1247,7 +1247,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>=(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator>=(const hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::greater_equals(lhs, rhs))
     {
@@ -1255,7 +1255,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>=(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+    auto operator>=(Ty &&lhs, hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::greater_equals(lhs, rhs))
@@ -1264,7 +1264,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator>=(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+    auto operator>=(Ty &&lhs, const hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::greater_equals(lhs, rhs))
@@ -1279,21 +1279,21 @@ namespace dhorn
 #pragma region append operators
 
     template <typename Ty>
-    auto operator+(_In_ hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator+(hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::append(lhs, rhs))
     {
         return details::hstring_helper<false>::append(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator+(_In_ const hstring &lhs, _In_ Ty &&rhs) ->
+    auto operator+(const hstring &lhs, Ty &&rhs) ->
         decltype(details::hstring_helper<false>::append(lhs, rhs))
     {
         return details::hstring_helper<false>::append(lhs, rhs);
     }
 
     template <typename Ty>
-    auto operator+(_In_ Ty &&lhs, _In_ hstring &rhs) -> decltype(
+    auto operator+(Ty &&lhs, hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::append(lhs, rhs))
     {
@@ -1301,7 +1301,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator+(_In_ Ty &&lhs, _In_ const hstring &rhs) -> decltype(
+    auto operator+(Ty &&lhs, const hstring &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::append(lhs, rhs))
     {
@@ -1309,7 +1309,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator+(_In_ hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator+(hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::append(lhs, rhs))
     {
@@ -1317,7 +1317,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator+(_In_ const hstring_reference &lhs, _In_ Ty &&rhs) -> decltype(
+    auto operator+(const hstring_reference &lhs, Ty &&rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         details::hstring_helper<false>::append(lhs, rhs))
     {
@@ -1325,7 +1325,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator+(_In_ Ty &&lhs, _In_ hstring_reference &rhs) -> decltype(
+    auto operator+(Ty &&lhs, hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::append(lhs, rhs))
@@ -1334,7 +1334,7 @@ namespace dhorn
     }
 
     template <typename Ty>
-    auto operator+(_In_ Ty &&lhs, _In_ const hstring_reference &rhs) -> decltype(
+    auto operator+(Ty &&lhs, const hstring_reference &rhs) -> decltype(
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring>::value>(),
         std::enable_if_t<!std::is_same<std::decay_t<Ty>, hstring_reference>::value>(),
         details::hstring_helper<false>::append(lhs, rhs))

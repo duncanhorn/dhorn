@@ -41,7 +41,7 @@ namespace dhorn
         public std::basic_streambuf<CharT, CharTraits>
     {
     public:
-        basic_socket_streambuf(_In_ SocketStorageType socket) :
+        basic_socket_streambuf(SocketStorageType socket) :
             _socket(socket),
             _receiveBuffer(new CharT[ReceiveBufferSize]),
             _sendBuffer(new CharT[SendBufferSize])
@@ -73,7 +73,7 @@ namespace dhorn
                 traits_type::to_int_type(*this->gptr());
         }
 
-        virtual int overflow(_In_ int ch)
+        virtual int overflow(int ch)
         {
             bool isEof = (ch == traits_type::eof());
 
@@ -142,7 +142,7 @@ namespace dhorn
             basic_socket_streambuf<CharT, CharTraits, ReceiveBufferSize, SendBufferSize, SocketStorageType>;
 
     public:
-        basic_socket_stream(_In_ SocketStorageType socket) :
+        basic_socket_stream(SocketStorageType socket) :
             _buffer(socket),
             std::basic_iostream<CharT, CharTraits>(&this->_buffer)
         {

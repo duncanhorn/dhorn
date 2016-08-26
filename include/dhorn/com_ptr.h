@@ -34,7 +34,7 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            com_ptr_ref(_In_ ComPtrType *ptr) :
+            com_ptr_ref(ComPtrType *ptr) :
                 _ptr(ptr)
             {
             }
@@ -113,7 +113,7 @@ namespace dhorn
         {
         }
 
-        com_ptr(_In_ std::nullptr_t) :
+        com_ptr(std::nullptr_t) :
             com_ptr()
         {
         }
@@ -121,26 +121,26 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        com_ptr(_In_opt_ Ty *ptr) :
+        com_ptr(Ty *ptr) :
             com_ptr()
         {
             this->Assign(ptr);
         }
 
-        com_ptr(_In_ const com_ptr &other) :
+        com_ptr(const com_ptr &other) :
             com_ptr()
         {
             this->Assign(other._ptr);
         }
 
         template <typename Ty>
-        com_ptr(_In_ const com_ptr<Ty> &other) :
+        com_ptr(const com_ptr<Ty> &other) :
             com_ptr()
         {
             this->Assign(other._ptr);
         }
 
-        com_ptr(_Inout_ com_ptr &&other) :
+        com_ptr(com_ptr &&other) :
             com_ptr()
         {
             this->swap(other);
@@ -149,7 +149,7 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<interface_type, Ty>::value>>
-        com_ptr(_Inout_ com_ptr<Ty> &&other) :
+        com_ptr(com_ptr<Ty> &&other) :
             _ptr(other._ptr)
         {
             other._ptr = nullptr;
@@ -167,7 +167,7 @@ namespace dhorn
         /*
          * Operators
          */
-        com_ptr &operator=(_In_ std::nullptr_t)
+        com_ptr &operator=(std::nullptr_t)
         {
             this->Release();
             return *this;
@@ -176,7 +176,7 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        com_ptr &operator=(_In_opt_ Ty *ptr)
+        com_ptr &operator=(Ty *ptr)
         {
             // We cannot call swap() here, because the assignment might throw. In the case that it does, we would not
             // release as we are expected to do.
@@ -186,7 +186,7 @@ namespace dhorn
             return *this;
         }
 
-        com_ptr &operator=(_In_ const com_ptr &other)
+        com_ptr &operator=(const com_ptr &other)
         {
             if (this != &other)
             {
@@ -197,7 +197,7 @@ namespace dhorn
         }
 
         template <typename Ty>
-        com_ptr &operator=(_In_ const com_ptr<Ty> &other)
+        com_ptr &operator=(const com_ptr<Ty> &other)
         {
             // We cannot call swap() here, because the assignment might throw. In the case that it does, we would not
             // release as we are expected to do.
@@ -207,7 +207,7 @@ namespace dhorn
             return *this;
         }
 
-        com_ptr &operator=(_Inout_ com_ptr &&other)
+        com_ptr &operator=(com_ptr &&other)
         {
             assert(this != &other);
             this->swap(other);
@@ -218,7 +218,7 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<interface_type, Ty>::value>>
-        com_ptr &operator=(_Inout_ com_ptr<Ty> &&other)
+        com_ptr &operator=(com_ptr<Ty> &&other)
         {
             // We do not call swap here as it would require an extra AddRef and Release since we would need to create
             // a separate object
@@ -239,24 +239,24 @@ namespace dhorn
             return this->_ptr != nullptr;
         }
 
-        bool operator==(_In_ const com_ptr &other)
+        bool operator==(const com_ptr &other)
         {
             return this->_ptr == other._ptr;
         }
 
-        bool operator<(_In_ const com_ptr &other)
+        bool operator<(const com_ptr &other)
         {
             return this->_ptr < other._ptr;
         }
 
-        bool operator>(_In_ const com_ptr &other)
+        bool operator>(const com_ptr &other)
         {
             return this->_ptr > other._ptr;
         }
 
-        bool operator!=(_In_ const com_ptr &other) { return !(*this == other); }
-        bool operator<=(_In_ const com_ptr &other) { return !(*this > other); }
-        bool operator>=(_In_ const com_ptr &other) { return !(*this < other); }
+        bool operator!=(const com_ptr &other) { return !(*this == other); }
+        bool operator<=(const com_ptr &other) { return !(*this > other); }
+        bool operator>=(const com_ptr &other) { return !(*this < other); }
 
         operator interface_type *(void) const
         {
@@ -286,7 +286,7 @@ namespace dhorn
             return com_ptr<Ty>(*this);
         }
 
-        void assign(_In_ std::nullptr_t)
+        void assign(std::nullptr_t)
         {
             this->Release();
         }
@@ -294,13 +294,13 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        void assign(_In_opt_ Ty *ptr)
+        void assign(Ty *ptr)
         {
             this->Release();
             this->Assign(ptr);
         }
 
-        void attach(_In_ std::nullptr_t)
+        void attach(std::nullptr_t)
         {
             this->Release();
         }
@@ -308,7 +308,7 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        void attach(_In_opt_ Ty *ptr)
+        void attach(Ty *ptr)
         {
             this->Release();
             this->Attach(ptr);
@@ -326,7 +326,7 @@ namespace dhorn
             this->Release();
         }
 
-        void swap(_Inout_ com_ptr &other)
+        void swap(com_ptr &other)
         {
             auto temp = this->_ptr;
             this->_ptr = other._ptr;
@@ -352,14 +352,14 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        void copy_to(_Outptr_result_maybenull_ Ty **ptr)
+        void copy_to(Ty **ptr)
         {
             // Must first assign to null in case an exception is thrown
             *ptr = nullptr;
             *ptr = com_ptr<Ty>(*this).detach();
         }
 
-        void copy_to(_In_ REFIID iid, _Outptr_result_maybenull_ void **ptr)
+        void copy_to(REFIID iid, void **ptr)
         {
             *ptr = nullptr;
             throw_if_failed(this->_ptr->QueryInterface(iid, ptr));
@@ -393,7 +393,7 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<interface_type, Ty>::value>>
-        inline void Assign(_In_opt_ Ty *ptr)
+        inline void Assign(Ty *ptr)
         {
             assert(!this->_ptr);
             this->_ptr = ptr;
@@ -404,7 +404,7 @@ namespace dhorn
             typename Ty,
             typename = typename std::enable_if_t<!std::is_base_of<interface_type, Ty>::value>,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        inline void Assign(_In_opt_ Ty *ptr)
+        inline void Assign(Ty *ptr)
         {
             assert(!this->_ptr);
             if (ptr)
@@ -416,7 +416,7 @@ namespace dhorn
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<interface_type, Ty>::value>>
-        inline void Attach(_In_opt_ Ty *ptr)
+        inline void Attach(Ty *ptr)
         {
             // Easy case: we can just do simple assignment
             assert(!this->_ptr);
@@ -427,7 +427,7 @@ namespace dhorn
             typename Ty,
             typename = typename std::enable_if_t<!std::is_base_of<interface_type, Ty>::value>,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        inline void Attach(_In_opt_ Ty *ptr)
+        inline void Attach(Ty *ptr)
         {
             // More complicated case: we must QI and Release, even if we fail
             assert(!this->_ptr);
@@ -454,7 +454,7 @@ namespace dhorn
 namespace std
 {
     template <typename Ty>
-    inline void swap(_Inout_ dhorn::com_ptr<Ty> &lhs, _Inout_ dhorn::com_ptr<Ty> &rhs)
+    inline void swap(dhorn::com_ptr<Ty> &lhs, dhorn::com_ptr<Ty> &rhs)
     {
         lhs.swap(rhs);
     }
@@ -468,7 +468,7 @@ namespace std
 
 // Overload for IID_PPV_ARGS
 template <typename Ty>
-void **IID_PPV_ARGS_Helper(_In_ dhorn::garbage::com_ptr_ref<Ty> ptr)
+void **IID_PPV_ARGS_Helper(dhorn::garbage::com_ptr_ref<Ty> ptr)
 {
     static_assert(std::is_base_of<IUnknown, typename Ty::interface_type>::value,
         "Cannot use IID_PPV_ARGS with a type that does not derive from IUnknown");

@@ -53,7 +53,7 @@ namespace dhorn
         struct shared_ptr_lifetime_traits
         {
             shared_ptr_lifetime_traits(void) = default;
-            shared_ptr_lifetime_traits(_In_ const Alloc &alloc) :
+            shared_ptr_lifetime_traits(const Alloc &alloc) :
                 _alloc(alloc)
             {
             }
@@ -63,7 +63,7 @@ namespace dhorn
                 return std::allocate_shared<Ty>(this->_alloc);
             }
 
-            void destroy(_In_ std::shared_ptr<Ty> &) const
+            void destroy(std::shared_ptr<Ty> &) const
             {
                 // shared_ptr handles its own lifetime
             }
@@ -77,7 +77,7 @@ namespace dhorn
         struct raw_ptr_lifetime_traits
         {
             raw_ptr_lifetime_traits(void) = default;
-            raw_ptr_lifetime_traits(_In_ const Alloc &alloc) :
+            raw_ptr_lifetime_traits(const Alloc &alloc) :
                 _alloc(alloc)
             {
             }
@@ -98,7 +98,7 @@ namespace dhorn
                 return ptr;
             }
 
-            void destroy(_In_ Ty *ptr)
+            void destroy(Ty *ptr)
             {
                 // Deallocate even if an exception is thrown in the destructor
                 auto deallocateOnExit = make_scope_exit([&]
@@ -171,7 +171,7 @@ namespace dhorn
         {
         }
 
-        lazy_initialization_t(_In_ const Alloc &alloc) :
+        lazy_initialization_t(const Alloc &alloc) :
             _instance(nullptr),
             _lifetimeTraits(alloc)
         {
@@ -233,7 +233,7 @@ namespace dhorn
             this->_instance = this->_lifetimeTraits.create();
         }
 
-        eager_initialization_t(_In_ const Alloc &alloc) :
+        eager_initialization_t(const Alloc &alloc) :
             _lifetimeTraits(alloc)
         {
             this->_instance = this->_lifetimeTraits.create();
@@ -272,7 +272,7 @@ namespace dhorn
         {
         }
 
-        atomic_exchange_initialization_t(_In_ const Alloc &alloc) :
+        atomic_exchange_initialization_t(const Alloc &alloc) :
             _instance(nullptr),
             _lifetimeTraits(alloc)
         {
@@ -345,8 +345,8 @@ namespace dhorn
         }
 
         // Cannot copy or move
-        instance(_In_ const instance &) = delete;
-        instance &operator=(_In_ const instance &) = delete;
+        instance(const instance &) = delete;
+        instance &operator=(const instance &) = delete;
 
 
 

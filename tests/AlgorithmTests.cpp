@@ -34,7 +34,7 @@ namespace dhorn
         TEST_CLASS(MaxTests)
         {
             template <typename ResultType, typename... Args>
-            void DoTest(_In_ ResultType expectedValue, Args &&...args)
+            void DoTest(ResultType expectedValue, Args &&...args)
             {
                 auto val = dhorn::max(std::forward<Args>(args)...);
                 Assert::IsTrue(expectedValue == val);
@@ -98,7 +98,7 @@ namespace dhorn
         TEST_CLASS(MinTests)
         {
             template <typename ResultType, typename... Args>
-            void DoTest(_In_ ResultType expectedValue, Args&&... args)
+            void DoTest(ResultType expectedValue, Args &&...args)
             {
                 auto val = dhorn::min(std::forward<Args>(args)...);
                 Assert::IsTrue(expectedValue == val);

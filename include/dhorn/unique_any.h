@@ -30,7 +30,7 @@ namespace dhorn
         template <typename Ty>
         struct no_op
         {
-            void operator()(_In_ const Ty &) noexcept
+            void operator()(const Ty &) noexcept
             {
             }
         };
@@ -81,12 +81,12 @@ namespace dhorn
         {
         }
 
-        unique_any(_In_ storage_type val) :
+        unique_any(storage_type val) :
             _value(std::move(val))
         {
         }
 
-        unique_any(_Inout_ unique_any &&other) :
+        unique_any(unique_any &&other) :
             unique_any() // Construct with invalid value
         {
             this->swap(other);
@@ -98,28 +98,28 @@ namespace dhorn
         }
 
         // Cannot copy (that's the whole point of unique_*)
-        unique_any(_In_ const unique_any &other) = delete;
-        unique_any &operator=(_In_ const unique_any &other) = delete;
+        unique_any(const unique_any &other) = delete;
+        unique_any &operator=(const unique_any &other) = delete;
 
 
 
         /*
          * Operators
          */
-        unique_any &operator=(_Inout_ unique_any &&other)
+        unique_any &operator=(unique_any &&other)
         {
             this->swap(other);
             return *this;
         }
 
-        unique_any &operator=(_In_ const storage_type &val)
+        unique_any &operator=(const storage_type &val)
         {
             this->Destroy();
             this->_value = val;
             return *this;
         }
 
-        unique_any &operator=(_In_ storage_type &&val)
+        unique_any &operator=(storage_type &&val)
         {
             this->Destroy();
             this->_value = std::move(val);
@@ -159,17 +159,17 @@ namespace dhorn
             this->Destroy();
         }
 
-        void reset(_In_ const storage_type &val)
+        void reset(const storage_type &val)
         {
             *this = val;
         }
 
-        void reset(_In_ storage_type &&val)
+        void reset(storage_type &&val)
         {
             *this = std::move(val);
         }
 
-        void swap(_Inout_ unique_any &other)
+        void swap(unique_any &other)
         {
             std::swap(this->_value, other._value);
         }
@@ -206,7 +206,7 @@ namespace dhorn
 
         struct close_handle
         {
-            void operator()(_In_ win32::handle_t handle)
+            void operator()(win32::handle_t handle)
             {
                 win32::close_handle(handle);
             }
@@ -214,7 +214,7 @@ namespace dhorn
 
         struct delete_dc
         {
-            void operator()(_In_ win32::device_context_handle handle)
+            void operator()(win32::device_context_handle handle)
             {
                 win32::delete_dc(handle);
             }
@@ -222,7 +222,7 @@ namespace dhorn
 
         struct delete_object
         {
-            void operator()(_In_ win32::gdi_object_handle handle)
+            void operator()(win32::gdi_object_handle handle)
             {
                 win32::delete_object(handle);
             }
@@ -230,7 +230,7 @@ namespace dhorn
 
         struct destroy_cursor
         {
-            void operator()(_In_ win32::cursor_handle handle)
+            void operator()(win32::cursor_handle handle)
             {
                 win32::destroy_cursor(handle);
             }
@@ -238,7 +238,7 @@ namespace dhorn
 
         struct destroy_icon
         {
-            void operator()(_In_ win32::icon_handle handle)
+            void operator()(win32::icon_handle handle)
             {
                 win32::destroy_icon(handle);
             }
@@ -246,7 +246,7 @@ namespace dhorn
 
         struct destroy_menu
         {
-            void operator()(_In_ win32::menu_handle handle)
+            void operator()(win32::menu_handle handle)
             {
                 win32::destroy_menu(handle);
             }
@@ -254,7 +254,7 @@ namespace dhorn
 
         struct destroy_window
         {
-            void operator()(_In_ win32::window_handle handle)
+            void operator()(win32::window_handle handle)
             {
                 win32::destroy_window(handle);
             }
@@ -262,7 +262,7 @@ namespace dhorn
 
         struct free_library
         {
-            void operator()(_In_ win32::module_handle handle)
+            void operator()(win32::module_handle handle)
             {
                 // NOTE: Also callable with type `instance_handle`
                 win32::free_library(handle);
@@ -271,7 +271,7 @@ namespace dhorn
 
         struct release_dc
         {
-            void operator()(_In_ win32::device_context_handle handle)
+            void operator()(win32::device_context_handle handle)
             {
                 win32::release_dc(handle);
             }
@@ -356,9 +356,7 @@ namespace dhorn
 namespace std
 {
     template <typename Ty, typename DestroyType, typename Traits>
-    void swap(
-        _Inout_ dhorn::unique_any<Ty, DestroyType, Traits> &lhs,
-        _Inout_ dhorn::unique_any<Ty, DestroyType, Traits> &rhs)
+    void swap(dhorn::unique_any<Ty, DestroyType, Traits> &lhs, dhorn::unique_any<Ty, DestroyType, Traits> &rhs)
     {
         lhs.swap(rhs);
     }

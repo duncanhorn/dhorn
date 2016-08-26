@@ -119,7 +119,7 @@ namespace dhorn
 
     namespace garbage
     {
-        std::shared_ptr<json_value> copy_json_value(_In_ const std::shared_ptr<json_value> &other);
+        std::shared_ptr<json_value> copy_json_value(const std::shared_ptr<json_value> &other);
     }
 
 
@@ -217,7 +217,7 @@ namespace dhorn
              */
             json_object_iterator_base(void) = default;
 
-            json_object_iterator_base(_In_ internal_iterator itr) :
+            json_object_iterator_base(internal_iterator itr) :
                 _itr(itr)
             {
             }
@@ -227,12 +227,12 @@ namespace dhorn
             /*
              * Operators
              */
-            bool operator==(_In_ const json_object_iterator_base &other)
+            bool operator==(const json_object_iterator_base &other)
             {
                 return this->_itr == other._itr;
             }
 
-            bool operator!=(_In_ const json_object_iterator_base &other)
+            bool operator!=(const json_object_iterator_base &other)
             {
                 return this->_itr != other._itr;
             }
@@ -253,7 +253,7 @@ namespace dhorn
                 return *this;
             }
 
-            json_object_iterator_base operator++(_In_ int)
+            json_object_iterator_base operator++(int)
             {
                 return json_object_iterator_base(this->_itr++);
             }
@@ -264,7 +264,7 @@ namespace dhorn
                 return *this;
             }
 
-            json_object_iterator_base operator--(_In_ int)
+            json_object_iterator_base operator--(int)
             {
                 return json_object_iterator_base(this->_itr--);
             }
@@ -324,12 +324,12 @@ namespace dhorn
         {
         }
 
-        json_object(_In_ const json_object &other)
+        json_object(const json_object &other)
         {
             this->copy(other);
         }
 
-        json_object(_Inout_ json_object &&) = default;
+        json_object(json_object &&) = default;
 
 
 
@@ -346,7 +346,7 @@ namespace dhorn
         /*
          * Operators
          */
-        json_object &operator=(_In_ const json_object &other)
+        json_object &operator=(const json_object &other)
         {
             if (&other != this)
             {
@@ -356,9 +356,9 @@ namespace dhorn
             return *this;
         }
 
-        json_object &operator=(_Inout_ json_object &&) = default;
+        json_object &operator=(json_object &&) = default;
 
-        std::shared_ptr<json_value> operator[](_In_ const utf8_string &str) const
+        std::shared_ptr<json_value> operator[](const utf8_string &str) const
         {
             auto itr = this->_map.find(str);
 
@@ -456,7 +456,7 @@ namespace dhorn
             return this->_map.size();
         }
 
-        void swap(_Inout_ json_object &other)
+        void swap(json_object &other)
         {
             this->_map.swap(other._map);
         }
@@ -465,7 +465,7 @@ namespace dhorn
 
     private:
 
-        void copy(_In_ const json_object &other)
+        void copy(const json_object &other)
         {
             this->_map.clear();
 
@@ -509,19 +509,19 @@ namespace dhorn
         {
         }
 
-        json_array(_In_ const json_array &other)
+        json_array(const json_array &other)
         {
             this->copy(other);
         }
 
-        json_array(_Inout_ json_array &&) = default;
+        json_array(json_array &&) = default;
 
-        json_array(_In_ const container_type &array)
+        json_array(const container_type &array)
         {
             this->copy(array);
         }
 
-        json_array(_Inout_ container_type &&array) :
+        json_array(container_type &&array) :
             _array(std::move(array))
         {
         }
@@ -541,7 +541,7 @@ namespace dhorn
         /*
          * Operators
          */
-        json_array &operator=(_In_ const json_array &other)
+        json_array &operator=(const json_array &other)
         {
             if (&other != this)
             {
@@ -551,7 +551,7 @@ namespace dhorn
             return *this;
         }
 
-        json_array &operator=(_Inout_ json_array &&) = default;
+        json_array &operator=(json_array &&) = default;
 
         const pointer_type &operator[](size_type index)
         {
@@ -583,7 +583,7 @@ namespace dhorn
             return this->_array.size();
         }
 
-        void swap(_Inout_ json_array &other)
+        void swap(json_array &other)
         {
             this->_array.swap(other._array);
         }
@@ -592,12 +592,12 @@ namespace dhorn
 
     private:
 
-        void copy(_In_ const json_array &other)
+        void copy(const json_array &other)
         {
             this->copy(other._array);
         }
 
-        void copy(_In_ const container_type &array)
+        void copy(const container_type &array)
         {
             this->_array.clear();
 
@@ -622,17 +622,17 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        json_number(_In_ utf8_string str) :
+        json_number(utf8_string str) :
             _str(std::move(str))
         {
         }
 
         // Default copy/move
         json_number(const json_number &) = default;
-        json_number(_Inout_ json_number &&) = default;
+        json_number(json_number &&) = default;
 
-        json_number &operator=(_In_ const json_number &) = default;
-        json_number &operator=(_Inout_ json_number &&) = default;
+        json_number &operator=(const json_number &) = default;
+        json_number &operator=(json_number &&) = default;
 
 
 
@@ -654,7 +654,7 @@ namespace dhorn
             return this->_str;
         }
 
-        void swap(_Inout_ json_number &other)
+        void swap(json_number &other)
         {
             this->_str.swap(other._str);
         }
@@ -678,17 +678,17 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        json_string(_In_ utf8_string str) :
+        json_string(utf8_string str) :
             _str(std::move(str))
         {
         }
 
         // Default copy/move
         json_string(const json_string &) = default;
-        json_string(_Inout_ json_string &&) = default;
+        json_string(json_string &&) = default;
 
-        json_string &operator=(_In_ const json_string &) = default;
-        json_string &operator=(_Inout_ json_string &&) = default;
+        json_string &operator=(const json_string &) = default;
+        json_string &operator=(json_string &&) = default;
 
 
 
@@ -710,7 +710,7 @@ namespace dhorn
             return this->_str;
         }
 
-        void swap(_Inout_ json_string &other)
+        void swap(json_string &other)
         {
             this->_str.swap(other._str);
         }
@@ -734,17 +734,17 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        json_boolean(_In_ bool value) :
+        json_boolean(bool value) :
             _value(value)
         {
         }
 
         // Default copy/move
         json_boolean(const json_boolean &) = default;
-        json_boolean(_Inout_ json_boolean &&) = default;
+        json_boolean(json_boolean &&) = default;
 
-        json_boolean &operator=(_In_ const json_boolean &) = default;
-        json_boolean &operator=(_Inout_ json_boolean &&) = default;
+        json_boolean &operator=(const json_boolean &) = default;
+        json_boolean &operator=(json_boolean &&) = default;
 
 
 
@@ -766,7 +766,7 @@ namespace dhorn
             return this->_value;
         }
 
-        void swap(_Inout_ json_boolean &other)
+        void swap(json_boolean &other)
         {
             this->_value = other._value;
         }
@@ -796,10 +796,10 @@ namespace dhorn
 
         // Default copy/move
         json_null(const json_null &) = default;
-        json_null(_Inout_ json_null &&) = default;
+        json_null(json_null &&) = default;
 
-        json_null &operator=(_In_ const json_null &) = default;
-        json_null &operator=(_Inout_ json_null &&) = default;
+        json_null &operator=(const json_null &) = default;
+        json_null &operator=(json_null &&) = default;
 
 
 
@@ -821,7 +821,7 @@ namespace dhorn
             return nullptr;
         }
 
-        void swap(_Inout_ json_boolean &)
+        void swap(json_boolean &)
         {
         }
     };
@@ -830,7 +830,7 @@ namespace dhorn
 
     namespace garbage
     {
-        std::shared_ptr<json_value> copy_json_value(_In_ const std::shared_ptr<json_value> &other)
+        std::shared_ptr<json_value> copy_json_value(const std::shared_ptr<json_value> &other)
         {
             auto type = other->type();
 
@@ -885,13 +885,13 @@ namespace dhorn
     struct json_cast_t;
 
     template <typename Ty, typename CastTy = json_cast_t<Ty>>
-    inline Ty json_cast(_In_ const json_value *value)
+    inline Ty json_cast(const json_value *value)
     {
         return CastTy()(value);
     }
 
     template <typename Ty, typename CastTy>
-    inline Ty json_cast(_In_ const json_value *value, _In_ const CastTy &cast)
+    inline Ty json_cast(const json_value *value, const CastTy &cast)
     {
         return cast(value);
     }
@@ -905,13 +905,13 @@ namespace dhorn
     struct make_json_t;
 
     template <typename Ty, typename MakeTy = make_json_t<Ty>>
-    inline std::shared_ptr<json_value> make_json(_In_ const Ty &value)
+    inline std::shared_ptr<json_value> make_json(const Ty &value)
     {
         return MakeTy()(value);
     }
 
     template <typename Ty, typename MakeTy>
-    inline std::shared_ptr<json_value> make_json(_In_ const Ty &value, _In_ const MakeTy &make)
+    inline std::shared_ptr<json_value> make_json(const Ty &value, const MakeTy &make)
     {
         return make(value);
     }
@@ -930,7 +930,7 @@ namespace dhorn
     {
         using value_type = Ty;
 
-        inline value_type operator()(_In_ const json_value *value) const
+        inline value_type operator()(const json_value *value) const
         {
             return numeric_cast<Ty>(value->as<json_number>()->str());
         }
@@ -939,7 +939,7 @@ namespace dhorn
     template <typename Ty>
     struct make_json_t<Ty, std::enable_if_t<std::is_arithmetic<Ty>::value>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const Ty &value) const
+        inline std::shared_ptr<json_value> operator()(const Ty &value) const
         {
             // TODO: Are string streams really the best option here? Also, should we attempt to do scientific notation?
             std::stringstream stream;
@@ -962,7 +962,7 @@ namespace dhorn
     {
         using value_type = std::basic_string<CharT>;
 
-        inline value_type operator()(_In_ const json_value *value) const
+        inline value_type operator()(const json_value *value) const
         {
             auto jsonString = value->as<json_string>();
             utf_string<CharT> utfString = jsonString->str();
@@ -973,7 +973,7 @@ namespace dhorn
     template <typename CharT>
     struct make_json_t<std::basic_string<CharT>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const std::basic_string<CharT> &value) const
+        inline std::shared_ptr<json_value> operator()(const std::basic_string<CharT> &value) const
         {
             return std::make_shared<json_string>(value);
         }
@@ -993,7 +993,7 @@ namespace dhorn
     {
         using value_type = utf_string<CharT>;
 
-        inline value_type operator()(_In_ const json_value *value) const
+        inline value_type operator()(const json_value *value) const
         {
             auto jsonString = value->as<json_string>();
             return jsonString->str();
@@ -1003,7 +1003,7 @@ namespace dhorn
     template <typename CharT>
     struct make_json_t<utf_string<CharT>>
     {
-        inline std::shared_ptr<json_value> operator()(_In_ const utf_string<CharT> &value) const
+        inline std::shared_ptr<json_value> operator()(const utf_string<CharT> &value) const
         {
             return std::make_shared<json_string>(value);
         }
@@ -1025,7 +1025,7 @@ namespace dhorn
         {
             using value_type = Ty;
 
-            inline value_type operator()(_In_ const json_value *value) const
+            inline value_type operator()(const json_value *value) const
             {
                 auto jsonArray = value->as<json_array>();
                 auto &array = jsonArray->array();
@@ -1045,7 +1045,7 @@ namespace dhorn
         {
             using value_type = Ty;
 
-            inline value_type operator()(_In_ const json_value *value) const
+            inline value_type operator()(const json_value *value) const
             {
                 auto jsonArray = value->as<json_array>();
                 auto &array = jsonArray->array();
@@ -1066,7 +1066,7 @@ namespace dhorn
         {
             using value_type = Ty;
 
-            inline value_type operator()(_In_ const json_value *value) const
+            inline value_type operator()(const json_value *value) const
             {
                 auto jsonArray = value->as<json_array>();
                 auto &array = jsonArray->array();
@@ -1086,7 +1086,7 @@ namespace dhorn
         {
             using value_type = Ty;
 
-            inline value_type operator()(_In_ const json_value *value) const
+            inline value_type operator()(const json_value *value) const
             {
                 value_type result;
                 constexpr size_t size = result.size();
@@ -1110,7 +1110,7 @@ namespace dhorn
         template <typename Ty>
         struct sequence_container_make_json_t
         {
-            inline std::shared_ptr<json_value> operator()(_In_ const Ty &value) const
+            inline std::shared_ptr<json_value> operator()(const Ty &value) const
             {
                 std::vector<std::shared_ptr<json_value>> array;
 
@@ -1385,7 +1385,7 @@ namespace dhorn
     {
         using value_type = std::map<KeyTy, ValueTy, Comp, Alloc>;
 
-        inline value_type operator()(_In_ const json_value *value) const
+        inline value_type operator()(const json_value *value) const
         {
             value_type result;
 

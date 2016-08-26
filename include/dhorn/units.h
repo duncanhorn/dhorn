@@ -72,7 +72,7 @@ namespace dhorn
             typename Ty,
             typename = std::enable_if<is_ratio<From>::value>::type,
             typename = std::enable_if<is_ratio<To>::value>::type>
-        inline constexpr Ty ratio_convert(_In_ const Ty &val)
+        inline constexpr Ty ratio_convert(const Ty &val)
         {
             using convert_ratio = std::ratio_divide<From, To>;
             return
@@ -143,36 +143,36 @@ namespace dhorn
         {
         }
 
-        unit(_In_ value_type val) :
+        unit(value_type val) :
             _value(std::move(val))
         {
         }
 
         template <typename OtherRatio>
-        unit(_In_ const unit<UnitType, OtherRatio> &other) :
+        unit(const unit<UnitType, OtherRatio> &other) :
             _value(garbage::ratio_convert<OtherRatio, Ratio>(other.value()))
         {
         }
 
         // Default copy/move
-        unit(_In_ const unit &) = default;
-        unit(_Inout_ unit &&) = default;
-        unit &operator=(_In_ const unit &) = default;
-        unit &operator=(_Inout_ unit &&) = default;
+        unit(const unit &) = default;
+        unit(unit &&) = default;
+        unit &operator=(const unit &) = default;
+        unit &operator=(unit &&) = default;
 
 
 
         /*
          * Operators
          */
-        unit &operator=(_In_ const value_type &val)
+        unit &operator=(const value_type &val)
         {
             this->_value = val;
             return *this;
         }
 
         template <typename OtherRatio>
-        unit &operator=(_In_ unit<UnitType, OtherRatio> &other)
+        unit &operator=(const unit<UnitType, OtherRatio> &other)
         {
             this->_value = garbage::ratio_convert<OtherRatio, Ratio>(other.value());
             return *this;
@@ -212,19 +212,19 @@ namespace dhorn
         }
 
         // Multiplication/Division/Modulous
-        unit &operator*=(_In_ const value_type &val)
+        unit &operator*=(const value_type &val)
         {
             this->_value *= val;
             return *this;
         }
 
-        unit &operator/=(_In_ const value_type &val)
+        unit &operator/=(const value_type &val)
         {
             this->_value /= val;
             return *this;
         }
 
-        unit &operator%=(_In_ const value_type &val)
+        unit &operator%=(const value_type &val)
         {
             this->_value %= val;
             return *this;
@@ -268,26 +268,26 @@ namespace dhorn
      * Value Multiplication/Division/Modulous
      */
     template <typename UnitType, typename Ratio, typename ValueType>
-    inline unit<UnitType, Ratio> operator*(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    inline unit<UnitType, Ratio> operator*(const unit<UnitType, Ratio> &lhs, const ValueType &rhs)
     {
         return unit<UnitType, Ratio>(lhs.value() * rhs);
     }
 
     template <typename ValueType, typename UnitType, typename Ratio>
-    inline unit<UnitType, Ratio> operator*(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    inline unit<UnitType, Ratio> operator*(const ValueType &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return unit<UnitType, Ratio>(lhs * rhs.value());
     }
 
     template <typename UnitType, typename Ratio, typename ValueType>
-    inline unit<UnitType, Ratio> operator/(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    inline unit<UnitType, Ratio> operator/(const unit<UnitType, Ratio> &lhs, const ValueType &rhs)
     {
         // Note that it does not make sense to divide a value by a unit; only a unit by a value
         return unit<UnitType, Ratio>(lhs.value() / rhs);
     }
 
     template <typename UnitType, typename Ratio, typename ValueType>
-    inline unit<UnitType, Ratio> operator%(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    inline unit<UnitType, Ratio> operator%(const unit<UnitType, Ratio> &lhs, const ValueType &rhs)
     {
         // Note that it does not make sense to divide a value by a unit; only a unit by a value
         return unit<UnitType, Ratio>(lhs.value() % rhs);
@@ -299,77 +299,73 @@ namespace dhorn
      * Operators
      */
     template <typename UnitType, typename Ratio, typename ValueType>
-    inline bool operator==(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    inline bool operator==(const unit<UnitType, Ratio> &lhs, const ValueType &rhs)
     {
         return lhs.value() == rhs;
     }
 
     template <typename ValueType, typename UnitType, typename Ratio>
-    inline bool operator==(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    inline bool operator==(const ValueType &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return lhs == rhs.value();
     }
 
     template <typename UnitType, typename Ratio>
-    inline bool operator==(_In_ const unit<UnitType, Ratio> &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    inline bool operator==(const unit<UnitType, Ratio> &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return lhs.value() == rhs.value();
     }
 
     template <typename UnitType, typename Ratio, typename ValueType>
-    inline bool operator!=(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    inline bool operator!=(const unit<UnitType, Ratio> &lhs, const ValueType &rhs)
     {
         return lhs.value() != rhs;
     }
 
     template <typename ValueType, typename UnitType, typename Ratio>
-    inline bool operator!=(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    inline bool operator!=(const ValueType &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return lhs != rhs.value();
     }
 
     template <typename UnitType, typename Ratio>
-    inline bool operator!=(_In_ const unit<UnitType, Ratio> &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    inline bool operator!=(const unit<UnitType, Ratio> &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return lhs.value() != rhs.value();
     }
 
     template <typename UnitType, typename Ratio, typename ValueType>
-    inline unit<UnitType, Ratio> operator+(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    inline unit<UnitType, Ratio> operator+(const unit<UnitType, Ratio> &lhs, const ValueType &rhs)
     {
         return unit<UnitType, Ratio>(lhs.value() + rhs);
     }
 
     template <typename ValueType, typename UnitType, typename Ratio>
-    inline unit<UnitType, Ratio> operator+(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    inline unit<UnitType, Ratio> operator+(const ValueType &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return unit<UnitType, Ratio>(lhs + rhs.value());
     }
 
     template <typename UnitType, typename Ratio>
-    inline unit<UnitType, Ratio> operator+(
-        _In_ const unit<UnitType, Ratio> &lhs,
-        _In_ const unit<UnitType, Ratio> &rhs)
+    inline unit<UnitType, Ratio> operator+(const unit<UnitType, Ratio> &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return unit<UnitType, Ratio>(lhs.value() + rhs.value());
     }
 
     template <typename UnitType, typename Ratio, typename ValueType>
-    inline unit<UnitType, Ratio> operator-(_In_ const unit<UnitType, Ratio> &lhs, _In_ const ValueType &rhs)
+    inline unit<UnitType, Ratio> operator-(const unit<UnitType, Ratio> &lhs, const ValueType &rhs)
     {
         return unit<UnitType, Ratio>(lhs.value() - rhs);
     }
 
     template <typename ValueType, typename UnitType, typename Ratio>
-    inline unit<UnitType, Ratio> operator-(_In_ const ValueType &lhs, _In_ const unit<UnitType, Ratio> &rhs)
+    inline unit<UnitType, Ratio> operator-(const ValueType &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return unit<UnitType, Ratio>(lhs - rhs.value());
     }
 
     template <typename UnitType, typename Ratio>
-    inline unit<UnitType, Ratio> operator-(
-        _In_ const unit<UnitType, Ratio> &lhs,
-        _In_ const unit<UnitType, Ratio> &rhs)
+    inline unit<UnitType, Ratio> operator-(const unit<UnitType, Ratio> &lhs, const unit<UnitType, Ratio> &rhs)
     {
         return unit<UnitType, Ratio>(lhs.value() - rhs.value());
     }
@@ -385,7 +381,7 @@ namespace dhorn
         typename Ratio,
         typename = typename std::enable_if<garbage::unit_traits<TargetType>::is_unit>::type,
         typename = typename std::enable_if<std::is_same<UnitType, typename garbage::unit_traits<TargetType>::unit_type>::value>::type>
-    inline constexpr TargetType unit_cast(_In_ const unit<UnitType, Ratio> &val)
+    inline constexpr TargetType unit_cast(const unit<UnitType, Ratio> &val)
     {
         return TargetType(val);
     }

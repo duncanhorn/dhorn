@@ -40,14 +40,14 @@ namespace dhorn
         {
         }
 
-        synchronized_object(_In_ Ty value) :
+        synchronized_object(Ty value) :
             _value(std::move(value))
         {
         }
 
         // Cannot copy
-        synchronized_object(_In_ const synchronized_object &) = delete;
-        synchronized_object &operator=(_In_ const synchronized_object &) = delete;
+        synchronized_object(const synchronized_object &) = delete;
+        synchronized_object &operator=(const synchronized_object &) = delete;
 
 
 
@@ -55,20 +55,20 @@ namespace dhorn
          * Execution
          */
         template <typename LockType = std::unique_lock<MutexType>, typename Func>
-        void execute_with_lock(_In_ const Func &fn)
+        void execute_with_lock(const Func &fn)
         {
             LockType lock(this->_mutex);
             fn(this->_value, lock);
         }
 
         template <typename Func>
-        void execute_without_lock(_In_ const Func &fn)
+        void execute_without_lock(const Func &fn)
         {
             fn(this->_value);
         }
 
         template <typename Func>
-        void execute_without_lock(_In_ const Func &fn) const
+        void execute_without_lock(const Func &fn) const
         {
             fn(this->_value);
         }
@@ -98,13 +98,13 @@ namespace dhorn
             return this->_value;
         }
 
-        void set_unlocked(_In_ const Ty &value)
+        void set_unlocked(const Ty &value)
         {
             this->_value = value;
         }
 
         template <typename LockType = std::unique_lock<MutexType>>
-        void set_locked(_In_ const Ty &value)
+        void set_locked(const Ty &value)
         {
             LockType lock(this->_mutex);
             this->_value = value;
@@ -122,13 +122,13 @@ namespace dhorn
         }
 
         template <typename LockType = std::unique_lock<MutexType>>
-        LockType lock(_In_ std::try_to_lock_t t)
+        LockType lock(std::try_to_lock_t t)
         {
             return LockType(this->_mutex, t);
         }
 
         template <typename LockType = std::unique_lock<MutexType>>
-        LockType lock(_In_ std::defer_lock_t t)
+        LockType lock(std::defer_lock_t t)
         {
             return LockType(this->_mutex, t);
         }

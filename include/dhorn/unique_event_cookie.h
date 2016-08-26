@@ -30,13 +30,13 @@ namespace dhorn
         {
         }
 
-        basic_unique_event_cookie(_Inout_ basic_unique_event_cookie &&other) :
+        basic_unique_event_cookie(basic_unique_event_cookie &&other) :
             basic_unique_event_cookie()
         {
             this->swap(other);
         }
 
-        basic_unique_event_cookie(_In_ event_cookie cookie, _In_ destroy_func_type destroyFunc) :
+        basic_unique_event_cookie(event_cookie cookie, destroy_func_type destroyFunc) :
             _cookie(cookie),
             _destroyFunc(std::move(destroyFunc))
         {
@@ -49,14 +49,14 @@ namespace dhorn
 
         // Cannot copy
         basic_unique_event_cookie(const basic_unique_event_cookie &) = delete;
-        basic_unique_event_cookie &operator=(_In_ const basic_unique_event_cookie &) = delete;
+        basic_unique_event_cookie &operator=(const basic_unique_event_cookie &) = delete;
 
 
 
         /*
          * Operators
          */
-        basic_unique_event_cookie &operator=(_Inout_ basic_unique_event_cookie &&other)
+        basic_unique_event_cookie &operator=(basic_unique_event_cookie &&other)
         {
             this->swap(other);
         }
@@ -76,7 +76,7 @@ namespace dhorn
             this->Destroy();
         }
 
-        void reset(_In_ event_cookie cookie, _In_ const destroy_func_type &destroyFunc)
+        void reset(event_cookie cookie, const destroy_func_type &destroyFunc)
         {
             this->Destroy();
             this->_cookie = cookie;
@@ -90,7 +90,7 @@ namespace dhorn
             return cookie;
         }
 
-        void swap(_Inout_ basic_unique_event_cookie &other)
+        void swap(basic_unique_event_cookie &other)
         {
             std::swap(this->_cookie, other._cookie);
             std::swap(this->_destroyFunc, other._destroyFunc);
@@ -115,8 +115,8 @@ namespace dhorn
 
     template <typename DestroyFuncType>
     basic_unique_event_cookie<DestroyFuncType> make_event_cookie(
-        _In_ event_cookie cookie,
-        _In_ const std::function<DestroyFuncType> &destroyFunc)
+        event_cookie cookie,
+        const std::function<DestroyFuncType> &destroyFunc)
     {
         return basic_unique_event_cookie<DestroyFuncType>(cookie, destroyFunc);
     }
@@ -138,8 +138,8 @@ namespace std
 {
     template <typename DestroyFuncType>
     void swap(
-        _Inout_ dhorn::basic_unique_event_cookie<DestroyFuncType> &lhs,
-        _Inout_ dhorn::basic_unique_event_cookie<DestroyFuncType> &rhs)
+        dhorn::basic_unique_event_cookie<DestroyFuncType> &lhs,
+        dhorn::basic_unique_event_cookie<DestroyFuncType> &rhs)
     {
         lhs.swap(rhs);
     }

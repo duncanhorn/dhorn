@@ -28,7 +28,7 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        task_pool(_In_ size_t threadCount) :
+        task_pool(size_t threadCount) :
             _running(true)
         {
             for (size_t i = 0; i < threadCount; ++i)
@@ -50,14 +50,13 @@ namespace dhorn
          * Task Submit Functions
          */
         template <typename Func>
-        void submit(_In_ const Func &func)
+        void submit(const Func &func)
         {
             this->_messageQueue.push_back(func);
         }
 
         template <typename Func, typename ResultType = decltype(std::declval<Func>()())>
-        auto submit_for_result(_In_ const Func &func) ->
-            std::future<ResultType>
+        auto submit_for_result(const Func &func) -> std::future<ResultType>
         {
             auto promise = std::make_shared<std::promise<ResultType>>();
             auto future = promise->get_future();

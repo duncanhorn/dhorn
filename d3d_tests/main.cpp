@@ -98,9 +98,9 @@ static void load_geometry(void)
 
 
 static std::pair<bool, intptr_t> key_press_handler(
-    _In_ dhorn::win32::window * /*sender*/,
-    _In_ uintptr_t wparam,
-    _In_ intptr_t lparam)
+    dhorn::win32::window * /*sender*/,
+    uintptr_t wparam,
+    intptr_t lparam)
 {
     bool handled = false;
     bool key_down = (lparam & 0x80000000) == 0;
@@ -157,9 +157,9 @@ static void move_cursor(void)
 
 
 static std::pair<bool, intptr_t> mouse_move_handler(
-    _In_ dhorn::win32::window * /*sender*/,
-    _In_ uintptr_t /*wparam*/,
-    _In_ intptr_t lparam)
+    dhorn::win32::window * /*sender*/,
+    uintptr_t /*wparam*/,
+    intptr_t lparam)
 {
     bool handled = false;
     size_t x = static_cast<uint16_t>(LOWORD(lparam));
@@ -189,10 +189,10 @@ static std::pair<bool, intptr_t> mouse_move_handler(
 
 
 int WINAPI wWinMain(
-    _In_ dhorn::win32::instance_handle instance,
-    _In_opt_ dhorn::win32::instance_handle /*prevInstance*/,
-    _In_ wchar_t * /*cmdLine*/,
-    _In_ int cmdShow)
+    dhorn::win32::instance_handle instance,
+    dhorn::win32::instance_handle /*prevInstance*/,
+    wchar_t * /*cmdLine*/,
+    int cmdShow)
 {
     // Initialize the window
     dhorn::win32::window_class windowClass(L"D3D Test Window");

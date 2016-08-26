@@ -878,7 +878,7 @@ namespace dhorn
         TEST_CLASS(HStringEqualityOperatorTests)
         {
             template <typename LhsTy, typename RhsTy>
-            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, _In_ bool expected)
+            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
                 Assert::AreEqual(expected, lhs == rhs);
 
@@ -1011,7 +1011,7 @@ namespace dhorn
         TEST_CLASS(HStringInequalityOperatorTests)
         {
             template <typename LhsTy, typename RhsTy>
-            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, _In_ bool expected)
+            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
                 Assert::AreEqual(expected, lhs != rhs);
 
@@ -1144,7 +1144,7 @@ namespace dhorn
         TEST_CLASS(HStringLessThanOperatorTests)
         {
             template <typename LhsTy, typename RhsTy>
-            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, _In_ bool expected)
+            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
                 Assert::AreEqual(expected, lhs < rhs);
 
@@ -1281,7 +1281,7 @@ namespace dhorn
         TEST_CLASS(HStringLessThanOrEqualsOperatorTests)
         {
             template <typename LhsTy, typename RhsTy>
-            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, _In_ bool expected)
+            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
                 Assert::AreEqual(expected, lhs <= rhs);
 
@@ -1418,7 +1418,7 @@ namespace dhorn
         TEST_CLASS(HStringGreaterThanOperatorTests)
         {
             template <typename LhsTy, typename RhsTy>
-            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, _In_ bool expected)
+            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
                 Assert::AreEqual(expected, lhs > rhs);
 
@@ -1555,7 +1555,7 @@ namespace dhorn
         TEST_CLASS(HStringGreaterThanOrEqualsOperatorTests)
         {
             template <typename LhsTy, typename RhsTy>
-            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, _In_ bool expected)
+            void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
                 Assert::AreEqual(expected, lhs >= rhs);
 
@@ -1703,7 +1703,7 @@ namespace dhorn
         TEST_CLASS(HStringAppendOperatorTests)
         {
             template <typename LhsTy, typename RhsTy, typename ResultTy>
-            void DoAppendTest(LhsTy &&lhs, RhsTy &&rhs, _In_ ResultTy &&expected)
+            void DoAppendTest(LhsTy &&lhs, RhsTy &&rhs, ResultTy &&expected)
             {
                 auto result = lhs + rhs;
                 Assert::IsTrue(std::is_same<decltype(result), hstring>::value);

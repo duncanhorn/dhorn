@@ -38,7 +38,7 @@ namespace dhorn
         }
 
         template <typename Func>
-        linear_animation(_In_ const Func &func) :
+        linear_animation(const Func &func) :
             MyBase(func),
             _left(this->next()),
             _right(this->next()),
@@ -52,7 +52,7 @@ namespace dhorn
         /*
          * Overloaded animation functions
          */
-        virtual animation_state on_update(_In_ duration elapsedTime)
+        virtual animation_state on_update(duration elapsedTime)
         {
             auto state = MyBase::on_update(elapsedTime);
 
@@ -100,7 +100,7 @@ namespace dhorn
             this->_offset = static_cast<Ty>(v_0 - this->_slope * t_0);
         }
 
-        inline constexpr double seconds_fraction(_In_ duration duration) const
+        inline constexpr double seconds_fraction(duration duration) const
         {
             return static_cast<double>(duration.count() * duration::period::num) / duration::period::den;
         }

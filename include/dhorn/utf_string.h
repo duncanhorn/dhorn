@@ -43,7 +43,7 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        bad_utf_encoding(_In_ utf_encoding encoding, _In_ char32_t badValue) :
+        bad_utf_encoding(utf_encoding encoding, char32_t badValue) :
             _encoding(encoding),
             _badValue(badValue)
         {
@@ -79,7 +79,7 @@ namespace dhorn
         /*
          * Declare read functions outside of traits for cross consumption
          */
-        inline void verify_character(_In_ utf_encoding encoding, _In_ char32_t val)
+        inline void verify_character(utf_encoding encoding, char32_t val)
         {
             if (((val > 0x0000D7FF) && (val < 0x0000E000)) ||
                 (val > 0x0010FFFF))
@@ -90,7 +90,7 @@ namespace dhorn
 
 #pragma region utf-8
 
-        inline constexpr size_t size_utf8(_In_ char ch) noexcept
+        inline constexpr size_t size_utf8(char ch) noexcept
         {
             // UTF-8 character widths are defined as:
             // 0xxx xxxx    - 1 byte wide
@@ -104,7 +104,7 @@ namespace dhorn
                 ((ch & 0xF8) == 0xF0) ? 4 : 0;
         }
 
-        inline constexpr size_t size_utf8(_In_ char32_t val) noexcept
+        inline constexpr size_t size_utf8(char32_t val) noexcept
         {
             // The format of a utf-8 character is (A is first byte, B is second, etc.):
             // 1 byte:  0000 0000 0000 0000 0000 0000 0AAA AAAA
@@ -118,7 +118,7 @@ namespace dhorn
                 (val & 0x001FFF80) ? 2 : 1;
         }
 
-        inline char32_t read_utf8(_In_ const char *str, _Out_opt_ const char **result)
+        inline char32_t read_utf8(const char *str, const char **result)
         {
             size_t size = size_utf8(*str);
             unsigned char mask = 0xFF >> size;
@@ -154,7 +154,7 @@ namespace dhorn
 
 #pragma region utf-16
 
-        inline constexpr size_t size_utf16(_In_ char16_t ch) noexcept
+        inline constexpr size_t size_utf16(char16_t ch) noexcept
         {
             // UTF-16 character widths are defined as:
             // 1101 10xx xxxx xxxx  - 2 characters (4 bytes)
@@ -165,7 +165,7 @@ namespace dhorn
                 ((static_cast<uint16_t>(ch) & 0xFC00) == 0xDC00) ? 0 : 1;
         }
 
-        inline constexpr size_t size_utf16(_In_ char32_t ch) noexcept
+        inline constexpr size_t size_utf16(char32_t ch) noexcept
         {
             // 0x000000 to 0x00D7FF:    1 character (2 bytes)
             // 0x00D800 to 0x00DFFF:    INVALID
@@ -177,7 +177,7 @@ namespace dhorn
             return (ch & 0xFFFF0000) ? 2 : 1;
         }
 
-        inline char32_t read_utf16(_In_ const char16_t *str, _Out_opt_ const char16_t **result)
+        inline char32_t read_utf16(const char16_t *str, const char16_t **result)
         {
             auto size = size_utf16(*str);
 
@@ -235,17 +235,17 @@ namespace dhorn
             static const utf_encoding encoding = utf_encoding::utf_8;
             using value_type = char;
 
-            static inline constexpr size_t size(_In_ value_type val) noexcept
+            static inline constexpr size_t size(value_type val) noexcept
             {
                 return size_utf8(val);
             }
 
-            static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
+            static inline char32_t next(const value_type *pos, const value_type **output)
             {
                 return read_utf8(pos, output);
             }
 
-            static inline const value_type *previous(_In_ const value_type *pos) noexcept
+            static inline const value_type *previous(const value_type *pos) noexcept
             {
                 // 10xx xxxx indicates that we are not yet at the end
                 do
@@ -257,7 +257,7 @@ namespace dhorn
                 return pos;
             }
 
-            static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
+            static inline value_type *write(char32_t val, value_type *pos)
             {
                 size_t bytes = size_utf8(val);
                 verify_character(utf_encoding::utf_8, val);
@@ -290,17 +290,17 @@ namespace dhorn
             static const utf_encoding encoding = utf_encoding::utf_16;
             using value_type = char16_t;
 
-            static inline constexpr size_t size(_In_ value_type val) noexcept
+            static inline constexpr size_t size(value_type val) noexcept
             {
                 return size_utf16(val);
             }
 
-            static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
+            static inline char32_t next(const value_type *pos, const value_type **output)
             {
                 return read_utf16(pos, output);
             }
 
-            static inline constexpr const value_type *previous(_In_ const value_type *pos) noexcept
+            static inline constexpr const value_type *previous(const value_type *pos) noexcept
             {
                 // 1101 11xx xxxx xxxx indicates that the current character is part of a surrogate pair
                 return ((*(pos - 1) & 0xFC00) == 0xDC00) ?
@@ -308,7 +308,7 @@ namespace dhorn
                     (pos - 1);
             }
 
-            static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
+            static inline value_type *write(char32_t val, value_type *pos)
             {
                 size_t bytes = size_utf16(val);
                 verify_character(utf_encoding::utf_16, val);
@@ -337,12 +337,12 @@ namespace dhorn
             static const utf_encoding encoding = utf_encoding::utf_32;
             using value_type = char32_t;
 
-            static inline constexpr size_t size(_In_ value_type /*val*/) noexcept
+            static inline constexpr size_t size(value_type /*val*/) noexcept
             {
                 return 1;
             }
 
-            static inline char32_t next(_In_ const value_type *pos, _Out_opt_ const value_type **output)
+            static inline char32_t next(const value_type *pos, const value_type **output)
             {
                 // Need to read the value before writing to output since we don't know if output == &pos
                 char32_t val = *pos;
@@ -356,12 +356,12 @@ namespace dhorn
                 return val;
             }
 
-            static inline constexpr const value_type *previous(_In_ const value_type *pos) noexcept
+            static inline constexpr const value_type *previous(const value_type *pos) noexcept
             {
                 return pos - 1;
             }
 
-            static inline value_type *write(_In_ char32_t val, /*_Out_*/ value_type *pos)
+            static inline value_type *write(char32_t val, value_type *pos)
             {
                 verify_character(utf_encoding::utf_32, val);
                 *pos = val;
@@ -433,51 +433,51 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        utf_string_iterator(_In_ const CharT *ptr) :
+        utf_string_iterator(const CharT *ptr) :
             _ptr(ptr)
         {
         }
 
-        utf_string_iterator(_In_ const utf_string_iterator &other) = default;
+        utf_string_iterator(const utf_string_iterator &other) = default;
 
 
 
         /*
          * Operators
          */
-        utf_string_iterator &operator=(_In_ const utf_string_iterator &other) = default;
+        utf_string_iterator &operator=(const utf_string_iterator &other) = default;
 
         char32_t operator*(void) const
         {
             return Traits::next(this->_ptr, nullptr);
         }
 
-        bool operator==(_In_ const utf_string_iterator &other)
+        bool operator==(const utf_string_iterator &other)
         {
             return this->_ptr == other._ptr;
         }
 
-        bool operator!=(_In_ const utf_string_iterator &other)
+        bool operator!=(const utf_string_iterator &other)
         {
             return this->_ptr != other._ptr;
         }
 
-        bool operator>(_In_ const utf_string_iterator &other)
+        bool operator>(const utf_string_iterator &other)
         {
             return this->_ptr > other._ptr;
         }
 
-        bool operator>=(_In_ const utf_string_iterator &other)
+        bool operator>=(const utf_string_iterator &other)
         {
             return this->_ptr >= other._ptr;
         }
 
-        bool operator<(_In_ const utf_string_iterator &other)
+        bool operator<(const utf_string_iterator &other)
         {
             return this->_ptr < other._ptr;
         }
 
-        bool operator<=(_In_ const utf_string_iterator &other)
+        bool operator<=(const utf_string_iterator &other)
         {
             return this->_ptr <= other._ptr;
         }
@@ -559,34 +559,34 @@ namespace dhorn
         {
         }
 
-        utf_string(_In_ const utf_string &other) :
+        utf_string(const utf_string &other) :
             utf_string()
         {
             this->Create(other);
         }
 
         template <typename CharType>
-        utf_string(_In_ const utf_string<CharType> &other) :
+        utf_string(const utf_string<CharType> &other) :
             utf_string()
         {
             this->Create(other);
         }
 
-        utf_string(_Inout_ utf_string &&other) :
+        utf_string(utf_string &&other) :
             utf_string()
         {
             this->swap(other);
         }
 
         template <typename CharType>
-        utf_string(_In_ const CharType *str) :
+        utf_string(const CharType *str) :
             utf_string()
         {
             this->Create(str);
         }
 
         template <typename CharType>
-        utf_string(_In_ const std::basic_string<CharType> &str) :
+        utf_string(const std::basic_string<CharType> &str) :
             utf_string()
         {
             // We don't use the iterator Create function since std::basic_string does not know about utf encodings and
@@ -595,7 +595,7 @@ namespace dhorn
         }
 
         template <typename Itr>
-        utf_string(_In_ Itr front, _In_ Itr back) :
+        utf_string(Itr front, Itr back) :
             utf_string()
         {
             this->Create(front, back);
@@ -611,20 +611,20 @@ namespace dhorn
         /*
          * Operators
          */
-        utf_string &operator=(_In_ const utf_string &other)
+        utf_string &operator=(const utf_string &other)
         {
             this->Assign(other);
             return *this;
         }
 
         template <typename CharType>
-        utf_string &operator=(_In_ const utf_string<CharType> &other)
+        utf_string &operator=(const utf_string<CharType> &other)
         {
             this->Assign(other);
             return *this;
         }
 
-        utf_string &operator=(_Inout_ utf_string &&other)
+        utf_string &operator=(utf_string &&other)
         {
             assert(this != &other);
             this->swap(other);
@@ -633,35 +633,35 @@ namespace dhorn
         }
 
         template <typename CharType>
-        utf_string &operator=(_In_ const CharType *str)
+        utf_string &operator=(const CharType *str)
         {
             this->Assign(str);
             return *this;
         }
 
         template <typename CharType>
-        utf_string &operator=(_In_ const std::basic_string<CharType> &other)
+        utf_string &operator=(const std::basic_string<CharType> &other)
         {
             this->Assign(other);
             return *this;
         }
 
         template <typename CharType>
-        utf_string &operator+=(_In_ const utf_string<CharType> &other)
+        utf_string &operator+=(const utf_string<CharType> &other)
         {
             this->Append(other);
             return *this;
         }
 
         template <typename CharType>
-        utf_string &operator+=(_In_ const CharType *other)
+        utf_string &operator+=(const CharType *other)
         {
             this->Append(other);
             return *this;
         }
 
         template <typename CharType>
-        utf_string &operator+=(_In_ const std::basic_string<CharType> &other)
+        utf_string &operator+=(const std::basic_string<CharType> &other)
         {
             this->Append(other);
             return *this;
@@ -770,7 +770,7 @@ namespace dhorn
             return this->Capacity() - 1;
         }
 
-        void reserve(_In_ size_t desiredSize)
+        void reserve(size_t desiredSize)
         {
             this->Resize(desiredSize);
         }
@@ -790,13 +790,13 @@ namespace dhorn
             return this->_front;
         }
 
-        void push_back(_In_ char32_t ch)
+        void push_back(char32_t ch)
         {
             this->InternalPushBack(ch);
             this->FinishString();
         }
 
-        utf_string substr(_In_ const_iterator pos, size_type count = npos) const
+        utf_string substr(const_iterator pos, size_type count = npos) const
         {
             utf_string result;
             for (size_type i = 0; (i < count) && (pos != this->end()); ++i)
@@ -813,7 +813,7 @@ namespace dhorn
             return result;
         }
 
-        utf_string substr(_In_ const_iterator pos, _In_ const_iterator back) const
+        utf_string substr(const_iterator pos, const_iterator back) const
         {
             assert(this->OwnsIterator(pos) && this->OwnsIterator(back));
             return utf_string(pos, back);
@@ -824,7 +824,7 @@ namespace dhorn
         /*
          * Public Functions
          */
-        void swap(_Inout_ utf_string &other)
+        void swap(utf_string &other)
         {
             std::swap(this->_front, other._front);
             std::swap(this->_back, other._back);
@@ -840,7 +840,7 @@ namespace dhorn
 
         // Returns pair (length, buffer size)
         template <typename CharType>
-        static std::pair<size_t, size_t> BufferSizeFromStringLiteral(_In_ const CharType *str)
+        static std::pair<size_t, size_t> BufferSizeFromStringLiteral(const CharType *str)
         {
             using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
 
@@ -856,7 +856,7 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void AppendFromBuffer(_In_ const CharType *str)
+        void AppendFromBuffer(const CharType *str)
         {
             using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
             while (*str)
@@ -867,7 +867,7 @@ namespace dhorn
             this->FinishString();
         }
 
-        inline bool Inside(_In_ const CharT *str) const
+        inline bool Inside(const CharT *str) const
         {
             return (str >= this->_front) && (str < this->_bounds);
         }
@@ -878,7 +878,7 @@ namespace dhorn
             *this->_back = '\0';
         }
 
-        inline void Copy(_In_ const CharT *str, _In_ size_t length, _In_ size_t bufferSize)
+        inline void Copy(const CharT *str, size_t length, size_t bufferSize)
         {
             assert(this->_back + bufferSize < this->_bounds);
             memcpy(this->_back, str, bufferSize * sizeof(value_type));
@@ -891,7 +891,7 @@ namespace dhorn
         //
         // Creating - assumes that this is uninitialized (i.e. this->_front == nullptr)
         //
-        void Create(_In_ const utf_string &other)
+        void Create(const utf_string &other)
         {
             assert(!this->_front);
             auto bufferSize = other.BufferSize();
@@ -902,14 +902,14 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Create(_In_ const utf_string<CharType> &other)
+        void Create(const utf_string<CharType> &other)
         {
             assert(!this->_front);
             this->Resize(other._length);
             this->AppendFromBuffer(other._front);
         }
 
-        void Create(_In_ const CharT *str)
+        void Create(const CharT *str)
         {
             // For string literals that are the same type as us (CharT *), we can just use memcpy
             assert(!this->_front);
@@ -921,21 +921,21 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Create(_In_ const CharType *str)
+        void Create(const CharType *str)
         {
             assert(!this->_front);
             this->Resize(BufferSizeFromStringLiteral(str).first);
             this->AppendFromBuffer(str);
         }
 
-        void Create(_In_ const std::basic_string<CharT> &str)
+        void Create(const std::basic_string<CharT> &str)
         {
             // We need to calculate the buffer size anyway, so just go ahead and call the memcpy version
             this->Create(str.c_str());
         }
 
         template <typename CharType>
-        void Create(_In_ const std::basic_string<CharType> &str)
+        void Create(const std::basic_string<CharType> &str)
         {
             assert(!this->_front);
             this->Resize(str.length());
@@ -943,7 +943,7 @@ namespace dhorn
         }
 
         template <typename Itr>
-        void Create(_In_ Itr front, _In_ Itr back)
+        void Create(Itr front, Itr back)
         {
             assert(!this->_front);
             this->Resize(std::distance(front, back));
@@ -963,7 +963,7 @@ namespace dhorn
         //
         // Assignment - Has proper checks for when the this == target, or when the buffer is a part of our buffer
         //
-        void Assign(_In_ const utf_string &other)
+        void Assign(const utf_string &other)
         {
             if (&other != this)
             {
@@ -973,13 +973,13 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Assign(_In_ const utf_string<CharType> &other)
+        void Assign(const utf_string<CharType> &other)
         {
             this->Destroy();
             this->Create(other);
         }
 
-        void Assign(_In_ const CharT *str)
+        void Assign(const CharT *str)
         {
             if (str == this->_front)
             {
@@ -1000,7 +1000,7 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Assign(_In_ const CharType *str)
+        void Assign(const CharType *str)
         {
             assert(!this->Inside(reinterpret_cast<const CharT *>(str))); // Guaranteed bad operation
             this->Destroy();
@@ -1008,7 +1008,7 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Assign(_In_ std::basic_string<CharType> &str)
+        void Assign(std::basic_string<CharType> &str)
         {
             this->Destroy();
             this->Create(str);
@@ -1019,7 +1019,7 @@ namespace dhorn
         //
         // Append - has proper checks for when we append ourself or part of ourself
         //
-        void Append(_In_ const utf_string &other)
+        void Append(const utf_string &other)
         {
             auto otherSize = other.BufferSize();
             auto otherLength = other._length;
@@ -1032,14 +1032,14 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Append(_In_ const utf_string<CharType> &other)
+        void Append(const utf_string<CharType> &other)
         {
             // Guess the resulting buffer size as one unit per character
             this->Resize(this->BufferSize() + other._length);
             this->AppendFromBuffer(other._front);
         }
 
-        void Append(_In_ const CharT *str)
+        void Append(const CharT *str)
         {
             auto otherSize = BufferSizeFromStringLiteral(str);
 
@@ -1060,13 +1060,13 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Append(_In_ const CharType *other)
+        void Append(const CharType *other)
         {
             this->Resize(this->BufferSize() + this->BufferSizeFromStringLiteral(other).first);
             this->AppendFromBuffer(other);
         }
 
-        void Append(_In_ const std::basic_string<CharT> &str)
+        void Append(const std::basic_string<CharT> &str)
         {
             auto otherSize = BufferSizeFromStringLiteral(str.c_str());
             this->Resize(this->BufferSize() + otherSize.second);
@@ -1076,7 +1076,7 @@ namespace dhorn
         }
 
         template <typename CharType>
-        void Append(_In_ const std::basic_string<CharType> &other)
+        void Append(const std::basic_string<CharType> &other)
         {
             this->Resize(this->BufferSize() + other.length());
             this->AppendFromBuffer(other.c_str());
@@ -1094,7 +1094,7 @@ namespace dhorn
             this->_length = 0;
         }
 
-        inline void InternalPushBack(_In_ char32_t ch)
+        inline void InternalPushBack(char32_t ch)
         {
             // Determine if we need to resize
             if ((this->_back + max_char_size) >= this->_bounds)
@@ -1109,7 +1109,7 @@ namespace dhorn
             assert(this->_back < this->_bounds);
         }
 
-        inline void Resize(_In_ size_t desiredCapacity)
+        inline void Resize(size_t desiredCapacity)
         {
             size_t currentCapacity = this->Capacity();
             size_t bufferSize = this->BufferSize();
@@ -1144,7 +1144,7 @@ namespace dhorn
             return (this->_bounds - this->_front);
         }
 
-        inline bool OwnsIterator(_In_ const_iterator itr) const noexcept
+        inline bool OwnsIterator(const_iterator itr) const noexcept
         {
             return (itr._ptr >= this->_front) && (itr._ptr <= this->_back);
         }
@@ -1163,7 +1163,7 @@ namespace dhorn
 #pragma region Append Operators
 
     template <typename CharT>
-    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    utf_string<CharT> operator+(const utf_string<CharT> &lhs, const utf_string<CharT> &rhs)
     {
         utf_string<CharT> copy(lhs);
         copy += rhs;
@@ -1171,7 +1171,7 @@ namespace dhorn
     }
 
     template <typename CharT>
-    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const std::basic_string<CharT> &rhs)
+    utf_string<CharT> operator+(const utf_string<CharT> &lhs, const std::basic_string<CharT> &rhs)
     {
         utf_string<CharT> copy(lhs);
         copy += rhs;
@@ -1179,7 +1179,7 @@ namespace dhorn
     }
 
     template <typename CharT>
-    utf_string<CharT> operator+(_In_ const utf_string<CharT> &lhs, _In_ const CharT *rhs)
+    utf_string<CharT> operator+(const utf_string<CharT> &lhs, const CharT *rhs)
     {
         utf_string<CharT> copy(lhs);
         copy += rhs;
@@ -1187,7 +1187,7 @@ namespace dhorn
     }
 
     template <typename CharT>
-    utf_string<CharT> operator+(_In_ const std::basic_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    utf_string<CharT> operator+(const std::basic_string<CharT> &lhs, const utf_string<CharT> &rhs)
     {
         utf_string<CharT> copy(lhs);
         copy += rhs;
@@ -1195,7 +1195,7 @@ namespace dhorn
     }
 
     template <typename CharT>
-    utf_string<CharT> operator+(_In_ const CharT *lhs, _In_ const utf_string<CharT> &rhs)
+    utf_string<CharT> operator+(const CharT *lhs, const utf_string<CharT> &rhs)
     {
         utf_string<CharT> copy(lhs);
         copy += rhs;
@@ -1207,7 +1207,7 @@ namespace dhorn
 #pragma region Equality Operators
 
     template <typename CharT>
-    bool operator==(_In_ const utf_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    bool operator==(const utf_string<CharT> &lhs, const utf_string<CharT> &rhs)
     {
         // Shortcuts since they are of the same string type
         if ((lhs.length() != rhs.length()) || (lhs.size() != rhs.size()))
@@ -1220,7 +1220,7 @@ namespace dhorn
     }
 
     template <typename CharT>
-    bool operator!=(_In_ const utf_string<CharT> &lhs, _In_ const utf_string<CharT> &rhs)
+    bool operator!=(const utf_string<CharT> &lhs, const utf_string<CharT> &rhs)
     {
         return !(lhs == rhs);
     }
@@ -1228,7 +1228,7 @@ namespace dhorn
 
 
     template <typename LhsCharT, typename RhsCharT>
-    bool operator==(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator==(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         // We can't compare size, but the length should at least be equal
         if (lhs.length() != rhs.length())
@@ -1253,7 +1253,7 @@ namespace dhorn
     }
 
     template <typename LhsCharT, typename RhsCharT>
-    bool operator!=(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator!=(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
     }
@@ -1264,7 +1264,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator==(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    bool operator==(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         for (auto ch : lhs)
         {
@@ -1281,7 +1281,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator!=(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    bool operator!=(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         return !(lhs == rhs);
     }
@@ -1290,7 +1290,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator==(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator==(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         for (auto ch : rhs)
         {
@@ -1307,7 +1307,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator!=(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator!=(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
     }
@@ -1318,7 +1318,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator==(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    bool operator==(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs == rhs.c_str();
     }
@@ -1327,7 +1327,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator!=(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    bool operator!=(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
     }
@@ -1336,7 +1336,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator==(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator==(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() == rhs;
     }
@@ -1345,7 +1345,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator!=(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator!=(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
     }
@@ -1355,7 +1355,7 @@ namespace dhorn
 #pragma region Comparison Operators
 
     template <typename LhsCharT, typename RhsCharT>
-    bool operator<(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator<(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         auto litr = std::begin(lhs);
         auto ritr = std::begin(rhs);
@@ -1385,7 +1385,7 @@ namespace dhorn
     }
 
     template <typename LhsCharT, typename RhsCharT>
-    bool operator<=(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator<=(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         auto litr = std::begin(lhs);
         auto ritr = std::begin(rhs);
@@ -1409,13 +1409,13 @@ namespace dhorn
     }
 
     template <typename LhsCharT, typename RhsCharT>
-    bool operator>(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator>(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs <= rhs);
     }
 
     template <typename LhsCharT, typename RhsCharT>
-    bool operator>=(_In_ const utf_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator>=(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs < rhs);
     }
@@ -1426,7 +1426,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator<(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    bool operator<(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         for (auto ch : lhs)
         {
@@ -1447,7 +1447,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator<=(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    bool operator<=(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         for (auto ch : lhs)
         {
@@ -1468,7 +1468,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator>(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    bool operator>(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         return !(lhs <= rhs);
     }
@@ -1477,7 +1477,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator>=(_In_ const utf_string<LhsCharT> &lhs, _In_ const RhsCharT *rhs)
+    bool operator>=(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         return !(lhs < rhs);
     }
@@ -1488,7 +1488,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator<(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator<(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         for (auto ch : rhs)
         {
@@ -1509,7 +1509,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator<=(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator<=(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         for (auto ch : rhs)
         {
@@ -1530,7 +1530,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator>(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator>(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs <= rhs);
     }
@@ -1539,7 +1539,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator>=(_In_ const LhsCharT *lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator>=(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs < rhs);
     }
@@ -1550,7 +1550,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator<(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    bool operator<(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs < rhs.c_str();
     }
@@ -1559,7 +1559,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator<=(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    bool operator<=(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs <= rhs.c_str();
     }
@@ -1568,7 +1568,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator>(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    bool operator>(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs > rhs.c_str();
     }
@@ -1577,7 +1577,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
-    bool operator>=(_In_ const utf_string<LhsCharT> &lhs, _In_ const std::basic_string<RhsCharT> &rhs)
+    bool operator>=(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs >= rhs.c_str();
     }
@@ -1588,7 +1588,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator<(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator<(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() < rhs;
     }
@@ -1597,7 +1597,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator<=(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator<=(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() <= rhs;
     }
@@ -1606,7 +1606,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator>(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator>(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() > rhs;
     }
@@ -1615,7 +1615,7 @@ namespace dhorn
         typename LhsCharT,
         typename RhsCharT,
         typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
-    bool operator>=(_In_ const std::basic_string<LhsCharT> &lhs, _In_ const utf_string<RhsCharT> &rhs)
+    bool operator>=(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() >= rhs;
     }
@@ -1643,7 +1643,7 @@ namespace std
     template <typename CharT>
     struct hash<dhorn::utf_string<CharT>>
     {
-        inline size_t operator()(_In_ const dhorn::utf_string<CharT> &str) const
+        inline size_t operator()(const dhorn::utf_string<CharT> &str) const
         {
             // TODO: Make this better. It's not good to create a string just for hashing
             // TODO: This won't be unique across CharT types. Does it need to be?

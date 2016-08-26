@@ -46,27 +46,27 @@ namespace dhorn
         /*
          * Operators
          */
-        point &operator+=(_In_ const point &rhs)
+        point &operator+=(const point &rhs)
         {
             this->x += rhs.x;
             this->y += rhs.y;
             return *this;
         }
 
-        point operator+(_In_ const point &rhs) const
+        point operator+(const point &rhs) const
         {
             point pt = *this;
             return pt += rhs;
         }
 
-        point &operator-=(_In_ const point &rhs)
+        point &operator-=(const point &rhs)
         {
             this->x -= rhs.x;
             this->y -= rhs.y;
             return *this;
         }
 
-        point operator-(_In_ const point &rhs) const
+        point operator-(const point &rhs) const
         {
             point pt = *this;
             return pt -= rhs;
@@ -77,14 +77,14 @@ namespace dhorn
      * Operators
      */
     template <typename LhsTy, typename RhsTy>
-    inline auto operator==(_In_ const point<LhsTy> &lhs, _In_ const point<RhsTy> &rhs) ->
+    inline auto operator==(const point<LhsTy> &lhs, const point<RhsTy> &rhs) ->
         decltype(LhsTy() == RhsTy())
     {
         return (lhs.x == rhs.x) && (lhs.y == rhs.y);
     }
 
     template <typename LhsTy, typename RhsTy>
-    inline auto operator!=(_In_ const point<LhsTy> &lhs, _In_ const point<RhsTy> &rhs) ->
+    inline auto operator!=(const point<LhsTy> &lhs, const point<RhsTy> &rhs) ->
         decltype(LhsTy() == RhsTy())
     {
         return !(lhs == rhs);
@@ -121,27 +121,27 @@ namespace dhorn
         /*
          * Operators
          */
-        size &operator+=(_In_ const size &rhs)
+        size &operator+=(const size &rhs)
         {
             this->width += rhs.width;
             this->height += rhs.height;
             return *this;
         }
 
-        size operator+(_In_ const size &rhs) const
+        size operator+(const size &rhs) const
         {
             size result = *this;
             return result += rhs;
         }
 
-        size &operator-=(_In_ const size &rhs)
+        size &operator-=(const size &rhs)
         {
             this->width -= rhs.width;
             this->height -= rhs.height;
             return *this;
         }
 
-        size operator-(_In_ const size &rhs) const
+        size operator-(const size &rhs) const
         {
             size result = *this;
             return result -= rhs;
@@ -152,14 +152,14 @@ namespace dhorn
      * Operators
      */
     template <typename LhsTy, typename RhsTy>
-    inline auto operator==(_In_ const size<LhsTy> &lhs, _In_ const size<RhsTy> &rhs) ->
+    inline auto operator==(const size<LhsTy> &lhs, const size<RhsTy> &rhs) ->
         decltype(LhsTy() == RhsTy())
     {
         return (lhs.width == rhs.width) && (lhs.height == rhs.height);
     }
 
     template <typename LhsTy, typename RhsTy>
-    inline auto operator!=(_In_ const size<LhsTy> &lhs, _In_ const size<RhsTy> &rhs) ->
+    inline auto operator!=(const size<LhsTy> &lhs, const size<RhsTy> &rhs) ->
         decltype(LhsTy() == RhsTy())
     {
         return !(lhs == rhs);
@@ -207,7 +207,7 @@ namespace dhorn
         /*
          * Operators
          */
-        bool operator==(_In_ const rect &rhs) const
+        bool operator==(const rect &rhs) const
         {
             return
                 (this->x == rhs.x) &&
@@ -216,13 +216,13 @@ namespace dhorn
                 (this->height == rhs.height);
         }
 
-        bool operator!=(_In_ const rect &rhs) const
+        bool operator!=(const rect &rhs) const
         {
             return !(*this == rhs);
         }
 
         template <typename PointTy>
-        rect &operator+=(_In_ const point<PointTy> &rhs)
+        rect &operator+=(const point<PointTy> &rhs)
         {
             this->x += rhs.x;
             this->y += rhs.y;
@@ -230,7 +230,7 @@ namespace dhorn
         }
 
         template <typename PointTy>
-        rect &operator-=(_In_ const point<PointTy> &rhs)
+        rect &operator-=(const point<PointTy> &rhs)
         {
             this->x -= rhs.x;
             this->y -= rhs.y;
@@ -242,28 +242,28 @@ namespace dhorn
      * Operators
      */
     template <typename RectTy, typename PointTy>
-    rect<RectTy> operator+(_In_ const rect<RectTy> &lhs, _In_ const point<PointTy> &rhs)
+    rect<RectTy> operator+(const rect<RectTy> &lhs, const point<PointTy> &rhs)
     {
         rect<RectTy> result = lhs;
         return result += rhs;
     }
 
     template <typename RectTy, typename PointTy>
-    rect<RectTy> operator+(_In_ const point<PointTy> &lhs, _In_ const rect<RectTy> &rhs)
+    rect<RectTy> operator+(const point<PointTy> &lhs, const rect<RectTy> &rhs)
     {
         rect<RectTy> result = rhs;
         return result += lhs;
     }
 
     template <typename RectTy, typename PointTy>
-    rect<RectTy> operator-(_In_ const rect<RectTy> &lhs, _In_ const point<PointTy> &rhs)
+    rect<RectTy> operator-(const rect<RectTy> &lhs, const point<PointTy> &rhs)
     {
         rect<RectTy> result = lhs;
         return result -= rhs;
     }
 
     template <typename RectTy, typename PointTy>
-    rect<RectTy> operator-(_In_ const point<PointTy> &lhs, _In_ const rect<RectTy> &rhs)
+    rect<RectTy> operator-(const point<PointTy> &lhs, const rect<RectTy> &rhs)
     {
         rect<RectTy> result = rhs;
         return result -= lhs;
@@ -279,13 +279,13 @@ namespace dhorn
 #pragma region Length Squared
 
     template <typename Ty>
-    inline Ty length_squared(_In_ Ty val)
+    inline Ty length_squared(Ty val)
     {
         return (val * val);
     }
 
     template <typename Ty, typename... Types>
-    inline auto length_squared(_In_ Ty val, _In_ Types... vals) ->
+    inline auto length_squared(Ty val, Types... vals) ->
         typename std::common_type<Ty, Types...>::type
     {
         return (val * val) * length_squared(vals...);
@@ -301,7 +301,7 @@ namespace dhorn
 #pragma region Length
 
     template <typename... Types>
-    auto length(_In_ Types... vals) ->
+    auto length(Types... vals) ->
         decltype(sqrt(length_squared(length_squared(vals...))))
     {
         return std::sqrt(length_squared(vals...));

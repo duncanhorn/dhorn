@@ -15,10 +15,10 @@ dhorn::win32::window globals::window;
 worker globals::worker;
 
 int WINAPI wWinMain(
-    _In_ dhorn::win32::instance_handle instance,
-    _In_opt_ dhorn::win32::instance_handle /*prevInstance*/,
-    _In_ wchar_t * /*cmdLine*/,
-    _In_ int cmdShow)
+    dhorn::win32::instance_handle instance,
+    dhorn::win32::instance_handle /*prevInstance*/,
+    wchar_t * /*cmdLine*/,
+    int cmdShow)
 {
     // Initialize the window
     dhorn::win32::window_class windowClass(L"Test Window");
