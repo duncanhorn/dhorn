@@ -208,7 +208,7 @@ namespace dhorn
                 // Force info to fall out of scope before calling TryRemove to help prevent logic errors
                 {
                     auto &info = itr->second;
-                    if (garbage::is_running(info.state))
+                    if (details::is_running(info.state))
                     {
                         auto elapsedTime = now - info.prev_time;
                         info.prev_time = now;
@@ -253,11 +253,11 @@ namespace dhorn
             return result;
         }
 
-        bool pause(animation_handle *handle)
+        bool pause(const animation_handle *handle)
         {
             auto itr = this->FindInfo(handle->id());
             auto &info = itr->second;
-            if (!garbage::is_running(info.state))
+            if (!details::is_running(info.state))
             {
                 // Cannot be paused if not running
                 return false;
@@ -267,11 +267,11 @@ namespace dhorn
             return true;
         }
 
-        bool resume(animation_handle *handle)
+        bool resume(const animation_handle *handle)
         {
             auto itr = this->FindInfo(handle->id());
             auto &info = itr->second;
-            if (!garbage::is_paused(info.state))
+            if (!details::is_paused(info.state))
             {
                 // Can't resume if not paused
                 return false;
@@ -281,11 +281,11 @@ namespace dhorn
             return true;
         }
 
-        bool cancel(animation_handle *handle)
+        bool cancel(const animation_handle *handle)
         {
             auto itr = this->FindInfo(handle->id());
             auto &info = itr->second;
-            if (garbage::is_complete(info.state))
+            if (details::is_complete(info.state))
             {
                 // Can't cancel if already complete
                 return false;
@@ -295,7 +295,7 @@ namespace dhorn
             return true;
         }
 
-        animation_state query_state(animation_handle *handle) const
+        animation_state query_state(const animation_handle *handle) const
         {
             return this->FindInfo(handle->id())->second.state;
         }
@@ -352,7 +352,7 @@ namespace dhorn
         bool TryRemove(const AnimationMap::iterator &pos)
         {
             auto &info = pos->second;
-            if (!info.has_references && garbage::is_complete(info.state))
+            if (!info.has_references && details::is_complete(info.state))
             {
                 this->_animationInfo.erase(pos);
                 return true;

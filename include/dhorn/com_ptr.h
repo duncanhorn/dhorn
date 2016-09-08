@@ -18,7 +18,7 @@ namespace dhorn
     /*
      * com_ptr_ref
      */
-    namespace garbage
+    namespace details
     {
         template <typename ComPtrType>
         class com_ptr_ref
@@ -108,40 +108,32 @@ namespace dhorn
          */
 #pragma region Constructor(s)/Destructor
 
-        com_ptr(void) :
-            _ptr(nullptr)
-        {
-        }
+        com_ptr(void) = default;
 
-        com_ptr(std::nullptr_t) :
-            com_ptr()
+        com_ptr(std::nullptr_t)
         {
         }
 
         template <
             typename Ty,
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
-        com_ptr(Ty *ptr) :
-            com_ptr()
+        com_ptr(Ty *ptr)
         {
             this->Assign(ptr);
         }
 
-        com_ptr(const com_ptr &other) :
-            com_ptr()
+        com_ptr(const com_ptr &other)
         {
             this->Assign(other._ptr);
         }
 
         template <typename Ty>
-        com_ptr(const com_ptr<Ty> &other) :
-            com_ptr()
+        com_ptr(const com_ptr<Ty> &other)
         {
             this->Assign(other._ptr);
         }
 
-        com_ptr(com_ptr &&other) :
-            com_ptr()
+        com_ptr(com_ptr &&other)
         {
             this->swap(other);
         }
@@ -229,9 +221,9 @@ namespace dhorn
             return *this;
         }
 
-        garbage::com_ptr_ref<com_ptr> operator&(void)
+        details::com_ptr_ref<com_ptr> operator&(void)
         {
-            return garbage::com_ptr_ref<com_ptr>(this);
+            return details::com_ptr_ref<com_ptr>(this);
         }
 
         operator bool(void) const
@@ -429,7 +421,8 @@ namespace dhorn
             typename = typename std::enable_if_t<std::is_base_of<IUnknown, Ty>::value>>
         inline void Attach(Ty *ptr)
         {
-            // More complicated case: we must QI and Release, even if we fail
+            // More complicated case: we must QI and Release, even if we fail since the caller is transferring
+            // ownership over to us
             assert(!this->_ptr);
 
             if (ptr)
@@ -443,13 +436,13 @@ namespace dhorn
 
 
 
-        IFace *_ptr;
+        IFace *_ptr = nullptr;
     };
 }
 
 
 
-#ifndef _DHORN_NO_STD
+#ifndef DHORN_NO_STD
 
 namespace std
 {
@@ -460,19 +453,19 @@ namespace std
     }
 }
 
-#endif  /*_DHORN_NO_STD*/
+#endif  /*DHORN_NO_STD*/
 
 
 
-#ifndef _DHORN_NO_GLOBAL
+#ifndef DHORN_NO_GLOBAL
 
 // Overload for IID_PPV_ARGS
 template <typename Ty>
-void **IID_PPV_ARGS_Helper(dhorn::garbage::com_ptr_ref<Ty> ptr)
+inline constexpr void **IID_PPV_ARGS_Helper(dhorn::details::com_ptr_ref<Ty> ptr)
 {
     static_assert(std::is_base_of<IUnknown, typename Ty::interface_type>::value,
         "Cannot use IID_PPV_ARGS with a type that does not derive from IUnknown");
     return ptr;
 }
 
-#endif  /* _DHORN_NO_GLOBAL */
+#endif  /* DHORN_NO_GLOBAL */

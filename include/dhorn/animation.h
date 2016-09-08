@@ -37,7 +37,7 @@ namespace dhorn
     /*
      * Common animation helpers
      */
-    namespace garbage
+    namespace details
     {
         // Helpers surrounding animation_state in case the enum ever expands. We have four conceptual states: pending,
         // running, paused, and completed, though we have more than four "true" states
@@ -144,7 +144,7 @@ namespace dhorn
     /*
      * Helper derivatives of animation
      */
-    namespace garbage
+    namespace details
     {
         /*
          * key_frame_animation. This maintains a set of (time, value) ordered based off 'time.' The key_frame_animation
@@ -174,7 +174,6 @@ namespace dhorn
              * Constructor(s)/Destructor
              */
             key_frame_animation(void) :
-                _totalElapsedTime(0),
                 _next(std::begin(this->_keyFrames))
             {
             }
@@ -193,6 +192,7 @@ namespace dhorn
             virtual animation_state on_update(duration elapsedTime)
             {
                 this->_totalElapsedTime += elapsedTime;
+                this->next();
                 return this->completed() ? animation_state::completed : animation_state::running;
             }
 
@@ -238,7 +238,7 @@ namespace dhorn
 
         protected:
 
-            iterator_type next(void)
+            const iterator_type &next(void)
             {
                 while ((this->_next != std::end(this->_keyFrames)) && (this->_next->first <= this->_totalElapsedTime))
                 {
@@ -248,14 +248,14 @@ namespace dhorn
                 return this->_next;
             }
 
-            bool begun(void)
+            bool begun(void) const
             {
-                return this->next() != std::begin(this->_keyFrames);
+                return this->_next != std::begin(this->_keyFrames);
             }
 
-            bool completed(void)
+            bool completed(void) const
             {
-                return this->next() == std::end(this->_keyFrames);
+                return this->_next == std::end(this->_keyFrames);
             }
 
             duration elapsed_time(void) const
@@ -275,7 +275,7 @@ namespace dhorn
 
         private:
 
-            duration _totalElapsedTime;
+            duration _totalElapsedTime{ 0 };
             container_type _keyFrames;
             iterator_type _next;
             update_function _updateFunc;

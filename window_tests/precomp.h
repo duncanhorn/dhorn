@@ -5,8 +5,6 @@
  */
 #pragma once
 
-#include <sal.h>
-
 #include <dhorn/functional.h>
 #include <dhorn/math.h>
 #include <dhorn/unique_any.h>

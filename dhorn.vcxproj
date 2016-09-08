@@ -157,6 +157,7 @@
     <ClInclude Include="include\dhorn\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\d3d11\d3d11_window.h" />
     <ClInclude Include="include\dhorn\d3d\d3d_utils.h" />
+    <ClInclude Include="include\dhorn\dynamic_ui\details\render_types.h" />
     <ClInclude Include="include\dhorn\hstring.h" />
     <ClInclude Include="include\dhorn\json.h" />
     <ClInclude Include="include\dhorn\nullable_value.h" />
@@ -169,7 +170,6 @@
     <ClInclude Include="include\dhorn\d3d\colors.h" />
     <ClInclude Include="include\dhorn\d3d\shapes.h" />
     <ClInclude Include="include\dhorn\discrete_animation.h" />
-    <ClInclude Include="include\dhorn\dynamic_ui\garbage\render_types.h" />
     <ClInclude Include="include\dhorn\dynamic_ui\render_node.h" />
     <ClInclude Include="include\dhorn\dynamic_ui\render_tree.h" />
     <ClInclude Include="include\dhorn\event_source.h" />

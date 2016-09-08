@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "garbage/render_types.h"
+#include "details/render_types.h"
 
 namespace dhorn
 {
@@ -28,7 +28,7 @@ namespace dhorn
              * Constructor(s)/Destructor
              */
             render_tree(void) :
-                _state(std::make_shared<garbage::render_state>())
+                _state(std::make_shared<details::render_state>())
             {
             }
 
@@ -36,7 +36,7 @@ namespace dhorn
 
         private:
 
-            std::shared_ptr<garbage::render_state> _state;
+            std::shared_ptr<details::render_state> _state;
         };
 
 #pragma endregion

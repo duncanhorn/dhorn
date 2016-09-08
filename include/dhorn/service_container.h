@@ -7,10 +7,6 @@
  */
 #pragma once
 
-#ifdef  WIN32
-#include <sal.h>
-#endif  /* WIN32 */
-
 #include <functional>
 #include <map>
 #include <memory>
@@ -22,7 +18,7 @@ namespace dhorn
     /*
      * Helpers
      */
-    namespace garbage
+    namespace details
     {
         class service_base
         {
@@ -161,7 +157,7 @@ namespace dhorn
      */
     class service_container final
     {
-        using StorageType = std::unique_ptr<garbage::service_base>;
+        using StorageType = std::unique_ptr<details::service_base>;
         using PairType = std::pair<uuid, StorageType>;
         using ContainerType = std::map<uuid, StorageType>;
 
@@ -245,7 +241,7 @@ namespace dhorn
         const std::shared_ptr<Ty> &find(void) const
         {
             auto itr = this->Find<Ty>();
-            auto derived = dynamic_cast<garbage::service_derived<Ty> *>(itr->second.get());
+            auto derived = dynamic_cast<details::service_derived<Ty> *>(itr->second.get());
 
             if (!derived)
             {
@@ -264,7 +260,7 @@ namespace dhorn
         std::shared_ptr<Ty> remove(void)
         {
             auto itr = this->Find<Ty>();
-            auto derived = dynamic_cast<garbage::service_derived<Ty> *>(itr->second.get());
+            auto derived = dynamic_cast<details::service_derived<Ty> *>(itr->second.get());
 
             if (!derived)
             {
@@ -306,7 +302,7 @@ namespace dhorn
         {
             auto result = this->_map.insert(std::make_pair(
                 service_type_traits<Ty>::id(),
-                StorageType(new garbage::service_derived<Ty>(ptr))));
+                StorageType(new details::service_derived<Ty>(ptr))));
 
             if (!result.second)
             {
@@ -336,7 +332,7 @@ namespace dhorn
 
 
 
-#ifndef _DHORN_NO_STD
+#ifndef DHORN_NO_STD
 
 namespace std
 {

@@ -563,8 +563,8 @@ namespace dhorn
                     icon,
                     cursor,
                     background,
-                    garbage::null_if_empty(menu_name),
-                    garbage::null_if_empty(class_name),
+                    details::null_if_empty(menu_name),
+                    details::null_if_empty(class_name),
                     small_icon
                 };
                 return result;
@@ -811,8 +811,8 @@ namespace dhorn
 
                 // Create the window
                 this->_window = create_window(
-                    garbage::null_if_empty(windowClass.class_name),     // Class Name
-                    garbage::null_if_empty(options.window_name),        // Window Name
+                    details::null_if_empty(windowClass.class_name),     // Class Name
+                    details::null_if_empty(options.window_name),        // Window Name
                     static_cast<uint32_t>(options.style),               // Window Style
                     options.x,                                          // X position
                     options.y,                                          // Y position

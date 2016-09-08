@@ -6,7 +6,7 @@
  * Defines the unique_any type which behaves pretty much exactly like std::unique_ptr does, only the first template
  * argument is stored as-is, not as a pointer. I.e. std::unique_ptr<Foo> would be equivalent to
  * dhorn::unique_any<Foo *>. The key difference is that dhorn::unique_any need not hold a pointer. E.g. it could hold a
- * HANDLE: dhorn::unique_any<HANDLE, garbage::close_handle>. The only requirements are that the type be default
+ * HANDLE: dhorn::unique_any<HANDLE, details::close_handle>. The only requirements are that the type be default
  * constructable, and it must be comparable to itself.
  */
 #pragma once
@@ -25,7 +25,7 @@ namespace dhorn
     /*
      * Helpers
      */
-    namespace garbage
+    namespace details
     {
         template <typename Ty>
         struct no_op
@@ -67,13 +67,13 @@ namespace dhorn
     template <
         typename Ty,
         typename DestroyType = typename std::conditional<
-            std::is_pointer<typename garbage::unique_storage<Ty>::type>::value,
+            std::is_pointer<typename details::unique_storage<Ty>::type>::value,
             std::default_delete<typename std::remove_pointer<Ty>::type>, // Use operator delete if it's a pointer
-            garbage::no_op<Ty>>::type, // Just nop if it's a non-pointer type (i.e. has destructor)
-        typename Traits = garbage::unique_any_traits<typename garbage::unique_storage<Ty>::type>>
+            details::no_op<Ty>>::type, // Just nop if it's a non-pointer type (i.e. has destructor)
+        typename Traits = details::unique_any_traits<typename details::unique_storage<Ty>::type>>
     class unique_any
     {
-        using storage_type = typename garbage::unique_storage<Ty>::type;
+        using storage_type = typename details::unique_storage<Ty>::type;
 
     public:
         unique_any(void) :
@@ -197,7 +197,7 @@ namespace dhorn
     /*
      * Destroy Types
      */
-    namespace garbage
+    namespace details
     {
         /*
          * For Windows types
@@ -295,7 +295,7 @@ namespace dhorn
 #pragma region Windows Types
 #ifdef WIN32
 
-    namespace garbage
+    namespace details
     {
         template <typename HandleType>
         struct invalid_handle_traits
@@ -330,18 +330,18 @@ namespace dhorn
         };
     }
 
-    using unique_handle = unique_any<win32::handle_t, garbage::close_handle, garbage::invalid_handle_traits<win32::handle_t>>;
-    using unique_bitmap = unique_any<win32::bitmap_handle, garbage::delete_object, garbage::null_handle_traits<win32::bitmap_handle>>;
-    using unique_brush = unique_any<win32::brush_handle, garbage::delete_object, garbage::null_handle_traits<win32::brush_handle>>;
-    using unique_cursor = unique_any<win32::cursor_handle, garbage::destroy_cursor, garbage::null_handle_traits<win32::cursor_handle>>;
-    using unique_deletable_dc = unique_any<win32::device_context_handle, garbage::delete_dc, garbage::null_handle_traits<win32::device_context_handle>>;
-    using unique_releasable_dc = unique_any<win32::device_context_handle, garbage::release_dc, garbage::null_handle_traits<win32::device_context_handle>>;
-    using unique_gdi_object = unique_any<win32::gdi_object_handle, garbage::delete_object, garbage::null_handle_traits<win32::gdi_object_handle>>;
-    using unique_icon = unique_any<win32::icon_handle, garbage::destroy_icon, garbage::null_handle_traits<win32::icon_handle>>;
-    using unique_instance = unique_any<win32::instance_handle, garbage::free_library, garbage::null_handle_traits<win32::instance_handle>>;
-    using unique_menu = unique_any<win32::menu_handle, garbage::destroy_menu, garbage::null_handle_traits<win32::menu_handle>>;
-    using unique_module = unique_any<win32::module_handle, garbage::free_library, garbage::null_handle_traits<win32::module_handle>>;
-    using unique_window = unique_any<win32::window_handle, garbage::destroy_window, garbage::null_handle_traits<win32::window_handle>>;
+    using unique_handle = unique_any<win32::handle_t, details::close_handle, details::invalid_handle_traits<win32::handle_t>>;
+    using unique_bitmap = unique_any<win32::bitmap_handle, details::delete_object, details::null_handle_traits<win32::bitmap_handle>>;
+    using unique_brush = unique_any<win32::brush_handle, details::delete_object, details::null_handle_traits<win32::brush_handle>>;
+    using unique_cursor = unique_any<win32::cursor_handle, details::destroy_cursor, details::null_handle_traits<win32::cursor_handle>>;
+    using unique_deletable_dc = unique_any<win32::device_context_handle, details::delete_dc, details::null_handle_traits<win32::device_context_handle>>;
+    using unique_releasable_dc = unique_any<win32::device_context_handle, details::release_dc, details::null_handle_traits<win32::device_context_handle>>;
+    using unique_gdi_object = unique_any<win32::gdi_object_handle, details::delete_object, details::null_handle_traits<win32::gdi_object_handle>>;
+    using unique_icon = unique_any<win32::icon_handle, details::destroy_icon, details::null_handle_traits<win32::icon_handle>>;
+    using unique_instance = unique_any<win32::instance_handle, details::free_library, details::null_handle_traits<win32::instance_handle>>;
+    using unique_menu = unique_any<win32::menu_handle, details::destroy_menu, details::null_handle_traits<win32::menu_handle>>;
+    using unique_module = unique_any<win32::module_handle, details::free_library, details::null_handle_traits<win32::module_handle>>;
+    using unique_window = unique_any<win32::window_handle, details::destroy_window, details::null_handle_traits<win32::window_handle>>;
 
 #endif
 #pragma endregion
@@ -351,7 +351,7 @@ namespace dhorn
 
 
 
-#ifndef _DHORN_NO_STD
+#ifndef DHORN_NO_STD
 
 namespace std
 {

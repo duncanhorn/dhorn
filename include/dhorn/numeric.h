@@ -19,7 +19,7 @@
 
 namespace dhorn
 {
-    namespace garbage
+    namespace details
     {
         template <typename NumericType>
         inline constexpr typename std::enable_if<std::is_signed<NumericType>::value, NumericType>::type
@@ -152,31 +152,31 @@ namespace dhorn
          const CharT *fraction_end;
          const CharT *string_front = str;
 
-         str = garbage::skip_sign(str);
+         str = details::skip_sign(str);
 
          // This may yield a string of zero length, which is okay
          integer_start = str;
-         str = garbage::skip_digits(str);
+         str = details::skip_digits(str);
          integer_end = str;
 
-         str = garbage::skip_decimal(str);
+         str = details::skip_decimal(str);
 
          // This may yield a string of zero length, which is okay
          fraction_start = str;
-         str = garbage::skip_digits(str);
+         str = details::skip_digits(str);
          fraction_end = str;
 
          // We initially read the exponent as intmax_t since any value whose exponent is greater than
          // std::numeric_limits<intmax_t>::max() is guaranteed to not be representable
          intmax_t exponent = 0;
-         if (garbage::is_exponential(*str))
+         if (details::is_exponential(*str))
          {
              ++str;
 
              bool isExponentNegative = (*str == '-');
-             str = garbage::skip_sign(str);
+             str = details::skip_sign(str);
 
-             str = garbage::read_integer_value<intmax_t>(str, static_cast<const CharT *>(nullptr), &exponent);
+             str = details::read_integer_value<intmax_t>(str, static_cast<const CharT *>(nullptr), &exponent);
              if (isExponentNegative)
              {
                  exponent = -exponent;
@@ -194,14 +194,14 @@ namespace dhorn
          {
              // All of the integer remains. Note that we still need to multiply by some power of 10. That will come
              // when we read the fraction
-             garbage::read_integer_value(integer_start, integer_end, &integer_part);
+             details::read_integer_value(integer_start, integer_end, &integer_part);
 
              // Some of fraction goes to integer
              auto fraction_shift = fraction_start + exponent;
              if (fraction_shift > fraction_end)
              {
                  // The whole fraction and then some needs to go to the integer part
-                 garbage::read_integer_value(fraction_start, fraction_end, &integer_part);
+                 details::read_integer_value(fraction_start, fraction_end, &integer_part);
 
                  auto power = fraction_shift - fraction_end;
                  integer_part *= static_cast<NumericType>(std::pow(static_cast<NumericType>(10), power));
@@ -209,13 +209,13 @@ namespace dhorn
              else
              {
                  // Only part of the fraction needs to go to the integer part
-                 garbage::read_integer_value(fraction_start, fraction_shift, &integer_part);
-                 garbage::read_fractional_value(fraction_shift, fraction_end, &fractional_part, &fractionNonZero);
+                 details::read_integer_value(fraction_start, fraction_shift, &integer_part);
+                 details::read_fractional_value(fraction_shift, fraction_end, &fractional_part, &fractionNonZero);
              }
          }
          else
          {
-             garbage::read_fractional_value(fraction_start, fraction_end, &fractional_part, &fractionNonZero);
+             details::read_fractional_value(fraction_start, fraction_end, &fractional_part, &fractionNonZero);
 
              // Some of the integer needs to go to the fraction
              auto integer_shift = integer_end + exponent;
@@ -223,7 +223,7 @@ namespace dhorn
              {
                  // The whole integer and then some needs to go to the fractional part. We've already accounted for the
                  // "and then some" above with the fractional_divide
-                 garbage::read_fractional_value(integer_start, integer_end, &fractional_part, &fractionNonZero);
+                 details::read_fractional_value(integer_start, integer_end, &fractional_part, &fractionNonZero);
 
                  // Need to account for the leading zeros
                  auto power = integer_start - integer_shift;
@@ -232,8 +232,8 @@ namespace dhorn
              else
              {
                  // Only part of the integer needs to go to the fractional part
-                 garbage::read_integer_value(integer_start, integer_shift, &integer_part);
-                 garbage::read_fractional_value(integer_shift, integer_end, &fractional_part, &fractionNonZero);
+                 details::read_integer_value(integer_start, integer_shift, &integer_part);
+                 details::read_fractional_value(integer_shift, integer_end, &fractional_part, &fractionNonZero);
              }
          }
 
@@ -242,7 +242,7 @@ namespace dhorn
          // Negate if necessary; ignore if zero
          if ((*string_front == '-') && ((integer_part != 0) || fractionNonZero))
          {
-             result = garbage::negate(result);
+             result = details::negate(result);
          }
 
          return result;

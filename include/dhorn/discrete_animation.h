@@ -18,9 +18,9 @@ namespace dhorn
      */
     template <typename Ty>
     class discrete_animation final :
-        public garbage::key_frame_animation<Ty>
+        public details::key_frame_animation<Ty>
     {
-        using MyBase = garbage::key_frame_animation<Ty>;
+        using MyBase = details::key_frame_animation<Ty>;
 
     public:
         /*

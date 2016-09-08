@@ -259,7 +259,7 @@ namespace dhorn
         }
 
         template <size_t Size>
-        array_reference(Ty(&arr)[Size]) :
+        array_reference(Ty (&arr)[Size]) :
             _ptr(arr),
             _size(Size)
         {

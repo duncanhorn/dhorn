@@ -132,7 +132,7 @@ namespace dhorn
 
 
 
-#ifndef _DHORN_NO_STD
+#ifndef DHORN_NO_STD
 
 namespace std
 {

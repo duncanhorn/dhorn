@@ -17,7 +17,7 @@ namespace dhorn
      */
 #pragma region is_comparable
 
-    namespace garbage
+    namespace details
     {
         template <typename Lhs, typename Rhs>
         struct IsComparable
@@ -41,7 +41,7 @@ namespace dhorn
 
     template <typename Lhs, typename Rhs>
     struct is_comparable :
-        public garbage::IsComparable<Lhs, Rhs>::type
+        public details::IsComparable<Lhs, Rhs>::type
     {
     };
 
@@ -57,7 +57,7 @@ namespace dhorn
      */
 #pragma region is_less_than_comparable
 
-    namespace garbage
+    namespace details
     {
         template <typename Lhs, typename Rhs>
         struct IsLessThanComparable
@@ -81,7 +81,7 @@ namespace dhorn
 
     template <typename Lhs, typename Rhs>
     struct is_less_than_comparable :
-        public garbage::IsLessThanComparable<Lhs, Rhs>::type
+        public details::IsLessThanComparable<Lhs, Rhs>::type
     {
     };
 

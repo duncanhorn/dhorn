@@ -7,10 +7,6 @@
  */
 #pragma once
 
-#ifdef  WIN32
-#include <sal.h>
-#endif  /* WIN32 */
-
 #include <algorithm>
 #include <cassert>
 #include <set>
@@ -1132,7 +1128,7 @@ namespace dhorn
 
 
 
-#if     (!defined _DHORN_NO_STD_SWAP) && (!defined _DHORN_NO_STD)
+#if     (!defined DHORN_NO_STD_SWAP) && (!defined DHORN_NO_STD)
 
 namespace std
 {
@@ -1143,4 +1139,4 @@ namespace std
     }
 }
 
-#endif  /* (!defined _DHORN_NO_STD_SWAP) && (!defined _DHORN_NO_STD) */
+#endif  /* (!defined DHORN_NO_STD_SWAP) && (!defined DHORN_NO_STD) */

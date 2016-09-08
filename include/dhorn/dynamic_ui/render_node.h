@@ -9,7 +9,7 @@
 
 #include <memory>
 
-#include "garbage/render_types.h"
+#include "details/render_types.h"
 
 namespace dhorn
 {
@@ -23,7 +23,7 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            render_node(std::shared_ptr<const garbage::render_state> state) :
+            render_node(std::shared_ptr<const details::render_state> state) :
                 _state(std::move(state))
             {
             }
@@ -36,7 +36,7 @@ namespace dhorn
 
         protected:
 
-            std::shared_ptr<const garbage::render_state> _state;
+            std::shared_ptr<const details::render_state> _state;
 
 
 

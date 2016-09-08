@@ -40,25 +40,25 @@ namespace dhorn
         dark_gray    = FOREGROUND_INTENSITY,
 
         dark_red     = FOREGROUND_RED,
-        red          = (dark_red | dark_gray),
+        red          = (dark_red | FOREGROUND_INTENSITY),
 
         dark_green   = FOREGROUND_GREEN,
-        green        = (dark_green | dark_gray),
+        green        = (dark_green | FOREGROUND_INTENSITY),
 
         dark_blue    = FOREGROUND_BLUE,
-        blue         = (dark_blue | dark_gray),
+        blue         = (dark_blue | FOREGROUND_INTENSITY),
 
         dark_magenta = (dark_red | dark_blue),
-        magenta      = (dark_magenta | dark_gray),
+        magenta      = (dark_magenta | FOREGROUND_INTENSITY),
 
         dark_cyan    = (dark_green | dark_blue),
-        cyan         = (dark_cyan | dark_gray),
+        cyan         = (dark_cyan | FOREGROUND_INTENSITY),
 
         dark_yellow  = (dark_red | dark_green),
-        yellow       = (dark_yellow | dark_gray),
+        yellow       = (dark_yellow | FOREGROUND_INTENSITY),
 
         gray         = (dark_red | dark_green | dark_blue),
-        white        = (dark_gray | dark_gray),
+        white        = (gray | FOREGROUND_INTENSITY),
     };
 
 

@@ -43,8 +43,8 @@ namespace dhorn
     public:
         basic_socket_streambuf(SocketStorageType socket) :
             _socket(socket),
-            _receiveBuffer(new CharT[ReceiveBufferSize]),
-            _sendBuffer(new CharT[SendBufferSize])
+            _receiveBuffer(std::make_unique<CharT[]>(ReceiveBufferSize)),
+            _sendBuffer(std::make_unique<CharT[]>(SendBufferSize))
         {
             // Init get/put buffers
             this->setg(this->_receiveBuffer.get(), this->_receiveBuffer.get(), this->_receiveBuffer.get());
@@ -103,7 +103,8 @@ namespace dhorn
 
         void Flush(void)
         {
-            this->_socket->send(this->pbase(), this->pptr());
+            auto len = this->pptr() - this->pbase();
+            this->_socket->send(this->pbase(), len);
             this->setp(this->_sendBuffer.get(), this->_sendBuffer.get(), this->_sendBuffer.get() + SendBufferSize);
         }
 

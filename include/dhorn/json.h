@@ -117,7 +117,7 @@ namespace dhorn
 
 
 
-    namespace garbage
+    namespace details
     {
         std::shared_ptr<json_value> copy_json_value(const std::shared_ptr<json_value> &other);
     }
@@ -195,7 +195,7 @@ namespace dhorn
 
     class json_object;
 
-    namespace garbage
+    namespace details
     {
         template <typename MapItr>
         class json_object_iterator_base :
@@ -310,8 +310,8 @@ namespace dhorn
          * Public Types
          */
         using size_type = container_type::size_type;
-        using iterator = garbage::json_object_iterator;
-        using const_iterator = garbage::json_object_const_iterator;
+        using iterator = details::json_object_iterator;
+        using const_iterator = details::json_object_const_iterator;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -474,7 +474,7 @@ namespace dhorn
                 this->_map.emplace(
                     std::piecewise_construct,
                     std::forward_as_tuple(pair.first),
-                    std::forward_as_tuple(garbage::copy_json_value(pair.second)));
+                    std::forward_as_tuple(details::copy_json_value(pair.second)));
             }
         }
 
@@ -603,7 +603,7 @@ namespace dhorn
 
             for (auto &value : array)
             {
-                this->_array.emplace_back(garbage::copy_json_value(value));
+                this->_array.emplace_back(details::copy_json_value(value));
             }
         }
 
@@ -828,7 +828,7 @@ namespace dhorn
 
 
 
-    namespace garbage
+    namespace details
     {
         std::shared_ptr<json_value> copy_json_value(const std::shared_ptr<json_value> &other)
         {
@@ -1018,7 +1018,7 @@ namespace dhorn
      */
 #pragma region Base classes for container json_cast_t and make_json_t
 
-    namespace garbage
+    namespace details
     {
         template <typename Ty>
         struct emplace_back_json_cast_t
@@ -1135,13 +1135,13 @@ namespace dhorn
 
     template <typename Ty, typename Alloc>
     struct json_cast_t<std::vector<Ty, Alloc>> :
-        public garbage::emplace_back_json_cast_t<std::vector<Ty, Alloc>>
+        public details::emplace_back_json_cast_t<std::vector<Ty, Alloc>>
     {
     };
 
     template <typename Ty, typename Alloc>
     struct make_json_t<std::vector<Ty, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::vector<Ty, Alloc>>
+        public details::sequence_container_make_json_t<std::vector<Ty, Alloc>>
     {
     };
 
@@ -1156,13 +1156,13 @@ namespace dhorn
 
     template <typename Ty, typename Alloc>
     struct json_cast_t<std::deque<Ty, Alloc>> :
-        public garbage::emplace_back_json_cast_t<std::deque<Ty, Alloc>>
+        public details::emplace_back_json_cast_t<std::deque<Ty, Alloc>>
     {
     };
 
     template <typename Ty, typename Alloc>
     struct make_json_t<std::deque<Ty, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::deque<Ty, Alloc>>
+        public details::sequence_container_make_json_t<std::deque<Ty, Alloc>>
     {
     };
 
@@ -1177,13 +1177,13 @@ namespace dhorn
 
     template <typename Ty, typename Alloc>
     struct json_cast_t<std::list<Ty, Alloc>> :
-        public garbage::emplace_back_json_cast_t<std::list<Ty, Alloc>>
+        public details::emplace_back_json_cast_t<std::list<Ty, Alloc>>
     {
     };
 
     template <typename Ty, typename Alloc>
     struct make_json_t<std::list<Ty, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::list<Ty, Alloc>>
+        public details::sequence_container_make_json_t<std::list<Ty, Alloc>>
     {
     };
 
@@ -1198,13 +1198,13 @@ namespace dhorn
 
     template <typename Ty, typename Alloc>
     struct json_cast_t<std::forward_list<Ty, Alloc>> :
-        public garbage::emplace_after_json_cast_t<std::forward_list<Ty, Alloc>>
+        public details::emplace_after_json_cast_t<std::forward_list<Ty, Alloc>>
     {
     };
 
     template <typename Ty, typename Alloc>
     struct make_json_t<std::forward_list<Ty, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::forward_list<Ty, Alloc>>
+        public details::sequence_container_make_json_t<std::forward_list<Ty, Alloc>>
     {
     };
 
@@ -1219,13 +1219,13 @@ namespace dhorn
 
     template <typename Ty, size_t Size>
     struct json_cast_t<std::array<Ty, Size>> :
-        public garbage::random_access_json_cast_t<std::array<Ty, Size>>
+        public details::random_access_json_cast_t<std::array<Ty, Size>>
     {
     };
 
     template <typename Ty, size_t Size>
     struct make_json_t<std::array<Ty, Size>> :
-        public garbage::sequence_container_make_json_t<std::array<Ty, Size>>
+        public details::sequence_container_make_json_t<std::array<Ty, Size>>
     {
     };
 
@@ -1240,13 +1240,13 @@ namespace dhorn
 
     template <typename Key, typename Comp, typename Alloc>
     struct json_cast_t<std::set<Key, Comp, Alloc>> :
-        public garbage::emplace_json_cast_t<std::set<Key, Comp, Alloc>>
+        public details::emplace_json_cast_t<std::set<Key, Comp, Alloc>>
     {
     };
 
     template <typename Key, typename Comp, typename Alloc>
     struct make_json_t<std::set<Key, Comp, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::set<Key, Comp, Alloc>>
+        public details::sequence_container_make_json_t<std::set<Key, Comp, Alloc>>
     {
     };
 
@@ -1261,13 +1261,13 @@ namespace dhorn
 
     template <typename Key, typename Comp, typename Alloc>
     struct json_cast_t<std::multiset<Key, Comp, Alloc>> :
-        public garbage::emplace_json_cast_t<std::multiset<Key, Comp, Alloc>>
+        public details::emplace_json_cast_t<std::multiset<Key, Comp, Alloc>>
     {
     };
 
     template <typename Key, typename Comp, typename Alloc>
     struct make_json_t<std::multiset<Key, Comp, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::multiset<Key, Comp, Alloc>>
+        public details::sequence_container_make_json_t<std::multiset<Key, Comp, Alloc>>
     {
     };
 
@@ -1282,13 +1282,13 @@ namespace dhorn
 
     template <typename Key, typename Hash, typename Equals, typename Alloc>
     struct json_cast_t<std::unordered_set<Key, Hash, Equals, Alloc>> :
-        public garbage::emplace_json_cast_t<std::unordered_set<Key, Hash, Equals, Alloc>>
+        public details::emplace_json_cast_t<std::unordered_set<Key, Hash, Equals, Alloc>>
     {
     };
 
     template <typename Key, typename Hash, typename Equals, typename Alloc>
     struct make_json_t<std::unordered_set<Key, Hash, Equals, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::unordered_set<Key, Hash, Equals, Alloc>>
+        public details::sequence_container_make_json_t<std::unordered_set<Key, Hash, Equals, Alloc>>
     {
     };
 
@@ -1303,13 +1303,13 @@ namespace dhorn
 
     template <typename Key, typename Hash, typename Equals, typename Alloc>
     struct json_cast_t<std::unordered_multiset<Key, Hash, Equals, Alloc>> :
-        public garbage::emplace_json_cast_t<std::unordered_multiset<Key, Hash, Equals, Alloc>>
+        public details::emplace_json_cast_t<std::unordered_multiset<Key, Hash, Equals, Alloc>>
     {
     };
 
     template <typename Key, typename Hash, typename Equals, typename Alloc>
     struct make_json_t<std::unordered_multiset<Key, Hash, Equals, Alloc>> :
-        public garbage::sequence_container_make_json_t<std::unordered_multiset<Key, Hash, Equals, Alloc>>
+        public details::sequence_container_make_json_t<std::unordered_multiset<Key, Hash, Equals, Alloc>>
     {
     };
 
@@ -1326,7 +1326,7 @@ namespace dhorn
     // "head," which for stacks, is the first item inserted and thus the last item to get pop-ed
     template <typename Ty, typename Container>
     struct json_cast_t<std::stack<Ty, Container>> :
-        public garbage::emplace_json_cast_t<std::stack<Ty, Container>>
+        public details::emplace_json_cast_t<std::stack<Ty, Container>>
     {
     };
 
@@ -1346,7 +1346,7 @@ namespace dhorn
      // "head," which for queues, is the first item inserted and thus the first item to get pop-ed
     template <typename Ty, typename Container>
     struct json_cast_t<std::queue<Ty, Container>> :
-        public garbage::emplace_json_cast_t<std::queue<Ty, Container>>
+        public details::emplace_json_cast_t<std::queue<Ty, Container>>
     {
     };
 
@@ -1364,7 +1364,7 @@ namespace dhorn
 
     template <typename Ty, typename Container, typename Compare>
     struct json_cast_t<std::priority_queue<Ty, Container, Compare>> :
-        public garbage::emplace_json_cast_t<std::priority_queue<Ty, Container, Compare>>
+        public details::emplace_json_cast_t<std::priority_queue<Ty, Container, Compare>>
     {
     };
 

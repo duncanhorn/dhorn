@@ -23,7 +23,7 @@ namespace dhorn
          */
         TEST_CLASS(Utf8TraitsTests)
         {
-            using traits_type = dhorn::garbage::utf8_traits;
+            using traits_type = dhorn::details::utf8_traits;
 
             TEST_METHOD(SizeTest)
             {
@@ -98,7 +98,7 @@ namespace dhorn
          */
         TEST_CLASS(Utf16TraitsTests)
         {
-            using traits_type = dhorn::garbage::utf16_traits;
+            using traits_type = dhorn::details::utf16_traits;
 
             TEST_METHOD(SizeTest)
             {
@@ -174,7 +174,7 @@ namespace dhorn
          */
         TEST_CLASS(Utf32TraitsTests)
         {
-            using traits_type = dhorn::garbage::utf32_traits;
+            using traits_type = dhorn::details::utf32_traits;
 
             TEST_METHOD(SizeTest)
             {

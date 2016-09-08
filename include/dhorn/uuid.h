@@ -18,8 +18,8 @@
 #endif  /*WIN32*/
 
 // On debug, set uuid to {CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}
-#ifndef _DHORN_DEBUG_UUID
-#define _DHORN_DEBUG_UUID       (0xCCCCCCCC)
+#ifndef DHORN_DEBUG_UUID
+#define DHORN_DEBUG_UUID       (0xCCCCCCCC)
 #endif
 
 #ifdef _MSC_VER
@@ -58,7 +58,7 @@ namespace dhorn
         {
         }
 
-        template <size_t N, typename = typename std::enable_if<N == 16>::type>
+        template <size_t N, typename = std::enable_if_t<N == 16>>
         uuid(const uint8_t (&arr)[N])
         {
             const uint32_t *target = reinterpret_cast<const uint32_t *>(arr);
@@ -69,7 +69,7 @@ namespace dhorn
             }
         }
 
-        template <size_t N, typename = typename std::enable_if<N == 4>::type>
+        template <size_t N, typename = std::enable_if_t<N == 4>>
         uuid(const uint32_t (&arr)[N])
         {
             for (size_t i = 0; i < 4; i++)
@@ -83,26 +83,15 @@ namespace dhorn
         uuid(uint8_t val0,  uint8_t val1,  uint8_t val2,  uint8_t val3,
              uint8_t val4,  uint8_t val5,  uint8_t val6,  uint8_t val7,
              uint8_t val8,  uint8_t val9,  uint8_t val10, uint8_t val11,
-             uint8_t val12, uint8_t val13, uint8_t val14, uint8_t val15)// :
-//             data{ val0, val1, val2,  val3,  val4,  val5,  val6,  val7,
-//                   val8, val9, val10, val11, val12, val13, val14, val15 }
+             uint8_t val12, uint8_t val13, uint8_t val14, uint8_t val15) :
+             data{ val0, val1, val2,  val3,  val4,  val5,  val6,  val7,
+                   val8, val9, val10, val11, val12, val13, val14, val15 }
         {
-            // TODO: switch to std::array once C++14 is adopted and the duplicated braces are no longer needed
-            this->data[0]  = val0;  this->data[1]  = val1;  this->data[2]  = val2;
-            this->data[3]  = val3;  this->data[4]  = val4;  this->data[5]  = val5;
-            this->data[6]  = val6;  this->data[7]  = val7;  this->data[8]  = val8;
-            this->data[9]  = val9;  this->data[10] = val10; this->data[11] = val11;
-            this->data[12] = val12; this->data[13] = val13; this->data[14] = val14;
-            this->data[15] = val15;
         }
 
-        uuid(uint32_t val0, uint32_t val1, uint32_t val2, uint32_t val3)// :
-//            data32{ val0, val1, val2, val3 }
+        uuid(uint32_t val0, uint32_t val1, uint32_t val2, uint32_t val3) :
+            data32{ val0, val1, val2, val3 }
         {
-            data32[0] = val0;
-            data32[1] = val1;
-            data32[2] = val2;
-            data32[3] = val3;
         }
 
         //template <int N, typename = std::enable_if<N == 8>::type>
@@ -137,10 +126,10 @@ namespace dhorn
         ~uuid(void)
         {
             // On debug, set uuid to {CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}
-            data32[0] = _DHORN_DEBUG_UUID;
-            data32[1] = _DHORN_DEBUG_UUID;
-            data32[2] = _DHORN_DEBUG_UUID;
-            data32[3] = _DHORN_DEBUG_UUID;
+            data32[0] = DHORN_DEBUG_UUID;
+            data32[1] = DHORN_DEBUG_UUID;
+            data32[2] = DHORN_DEBUG_UUID;
+            data32[3] = DHORN_DEBUG_UUID;
         }
 #endif
 
@@ -213,7 +202,7 @@ static_assert(sizeof(dhorn::uuid) == sizeof(GUID), "dhorn::uuid must be same siz
 
 
 
-#ifndef _DHORN_NO_STD
+#ifndef DHORN_NO_STD
 
 namespace std
 {
@@ -230,7 +219,7 @@ namespace std
     };
 }
 
-#endif  /*_DHORN_NO_STD*/
+#endif  /*DHORN_NO_STD*/
 
 
 

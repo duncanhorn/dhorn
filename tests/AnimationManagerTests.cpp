@@ -99,7 +99,7 @@ namespace dhorn
                 mgr.cancel(handle.get());
 
                 // Should either be in the canceled or completed state; we don't really care
-                Assert::IsTrue(garbage::is_complete(mgr.query_state(handle.get())));
+                Assert::IsTrue(details::is_complete(mgr.query_state(handle.get())));
 
                 // After update, it should definitely be completed
                 mgr.update();

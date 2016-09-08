@@ -44,7 +44,7 @@
 
 namespace dhorn
 {
-    namespace garbage
+    namespace details
     {
         /*
          * Default allocation for the various initialization types
@@ -215,8 +215,8 @@ namespace dhorn
     private:
 
         // We are using atomic operations, so we may need to change the storage type
-        using pointer = typename garbage::select_pointer_for_atomic<Pointer>::type;
-        using lifetime_traits = typename garbage::select_lifetime_traits<Pointer, Alloc>::type;
+        using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
+        using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
 
         lifetime_traits _lifetimeTraits;
         pointer _instance;
@@ -256,7 +256,7 @@ namespace dhorn
     private:
 
         using pointer = Pointer;
-        using lifetime_traits = typename garbage::select_lifetime_traits<Pointer, Alloc>::type;
+        using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
 
         lifetime_traits _lifetimeTraits;
         pointer _instance;
@@ -314,8 +314,8 @@ namespace dhorn
     private:
 
         // We are using atomic operations, so we may need to change the storage type
-        using pointer = typename garbage::select_pointer_for_atomic<Pointer>::type;
-        using lifetime_traits = typename garbage::select_lifetime_traits<Pointer, Alloc>::type;
+        using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
+        using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
 
         lifetime_traits _lifetimeTraits;
         pointer _instance;
@@ -353,19 +353,19 @@ namespace dhorn
         /*
          * Accessors
          */
-        pointer get_instance(void)
+        pointer get(void)
         {
             return this->_synch();
         }
 
         Ty &operator*(void)
         {
-            return *this->get_instance();
+            return *this->get();
         }
 
         pointer operator->(void)
         {
-            return this->get_instance();
+            return this->get();
         }
 
     private:

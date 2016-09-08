@@ -13,11 +13,11 @@
     <Filter Include="include\dynamic_ui">
       <UniqueIdentifier>{72cc98d2-37a1-4787-ab03-492bf8089f92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\dynamic_ui\garbage">
-      <UniqueIdentifier>{63e3207e-c299-4959-9e91-505f828e56d7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\d3d11">
       <UniqueIdentifier>{2fee7d41-2e82-4124-9cc5-67f938d7eb82}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\dynamic_ui\details">
+      <UniqueIdentifier>{63e3207e-c299-4959-9e91-505f828e56d7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -102,9 +102,6 @@
     <ClInclude Include="include\dhorn\dynamic_ui\render_node.h">
       <Filter>include\dynamic_ui</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\dynamic_ui\garbage\render_types.h">
-      <Filter>include\dynamic_ui\garbage</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\unique_event_cookie.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -164,6 +161,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\utf_iterator.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\dynamic_ui\details\render_types.h">
+      <Filter>include\dynamic_ui\details</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

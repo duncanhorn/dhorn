@@ -30,7 +30,7 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         template <typename CharT>
-        bad_encoding(_In_ CharT value) :
+        bad_encoding(CharT value) :
             _value(value),
             _typeSize(sizeof(value))
         {
@@ -87,7 +87,7 @@ namespace dhorn
         /*
          * Operators
          */
-        void operator()(_In_ CharT value) const
+        void operator()(CharT value) const
         {
             throw bad_encoding(value);
         }
@@ -122,7 +122,7 @@ namespace dhorn
     };
 
     template <typename CharT>
-    constexpr max_code_point_size_v = max_code_point_size<CharT>::value;
+    constexpr size_t max_code_point_size_v = max_code_point_size<CharT>::value;
 
 #pragma endregion
 
@@ -133,7 +133,7 @@ namespace dhorn
      */
 #pragma region code_point_size
 
-    inline constexpr size_t code_point_size(_In_ char value)
+    inline constexpr size_t code_point_size(char value)
     {
         return ((value & 0x80) == 0) ? 1 :
             ((value & 0xE0) == 0xC0) ? 2 :
@@ -141,12 +141,12 @@ namespace dhorn
             ((value & 0xF8) == 0xF0) ? 4 : 0;
     }
 
-    inline constexpr size_t code_point_size(_In_ char16_t value)
+    inline constexpr size_t code_point_size(char16_t value)
     {
         return ((value & 0xFC00) == 0xD800) ? 2 : 1;
     }
 
-    inline constexpr size_t code_point_size(_In_ char32_t value)
+    inline constexpr size_t code_point_size(char32_t /*value*/)
     {
         return 1;
     }
@@ -166,7 +166,7 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        utf_iterator(_In_ const FromItr &itr) :
+        utf_iterator(const FromItr &itr) :
             _itr(itr)
         {
         }
@@ -190,7 +190,7 @@ namespace dhorn
     /*
      * utf_iterator Creation Helpers
      */
-#pragma utf_iterator Creation Helpers
+#pragma region utf_iterator Creation Helpers
 
 
 

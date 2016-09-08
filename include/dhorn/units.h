@@ -16,7 +16,7 @@ namespace dhorn
     /*
      * Conversion helpers (squared, cubed, etc.)
      */
-    namespace garbage
+    namespace details
     {
         template <typename Ty>
         struct unit_type_base
@@ -36,7 +36,7 @@ namespace dhorn
     class unit;
 
     // Helpers
-    namespace garbage
+    namespace details
     {
         template <typename Ty>
         struct is_ratio : std::false_type
@@ -100,22 +100,22 @@ namespace dhorn
     namespace unit_type
     {
         template <typename Ty>
-        struct length : public garbage::unit_type_base<Ty> {};
+        struct length : public details::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct area : public garbage::unit_type_base<Ty> {};
+        struct area : public details::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct volume : public garbage::unit_type_base<Ty> {};
+        struct volume : public details::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct mass : public garbage::unit_type_base<Ty> {};
+        struct mass : public details::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct time : public garbage::unit_type_base<Ty> {};
+        struct time : public details::unit_type_base<Ty> {};
 
         template <typename Ty>
-        struct current : public garbage::unit_type_base<Ty> {};
+        struct current : public details::unit_type_base<Ty> {};
     }
 
 #pragma endregion
@@ -125,7 +125,7 @@ namespace dhorn
     template <typename UnitType, typename Ratio>
     class unit final
     {
-        static_assert(garbage::is_ratio<Ratio>::value, "Second template argument must be of type std::ratio");
+        static_assert(details::is_ratio<Ratio>::value, "Second template argument must be of type std::ratio");
 
     public:
         /*
@@ -150,7 +150,7 @@ namespace dhorn
 
         template <typename OtherRatio>
         unit(const unit<UnitType, OtherRatio> &other) :
-            _value(garbage::ratio_convert<OtherRatio, Ratio>(other.value()))
+            _value(details::ratio_convert<OtherRatio, Ratio>(other.value()))
         {
         }
 
@@ -174,7 +174,7 @@ namespace dhorn
         template <typename OtherRatio>
         unit &operator=(const unit<UnitType, OtherRatio> &other)
         {
-            this->_value = garbage::ratio_convert<OtherRatio, Ratio>(other.value());
+            this->_value = details::ratio_convert<OtherRatio, Ratio>(other.value());
             return *this;
         }
 
@@ -379,8 +379,8 @@ namespace dhorn
         typename TargetType,
         typename UnitType,
         typename Ratio,
-        typename = typename std::enable_if<garbage::unit_traits<TargetType>::is_unit>::type,
-        typename = typename std::enable_if<std::is_same<UnitType, typename garbage::unit_traits<TargetType>::unit_type>::value>::type>
+        typename = typename std::enable_if<details::unit_traits<TargetType>::is_unit>::type,
+        typename = typename std::enable_if<std::is_same<UnitType, typename details::unit_traits<TargetType>::unit_type>::value>::type>
     inline constexpr TargetType unit_cast(const unit<UnitType, Ratio> &val)
     {
         return TargetType(val);

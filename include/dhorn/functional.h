@@ -14,7 +14,7 @@ namespace dhorn
      */
 #pragma region bind_member_function
 
-    namespace garbage
+    namespace details
     {
         template <typename Ty, typename ResultType, typename... Args>
         struct member_function
@@ -28,9 +28,10 @@ namespace dhorn
             {
             }
 
-            result_type operator()(Args &&...args)
+            template <typename... ArgsTy>
+            result_type operator()(ArgsTy &&...args)
             {
-                return (ptr->*func)(std::forward<Args>(args)...);
+                return (ptr->*func)(std::forward<ArgsTy>(args)...);
             }
 
             // Members
@@ -40,15 +41,15 @@ namespace dhorn
     }
 
     template <typename Ty, typename ResultType, typename... Args>
-    garbage::member_function<Ty, ResultType, Args...> bind_member_function(ResultType(Ty::*func)(Args...), Ty &obj)
+    details::member_function<Ty, ResultType, Args...> bind_member_function(ResultType (Ty::*func)(Args...), Ty &obj)
     {
-        return garbage::member_function<Ty, ResultType, Args...>(&obj, func);
+        return details::member_function<Ty, ResultType, Args...>(&obj, func);
     }
 
     template <typename Ty, typename ResultType, typename... Args>
-    garbage::member_function<Ty, ResultType, Args...> bind_member_function(ResultType(Ty::*func)(Args...), Ty *ptr)
+    details::member_function<Ty, ResultType, Args...> bind_member_function(ResultType (Ty::*func)(Args...), Ty *ptr)
     {
-        return garbage::member_function<Ty, ResultType, Args...>(ptr, func);
+        return details::member_function<Ty, ResultType, Args...>(ptr, func);
     }
 
 #pragma endregion

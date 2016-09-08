@@ -16,7 +16,7 @@
 
 namespace dhorn
 {
-    namespace garbage
+    namespace details
     {
         /*
          * message_queue_types
@@ -70,7 +70,7 @@ namespace dhorn
     template <typename FuncType>
     class message_queue final
     {
-        using MyTypes = garbage::message_queue_types<FuncType>;
+        using MyTypes = details::message_queue_types<FuncType>;
         using FunctionType = typename MyTypes::function_type;
 
     public:
@@ -105,7 +105,7 @@ namespace dhorn
         void push_back(const FunctionType &func)
         {
             // Do all initialization work that does not need to occur under lock first
-            auto pNode = new garbage::message_queue_node<MyTypes>(func);
+            auto pNode = new details::message_queue_node<MyTypes>(func);
 
             { // Acquire _backMutex
                 std::lock_guard<std::mutex> lock(this->_backMutex);
@@ -173,7 +173,7 @@ namespace dhorn
         FunctionType PopFront(void)
         {
             // !!! NOTE: _size must have been previously decremented !!!
-            garbage::message_queue_node<MyTypes> *pNode;
+            details::message_queue_node<MyTypes> *pNode;
             { // Acquire _frontMutex
                 std::lock_guard<std::mutex> lock(this->_frontMutex);
                 pNode = this->_front.next;
@@ -199,8 +199,8 @@ namespace dhorn
             return std::move(pNode->func);
         }
 
-        garbage::message_queue_node<MyTypes> _front;
-        garbage::message_queue_node<MyTypes> *_back;
+        details::message_queue_node<MyTypes> _front;
+        details::message_queue_node<MyTypes> *_back;
         size_t _size;
 
         std::mutex _frontMutex;

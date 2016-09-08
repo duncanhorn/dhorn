@@ -29,6 +29,8 @@
 
 #endif
 
+#include "bitmask.h"
+
 namespace dhorn
 {
     /*
@@ -141,16 +143,7 @@ namespace dhorn
         push_immediate  = MSG_PUSH_IMMEDIATE,
         wait_all        = MSG_WAITALL,
     };
-
-    inline message_flags operator|(message_flags lhs, message_flags rhs)
-    {
-        return static_cast<message_flags>(static_cast<int>(lhs) | static_cast<int>(rhs));
-    }
-
-    inline message_flags operator&(message_flags lhs, message_flags rhs)
-    {
-        return static_cast<message_flags>(static_cast<int>(lhs) & static_cast<int>(rhs));
-    }
+    DHORN_DECLARE_BITMASK_OPERATORS(message_flags);
 
     enum class shutdown_options : int
     {
@@ -196,16 +189,7 @@ namespace dhorn
         service_provider_config_info    = PVD_CONFIG,
         conditional_accept              = SO_CONDITIONAL_ACCEPT,
     };
-
-    inline socket_option operator|(socket_option lhs, socket_option rhs)
-    {
-        return static_cast<socket_option>(static_cast<int>(lhs) | static_cast<int>(rhs));
-    }
-
-    inline socket_option operator&(socket_option lhs, socket_option rhs)
-    {
-        return static_cast<socket_option>(static_cast<int>(lhs) & static_cast<int>(rhs));
-    }
+    DHORN_DECLARE_BITMASK_OPERATORS(socket_option);
 
     enum class io_control_command : unsigned long
     {
@@ -252,7 +236,7 @@ namespace dhorn
         socket_error_t _error;
     };
 
-    namespace garbage
+    namespace details
     {
         inline void wsa_throw_last_error(void)
         {
@@ -306,7 +290,7 @@ namespace dhorn
     /*
      * Sockets Traits
      */
-    namespace garbage
+    namespace details
     {
         /*
          * address_family_traits
@@ -325,7 +309,7 @@ namespace dhorn
 
             static inline const ip_addr &create(const sock_addr &addr)
             {
-                garbage::wsa_throw_if_false(addr.sin_family == static_cast<int>(family), WSAEINVAL);
+                wsa_throw_if_false(addr.sin_family == static_cast<int>(family), WSAEINVAL);
                 return addr.sin_addr;
             }
 
@@ -348,7 +332,7 @@ namespace dhorn
 
             static inline const ip_addr &create(const sock_addr &addr)
             {
-                garbage::wsa_throw_if_false(addr.sin6_family == static_cast<int>(family), WSAEINVAL);
+                wsa_throw_if_false(addr.sin6_family == static_cast<int>(family), WSAEINVAL);
                 return addr.sin6_addr;
             }
 
@@ -384,7 +368,7 @@ namespace dhorn
                     reinterpret_cast<PVOID>(const_cast<ip_addr *>(&addr)),
                     buff,
                     sizeof(buff));
-                garbage::wsa_throw_if_null(result);
+                wsa_throw_if_null(result);
 
                 return buff;
             }
@@ -405,7 +389,7 @@ namespace dhorn
                     reinterpret_cast<PVOID>(const_cast<ip_addr *>(&addr)),
                     buff,
                     sizeof(buff) / 2);
-                garbage::wsa_throw_if_null(result);
+                wsa_throw_if_null(result);
 
                 return buff;
             }
@@ -422,7 +406,7 @@ namespace dhorn
     template <address_family Family>
     class ip_address
     {
-        using MyTraits = garbage::address_family_traits<Family>;
+        using MyTraits = details::address_family_traits<Family>;
 
     public:
 
@@ -536,7 +520,7 @@ namespace dhorn
         template <typename CharType = char>
         std::basic_string<CharType> str(void) const
         {
-            return garbage::socket_string_traits<CharType, Family>::n_to_p(this->_addr);
+            return details::socket_string_traits<CharType, Family>::n_to_p(this->_addr);
         }
 
 
@@ -545,8 +529,7 @@ namespace dhorn
 
         void Set(const char *ip)
         {
-            auto result = garbage::wsa_throw_if_error(InetPtonA(static_cast<int>(Family), ip, &this->_addr));
-            if (result == 0)
+            if (details::wsa_throw_if_error(InetPtonA(static_cast<int>(Family), ip, &this->_addr)) == 0)
             {
                 // Result of an invalid string. WSAGetLastError will give us zero, so provide our own error code
                 throw socket_exception(WSA_INVALID_PARAMETER);
@@ -555,8 +538,7 @@ namespace dhorn
 
         void Set(const wchar_t *ip)
         {
-            auto result = garbage::wsa_throw_if_error(InetPtonW(static_cast<int>(Family), ip, &this->_addr));
-            if (result == 0)
+            if (details::wsa_throw_if_error(InetPtonW(static_cast<int>(Family), ip, &this->_addr)) == 0)
             {
                 // Result of an invalid string. WSAGetLastError will give us zero, so provide our own error code
                 throw socket_exception(WSA_INVALID_PARAMETER);
@@ -758,7 +740,7 @@ namespace dhorn
      */
 #pragma region socket_base
 
-    namespace garbage
+    namespace details
     {
         /*
          * Only to be used by socket_base constructor to call WSAStartup to load WinSock.dll
@@ -802,7 +784,7 @@ namespace dhorn
             // safe, so the constructor technically can get called more than once here. In the unlikely event that
             // this does happen, we'll just end up calling WSAStartup more than once while only making one call to
             // WSACleanup. Since the system will re-claim our resources, we just ignore the possibility
-            static const garbage::socket_initializer _init;
+            static const details::socket_initializer _init;
         }
 
         socket_base(address_family family, socket_type type, ip_protocol protocol) :
@@ -874,7 +856,7 @@ namespace dhorn
             auto result = ::accept(this->_socket, addr, &size);
             if (result == invalid_socket)
             {
-                garbage::wsa_throw_last_error();
+                details::wsa_throw_last_error();
             }
 
             addr.reset_size();
@@ -957,12 +939,12 @@ namespace dhorn
 
         void open(address_family family, socket_type type, ip_protocol protocol)
         {
-            garbage::wsa_throw_if_false(this->_socket == invalid_socket, WSAEISCONN);
+            details::wsa_throw_if_false(this->_socket == invalid_socket, WSAEISCONN);
 
             this->_socket = socket(static_cast<int>(family), static_cast<int>(type), static_cast<int>(protocol));
             if (this->_socket == invalid_socket)
             {
-                garbage::wsa_throw_last_error();
+                details::wsa_throw_last_error();
             }
         }
 
@@ -1155,7 +1137,7 @@ namespace dhorn
             auto result = func(std::forward<Args>(args)...);
             if (result == socket_error)
             {
-                garbage::wsa_throw_last_error();
+                details::wsa_throw_last_error();
             }
 
             return result;
@@ -1700,7 +1682,7 @@ namespace dhorn
      */
 #pragma region Other Functions
 
-    namespace garbage
+    namespace details
     {
         inline void create_fd_set(const std::set<socket_t> &sockets, fd_set &fdSet)
         {
@@ -1733,7 +1715,7 @@ namespace dhorn
 
 
 
-#ifndef _DHORN_NO_STD
+#ifndef DHORN_NO_STD
 
 namespace std
 {

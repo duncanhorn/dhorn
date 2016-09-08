@@ -74,7 +74,7 @@ namespace dhorn
 
 
 
-    namespace garbage
+    namespace details
     {
         /*
          * Declare read functions outside of traits for cross consumption
@@ -427,7 +427,7 @@ namespace dhorn
         public std::iterator<std::bidirectional_iterator_tag, char32_t, ptrdiff_t, CharT *, char32_t>
     {
         friend class utf_string<CharT>;
-        using Traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
+        using Traits = typename details::utf_encoding_from_char<CharT>::traits_type;
 
     public:
         /*
@@ -527,7 +527,7 @@ namespace dhorn
     template <typename CharT>
     class utf_string final
     {
-        using Traits = typename garbage::utf_encoding_from_char<CharT>::traits_type;
+        using Traits = typename details::utf_encoding_from_char<CharT>::traits_type;
 
         template <typename CharType>
         friend class utf_string;
@@ -842,7 +842,7 @@ namespace dhorn
         template <typename CharType>
         static std::pair<size_t, size_t> BufferSizeFromStringLiteral(const CharType *str)
         {
-            using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
+            using their_traits = typename details::utf_encoding_from_char<CharType>::traits_type;
 
             auto end = str;
             size_t length = 0;
@@ -858,7 +858,7 @@ namespace dhorn
         template <typename CharType>
         void AppendFromBuffer(const CharType *str)
         {
-            using their_traits = typename garbage::utf_encoding_from_char<CharType>::traits_type;
+            using their_traits = typename details::utf_encoding_from_char<CharType>::traits_type;
             while (*str)
             {
                 this->InternalPushBack(their_traits::next(str, &str));
@@ -1263,7 +1263,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator==(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         for (auto ch : lhs)
@@ -1280,7 +1280,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator!=(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         return !(lhs == rhs);
@@ -1289,7 +1289,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator==(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         for (auto ch : rhs)
@@ -1306,7 +1306,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator!=(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
@@ -1317,7 +1317,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator==(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs == rhs.c_str();
@@ -1326,7 +1326,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator!=(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
@@ -1335,7 +1335,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator==(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() == rhs;
@@ -1344,7 +1344,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator!=(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs == rhs);
@@ -1425,7 +1425,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator<(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         for (auto ch : lhs)
@@ -1446,7 +1446,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator<=(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         for (auto ch : lhs)
@@ -1467,7 +1467,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator>(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         return !(lhs <= rhs);
@@ -1476,7 +1476,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator>=(const utf_string<LhsCharT> &lhs, const RhsCharT *rhs)
     {
         return !(lhs < rhs);
@@ -1487,7 +1487,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator<(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         for (auto ch : rhs)
@@ -1508,7 +1508,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator<=(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         for (auto ch : rhs)
@@ -1529,7 +1529,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator>(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs <= rhs);
@@ -1538,7 +1538,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator>=(const LhsCharT *lhs, const utf_string<RhsCharT> &rhs)
     {
         return !(lhs < rhs);
@@ -1549,7 +1549,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator<(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs < rhs.c_str();
@@ -1558,7 +1558,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator<=(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs <= rhs.c_str();
@@ -1567,7 +1567,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator>(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs > rhs.c_str();
@@ -1576,7 +1576,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<RhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<RhsCharT>::traits_type>
     bool operator>=(const utf_string<LhsCharT> &lhs, const std::basic_string<RhsCharT> &rhs)
     {
         return lhs >= rhs.c_str();
@@ -1587,7 +1587,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator<(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() < rhs;
@@ -1596,7 +1596,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator<=(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() <= rhs;
@@ -1605,7 +1605,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator>(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() > rhs;
@@ -1614,7 +1614,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        typename LiteralTraits = typename garbage::utf_encoding_from_char<LhsCharT>::traits_type>
+        typename LiteralTraits = typename details::utf_encoding_from_char<LhsCharT>::traits_type>
     bool operator>=(const std::basic_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
     {
         return lhs.c_str() >= rhs;

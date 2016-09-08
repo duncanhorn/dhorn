@@ -68,12 +68,12 @@ namespace dhorn
                 // Lazy init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
 
-                auto ptr = obj.get_instance();
+                auto ptr = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::IsNotNull(ptr.get());
 
-                // Calling get_instance again should give the same value
-                auto other = obj.get_instance();
+                // Calling get again should give the same value
+                auto other = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::AreEqual(1u, test_class::created_count.load());
                 Assert::IsTrue(ptr == other);
@@ -86,12 +86,12 @@ namespace dhorn
                 // Lazy init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
 
-                auto ptr = obj.get_instance();
+                auto ptr = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::IsNotNull(ptr);
 
-                // Calling get_instance again should give the same value
-                auto other = obj.get_instance();
+                // Calling get again should give the same value
+                auto other = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::AreEqual(1u, test_class::created_count.load());
                 Assert::IsTrue(ptr == other);
@@ -104,12 +104,12 @@ namespace dhorn
                 // Eager init creates the object right away
                 Assert::AreEqual(1u, test_class::instance_count.load());
 
-                auto ptr = obj.get_instance();
+                auto ptr = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::IsNotNull(ptr.get());
 
-                // Calling get_instance again should give the same value
-                auto other = obj.get_instance();
+                // Calling get again should give the same value
+                auto other = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::AreEqual(1u, test_class::created_count.load());
                 Assert::IsTrue(ptr == other);
@@ -122,12 +122,12 @@ namespace dhorn
                 // Eager init creates the object right away
                 Assert::AreEqual(1u, test_class::instance_count.load());
 
-                auto ptr = obj.get_instance();
+                auto ptr = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::IsNotNull(ptr);
 
-                // Calling get_instance again should give the same value
-                auto other = obj.get_instance();
+                // Calling get again should give the same value
+                auto other = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::AreEqual(1u, test_class::created_count.load());
                 Assert::IsTrue(ptr == other);
@@ -140,12 +140,12 @@ namespace dhorn
                 // Atomic exchange init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
 
-                auto ptr = obj.get_instance();
+                auto ptr = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::IsNotNull(ptr.get());
 
-                // Calling get_instance again should give the same value
-                auto other = obj.get_instance();
+                // Calling get again should give the same value
+                auto other = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::AreEqual(1u, test_class::created_count.load());
                 Assert::IsTrue(ptr == other);
@@ -158,12 +158,12 @@ namespace dhorn
                 // Atomic exchange init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
 
-                auto ptr = obj.get_instance();
+                auto ptr = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::IsNotNull(ptr);
 
-                // Calling get_instance again should give the same value
-                auto other = obj.get_instance();
+                // Calling get again should give the same value
+                auto other = obj.get();
                 Assert::AreEqual(1u, test_class::instance_count.load());
                 Assert::AreEqual(1u, test_class::created_count.load());
                 Assert::IsTrue(ptr == other);
@@ -179,7 +179,7 @@ namespace dhorn
                     std::shared_ptr<test_class> ptr;
                     {
                         dhorn::lazy_init_instance_t<test_class> obj;
-                        ptr = obj.get_instance();
+                        ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
 
@@ -197,7 +197,7 @@ namespace dhorn
                     test_class *ptr;
                     {
                         dhorn::lazy_init_instance_t<test_class, test_class *> obj;
-                        ptr = obj.get_instance();
+                        ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
 
@@ -216,7 +216,7 @@ namespace dhorn
                     std::shared_ptr<test_class> ptr;
                     {
                         dhorn::eager_init_instance_t<test_class> obj;
-                        ptr = obj.get_instance();
+                        ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
 
@@ -234,7 +234,7 @@ namespace dhorn
                     test_class *ptr;
                     {
                         dhorn::eager_init_instance_t<test_class, test_class *> obj;
-                        ptr = obj.get_instance();
+                        ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
 
@@ -253,7 +253,7 @@ namespace dhorn
                     std::shared_ptr<test_class> ptr;
                     {
                         dhorn::atomic_exchange_instance_t<test_class> obj;
-                        ptr = obj.get_instance();
+                        ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
 
@@ -271,7 +271,7 @@ namespace dhorn
                     test_class *ptr;
                     {
                         dhorn::atomic_exchange_instance_t<test_class, test_class *> obj;
-                        ptr = obj.get_instance();
+                        ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
 
@@ -292,7 +292,7 @@ namespace dhorn
             {
                 dhorn::lazy_init_instance_t<test_class> obj;
 
-                // operator-> should do an implicit get_instance/initialization
+                // operator-> should do an implicit get/initialization
                 obj->x = 42;
                 Assert::AreEqual(42, obj->x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -302,7 +302,7 @@ namespace dhorn
             {
                 dhorn::lazy_init_instance_t<test_class, test_class *> obj;
 
-                // operator-> should do an implicit get_instance/initialization
+                // operator-> should do an implicit get/initialization
                 obj->x = 42;
                 Assert::AreEqual(42, obj->x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -312,7 +312,7 @@ namespace dhorn
             {
                 dhorn::lazy_init_instance_t<test_class> obj;
 
-                // operator* should do an implicit get_instance/initialization
+                // operator* should do an implicit get/initialization
                 (*obj).x = 42;
                 Assert::AreEqual(42, (*obj).x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -322,7 +322,7 @@ namespace dhorn
             {
                 dhorn::lazy_init_instance_t<test_class, test_class *> obj;
 
-                // operator* should do an implicit get_instance/initialization
+                // operator* should do an implicit get/initialization
                 (*obj).x = 42;
                 Assert::AreEqual(42, (*obj).x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -332,7 +332,7 @@ namespace dhorn
             {
                 dhorn::eager_init_instance_t<test_class> obj;
 
-                // operator-> should do an implicit get_instance/initialization
+                // operator-> should do an implicit get/initialization
                 obj->x = 42;
                 Assert::AreEqual(42, obj->x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -342,7 +342,7 @@ namespace dhorn
             {
                 dhorn::eager_init_instance_t<test_class, test_class *> obj;
 
-                // operator-> should do an implicit get_instance/initialization
+                // operator-> should do an implicit get/initialization
                 obj->x = 42;
                 Assert::AreEqual(42, obj->x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -352,7 +352,7 @@ namespace dhorn
             {
                 dhorn::eager_init_instance_t<test_class> obj;
 
-                // operator* should do an implicit get_instance/initialization
+                // operator* should do an implicit get/initialization
                 (*obj).x = 42;
                 Assert::AreEqual(42, (*obj).x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -362,7 +362,7 @@ namespace dhorn
             {
                 dhorn::eager_init_instance_t<test_class, test_class *> obj;
 
-                // operator* should do an implicit get_instance/initialization
+                // operator* should do an implicit get/initialization
                 (*obj).x = 42;
                 Assert::AreEqual(42, (*obj).x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -372,7 +372,7 @@ namespace dhorn
             {
                 dhorn::atomic_exchange_instance_t<test_class> obj;
 
-                // operator-> should do an implicit get_instance/initialization
+                // operator-> should do an implicit get/initialization
                 obj->x = 42;
                 Assert::AreEqual(42, obj->x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -382,7 +382,7 @@ namespace dhorn
             {
                 dhorn::atomic_exchange_instance_t<test_class, test_class *> obj;
 
-                // operator-> should do an implicit get_instance/initialization
+                // operator-> should do an implicit get/initialization
                 obj->x = 42;
                 Assert::AreEqual(42, obj->x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -392,7 +392,7 @@ namespace dhorn
             {
                 dhorn::atomic_exchange_instance_t<test_class> obj;
 
-                // operator* should do an implicit get_instance/initialization
+                // operator* should do an implicit get/initialization
                 (*obj).x = 42;
                 Assert::AreEqual(42, (*obj).x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -402,7 +402,7 @@ namespace dhorn
             {
                 dhorn::atomic_exchange_instance_t<test_class, test_class *> obj;
 
-                // operator* should do an implicit get_instance/initialization
+                // operator* should do an implicit get/initialization
                 (*obj).x = 42;
                 Assert::AreEqual(42, (*obj).x);
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -448,7 +448,7 @@ namespace dhorn
                                 }
                             }
 
-                            pointers[j] = obj.get_instance();
+                            pointers[j] = obj.get();
                         });
                     }
 
@@ -497,7 +497,7 @@ namespace dhorn
                                 }
                             }
 
-                            pointers[j] = obj.get_instance();
+                            pointers[j] = obj.get();
                         });
                     }
 
@@ -548,7 +548,7 @@ namespace dhorn
                                 }
                             }
 
-                            pointers[j] = obj.get_instance();
+                            pointers[j] = obj.get();
                         });
                     }
 

@@ -21,9 +21,9 @@ namespace dhorn
 {
     template <typename Ty>
     class linear_animation :
-        public garbage::key_frame_animation<Ty>
+        public details::key_frame_animation<Ty>
     {
-        using MyBase = garbage::key_frame_animation<Ty>;
+        using MyBase = details::key_frame_animation<Ty>;
 
     public:
         /*
@@ -38,8 +38,8 @@ namespace dhorn
         }
 
         template <typename Func>
-        linear_animation(const Func &func) :
-            MyBase(func),
+        linear_animation(Func &&func) :
+            MyBase(std::forward<Func>(func)),
             _left(this->next()),
             _right(this->next()),
             _slope{},

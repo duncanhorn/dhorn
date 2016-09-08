@@ -16,7 +16,7 @@ namespace dhorn
 {
     namespace dynamic_ui
     {
-        namespace garbage
+        namespace details
         {
             struct render_state
             {
