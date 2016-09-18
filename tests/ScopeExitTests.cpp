@@ -21,7 +21,7 @@ namespace dhorn
             {
                 int x = 0;
                 {
-                    auto fn = make_scope_exit([&]() { x = 42; });
+                    auto fn = dhorn::experimental::make_scope_exit([&]() { x = 42; });
                     Assert::AreEqual(0, x);
                 }
                 Assert::AreEqual(42, x);
@@ -32,7 +32,7 @@ namespace dhorn
                 int x = 0;
                 try
                 {
-                    auto fn = make_scope_exit([&]() { x = 42; });
+                    auto fn = dhorn::experimental::make_scope_exit([&]() { x = 42; });
                     Assert::AreEqual(0, x);
 
                     throw std::exception();
@@ -48,7 +48,7 @@ namespace dhorn
             {
                 int x = 0;
                 {
-                    auto fn = make_scope_exit([&]() { x = 42; });
+                    auto fn = dhorn::experimental::make_scope_exit([&]() { x = 42; });
                     Assert::AreEqual(0, x);
 
                     fn.cancel();
@@ -61,7 +61,7 @@ namespace dhorn
                 bool pass = false;
                 try
                 {
-                    auto fn = make_scope_exit([]() { throw std::exception(); });
+                    auto fn = dhorn::experimental::make_scope_exit([]() { throw std::exception(); });
                 }
                 catch (std::exception &)
                 {
@@ -77,7 +77,7 @@ namespace dhorn
 
                 {
                     object_counter cnt;
-                    auto fn = make_scope_exit([cnt = std::move(cnt)]() {});
+                    auto fn = dhorn::experimental::make_scope_exit([cnt = std::move(cnt)]() {});
                 }
 
                 // Only the initial constructed value should have been a non-move
@@ -92,7 +92,7 @@ namespace dhorn
                 {
                     object_counter cnt;
                     auto func = [cnt = std::move(cnt)]() {};
-                    auto fn = make_scope_exit(func);
+                    auto fn = dhorn::experimental::make_scope_exit(func);
                 }
 
                 // Should have been at least one copy

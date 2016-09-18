@@ -25,7 +25,7 @@ namespace dhorn
             TEST_METHOD(SingleThreadTest)
             {
                 const size_t testCount = 100;
-                dhorn::message_queue<int(int, int)> msgQueue;
+                dhorn::experimental::message_queue<int(int, int)> msgQueue;
                 int x = 0;
 
                 // Insert data
@@ -52,7 +52,7 @@ namespace dhorn
             TEST_METHOD(SingleProducerSingleConsumerTest)
             {
                 const size_t testCount = 100;
-                dhorn::message_queue<void(void)> msgQueue;
+                dhorn::experimental::message_queue<void(void)> msgQueue;
                 int x = 0;
 
                 std::thread producer([&]()
@@ -81,7 +81,7 @@ namespace dhorn
             {
                 const size_t testCount = 1000;
                 const size_t producerCount = 20;
-                dhorn::message_queue<void(void)> msgQueue;
+                dhorn::experimental::message_queue<void(void)> msgQueue;
                 int counts[producerCount] = {};
 
                 std::vector<std::thread> producers;
@@ -121,7 +121,7 @@ namespace dhorn
                 const size_t testCount = 5000;
                 const size_t consumerCount = 20;
                 static_assert(testCount % consumerCount == 0, "Must be divisible");
-                dhorn::message_queue<void(void)> msgQueue;
+                dhorn::experimental::message_queue<void(void)> msgQueue;
                 std::atomic_int x{};
 
                 std::vector<std::thread> consumers;
@@ -156,7 +156,7 @@ namespace dhorn
                 const size_t testCount = 1000;
                 const size_t producerCount = 20;
                 const size_t consumerCount = 20;
-                dhorn::message_queue<void(void)> msgQueue;
+                dhorn::experimental::message_queue<void(void)> msgQueue;
                 std::atomic_int counts[producerCount] = {};
                 std::atomic_int x{};
 
@@ -206,7 +206,7 @@ namespace dhorn
             TEST_METHOD(TryPopFrontTest)
             {
                 const size_t testCount = 100;
-                dhorn::message_queue<void(void)> msgQueue;
+                dhorn::experimental::message_queue<void(void)> msgQueue;
                 int x = 0;
 
                 // Insert data

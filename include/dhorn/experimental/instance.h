@@ -44,350 +44,353 @@
 
 namespace dhorn
 {
-    namespace details
+    namespace experimental
     {
-        /*
-         * Default allocation for the various initialization types
-         */
-        template <typename Ty, typename Alloc = std::allocator<Ty>>
-        struct shared_ptr_lifetime_traits
+        namespace details
         {
-            shared_ptr_lifetime_traits(void) = default;
-            shared_ptr_lifetime_traits(const Alloc &alloc) :
-                _alloc(alloc)
+            /*
+             * Default allocation for the various initialization types
+             */
+            template <typename Ty, typename Alloc = std::allocator<Ty>>
+            struct shared_ptr_lifetime_traits
             {
-            }
-
-            std::shared_ptr<Ty> create(void)
-            {
-                return std::allocate_shared<Ty>(this->_alloc);
-            }
-
-            void destroy(std::shared_ptr<Ty> &) const
-            {
-                // shared_ptr handles its own lifetime
-            }
-
-        private:
-
-            Alloc _alloc;
-        };
-
-        template <typename Ty, typename Alloc = std::allocator<Ty>>
-        struct raw_ptr_lifetime_traits
-        {
-            raw_ptr_lifetime_traits(void) = default;
-            raw_ptr_lifetime_traits(const Alloc &alloc) :
-                _alloc(alloc)
-            {
-            }
-
-            Ty *create(void)
-            {
-                auto ptr = this->_alloc.allocate(1);
-                try
+                shared_ptr_lifetime_traits(void) = default;
+                shared_ptr_lifetime_traits(const Alloc &alloc) :
+                    _alloc(alloc)
                 {
-                    this->_alloc.construct(ptr);
                 }
-                catch (...)
+
+                std::shared_ptr<Ty> create(void)
                 {
-                    this->_alloc.deallocate(ptr, 1);
-                    throw;
+                    return std::allocate_shared<Ty>(this->_alloc);
+                }
+
+                void destroy(std::shared_ptr<Ty> &) const
+                {
+                    // shared_ptr handles its own lifetime
+                }
+
+            private:
+
+                Alloc _alloc;
+            };
+
+            template <typename Ty, typename Alloc = std::allocator<Ty>>
+            struct raw_ptr_lifetime_traits
+            {
+                raw_ptr_lifetime_traits(void) = default;
+                raw_ptr_lifetime_traits(const Alloc &alloc) :
+                    _alloc(alloc)
+                {
+                }
+
+                Ty *create(void)
+                {
+                    auto ptr = this->_alloc.allocate(1);
+                    try
+                    {
+                        this->_alloc.construct(ptr);
+                    }
+                    catch (...)
+                    {
+                        this->_alloc.deallocate(ptr, 1);
+                        throw;
+                    }
+
+                    return ptr;
+                }
+
+                void destroy(Ty *ptr)
+                {
+                    // Deallocate even if an exception is thrown in the destructor
+                    auto deallocateOnExit = make_scope_exit([&]
+                    {
+                        this->_alloc.deallocate(ptr, 1);
+                    });
+
+                    this->_alloc.destroy(ptr);
+                }
+
+            private:
+
+                Alloc _alloc;
+            };
+
+
+            /*
+             * Select the *lifetime_traits type from the pointer type
+             */
+            template <typename Pointer, typename Alloc>
+            struct select_lifetime_traits;
+
+            template <typename Ty, typename Alloc>
+            struct select_lifetime_traits<std::shared_ptr<Ty>, Alloc>
+            {
+                using type = shared_ptr_lifetime_traits<Ty, Alloc>;
+            };
+
+            template <typename Ty, typename Alloc>
+            struct select_lifetime_traits<Ty *, Alloc>
+            {
+                using type = raw_ptr_lifetime_traits<Ty, Alloc>;
+            };
+
+
+
+            /*
+             * Select the underlying pointer type when atomic operations are desired
+             */
+            template <typename Pointer>
+            struct select_pointer_for_atomic;
+
+            template <typename Ty>
+            struct select_pointer_for_atomic<std::shared_ptr<Ty>>
+            {
+                // Atomic operations can be done on std::shared_ptr itself
+                using type = std::shared_ptr<Ty>;
+            };
+
+            template <typename Ty>
+            struct select_pointer_for_atomic<Ty *>
+            {
+                // Atomic operations can't be done on raw pointers (for whatever reason...)
+                using type = std::atomic<Ty *>;
+            };
+        }
+
+
+
+        /*
+         * Initialization Techniques
+         */
+#pragma region Initialization Techniques
+
+        template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Alloc = std::allocator<Ty>>
+        struct lazy_initialization_t
+        {
+            lazy_initialization_t(void) :
+                _instance(nullptr)
+            {
+            }
+
+            lazy_initialization_t(const Alloc &alloc) :
+                _instance(nullptr),
+                _lifetimeTraits(alloc)
+            {
+            }
+
+            ~lazy_initialization_t()
+            {
+                // Since we are in the destructor, we don't need to worry about synchronization since nobody should be
+                // referencing this object
+                auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
+
+                if (ptr)
+                {
+                    this->_lifetimeTraits.destroy(ptr);
+
+                    Pointer null = nullptr;
+                    std::atomic_store_explicit(&this->_instance, null, std::memory_order_relaxed);
+                }
+            }
+
+            Pointer operator()(void)
+            {
+                auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
+                std::atomic_thread_fence(std::memory_order_acquire);
+
+                if (!ptr)
+                {
+                    std::lock_guard<std::mutex> lock(this->_mutex);
+                    ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
+                    if (!ptr)
+                    {
+                        ptr = this->_lifetimeTraits.create();
+                        std::atomic_thread_fence(std::memory_order_release);
+                        std::atomic_store_explicit(&this->_instance, ptr, std::memory_order_relaxed);
+                    }
                 }
 
                 return ptr;
             }
 
-            void destroy(Ty *ptr)
-            {
-                // Deallocate even if an exception is thrown in the destructor
-                auto deallocateOnExit = make_scope_exit([&]
-                {
-                    this->_alloc.deallocate(ptr, 1);
-                });
+        private:
 
-                this->_alloc.destroy(ptr);
+            // We are using atomic operations, so we may need to change the storage type
+            using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
+            using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
+
+            lifetime_traits _lifetimeTraits;
+            pointer _instance;
+            std::mutex _mutex;
+        };
+
+
+
+        template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Alloc = std::allocator<Ty>>
+        struct eager_initialization_t
+        {
+            eager_initialization_t(void)
+            {
+                this->_instance = this->_lifetimeTraits.create();
+            }
+
+            eager_initialization_t(const Alloc &alloc) :
+                _lifetimeTraits(alloc)
+            {
+                this->_instance = this->_lifetimeTraits.create();
+            }
+
+            ~eager_initialization_t()
+            {
+                if (this->_instance)
+                {
+                    this->_lifetimeTraits.destroy(this->_instance);
+                    this->_instance = nullptr;
+                }
+            }
+
+            Pointer operator()(void)
+            {
+                return this->_instance;
             }
 
         private:
 
-            Alloc _alloc;
-        };
+            using pointer = Pointer;
+            using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
 
-
-        /*
-         * Select the *lifetime_traits type from the pointer type
-         */
-        template <typename Pointer, typename Alloc>
-        struct select_lifetime_traits;
-
-        template <typename Ty, typename Alloc>
-        struct select_lifetime_traits<std::shared_ptr<Ty>, Alloc>
-        {
-            using type = shared_ptr_lifetime_traits<Ty, Alloc>;
-        };
-
-        template <typename Ty, typename Alloc>
-        struct select_lifetime_traits<Ty *, Alloc>
-        {
-            using type = raw_ptr_lifetime_traits<Ty, Alloc>;
+            lifetime_traits _lifetimeTraits;
+            pointer _instance;
         };
 
 
 
-        /*
-         * Select the underlying pointer type when atomic operations are desired
-         */
-        template <typename Pointer>
-        struct select_pointer_for_atomic;
-
-        template <typename Ty>
-        struct select_pointer_for_atomic<std::shared_ptr<Ty>>
+        template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Alloc = std::allocator<Ty>>
+        struct atomic_exchange_initialization_t
         {
-            // Atomic operations can be done on std::shared_ptr itself
-            using type = std::shared_ptr<Ty>;
-        };
-
-        template <typename Ty>
-        struct select_pointer_for_atomic<Ty *>
-        {
-            // Atomic operations can't be done on raw pointers (for whatever reason...)
-            using type = std::atomic<Ty *>;
-        };
-    }
-
-
-
-    /*
-     * Initialization Techniques
-     */
-#pragma region Initialization Techniques
-
-    template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Alloc = std::allocator<Ty>>
-    struct lazy_initialization_t
-    {
-        lazy_initialization_t(void) :
-            _instance(nullptr)
-        {
-        }
-
-        lazy_initialization_t(const Alloc &alloc) :
-            _instance(nullptr),
-            _lifetimeTraits(alloc)
-        {
-        }
-
-        ~lazy_initialization_t()
-        {
-            // Since we are in the destructor, we don't need to worry about synchronization since nobody should be
-            // referencing this object
-            auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
-
-            if (ptr)
+            atomic_exchange_initialization_t(void) :
+                _instance(nullptr)
             {
-                this->_lifetimeTraits.destroy(ptr);
-
-                Pointer null = nullptr;
-                std::atomic_store_explicit(&this->_instance, null, std::memory_order_relaxed);
             }
-        }
 
-        Pointer operator()(void)
-        {
-            auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
-            std::atomic_thread_fence(std::memory_order_acquire);
-
-            if (!ptr)
+            atomic_exchange_initialization_t(const Alloc &alloc) :
+                _instance(nullptr),
+                _lifetimeTraits(alloc)
             {
-                std::lock_guard<std::mutex> lock(this->_mutex);
-                ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
+            }
+
+            ~atomic_exchange_initialization_t()
+            {
+                // Since we are in the destructor, we don't need to worry about synchronization since nobody should be
+                // referencing this object
+                auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
+
+                if (ptr)
+                {
+                    this->_lifetimeTraits.destroy(ptr);
+                    std::atomic_store_explicit(&this->_instance, pointer{ nullptr }, std::memory_order_relaxed);
+                }
+            }
+
+            Pointer operator()(void)
+            {
+                auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
+
                 if (!ptr)
                 {
+                    // Not yet assigned, try to do so now
                     ptr = this->_lifetimeTraits.create();
-                    std::atomic_thread_fence(std::memory_order_release);
-                    std::atomic_store_explicit(&this->_instance, ptr, std::memory_order_relaxed);
+                    Pointer existing = nullptr;
+                    if (!std::atomic_compare_exchange_strong(&this->_instance, &existing, ptr))
+                    {
+                        // Someone else beat us to the punch. Destroy the one we just created and use theirs
+                        this->_lifetimeTraits.destroy(ptr);
+                        ptr = existing;
+                    }
                 }
+
+                return ptr;
             }
 
-            return ptr;
-        }
+        private:
 
-    private:
+            // We are using atomic operations, so we may need to change the storage type
+            using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
+            using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
 
-        // We are using atomic operations, so we may need to change the storage type
-        using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
-        using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
-
-        lifetime_traits _lifetimeTraits;
-        pointer _instance;
-        std::mutex _mutex;
-    };
-
-
-
-    template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Alloc = std::allocator<Ty>>
-    struct eager_initialization_t
-    {
-        eager_initialization_t(void)
-        {
-            this->_instance = this->_lifetimeTraits.create();
-        }
-
-        eager_initialization_t(const Alloc &alloc) :
-            _lifetimeTraits(alloc)
-        {
-            this->_instance = this->_lifetimeTraits.create();
-        }
-
-        ~eager_initialization_t()
-        {
-            if (this->_instance)
-            {
-                this->_lifetimeTraits.destroy(this->_instance);
-                this->_instance = nullptr;
-            }
-        }
-
-        Pointer operator()(void)
-        {
-            return this->_instance;
-        }
-
-    private:
-
-        using pointer = Pointer;
-        using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
-
-        lifetime_traits _lifetimeTraits;
-        pointer _instance;
-    };
-
-
-
-    template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Alloc = std::allocator<Ty>>
-    struct atomic_exchange_initialization_t
-    {
-        atomic_exchange_initialization_t(void) :
-            _instance(nullptr)
-        {
-        }
-
-        atomic_exchange_initialization_t(const Alloc &alloc) :
-            _instance(nullptr),
-            _lifetimeTraits(alloc)
-        {
-        }
-
-        ~atomic_exchange_initialization_t()
-        {
-            // Since we are in the destructor, we don't need to worry about synchronization since nobody should be
-            // referencing this object
-            auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
-
-            if (ptr)
-            {
-                this->_lifetimeTraits.destroy(ptr);
-                std::atomic_store_explicit(&this->_instance, pointer{ nullptr }, std::memory_order_relaxed);
-            }
-        }
-
-        Pointer operator()(void)
-        {
-            auto ptr = std::atomic_load_explicit(&this->_instance, std::memory_order_relaxed);
-
-            if (!ptr)
-            {
-                // Not yet assigned, try to do so now
-                ptr = this->_lifetimeTraits.create();
-                Pointer existing = nullptr;
-                if (!std::atomic_compare_exchange_strong(&this->_instance, &existing, ptr))
-                {
-                    // Someone else beat us to the punch. Destroy the one we just created and use theirs
-                    this->_lifetimeTraits.destroy(ptr);
-                    ptr = existing;
-                }
-            }
-
-            return ptr;
-        }
-
-    private:
-
-        // We are using atomic operations, so we may need to change the storage type
-        using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
-        using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
-
-        lifetime_traits _lifetimeTraits;
-        pointer _instance;
-    };
+            lifetime_traits _lifetimeTraits;
+            pointer _instance;
+        };
 
 #pragma endregion
 
 
 
-    template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Synch = lazy_initialization_t<Ty, Pointer>>
-    class instance
-    {
-    public:
+        template <typename Ty, typename Pointer = std::shared_ptr<Ty>, typename Synch = lazy_initialization_t<Ty, Pointer>>
+        class instance
+        {
+        public:
+
+            /*
+             * Public Types
+             */
+            using pointer = Pointer;
+
+
+
+            /*
+             * Constructor(s)/Destructor
+             */
+            instance()
+            {
+            }
+
+            // Cannot copy or move
+            instance(const instance &) = delete;
+            instance &operator=(const instance &) = delete;
+
+
+
+            /*
+             * Accessors
+             */
+            pointer get(void)
+            {
+                return this->_synch();
+            }
+
+            Ty &operator*(void)
+            {
+                return *this->get();
+            }
+
+            pointer operator->(void)
+            {
+                return this->get();
+            }
+
+        private:
+
+            Synch _synch;
+        };
+
+
 
         /*
-         * Public Types
+         * Useful typedefs
          */
-        using pointer = Pointer;
-
-
-
-        /*
-         * Constructor(s)/Destructor
-         */
-        instance()
-        {
-        }
-
-        // Cannot copy or move
-        instance(const instance &) = delete;
-        instance &operator=(const instance &) = delete;
-
-
-
-        /*
-         * Accessors
-         */
-        pointer get(void)
-        {
-            return this->_synch();
-        }
-
-        Ty &operator*(void)
-        {
-            return *this->get();
-        }
-
-        pointer operator->(void)
-        {
-            return this->get();
-        }
-
-    private:
-
-        Synch _synch;
-    };
-
-
-
-    /*
-     * Useful typedefs
-     */
 #pragma region Typedefs
 
-    template <typename Ty, typename Pointer = std::shared_ptr<Ty>>
-    using lazy_init_instance_t = instance<Ty, Pointer, lazy_initialization_t<Ty, Pointer>>;
+        template <typename Ty, typename Pointer = std::shared_ptr<Ty>>
+        using lazy_init_instance_t = instance<Ty, Pointer, lazy_initialization_t<Ty, Pointer>>;
 
-    template <typename Ty, typename Pointer = std::shared_ptr<Ty>>
-    using eager_init_instance_t = instance<Ty, Pointer, eager_initialization_t<Ty, Pointer>>;
+        template <typename Ty, typename Pointer = std::shared_ptr<Ty>>
+        using eager_init_instance_t = instance<Ty, Pointer, eager_initialization_t<Ty, Pointer>>;
 
-    template <typename Ty, typename Pointer = std::shared_ptr<Ty>>
-    using atomic_exchange_instance_t = instance<Ty, Pointer, atomic_exchange_initialization_t<Ty, Pointer>>;
+        template <typename Ty, typename Pointer = std::shared_ptr<Ty>>
+        using atomic_exchange_instance_t = instance<Ty, Pointer, atomic_exchange_initialization_t<Ty, Pointer>>;
 
 #pragma endregion
+    }
 }

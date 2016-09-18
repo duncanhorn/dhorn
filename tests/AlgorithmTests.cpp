@@ -34,7 +34,7 @@ namespace dhorn
             template <typename ResultType, typename... Args>
             void DoTest(ResultType expectedValue, Args &&...args)
             {
-                auto val = dhorn::max(std::forward<Args>(args)...);
+                auto val = dhorn::experimental::max(std::forward<Args>(args)...);
                 Assert::IsTrue(expectedValue == val);
                 Assert::IsTrue(std::is_same<decltype(val), ResultType>::value);
             }
@@ -98,7 +98,7 @@ namespace dhorn
             template <typename ResultType, typename... Args>
             void DoTest(ResultType expectedValue, Args &&...args)
             {
-                auto val = dhorn::min(std::forward<Args>(args)...);
+                auto val = dhorn::experimental::min(std::forward<Args>(args)...);
                 Assert::IsTrue(expectedValue == val);
                 Assert::IsTrue(std::is_same<decltype(val), ResultType>::value);
             }

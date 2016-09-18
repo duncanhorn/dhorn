@@ -8,7 +8,7 @@
 
 #include "globals.h"
 
-using namespace dhorn::win32;
+using namespace dhorn::experimental::win32;
 
 worker::worker(void) :
     _topLeft(-2, 1),
@@ -23,7 +23,7 @@ worker::worker(void) :
 {
     // For now, we will spawn one worker thread for each logical processor. The thought is that the UI thread shouldn't
     // have all that much work to do. This can be tweaked later
-    this->_threadCount = dhorn::win32::get_maximum_processor_count();
+    this->_threadCount = get_maximum_processor_count();
 }
 
 worker::~worker(void)
@@ -33,14 +33,14 @@ worker::~worker(void)
 void worker::start(void)
 {
     // Register callback handlers
-    globals::window.add_callback_handler(window_message::paint, dhorn::bind_member_function(&worker::on_paint, this));
-    globals::window.add_callback_handler(window_message::size, dhorn::bind_member_function(&worker::on_resize, this));
+    globals::window.add_callback_handler(window_message::paint, dhorn::experimental::bind_member_function(&worker::on_paint, this));
+    globals::window.add_callback_handler(window_message::size, dhorn::experimental::bind_member_function(&worker::on_resize, this));
     globals::window.add_callback_handler(
         window_message::erase_background,
-        dhorn::bind_member_function(&worker::on_erase_background, this));
+        dhorn::experimental::bind_member_function(&worker::on_erase_background, this));
     globals::window.add_callback_handler(
         window_message::mouse_wheel,
-        dhorn::bind_member_function(&worker::on_scrollwheel, this));
+        dhorn::experimental::bind_member_function(&worker::on_scrollwheel, this));
 
     // Initialize the number of threads executing since the update function assums that the thread was already
     // contributing to the execution count
@@ -53,7 +53,7 @@ void worker::start(void)
     this->_running = true;
     for (uint32_t i = 0; i < this->_threadCount; ++i)
     {
-        this->_threads.emplace_back(dhorn::bind_member_function(&worker::thread_proc, this));
+        this->_threads.emplace_back(dhorn::experimental::bind_member_function(&worker::thread_proc, this));
     }
 }
 
@@ -108,7 +108,7 @@ void worker::thread_proc(void)
                 for (size_t i = 0; i < this->_iterationsPerUpdate; ++i)
                 {
                     entry.value = (entry.value * entry.value) + entry.point;
-                    if (dhorn::length_squared(entry.value.imag(), entry.value.real()) >= 4)
+                    if (dhorn::experimental::length_squared(entry.value.imag(), entry.value.real()) >= 4)
                     {
                         entry.iterations = this->_iterations + i;
                         entry.color = DecideColor(entry.iterations);
@@ -205,7 +205,7 @@ void worker::update_size(void)
     {
         auto lock = std::unique_lock<std::mutex>(this->_drawMutex);
         RECT rc = { 0, 0, (LONG)size.width, (LONG)size.height };
-        dhorn::unique_brush black = CreateSolidBrush(RGB(0, 0, 0));
+        dhorn::experimental::unique_brush black = CreateSolidBrush(RGB(0, 0, 0));
         FillRect(this->dc, &rc, black);
     }
 
@@ -252,7 +252,7 @@ callback_handler::result_type worker::on_paint(window *pWindow, uintptr_t /*wpar
 }
 
 callback_handler::result_type worker::on_resize(
-    dhorn::win32::window * /*pWindow*/,
+    window * /*pWindow*/,
     uintptr_t /*wparam*/,
     intptr_t /*lparam*/)
 {
@@ -261,7 +261,7 @@ callback_handler::result_type worker::on_resize(
 }
 
 callback_handler::result_type worker::on_erase_background(
-    dhorn::win32::window * /*pWindow*/,
+    window * /*pWindow*/,
     uintptr_t /*wparam*/,
     intptr_t /*lparam*/)
 {
@@ -270,7 +270,7 @@ callback_handler::result_type worker::on_erase_background(
 }
 
 callback_handler::result_type worker::on_scrollwheel(
-    dhorn::win32::window * /*pWindow*/,
+    window * /*pWindow*/,
     uintptr_t wparam,
     intptr_t lparam)
 {
@@ -279,7 +279,7 @@ callback_handler::result_type worker::on_scrollwheel(
 
     // Ignore if not in the client area
     auto data = this->_data;
-    dhorn::rect<size_t> size = { (*data)[0].size(), data->size() };
+    dhorn::experimental::rect<size_t> size = { (*data)[0].size(), data->size() };
     if ((pt.x < 0) || (pt.x >= (LONG)size.width) || (pt.y < 0) || (pt.y >= (LONG)size.height))
     {
         return std::make_pair(false, 0);

@@ -23,105 +23,108 @@
 
 namespace dhorn
 {
-    namespace d3d
+    namespace experimental
     {
-        /*
-         * vertex structure
-         */
-        struct vertex
+        namespace d3d
         {
-            DirectX::XMFLOAT3 position;
-            DirectX::XMFLOAT3 normal;
-        };
-
-
-
-        /*
-         * cuboid
-         */
-        void cuboid(
-            float width,
-            float height,
-            float depth,
-            std::vector<vertex> &vertices,
-            std::vector<unsigned> &indices)
-        {
-            vertices.clear();
-            indices.clear();
-
-            float x = width * 0.5f;
-            float y = height * 0.5f;
-            float z = depth * 0.5f;
-
             /*
-             * Fill in the vertices
+             * vertex structure
              */
-            vertices.resize(24);
-            size_t i = 0;
-
-            // Front face
-            DirectX::XMFLOAT3 normal = { 0, 0, -1 };
-            vertices[i++] = { {  x,  y, -z }, normal };
-            vertices[i++] = { {  x, -y, -z }, normal };
-            vertices[i++] = { { -x, -y, -z }, normal };
-            vertices[i++] = { { -x,  y, -z }, normal };
-
-            // Back face
-            normal = { 0, 0, 1 };
-            vertices[i++] = { {  x,  y, z }, normal };
-            vertices[i++] = { { -x,  y, z }, normal };
-            vertices[i++] = { { -x, -y, z }, normal };
-            vertices[i++] = { {  x, -y, z }, normal };
-
-            // Top face
-            normal = { 0, 1, 0 };
-            vertices[i++] = { {  x, y,  z }, normal };
-            vertices[i++] = { {  x, y, -z }, normal };
-            vertices[i++] = { { -x, y, -z }, normal };
-            vertices[i++] = { { -x, y,  z }, normal };
-
-            // Bottom face
-            normal = { 0, -1, 0 };
-            vertices[i++] = { {  x, -y,  z }, normal };
-            vertices[i++] = { { -x, -y,  z }, normal };
-            vertices[i++] = { { -x, -y, -z }, normal };
-            vertices[i++] = { {  x, -y, -z }, normal };
-
-            // Right face
-            normal = { 1, 0, 0 };
-            vertices[i++] = { { x,  y,  z }, normal };
-            vertices[i++] = { { x, -y,  z }, normal };
-            vertices[i++] = { { x, -y, -z }, normal };
-            vertices[i++] = { { x,  y, -z }, normal };
-
-            // Left face
-            normal = { -1, 0, 0 };
-            vertices[i++] = { { -x,  y,  z }, normal };
-            vertices[i++] = { { -x,  y, -z }, normal };
-            vertices[i++] = { { -x, -y, -z }, normal };
-            vertices[i++] = { { -x, -y,  z }, normal };
-            assert(i == vertices.size());
-
-            /*
-             * Fill in the indices
-             */
-            indices.resize(36);
-            i = 0;
-
-            for (size_t j = 0; j < 6; ++j)
+            struct vertex
             {
-                size_t offset = j * 4;
+                DirectX::XMFLOAT3 position;
+                DirectX::XMFLOAT3 normal;
+            };
 
-                // The vertices should be ordered in a clockwise fashion
-                indices[i++] = offset;
-                indices[i++] = offset + 1;
-                indices[i++] = offset + 2;
 
-                indices[i++] = offset + 2;
-                indices[i++] = offset + 3;
-                indices[i++] = offset;
+
+            /*
+             * cuboid
+             */
+            void cuboid(
+                float width,
+                float height,
+                float depth,
+                std::vector<vertex> &vertices,
+                std::vector<unsigned> &indices)
+            {
+                vertices.clear();
+                indices.clear();
+
+                float x = width * 0.5f;
+                float y = height * 0.5f;
+                float z = depth * 0.5f;
+
+                /*
+                 * Fill in the vertices
+                 */
+                vertices.resize(24);
+                size_t i = 0;
+
+                // Front face
+                DirectX::XMFLOAT3 normal = { 0, 0, -1 };
+                vertices[i++] = { {  x,  y, -z }, normal };
+                vertices[i++] = { {  x, -y, -z }, normal };
+                vertices[i++] = { { -x, -y, -z }, normal };
+                vertices[i++] = { { -x,  y, -z }, normal };
+
+                // Back face
+                normal = { 0, 0, 1 };
+                vertices[i++] = { {  x,  y, z }, normal };
+                vertices[i++] = { { -x,  y, z }, normal };
+                vertices[i++] = { { -x, -y, z }, normal };
+                vertices[i++] = { {  x, -y, z }, normal };
+
+                // Top face
+                normal = { 0, 1, 0 };
+                vertices[i++] = { {  x, y,  z }, normal };
+                vertices[i++] = { {  x, y, -z }, normal };
+                vertices[i++] = { { -x, y, -z }, normal };
+                vertices[i++] = { { -x, y,  z }, normal };
+
+                // Bottom face
+                normal = { 0, -1, 0 };
+                vertices[i++] = { {  x, -y,  z }, normal };
+                vertices[i++] = { { -x, -y,  z }, normal };
+                vertices[i++] = { { -x, -y, -z }, normal };
+                vertices[i++] = { {  x, -y, -z }, normal };
+
+                // Right face
+                normal = { 1, 0, 0 };
+                vertices[i++] = { { x,  y,  z }, normal };
+                vertices[i++] = { { x, -y,  z }, normal };
+                vertices[i++] = { { x, -y, -z }, normal };
+                vertices[i++] = { { x,  y, -z }, normal };
+
+                // Left face
+                normal = { -1, 0, 0 };
+                vertices[i++] = { { -x,  y,  z }, normal };
+                vertices[i++] = { { -x,  y, -z }, normal };
+                vertices[i++] = { { -x, -y, -z }, normal };
+                vertices[i++] = { { -x, -y,  z }, normal };
+                assert(i == vertices.size());
+
+                /*
+                 * Fill in the indices
+                 */
+                indices.resize(36);
+                i = 0;
+
+                for (size_t j = 0; j < 6; ++j)
+                {
+                    size_t offset = j * 4;
+
+                    // The vertices should be ordered in a clockwise fashion
+                    indices[i++] = offset;
+                    indices[i++] = offset + 1;
+                    indices[i++] = offset + 2;
+
+                    indices[i++] = offset + 2;
+                    indices[i++] = offset + 3;
+                    indices[i++] = offset;
+                }
+                assert(i == indices.size());
             }
-            assert(i == indices.size());
         }
     }
 }

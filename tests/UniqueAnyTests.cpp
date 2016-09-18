@@ -51,7 +51,7 @@ namespace dhorn
             {
                 {
                     // Default construct should not affect the count
-                    dhorn::unique_any<test_class *> ptr;
+                    dhorn::experimental::unique_any<test_class *> ptr;
                     Assert::AreEqual(0, count);
 
                     ptr = new test_class();
@@ -72,7 +72,7 @@ namespace dhorn
             {
                 {
                     // Default construct should not affect the count
-                    dhorn::unique_any<test_class[]> ptr;
+                    dhorn::experimental::unique_any<test_class[]> ptr;
                     Assert::AreEqual(0, count);
 
                     // Calling new[] with a size of 5 should mean that count is now 5 as well
@@ -96,7 +96,7 @@ namespace dhorn
                 Assert::AreEqual(5, count);
 
                 {
-                    dhorn::unique_any<std::vector<test_class>> val;
+                    dhorn::experimental::unique_any<std::vector<test_class>> val;
                     Assert::AreEqual(5, count);
 
                     // Assignment should copy here (i.e. it acts like a normal non-unique value)
@@ -151,7 +151,7 @@ namespace dhorn
             TEST_METHOD(DefaultConstructorTest)
             {
                 // Should construct and should be invalid
-                dhorn::unique_handle handle;
+                dhorn::experimental::unique_handle handle;
                 Assert::IsTrue(static_cast<HANDLE>(handle) == INVALID_HANDLE_VALUE);
             }
 
@@ -160,7 +160,7 @@ namespace dhorn
                 // Construct with handle should give no errors
                 {
                     auto handle = make_valid_handle();
-                    dhorn::unique_handle h(handle);
+                    dhorn::experimental::unique_handle h(handle);
 
                     Assert::AreNotEqual(handle, INVALID_HANDLE_VALUE);
                     Assert::AreEqual(handle, static_cast<HANDLE>(h));
@@ -174,12 +174,12 @@ namespace dhorn
                 {
                     {
                         auto handle = make_valid_handle();
-                        dhorn::unique_handle x(handle);
-                        dhorn::unique_handle y(handle);
+                        dhorn::experimental::unique_handle x(handle);
+                        dhorn::experimental::unique_handle y(handle);
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (const win32_exception &e)
+                catch (const dhorn::experimental::win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }
@@ -190,15 +190,15 @@ namespace dhorn
                 // Copy constructor should give build errors. Since we can't test build errors with
                 // unit tests, and since std::is_copy_constructable is not robust at all, uncomment
                 // the second line below to verify it does not compile...
-                dhorn::unique_handle x;
-                //dhorn::unique_handle y(x);
+                dhorn::experimental::unique_handle x;
+                //dhorn::experimental::unique_handle y(x);
             }
 
             TEST_METHOD(MoveConstructorTest)
             {
                 {
-                    dhorn::unique_handle x(make_valid_handle());
-                    dhorn::unique_handle y(std::move(x));
+                    dhorn::experimental::unique_handle x(make_valid_handle());
+                    dhorn::experimental::unique_handle y(std::move(x));
                 }
 
                 // No exceptions should be thrown and the HANDLE should be closed
@@ -226,12 +226,12 @@ namespace dhorn
                     try
                     {
                         {
-                            dhorn::unique_handle x(handle);
-                            dhorn::unique_handle y(handle);
+                            dhorn::experimental::unique_handle x(handle);
+                            dhorn::experimental::unique_handle y(handle);
                         }
                         Assert::Fail(L"Expected an exception (TEST 1)");
                     }
-                    catch (win32_exception &e)
+                    catch (dhorn::experimental::win32_exception &e)
                     {
                         Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                     }
@@ -240,32 +240,32 @@ namespace dhorn
                 // TEST 2 : Construct one is fine
                 test_func([](HANDLE handle)
                 {
-                    dhorn::unique_handle x(handle);
+                    dhorn::experimental::unique_handle x(handle);
                 });
 
                 // TEST 3 : Bogus handle should give exception
                 try
                 {
                     {
-                        dhorn::unique_handle x(make_invalid_handle());
+                        dhorn::experimental::unique_handle x(make_invalid_handle());
                     }
                     Assert::Fail(L"Expected an exception (TEST 3)");
                 }
-                catch (win32_exception &e)
+                catch (dhorn::experimental::win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }
 
                 // TEST 4 : No-arg should not cause exception
                 {
-                    dhorn::unique_handle x;
+                    dhorn::experimental::unique_handle x;
                     (void)x;
                 }
 
                 // TEST 5 : Assign to handle
                 test_func([](HANDLE handle)
                 {
-                    dhorn::unique_handle x;
+                    dhorn::experimental::unique_handle x;
 
                     // Ensure no optimizations
                     Assert::IsTrue(static_cast<HANDLE>(x) == INVALID_HANDLE_VALUE);
@@ -278,7 +278,7 @@ namespace dhorn
                 {
                     HANDLE other = make_valid_handle2();
                     {
-                        dhorn::unique_handle x(handle);
+                        dhorn::experimental::unique_handle x(handle);
                         x = other;
                     }
 
@@ -291,8 +291,8 @@ namespace dhorn
                     try
                     {
                         {
-                            dhorn::unique_handle x(handle);
-                            dhorn::unique_handle y;
+                            dhorn::experimental::unique_handle x(handle);
+                            dhorn::experimental::unique_handle y;
 
                             // Ensure no optimizations
                             Assert::IsTrue(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
@@ -301,7 +301,7 @@ namespace dhorn
                         }
                         Assert::Fail(L"Expected an exception (TEST 7)");
                     }
-                    catch (win32_exception &e)
+                    catch (dhorn::experimental::win32_exception &e)
                     {
                         Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                     }
@@ -312,7 +312,7 @@ namespace dhorn
             {
                 // Assignment should work
                 {
-                    dhorn::unique_handle x;
+                    dhorn::experimental::unique_handle x;
                     Assert::IsTrue(static_cast<HANDLE>(x) == INVALID_HANDLE_VALUE);
 
                     x = make_valid_handle();
@@ -321,7 +321,7 @@ namespace dhorn
 
                 // Re-assignment should work as well
                 {
-                    dhorn::unique_handle x = make_valid_handle();
+                    dhorn::experimental::unique_handle x = make_valid_handle();
                     x = make_valid_handle2();
                 }
                 verify_handle_closed();
@@ -332,12 +332,12 @@ namespace dhorn
                 {
                     HANDLE handle = make_valid_handle();
                     {
-                        dhorn::unique_handle x = handle;
+                        dhorn::experimental::unique_handle x = handle;
                         x = handle;
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (win32_exception &e)
+                catch (dhorn::experimental::win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }
@@ -348,8 +348,8 @@ namespace dhorn
                 // Copy assignment should give build errors. Since we can't test build errors with
                 // unit tests, and since std::is_assignable is not robust at all, uncomment the
                 // line below to verify it does not compile...
-                dhorn::unique_handle x;
-                dhorn::unique_handle y;
+                dhorn::experimental::unique_handle x;
+                dhorn::experimental::unique_handle y;
 
                 Assert::IsTrue(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
 
@@ -358,9 +358,9 @@ namespace dhorn
 
             TEST_METHOD(MoveAssignmentTest)
             {
-                dhorn::unique_handle x(make_valid_handle());
+                dhorn::experimental::unique_handle x(make_valid_handle());
                 {
-                    dhorn::unique_handle y;
+                    dhorn::experimental::unique_handle y;
 
                     Assert::IsTrue(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
 
@@ -376,7 +376,7 @@ namespace dhorn
             TEST_METHOD(InvalidTest)
             {
                 // Default should be invalid
-                dhorn::unique_handle x;
+                dhorn::experimental::unique_handle x;
                 Assert::IsFalse(x);
 
                 // Assign to non-invalid
@@ -384,7 +384,7 @@ namespace dhorn
                 Assert::IsTrue(x);
 
                 // Move should make invalid again
-                dhorn::unique_handle y(std::move(x));
+                dhorn::experimental::unique_handle y(std::move(x));
                 Assert::IsFalse(x);
                 Assert::IsTrue(y);
 
@@ -396,7 +396,7 @@ namespace dhorn
             TEST_METHOD(ResetTest)
             {
                 HANDLE handle = make_valid_handle();
-                dhorn::unique_handle x(handle);
+                dhorn::experimental::unique_handle x(handle);
                 {
                     x.reset();
 
@@ -408,7 +408,7 @@ namespace dhorn
                 Assert::IsFalse(x);
 
                 // Calling reset on an invalid handle should be harmless
-                dhorn::unique_handle y;
+                dhorn::experimental::unique_handle y;
                 y.reset();
                 Assert::IsFalse(y);
             }
@@ -420,9 +420,9 @@ namespace dhorn
                     HANDLE one = make_valid_handle();
                     HANDLE two = make_valid_handle2();
                     {
-                        dhorn::unique_handle x(one);
+                        dhorn::experimental::unique_handle x(one);
                         {
-                            dhorn::unique_handle y(two);
+                            dhorn::experimental::unique_handle y(two);
                             x.swap(y);
                         }
                         // one should be closed and two should still be active
@@ -432,7 +432,7 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (win32_exception &e)
+                catch (dhorn::experimental::win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
                 }

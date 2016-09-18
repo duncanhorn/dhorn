@@ -3,7 +3,7 @@
  *
  * main.cpp
  *
- * Functional tests for the dhorn::d3d namespace. Namely the d3d_window class
+ * Functional tests for the dhorn::experimental::d3d namespace. Namely the d3d_window class
  */
 
 #include <dhorn/experimental/d3d11/d3d11_utils.h>
@@ -15,14 +15,14 @@
 #include "globals.h"
 
 // Define the globals
-dhorn::d3d::camera globals::camera;
-dhorn::d3d11::d3d11_window globals::window;
-dhorn::com_ptr<ID3D11VertexShader> globals::vertex_shader;
-dhorn::com_ptr<ID3D11PixelShader> globals::pixel_shader;
-dhorn::com_ptr<ID3D11InputLayout> globals::input_layout;
-dhorn::com_ptr<ID3D11Buffer> globals::cuboid_vertices;
-dhorn::com_ptr<ID3D11Buffer> globals::cuboid_indices;
-dhorn::com_ptr<ID3D11Buffer> globals::object_data;
+dhorn::experimental::d3d::camera globals::camera;
+dhorn::experimental::d3d11::d3d11_window globals::window;
+dhorn::experimental::com_ptr<ID3D11VertexShader> globals::vertex_shader;
+dhorn::experimental::com_ptr<ID3D11PixelShader> globals::pixel_shader;
+dhorn::experimental::com_ptr<ID3D11InputLayout> globals::input_layout;
+dhorn::experimental::com_ptr<ID3D11Buffer> globals::cuboid_vertices;
+dhorn::experimental::com_ptr<ID3D11Buffer> globals::cuboid_indices;
+dhorn::experimental::com_ptr<ID3D11Buffer> globals::object_data;
 
 bool globals::forward = false;
 bool globals::backward = false;
@@ -47,31 +47,31 @@ struct object_data
 static void load_shaders(void)
 {
     std::vector<uint8_t> vertexShaderBytecode;
-    globals::vertex_shader = dhorn::d3d11::load_vertex_shader(
+    globals::vertex_shader = dhorn::experimental::d3d11::load_vertex_shader(
         globals::window.device(),
         OUTPUT_PATH "VertexShader.cso",
         vertexShaderBytecode);
 
     D3D11_INPUT_ELEMENT_DESC inputDesc[] =
     {
-        dhorn::d3d11::input_element_desc(&vertex::position, DXGI_FORMAT_R32G32B32_FLOAT, "POSITION"),
-        dhorn::d3d11::input_element_desc(&vertex::normal, DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL"),
-        dhorn::d3d11::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
+        dhorn::experimental::d3d11::input_element_desc(&vertex::position, DXGI_FORMAT_R32G32B32_FLOAT, "POSITION"),
+        dhorn::experimental::d3d11::input_element_desc(&vertex::normal, DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL"),
+        dhorn::experimental::d3d11::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
     };
-    dhorn::throw_if_failed(globals::window.device()->CreateInputLayout(
-        inputDesc, dhorn::array_size(inputDesc),
+    dhorn::experimental::throw_if_failed(globals::window.device()->CreateInputLayout(
+        inputDesc, dhorn::experimental::array_size(inputDesc),
         vertexShaderBytecode.data(), vertexShaderBytecode.size(),
         &globals::input_layout));
 
-    globals::pixel_shader = dhorn::d3d11::load_pixel_shader(globals::window.device(), OUTPUT_PATH "PixelShader.cso");
+    globals::pixel_shader = dhorn::experimental::d3d11::load_pixel_shader(globals::window.device(), OUTPUT_PATH "PixelShader.cso");
 }
 
 
 static void load_geometry(void)
 {
-    std::vector<dhorn::d3d::vertex> cuboidVertices;
+    std::vector<dhorn::experimental::d3d::vertex> cuboidVertices;
     std::vector<UINT> indices;
-    dhorn::d3d::cuboid(1.0f, 1.0f, 1.0f, cuboidVertices, indices);
+    dhorn::experimental::d3d::cuboid(1.0f, 1.0f, 1.0f, cuboidVertices, indices);
 
     // We need to convert each vertex to our own vertex format
     std::vector<vertex> vertices;
@@ -89,54 +89,54 @@ static void load_geometry(void)
         vertices.push_back(next);
     }
 
-    globals::cuboid_vertices = dhorn::d3d11::create_buffer(globals::window.device(), vertices, D3D11_BIND_VERTEX_BUFFER);
-    globals::cuboid_indices = dhorn::d3d11::create_buffer(globals::window.device(), indices, D3D11_BIND_INDEX_BUFFER);
+    globals::cuboid_vertices = dhorn::experimental::d3d11::create_buffer(globals::window.device(), vertices, D3D11_BIND_VERTEX_BUFFER);
+    globals::cuboid_indices = dhorn::experimental::d3d11::create_buffer(globals::window.device(), indices, D3D11_BIND_INDEX_BUFFER);
 
     // Create the buffer that we will use for the cbuffer for 'ObjectData'
-    globals::object_data = dhorn::d3d11::create_constant_buffer<object_data>(globals::window.device());
+    globals::object_data = dhorn::experimental::d3d11::create_constant_buffer<object_data>(globals::window.device());
 }
 
 
 static std::pair<bool, intptr_t> key_press_handler(
-    dhorn::win32::window * /*sender*/,
+    dhorn::experimental::win32::window * /*sender*/,
     uintptr_t wparam,
     intptr_t lparam)
 {
     bool handled = false;
     bool key_down = (lparam & 0x80000000) == 0;
 
-    switch (static_cast<dhorn::win32::virtual_key>(wparam))
+    switch (static_cast<dhorn::experimental::win32::virtual_key>(wparam))
     {
-    case dhorn::win32::virtual_key::up:
-    case dhorn::win32::virtual_key::w:
+    case dhorn::experimental::win32::virtual_key::up:
+    case dhorn::experimental::win32::virtual_key::w:
         globals::forward = key_down;
         handled = true;
         break;
 
-    case dhorn::win32::virtual_key::down:
-    case dhorn::win32::virtual_key::s:
+    case dhorn::experimental::win32::virtual_key::down:
+    case dhorn::experimental::win32::virtual_key::s:
         globals::backward = key_down;
         handled = true;
         break;
 
-    case dhorn::win32::virtual_key::left:
-    case dhorn::win32::virtual_key::a:
+    case dhorn::experimental::win32::virtual_key::left:
+    case dhorn::experimental::win32::virtual_key::a:
         globals::left = key_down;
         handled = true;
         break;
 
-    case dhorn::win32::virtual_key::right:
-    case dhorn::win32::virtual_key::d:
+    case dhorn::experimental::win32::virtual_key::right:
+    case dhorn::experimental::win32::virtual_key::d:
         globals::right = key_down;
         handled = true;
         break;
 
-    case dhorn::win32::virtual_key::space:
+    case dhorn::experimental::win32::virtual_key::space:
         globals::up = key_down;
         handled = true;
         break;
 
-    case dhorn::win32::virtual_key::shift:
+    case dhorn::experimental::win32::virtual_key::shift:
         globals::down = key_down;
         handled = true;
         break;
@@ -157,7 +157,7 @@ static void move_cursor(void)
 
 
 static std::pair<bool, intptr_t> mouse_move_handler(
-    dhorn::win32::window * /*sender*/,
+    dhorn::experimental::win32::window * /*sender*/,
     uintptr_t /*wparam*/,
     intptr_t lparam)
 {
@@ -189,21 +189,21 @@ static std::pair<bool, intptr_t> mouse_move_handler(
 
 
 int WINAPI wWinMain(
-    dhorn::win32::instance_handle instance,
-    dhorn::win32::instance_handle /*prevInstance*/,
+    dhorn::experimental::win32::instance_handle instance,
+    dhorn::experimental::win32::instance_handle /*prevInstance*/,
     wchar_t * /*cmdLine*/,
     int cmdShow)
 {
     // Initialize the window
-    dhorn::win32::window_class windowClass(L"D3D Test Window");
+    dhorn::experimental::win32::window_class windowClass(L"D3D Test Window");
     windowClass.use_defaults();
     windowClass.instance = instance;
 
-    dhorn::win32::window_options options(L"D3D Test Window");
+    dhorn::experimental::win32::window_options options(L"D3D Test Window");
     options.width = 600;
     options.height = 400;
 
-    globals::window.set_background(dhorn::d3d::colors::burnt_orange);
+    globals::window.set_background(dhorn::experimental::d3d::colors::burnt_orange);
 
     globals::window.on_initialized([&](void)
     {
@@ -263,16 +263,16 @@ int WINAPI wWinMain(
         context->DrawIndexed(36, 0, 0);
     });
 
-    globals::window.on_resize([&](const dhorn::rect<size_t> &clientArea)
+    globals::window.on_resize([&](const dhorn::experimental::rect<size_t> &clientArea)
     {
         float ratio = static_cast<float>(clientArea.width) / static_cast<float>(clientArea.height);
         globals::camera.configure_frustum(0.1f, 100.0f, DirectX::XM_PIDIV2, ratio);
     });
 
     // Set window message handlers
-    globals::window.add_callback_handler(dhorn::win32::window_message::key_down, &key_press_handler);
-    globals::window.add_callback_handler(dhorn::win32::window_message::key_up, &key_press_handler);
-    globals::window.add_callback_handler(dhorn::win32::window_message::mouse_move, &mouse_move_handler);
+    globals::window.add_callback_handler(dhorn::experimental::win32::window_message::key_down, &key_press_handler);
+    globals::window.add_callback_handler(dhorn::experimental::win32::window_message::key_up, &key_press_handler);
+    globals::window.add_callback_handler(dhorn::experimental::win32::window_message::mouse_move, &mouse_move_handler);
 
     // Run the application!
     globals::window.run(windowClass, options, cmdShow);

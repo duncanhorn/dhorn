@@ -29,115 +29,118 @@
 
 namespace dhorn
 {
-    template <typename Ty, typename MutexType = std::mutex>
-    class synchronized_object
+    namespace experimental
     {
-    public:
-        /*
-         * Constructor(s)/Destructor
-         */
-        synchronized_object()
+        template <typename Ty, typename MutexType = std::mutex>
+        class synchronized_object
         {
-        }
+        public:
+            /*
+             * Constructor(s)/Destructor
+             */
+            synchronized_object()
+            {
+            }
 
-        synchronized_object(Ty value) :
-            _value(std::move(value))
-        {
-        }
+            synchronized_object(Ty value) :
+                _value(std::move(value))
+            {
+            }
 
-        // Cannot copy
-        synchronized_object(const synchronized_object &) = delete;
-        synchronized_object &operator=(const synchronized_object &) = delete;
-
-
-
-        /*
-         * Execution
-         */
-        template <typename LockType = std::unique_lock<MutexType>, typename Func>
-        void execute_with_lock(const Func &fn)
-        {
-            LockType lock(this->_mutex);
-            fn(this->_value, lock);
-        }
-
-        template <typename Func>
-        void execute_without_lock(const Func &fn)
-        {
-            fn(this->_value);
-        }
-
-        template <typename Func>
-        void execute_without_lock(const Func &fn) const
-        {
-            fn(this->_value);
-        }
+            // Cannot copy
+            synchronized_object(const synchronized_object &) = delete;
+            synchronized_object &operator=(const synchronized_object &) = delete;
 
 
 
-        /*
-         * Value get/set
-         *
-         * TODO: get and get_locked both return a copy. Would it make sense for get (not get_locked) to return a
-         * reference since it's already not thread safe?
-         */
-        Ty copy_unlocked(void)
-        {
-            return this->_value;
-        }
+            /*
+             * Execution
+             */
+            template <typename LockType = std::unique_lock<MutexType>, typename Func>
+            void execute_with_lock(const Func &fn)
+            {
+                LockType lock(this->_mutex);
+                fn(this->_value, lock);
+            }
 
-        Ty copy_unlocked(void) const
-        {
-            return this->_value;
-        }
+            template <typename Func>
+            void execute_without_lock(const Func &fn)
+            {
+                fn(this->_value);
+            }
 
-        template <typename LockType = std::unique_lock<MutexType>>
-        Ty copy_locked(void)
-        {
-            LockType lock(this->_mutex);
-            return this->_value;
-        }
-
-        void set_unlocked(const Ty &value)
-        {
-            this->_value = value;
-        }
-
-        template <typename LockType = std::unique_lock<MutexType>>
-        void set_locked(const Ty &value)
-        {
-            LockType lock(this->_mutex);
-            this->_value = value;
-        }
+            template <typename Func>
+            void execute_without_lock(const Func &fn) const
+            {
+                fn(this->_value);
+            }
 
 
 
-        /*
-         * Locking
-         */
-        template <typename LockType = std::unique_lock<MutexType>>
-        LockType lock(void)
-        {
-            return LockType(this->_mutex);
-        }
+            /*
+             * Value get/set
+             *
+             * TODO: get and get_locked both return a copy. Would it make sense for get (not get_locked) to return a
+             * reference since it's already not thread safe?
+             */
+            Ty copy_unlocked(void)
+            {
+                return this->_value;
+            }
 
-        template <typename LockType = std::unique_lock<MutexType>>
-        LockType lock(std::try_to_lock_t t)
-        {
-            return LockType(this->_mutex, t);
-        }
+            Ty copy_unlocked(void) const
+            {
+                return this->_value;
+            }
 
-        template <typename LockType = std::unique_lock<MutexType>>
-        LockType lock(std::defer_lock_t t)
-        {
-            return LockType(this->_mutex, t);
-        }
+            template <typename LockType = std::unique_lock<MutexType>>
+            Ty copy_locked(void)
+            {
+                LockType lock(this->_mutex);
+                return this->_value;
+            }
+
+            void set_unlocked(const Ty &value)
+            {
+                this->_value = value;
+            }
+
+            template <typename LockType = std::unique_lock<MutexType>>
+            void set_locked(const Ty &value)
+            {
+                LockType lock(this->_mutex);
+                this->_value = value;
+            }
 
 
 
-    private:
+            /*
+             * Locking
+             */
+            template <typename LockType = std::unique_lock<MutexType>>
+            LockType lock(void)
+            {
+                return LockType(this->_mutex);
+            }
 
-        Ty _value;
-        MutexType _mutex;
-    };
+            template <typename LockType = std::unique_lock<MutexType>>
+            LockType lock(std::try_to_lock_t t)
+            {
+                return LockType(this->_mutex, t);
+            }
+
+            template <typename LockType = std::unique_lock<MutexType>>
+            LockType lock(std::defer_lock_t t)
+            {
+                return LockType(this->_mutex, t);
+            }
+
+
+
+        private:
+
+            Ty _value;
+            MutexType _mutex;
+        };
+    }
 }

@@ -24,9 +24,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\dhorn\experimental\algorithm.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\animation.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -167,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\experimental\d3d\shapes.h">
       <Filter>include\experimental\d3d</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\algorithm.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -19,10 +19,10 @@ namespace dhorn
         {
             TEST_METHOD(EmptyTest)
             {
-                dhorn::command_line cmdLine;
+                dhorn::experimental::command_line cmdLine;
                 Assert::AreEqual(0u, cmdLine.size());
 
-                dhorn::command_line cmdLine2({});
+                dhorn::experimental::command_line cmdLine2({});
                 Assert::AreEqual(0u, cmdLine2.size());
 
                 Assert::IsTrue(cmdLine.begin() == cmdLine.end());
@@ -30,7 +30,7 @@ namespace dhorn
 
             TEST_METHOD(SingleValueTest)
             {
-                dhorn::command_line cmdLine({ "foo" });
+                dhorn::experimental::command_line cmdLine({ "foo" });
                 Assert::AreEqual(1u, cmdLine.size());
 
                 Assert::IsTrue(*cmdLine.begin() == "foo");
@@ -40,7 +40,7 @@ namespace dhorn
 
             TEST_METHOD(TwoValueTest)
             {
-                dhorn::command_line cmdLine({ "foo", "bar" });
+                dhorn::experimental::command_line cmdLine({ "foo", "bar" });
                 Assert::AreEqual(2u, cmdLine.size());
 
                 auto itr = cmdLine.begin();
@@ -59,7 +59,7 @@ namespace dhorn
 
             TEST_METHOD(SingleSwitchTest)
             {
-                dhorn::command_line cmdLine({ "/foo" });
+                dhorn::experimental::command_line cmdLine({ "/foo" });
                 Assert::AreEqual(1u, cmdLine.size());
 
                 Assert::IsTrue(*cmdLine.begin() == "/foo");
@@ -69,7 +69,7 @@ namespace dhorn
 
             TEST_METHOD(TwoSwitchTest)
             {
-                dhorn::command_line cmdLine({ "/foo", "/bar" });
+                dhorn::experimental::command_line cmdLine({ "/foo", "/bar" });
                 Assert::AreEqual(2u, cmdLine.size());
 
                 auto itr = cmdLine.begin();
@@ -92,7 +92,7 @@ namespace dhorn
 
             TEST_METHOD(SingleSwitchWithSingleArgTest)
             {
-                dhorn::command_line cmdLine({ "/foo", "bar" });
+                dhorn::experimental::command_line cmdLine({ "/foo", "bar" });
                 Assert::AreEqual(2u, cmdLine.size());
 
                 auto itr = cmdLine.begin();
@@ -114,7 +114,7 @@ namespace dhorn
 
             TEST_METHOD(SingleSwitchWithMultiArgTest)
             {
-                dhorn::command_line cmdLine({ "/foo", "bar1", "bar2" });
+                dhorn::experimental::command_line cmdLine({ "/foo", "bar1", "bar2" });
                 Assert::AreEqual(3u, cmdLine.size());
 
                 auto itr = cmdLine.begin();
@@ -148,12 +148,12 @@ namespace dhorn
                 std::vector<std::string> outSwitches;
                 std::vector<std::string> outArgs;
 
-                dhorn::command_line cmdLine(std::begin(input), std::end(input));
+                dhorn::experimental::command_line cmdLine(std::begin(input), std::end(input));
                 for (auto itr = cmdLine.begin(); itr != cmdLine.end(); ++itr)
                 {
                     output.push_back(*itr);
 
-                    if (!dhorn::is_command_line_switch(*itr))
+                    if (!dhorn::experimental::is_command_line_switch(*itr))
                     {
                         outArgs.push_back(*itr);
                     }

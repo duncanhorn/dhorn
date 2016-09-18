@@ -11,40 +11,43 @@
 
 namespace dhorn
 {
-    template <typename ValueTy, typename MaskTy>
-    inline constexpr ValueTy set_flag(const ValueTy &value, const MaskTy &mask) noexcept
+    namespace experimental
     {
-        return value | mask;
-    }
+        template <typename ValueTy, typename MaskTy>
+        inline constexpr ValueTy set_flag(const ValueTy &value, const MaskTy &mask) noexcept
+        {
+            return value | mask;
+        }
 
-    template <typename ValueTy, typename MaskTy>
-    inline constexpr ValueTy clear_flag(const ValueTy &value, const MaskTy &mask) noexcept
-    {
-        return value & (~mask);
-    }
+        template <typename ValueTy, typename MaskTy>
+        inline constexpr ValueTy clear_flag(const ValueTy &value, const MaskTy &mask) noexcept
+        {
+            return value & (~mask);
+        }
 
-    template <typename ValueTy, typename MaskTy>
-    inline constexpr ValueTy toggle_flag(const ValueTy &value, const MaskTy &mask) noexcept
-    {
-        return value ^ mask;
-    }
+        template <typename ValueTy, typename MaskTy>
+        inline constexpr ValueTy toggle_flag(const ValueTy &value, const MaskTy &mask) noexcept
+        {
+            return value ^ mask;
+        }
 
-    template <typename ValueTy, typename MaskTy>
-    inline constexpr bool is_any_flag_set(const ValueTy &value, const MaskTy &mask) noexcept
-    {
-        return !!(value & mask);
-    }
+        template <typename ValueTy, typename MaskTy>
+        inline constexpr bool is_any_flag_set(const ValueTy &value, const MaskTy &mask) noexcept
+        {
+            return !!(value & mask);
+        }
 
-    template <typename ValueTy, typename MaskTy>
-    inline constexpr bool are_all_flags_set(const ValueTy &value, const MaskTy &mask) noexcept
-    {
-        return (value & mask) == mask;
-    }
+        template <typename ValueTy, typename MaskTy>
+        inline constexpr bool are_all_flags_set(const ValueTy &value, const MaskTy &mask) noexcept
+        {
+            return (value & mask) == mask;
+        }
 
-    template <typename ValueTy, typename MaskTy>
-    inline constexpr bool are_all_flags_clear(const ValueTy &value, const MaskTy &mask) noexcept
-    {
-        return (value & mask) == 0;
+        template <typename ValueTy, typename MaskTy>
+        inline constexpr bool are_all_flags_clear(const ValueTy &value, const MaskTy &mask) noexcept
+        {
+            return (value & mask) == 0;
+        }
     }
 }
 
@@ -55,19 +58,19 @@ namespace dhorn
 #define DHORN_DECLARE_BITMASK_OPERATORS(Type)   \
 inline constexpr Type operator|(const Type &lhs, const Type &rhs)                       \
 {                                                                                       \
-    using IntType = dhorn::select_unsigned<Type>;                                       \
+    using IntType = dhorn::experimental::select_unsigned<Type>;                         \
     return static_cast<Type>(static_cast<IntType>(lhs) | static_cast<IntType>(rhs));    \
 }                                                                                       \
                                                                                         \
 inline constexpr Type operator&(const Type &lhs, const Type &rhs)                       \
 {                                                                                       \
-    using IntType = dhorn::select_unsigned<Type>;                                       \
+    using IntType = dhorn::experimental::select_unsigned<Type>;                         \
     return static_cast<Type>(static_cast<IntType>(lhs) & static_cast<IntType>(rhs));    \
 }                                                                                       \
                                                                                         \
 inline constexpr Type operator^(const Type &lhs, const Type &rhs)                       \
 {                                                                                       \
-    using IntType = dhorn::select_unsigned<Type>;                                       \
+    using IntType = dhorn::experimental::select_unsigned<Type>;                         \
     return static_cast<Type>(static_cast<IntType>(lhs) ^ static_cast<IntType>(rhs));    \
 }
 

@@ -14,187 +14,190 @@
 
 namespace dhorn
 {
-    template <typename Ty>
-    class nullable_value final
+    namespace experimental
     {
-    public:
-        nullable_value(void) = default;
-
-        nullable_value(const nullable_value &other)
+        template <typename Ty>
+        class nullable_value final
         {
-            if (other)
+        public:
+            nullable_value(void) = default;
+
+            nullable_value(const nullable_value &other)
             {
-                Set(other.get());
+                if (other)
+                {
+                    Set(other.get());
+                }
             }
-        }
 
-        nullable_value(nullable_value &&other)
-        {
-            swap(other);
-        }
-
-        ~nullable_value()
-        {
-            Reset();
-        }
-
-
-
-        /*
-         * Operators
-         */
-        nullable_value &operator=(const nullable_value &other)
-        {
-            if (&other == this)
+            nullable_value(nullable_value &&other)
             {
+                swap(other);
+            }
+
+            ~nullable_value()
+            {
+                Reset();
+            }
+
+
+
+            /*
+             * Operators
+             */
+            nullable_value &operator=(const nullable_value &other)
+            {
+                if (&other == this)
+                {
+                    return *this;
+                }
+
+                Reset();
+                if (other)
+                {
+                    Set(other.get());
+                }
+
                 return *this;
             }
 
-            Reset();
-            if (other)
+            nullable_value &operator=(nullable_value &&other)
             {
-                Set(other.get());
+                swap(other);
+                return *this;
             }
 
-            return *this;
-        }
-
-        nullable_value &operator=(nullable_value &&other)
-        {
-            swap(other);
-            return *this;
-        }
-
-        Ty &operator*(void)
-        {
-            return *this->_ptr;
-        }
-
-        const Ty &operator*(void) const
-        {
-            return *this->_ptr;
-        }
-
-        Ty *operator->(void) const
-        {
-            return this->_ptr;
-        }
-
-        operator bool(void) const
-        {
-            return has_value();
-        }
-
-
-
-        /*
-         * Functions
-         */
-        const Ty &get(void) const
-        {
-            return *this->_ptr;
-        }
-
-        bool has_value(void) const
-        {
-            return this->_ptr != nullptr;
-        }
-
-        void reset(void)
-        {
-            Reset();
-        }
-
-        void reset(const Ty &value)
-        {
-            Set(value);
-        }
-
-        void reset(Ty &&value)
-        {
-            Set(std::move(value));
-        }
-
-        void set(const Ty &value)
-        {
-            Set(value);
-        }
-
-        void set(Ty &&value)
-        {
-            Set(std::move(value));
-        }
-
-        void swap(nullable_value &other)
-        {
-            if (other && has_value())
+            Ty &operator*(void)
             {
-                // Both are good; swap is okay
-                std::swap(*this->_ptr, *other._ptr);
+                return *this->_ptr;
             }
-            else if (other)
+
+            const Ty &operator*(void) const
             {
-                // Only other is good
-                Set(std::move(*other._ptr));
-                other.Reset();
+                return *this->_ptr;
             }
-            else if (has_value())
+
+            Ty *operator->(void) const
             {
-                // Only this is good
-                other.Set(std::move(*this->_ptr));
+                return this->_ptr;
+            }
+
+            operator bool(void) const
+            {
+                return has_value();
+            }
+
+
+
+            /*
+             * Functions
+             */
+            const Ty &get(void) const
+            {
+                return *this->_ptr;
+            }
+
+            bool has_value(void) const
+            {
+                return this->_ptr != nullptr;
+            }
+
+            void reset(void)
+            {
                 Reset();
             }
-        }
 
-
-
-    private:
-
-        void SetPointer()
-        {
-            this->_ptr = reinterpret_cast<Ty *>(&this->_data);
-        }
-
-        void Set(const Ty &value)
-        {
-            if (!this->_ptr)
+            void reset(const Ty &value)
             {
-                // First creation
-                SetPointer();
-                new (this->_ptr) Ty(value);
+                Set(value);
             }
-            else
-            {
-                // Already created
-                *this->_ptr = value;
-            }
-        }
 
-        void Set(Ty &&value)
-        {
-            if (!this->_ptr)
+            void reset(Ty &&value)
             {
-                // First creation
-                SetPointer();
-                new (this->_ptr) Ty(std::move(value));
+                Set(std::move(value));
             }
-            else
-            {
-                // Already created
-                *this->_ptr = std::move(value);
-            }
-        }
 
-        void Reset()
-        {
-            if (this->_ptr)
+            void set(const Ty &value)
             {
-                this->_ptr->~Ty();
-                this->_ptr = nullptr;
+                Set(value);
             }
-        }
 
-        Ty *_ptr = nullptr;
-        uint8_t _data[sizeof(Ty)];
-    };
+            void set(Ty &&value)
+            {
+                Set(std::move(value));
+            }
+
+            void swap(nullable_value &other)
+            {
+                if (other && has_value())
+                {
+                    // Both are good; swap is okay
+                    std::swap(*this->_ptr, *other._ptr);
+                }
+                else if (other)
+                {
+                    // Only other is good
+                    Set(std::move(*other._ptr));
+                    other.Reset();
+                }
+                else if (has_value())
+                {
+                    // Only this is good
+                    other.Set(std::move(*this->_ptr));
+                    Reset();
+                }
+            }
+
+
+
+        private:
+
+            void SetPointer()
+            {
+                this->_ptr = reinterpret_cast<Ty *>(&this->_data);
+            }
+
+            void Set(const Ty &value)
+            {
+                if (!this->_ptr)
+                {
+                    // First creation
+                    SetPointer();
+                    new (this->_ptr) Ty(value);
+                }
+                else
+                {
+                    // Already created
+                    *this->_ptr = value;
+                }
+            }
+
+            void Set(Ty &&value)
+            {
+                if (!this->_ptr)
+                {
+                    // First creation
+                    SetPointer();
+                    new (this->_ptr) Ty(std::move(value));
+                }
+                else
+                {
+                    // Already created
+                    *this->_ptr = std::move(value);
+                }
+            }
+
+            void Reset()
+            {
+                if (this->_ptr)
+                {
+                    this->_ptr->~Ty();
+                    this->_ptr = nullptr;
+                }
+            }
+
+            Ty *_ptr = nullptr;
+            uint8_t _data[sizeof(Ty)];
+        };
+    }
 }

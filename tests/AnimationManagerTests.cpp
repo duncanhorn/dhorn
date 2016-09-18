@@ -19,12 +19,12 @@ namespace dhorn
         {
             // Test animation instance
             class test_animation :
-                public animation
+                public dhorn::experimental::animation
             {
             public:
 
                 test_animation() :
-                    _nextState(animation_state::running)
+                    _nextState(dhorn::experimental::animation_state::running)
                 {
                 }
 
@@ -37,7 +37,7 @@ namespace dhorn
                 }
 
                 // animation
-                virtual animation_state on_update(duration /*delta*/) override
+                virtual dhorn::experimental::animation_state on_update(duration /*delta*/) override
                 {
                     if (this->_onUpdate)
                     {
@@ -48,7 +48,7 @@ namespace dhorn
                 }
 
                 // Test functions
-                void set_next_state(animation_state state)
+                void set_next_state(dhorn::experimental::animation_state state)
                 {
                     this->_nextState = state;
                 }
@@ -65,21 +65,21 @@ namespace dhorn
 
             private:
 
-                animation_state _nextState;
+                dhorn::experimental::animation_state _nextState;
                 std::function<void(void)> _onDestroy;
                 std::function<void(void)> _onUpdate;
             };
 
             TEST_METHOD(QueryStateFailureTest)
             {
-                animation_manager mgr;
+                dhorn::experimental::animation_manager mgr;
                 test_animation *anim = new test_animation();
                 auto handle = mgr.submit(anim);
 
                 // Querying the animation state on a different animation_manager instance should throw
                 try
                 {
-                    animation_manager mgr2;
+                    dhorn::experimental::animation_manager mgr2;
                     mgr2.query_state(handle.get());
                     Assert::Fail(L"Expected an exception");
                 }
@@ -90,33 +90,33 @@ namespace dhorn
 
             TEST_METHOD(CancelTest)
             {
-                animation_manager mgr;
+                dhorn::experimental::animation_manager mgr;
                 test_animation *anim = new test_animation();
                 auto handle = mgr.submit(anim);
 
                 mgr.cancel(handle.get());
 
                 // Should either be in the canceled or completed state; we don't really care
-                Assert::IsTrue(details::is_complete(mgr.query_state(handle.get())));
+                Assert::IsTrue(dhorn::experimental::details::is_complete(mgr.query_state(handle.get())));
 
                 // After update, it should definitely be completed
                 mgr.update();
-                Assert::IsTrue(mgr.query_state(handle.get()) == animation_state::completed);
+                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::completed);
 
                 // Animations should be able to cancel themselves (and immediately transition to completed
                 anim = new test_animation();
-                anim->set_next_state(animation_state::canceled);
+                anim->set_next_state(dhorn::experimental::animation_state::canceled);
                 handle = mgr.submit(anim);
 
                 mgr.update();
-                Assert::IsTrue(mgr.query_state(handle.get()) == animation_state::completed);
+                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::completed);
             }
 
             TEST_METHOD(DestroyTest)
             {
-                animation_manager mgr;
+                dhorn::experimental::animation_manager mgr;
                 test_animation *anim = new test_animation();
-                anim->set_next_state(animation_state::completed);
+                anim->set_next_state(dhorn::experimental::animation_state::completed);
 
                 int x = 0;
                 anim->on_destroy([&]()
@@ -138,7 +138,7 @@ namespace dhorn
 
                 x = 0;
                 anim = new test_animation();
-                anim->set_next_state(animation_state::completed);
+                anim->set_next_state(dhorn::experimental::animation_state::completed);
                 anim->on_destroy([&]()
                 {
                     x = 42;
@@ -158,27 +158,27 @@ namespace dhorn
 
             TEST_METHOD(PauseResumeTest)
             {
-                animation_manager mgr;
+                dhorn::experimental::animation_manager mgr;
                 test_animation *anim = new test_animation();
                 auto handle = mgr.submit(anim);
 
                 mgr.pause(handle.get());
-                Assert::IsTrue(mgr.query_state(handle.get()) == animation_state::paused);
+                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
 
                 // Update shouldn't impact animations
                 int x = 0;
                 anim->on_update([&]() { x = 42; });
                 mgr.update();
                 Assert::AreEqual(0, x);
-                Assert::IsTrue(mgr.query_state(handle.get()) == animation_state::paused);
+                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
 
                 mgr.resume(handle.get());
-                Assert::IsTrue(mgr.query_state(handle.get()) == animation_state::running);
+                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::running);
 
                 // Animations should be able to transition themselves to paused
-                anim->set_next_state(animation_state::paused);
+                anim->set_next_state(dhorn::experimental::animation_state::paused);
                 mgr.update();
-                Assert::IsTrue(mgr.query_state(handle.get()) == animation_state::paused);
+                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
             }
 
             TEST_METHOD(DestructorTest)
@@ -193,7 +193,7 @@ namespace dhorn
                     anim->on_destroy([&]() { x = 42; });
                     anim2->on_destroy([&]() { y = 8;} );
 
-                    animation_manager mgr;
+                    dhorn::experimental::animation_manager mgr;
                     auto handle = mgr.submit(anim);
                     auto handle2 = mgr.submit(anim2);
                 }

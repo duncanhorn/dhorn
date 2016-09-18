@@ -144,9 +144,9 @@ namespace dhorn
         TEST_CLASS(TreeNodeTests)
         {
         public:
-            using tree_type = dhorn::tree<node_test_class>;
-            using test_type = _dhorn_tree_node<dhorn::_dhorn_tree_types<node_test_class, std::allocator<node_test_class>>>;
-            using sentinel_type = _dhorn_tree_node<dhorn::_dhorn_tree_types<node_test_class, std::allocator<node_test_class>>, true>;
+            using tree_type = dhorn::experimental::tree<node_test_class>;
+            using test_type = dhorn::experimental::_dhorn_tree_node<dhorn::experimental::_dhorn_tree_types<node_test_class, std::allocator<node_test_class>>>;
+            using sentinel_type = dhorn::experimental::_dhorn_tree_node<dhorn::experimental::_dhorn_tree_types<node_test_class, std::allocator<node_test_class>>, true>;
 
             /*
              * Constructor Tests
@@ -388,7 +388,7 @@ namespace dhorn
              */
             TEST_METHOD(ValueAccessorTest)
             {
-                using node_type = _dhorn_tree_node<dhorn::tree<std::string>>;
+                using node_type = dhorn::experimental::_dhorn_tree_node<dhorn::experimental::tree<std::string>>;
 
                 node_type x;
                 Assert::IsTrue(x.value() == "");
@@ -415,7 +415,7 @@ namespace dhorn
          */
         TEST_CLASS(TreeIteratorTests)
         {
-            using test_type = dhorn::tree<node_test_class>;
+            using test_type = dhorn::experimental::tree<node_test_class>;
 
             TEST_METHOD(EqualityTest)
             {
@@ -437,21 +437,21 @@ namespace dhorn
                 Assert::IsFalse(ritr != critr);
                 Assert::IsFalse(critr != ritr);
 
-                Assert::IsTrue(dhorn::is_comparable<decltype(itr), decltype(citr)>::value);
-                Assert::IsFalse(dhorn::is_comparable<decltype(itr), decltype(ritr)>::value);
-                Assert::IsFalse(dhorn::is_comparable<decltype(itr), decltype(critr)>::value);
+                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(itr), decltype(citr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(itr), decltype(ritr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(itr), decltype(critr)>::value);
 
-                Assert::IsTrue(dhorn::is_comparable<decltype(citr), decltype(itr)>::value);
-                Assert::IsFalse(dhorn::is_comparable<decltype(citr), decltype(ritr)>::value);
-                Assert::IsFalse(dhorn::is_comparable<decltype(citr), decltype(critr)>::value);
+                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(citr), decltype(itr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(citr), decltype(ritr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(citr), decltype(critr)>::value);
 
-                Assert::IsFalse(dhorn::is_comparable<decltype(ritr), decltype(itr)>::value);
-                Assert::IsFalse(dhorn::is_comparable<decltype(ritr), decltype(citr)>::value);
-                Assert::IsTrue(dhorn::is_comparable<decltype(ritr), decltype(critr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(ritr), decltype(itr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(ritr), decltype(citr)>::value);
+                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(ritr), decltype(critr)>::value);
 
-                Assert::IsFalse(dhorn::is_comparable<decltype(critr), decltype(itr)>::value);
-                Assert::IsFalse(dhorn::is_comparable<decltype(critr), decltype(citr)>::value);
-                Assert::IsTrue(dhorn::is_comparable<decltype(critr), decltype(ritr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(critr), decltype(itr)>::value);
+                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(critr), decltype(citr)>::value);
+                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(critr), decltype(ritr)>::value);
 
                 // Insert a value and assert that begin() != end
                 x.insert(std::begin(x), node_test_class());
@@ -528,7 +528,7 @@ namespace dhorn
 
             TEST_METHOD(DereferenceTest)
             {
-                dhorn::tree<std::string> x;
+                dhorn::experimental::tree<std::string> x;
                 x.insert(std::end(x), "foo");
                 x.insert(std::end(x), "bar");
 
@@ -586,7 +586,7 @@ namespace dhorn
 
             TEST_METHOD(IncrementTest)
             {
-                dhorn::tree<std::string> x;
+                dhorn::experimental::tree<std::string> x;
                 x.insert(std::end(x), "foo");
                 x.insert(std::end(x), "bar");
 
@@ -620,7 +620,7 @@ namespace dhorn
 
             TEST_METHOD(DecrementTest)
             {
-                dhorn::tree<std::string> x;
+                dhorn::experimental::tree<std::string> x;
                 x.insert(std::end(x), "foo");
                 x.insert(std::end(x), "bar");
 
@@ -649,7 +649,7 @@ namespace dhorn
 
             TEST_METHOD(AdditionTest)
             {
-                dhorn::tree<std::string> x;
+                dhorn::experimental::tree<std::string> x;
                 x.insert(std::end(x), "1");
                 x.insert(std::end(x), "2");
                 x.insert(std::end(x), "3");
@@ -682,7 +682,7 @@ namespace dhorn
 
             TEST_METHOD(SubtractionTest)
             {
-                dhorn::tree<std::string> x;
+                dhorn::experimental::tree<std::string> x;
                 x.insert(std::end(x), "1");
                 x.insert(std::end(x), "2");
                 x.insert(std::end(x), "3");
@@ -713,7 +713,7 @@ namespace dhorn
 
             TEST_METHOD(IndexingTest)
             {
-                dhorn::tree<std::string> x;
+                dhorn::experimental::tree<std::string> x;
                 x.insert(std::end(x), "1");
                 x.insert(std::end(x), "2");
                 x.insert(std::end(x), "3");
@@ -729,7 +729,7 @@ namespace dhorn
             TEST_METHOD(BeginEndTest)
             {
                 // Run the above tests, but with a second level child
-                dhorn::tree<std::string> x;
+                dhorn::experimental::tree<std::string> x;
                 auto itr = x.insert(std::end(x), "0");
                 x.insert(std::end(itr), "1");
                 x.insert(std::end(itr), "2");
@@ -783,7 +783,7 @@ namespace dhorn
 
         TEST_CLASS(TreeTests)
         {
-            using test_type = dhorn::tree<node_test_class>;
+            using test_type = dhorn::experimental::tree<node_test_class>;
 
             /*
              * The test tree is generated with 10 children of the sentinel, each containing values
@@ -1019,7 +1019,7 @@ namespace dhorn
                 // Very simple test. Make sure begin() and end() are equal to or are not equal to
                 // each other and that they have the correct values. Iterators were tested in depth in
                 // a separate test
-                dhorn::tree<std::string> test;
+                dhorn::experimental::tree<std::string> test;
                 Assert::IsTrue(test.begin() == test.end());
 
                 test.insert(std::begin(test), "foo");
@@ -1043,7 +1043,7 @@ namespace dhorn
             TEST_METHOD(CapacityTest)
             {
                 // Add breadth and depth and make sure the size updates correctly. Also test empty()
-                dhorn::tree<int> tree;
+                dhorn::experimental::tree<int> tree;
                 Assert::IsTrue(tree.empty());
 
                 for (size_t i = 0; i < 100; i++)

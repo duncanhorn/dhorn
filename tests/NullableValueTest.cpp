@@ -25,7 +25,7 @@ namespace dhorn
             TEST_METHOD(DefaultConstructorTest)
             {
                 {
-                    dhorn::nullable_value<object_counter> value;
+                    dhorn::experimental::nullable_value<object_counter> value;
                     Assert::AreEqual(0u, object_counter::constructed_count);
                 }
                 Assert::AreEqual(0u, object_counter::destructed_count);
@@ -34,7 +34,7 @@ namespace dhorn
             TEST_METHOD(CopyConstructorTest)
             {
                 {
-                    dhorn::nullable_value<object_counter> value;
+                    dhorn::experimental::nullable_value<object_counter> value;
                     value.set(object_counter{});
                     auto value2 = value;
 
@@ -47,7 +47,7 @@ namespace dhorn
             TEST_METHOD(MoveConstructorTest)
             {
                 {
-                    dhorn::nullable_value<object_counter> value;
+                    dhorn::experimental::nullable_value<object_counter> value;
                     value.set(object_counter{});
                     auto value2 = std::move(value);
 
@@ -61,9 +61,9 @@ namespace dhorn
 
             TEST_METHOD(CopyAssignmentTest)
             {
-                dhorn::nullable_value<object_counter> value;
+                dhorn::experimental::nullable_value<object_counter> value;
                 {
-                    dhorn::nullable_value<object_counter> value2;
+                    dhorn::experimental::nullable_value<object_counter> value2;
                     value2.set(object_counter{});
                     value = value2;
 
@@ -75,9 +75,9 @@ namespace dhorn
 
             TEST_METHOD(MoveAssignmentTest)
             {
-                dhorn::nullable_value<object_counter> value;
+                dhorn::experimental::nullable_value<object_counter> value;
                 {
-                    dhorn::nullable_value<object_counter> value2;
+                    dhorn::experimental::nullable_value<object_counter> value2;
                     value2.set(object_counter{});
                     value = std::move(value2);
 
@@ -91,21 +91,21 @@ namespace dhorn
 
             TEST_METHOD(DereferenceTest)
             {
-                dhorn::nullable_value<int> value;
+                dhorn::experimental::nullable_value<int> value;
                 value.set(42);
                 Assert::AreEqual(42, *value);
             }
 
             TEST_METHOD(OperatorArrowTest)
             {
-                dhorn::nullable_value<std::string> value;
+                dhorn::experimental::nullable_value<std::string> value;
                 value.set("foobar");
                 Assert::AreEqual(6u, value->length());
             }
 
             TEST_METHOD(OperatorBoolTest)
             {
-                dhorn::nullable_value<int> value;
+                dhorn::experimental::nullable_value<int> value;
                 Assert::IsFalse(value);
 
                 value.set(42);
@@ -119,7 +119,7 @@ namespace dhorn
             {
                 {
                     object_counter obj;
-                    dhorn::nullable_value<object_counter> value;
+                    dhorn::experimental::nullable_value<object_counter> value;
                     value.set(obj);
                     Assert::AreEqual(2u, object_counter::instance_count);
                     Assert::AreEqual(1u, object_counter::copy_count);
@@ -132,7 +132,7 @@ namespace dhorn
             TEST_METHOD(MoveAssignValueTest)
             {
                 {
-                    dhorn::nullable_value<object_counter> value;
+                    dhorn::experimental::nullable_value<object_counter> value;
                     value.set(object_counter{});
                     Assert::AreEqual(1u, object_counter::instance_count);
                     Assert::AreEqual(0u, object_counter::copy_count);
@@ -144,14 +144,14 @@ namespace dhorn
 
             TEST_METHOD(GetValueTest)
             {
-                dhorn::nullable_value<int> value;
+                dhorn::experimental::nullable_value<int> value;
                 value.set(42);
                 Assert::AreEqual(42, value.get());
             }
 
             TEST_METHOD(HasValueTest)
             {
-                dhorn::nullable_value<int> value;
+                dhorn::experimental::nullable_value<int> value;
                 Assert::IsFalse(value.has_value());
 
                 value.set(42);
@@ -163,7 +163,7 @@ namespace dhorn
 
             TEST_METHOD(ResetTest)
             {
-                dhorn::nullable_value<object_counter> value;
+                dhorn::experimental::nullable_value<object_counter> value;
                 value.reset(object_counter{});
                 Assert::AreEqual(1u, object_counter::instance_count);
 
@@ -173,8 +173,8 @@ namespace dhorn
 
             TEST_METHOD(SwapTest)
             {
-                dhorn::nullable_value<int> value1;
-                dhorn::nullable_value<int> value2;
+                dhorn::experimental::nullable_value<int> value1;
+                dhorn::experimental::nullable_value<int> value2;
 
                 value1.swap(value2);
                 Assert::IsFalse(value1);

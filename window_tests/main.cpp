@@ -11,22 +11,22 @@
 #include "globals.h"
 
 // Define globals here
-dhorn::win32::window globals::window;
+dhorn::experimental::win32::window globals::window;
 worker globals::worker;
 
 int WINAPI wWinMain(
-    dhorn::win32::instance_handle instance,
-    dhorn::win32::instance_handle /*prevInstance*/,
+    dhorn::experimental::win32::instance_handle instance,
+    dhorn::experimental::win32::instance_handle /*prevInstance*/,
     wchar_t * /*cmdLine*/,
     int cmdShow)
 {
     // Initialize the window
-    dhorn::win32::window_class windowClass(L"Test Window");
+    dhorn::experimental::win32::window_class windowClass(L"Test Window");
     windowClass.use_defaults();
     windowClass.instance = instance;
 
-    dhorn::win32::window_options options(L"Test Window");
-    options.style = dhorn::win32::window_style::overlapped_window;
+    dhorn::experimental::win32::window_options options(L"Test Window");
+    options.style = dhorn::experimental::win32::window_style::overlapped_window;
     options.width = 600;
     options.height = 400;
 

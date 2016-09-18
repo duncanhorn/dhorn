@@ -58,392 +58,395 @@
 
 namespace dhorn
 {
-    /*
-     * Default is_command_line_switch implementation
-     */
-    template <typename StringTy>
-    inline constexpr bool is_command_line_switch(const StringTy &str) noexcept
-    {
-        return !str.empty() && ((str[0] == '/') || (str[0] == '-'));
-    }
-
-    template <typename StringTy>
-    struct is_command_line_switch_t
-    {
-        inline constexpr bool operator()(const StringTy &str) const noexcept
-        {
-            return is_command_line_switch(str);
-        }
-    };
-
-
-
-    /*
-     * Forward declare iterator types
-     */
-    template <typename CmdLine, typename IsSwitch>
-    class command_line_switch_iterator;
-
-    template <typename CmdLine, typename IsSwitch>
-    class command_line_iterator;
-
-
-
-    template <typename CharT, typename CharTraits = std::char_traits<CharT>, typename Alloc = std::allocator<CharT>>
-    class basic_command_line
+    namespace experimental
     {
         /*
-         * Private Types
+         * Default is_command_line_switch implementation
          */
-        using my_type = basic_command_line<CharT, CharTraits, Alloc>;
-        using string_type = std::basic_string<CharT, CharTraits, Alloc>;
-
-    public:
-        /*
-         * Public types
-         */
-        using value_type = string_type;
-        using container = std::vector<value_type>;
-        using size_type = typename container::size_type;
-        using iterator = command_line_iterator<my_type, is_command_line_switch_t<value_type>>;
-        using const_iterator = iterator;
-
-
-
-        /*
-         * Constructor(s)/Destructor
-         */
-        basic_command_line(void)
+        template <typename StringTy>
+        inline constexpr bool is_command_line_switch(const StringTy &str) noexcept
         {
+            return !str.empty() && ((str[0] == '/') || (str[0] == '-'));
         }
 
-        basic_command_line(const container &data) :
-            _data(data)
+        template <typename StringTy>
+        struct is_command_line_switch_t
         {
-        }
-
-        basic_command_line(container &&data) :
-            _data(std::move(data))
-        {
-        }
-
-        template <typename Itr>
-        basic_command_line(Itr front, Itr back) :
-            _data(front, back)
-        {
-        }
-
-        basic_command_line(const std::initializer_list<value_type> &data) :
-            _data(data)
-        {
-        }
+            inline constexpr bool operator()(const StringTy &str) const noexcept
+            {
+                return is_command_line_switch(str);
+            }
+        };
 
 
 
         /*
-         * Data
+         * Forward declare iterator types
          */
-        size_type size(void) const noexcept
+        template <typename CmdLine, typename IsSwitch>
+        class command_line_switch_iterator;
+
+        template <typename CmdLine, typename IsSwitch>
+        class command_line_iterator;
+
+
+
+        template <typename CharT, typename CharTraits = std::char_traits<CharT>, typename Alloc = std::allocator<CharT>>
+        class basic_command_line
         {
-            return this->_data.size();
-        }
+            /*
+             * Private Types
+             */
+            using my_type = basic_command_line<CharT, CharTraits, Alloc>;
+            using string_type = std::basic_string<CharT, CharTraits, Alloc>;
+
+        public:
+            /*
+             * Public types
+             */
+            using value_type = string_type;
+            using container = std::vector<value_type>;
+            using size_type = typename container::size_type;
+            using iterator = command_line_iterator<my_type, is_command_line_switch_t<value_type>>;
+            using const_iterator = iterator;
+
+
+
+            /*
+             * Constructor(s)/Destructor
+             */
+            basic_command_line(void)
+            {
+            }
+
+            basic_command_line(const container &data) :
+                _data(data)
+            {
+            }
+
+            basic_command_line(container &&data) :
+                _data(std::move(data))
+            {
+            }
+
+            template <typename Itr>
+            basic_command_line(Itr front, Itr back) :
+                _data(front, back)
+            {
+            }
+
+            basic_command_line(const std::initializer_list<value_type> &data) :
+                _data(data)
+            {
+            }
+
+
+
+            /*
+             * Data
+             */
+            size_type size(void) const noexcept
+            {
+                return this->_data.size();
+            }
+
+
+
+            /*
+             * Iterators
+             */
+            iterator begin(void) const
+            {
+                return iterator(&this->_data, 0);
+            }
+
+            template <typename CustomIsSwitch>
+            command_line_iterator<my_type, CustomIsSwitch> begin(const CustomIsSwitch &isSwitch) const
+            {
+                return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
+            }
+
+            const_iterator cbegin(void) const
+            {
+                return const_iterator(&this->_data, 0);
+            }
+
+            template <typename CustomIsSwitch>
+            command_line_iterator<my_type, CustomIsSwitch> cbegin(const CustomIsSwitch &isSwitch) const
+            {
+                return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
+            }
+
+            iterator end(void) const
+            {
+                return iterator(&this->_data, this->_data.size());
+            }
+
+            template <typename CustomIsSwitch>
+            command_line_iterator<my_type, CustomIsSwitch> end(const CustomIsSwitch &isSwitch) const
+            {
+                return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
+            }
+
+            const_iterator cend(void) const
+            {
+                return const_iterator(&this->_data, this->_data.size());
+            }
+
+            template <typename CustomIsSwitch>
+            command_line_iterator<my_type, CustomIsSwitch> cend(const CustomIsSwitch &isSwitch) const
+            {
+                return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
+            }
+
+
+
+        private:
+
+            container _data;
+        };
 
 
 
         /*
-         * Iterators
+         * Type definitions
          */
-        iterator begin(void) const
-        {
-            return iterator(&this->_data, 0);
-        }
-
-        template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> begin(const CustomIsSwitch &isSwitch) const
-        {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
-        }
-
-        const_iterator cbegin(void) const
-        {
-            return const_iterator(&this->_data, 0);
-        }
-
-        template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> cbegin(const CustomIsSwitch &isSwitch) const
-        {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, 0, isSwitch);
-        }
-
-        iterator end(void) const
-        {
-            return iterator(&this->_data, this->_data.size());
-        }
-
-        template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> end(const CustomIsSwitch &isSwitch) const
-        {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
-        }
-
-        const_iterator cend(void) const
-        {
-            return const_iterator(&this->_data, this->_data.size());
-        }
-
-        template <typename CustomIsSwitch>
-        command_line_iterator<my_type, CustomIsSwitch> cend(const CustomIsSwitch &isSwitch) const
-        {
-            return command_line_iterator<my_type, CustomIsSwitch>(&this->_data, this->_data.size(), isSwitch);
-        }
+        using command_line = basic_command_line<char>;
+        using wcommand_line = basic_command_line<wchar_t>;
 
 
 
-    private:
-
-        container _data;
-    };
-
-
-
-    /*
-     * Type definitions
-     */
-    using command_line = basic_command_line<char>;
-    using wcommand_line = basic_command_line<wchar_t>;
-
-
-
-    /*
-     * Iterator types
-     */
+        /*
+         * Iterator types
+         */
 #pragma region Iterator Types
 
-    template <typename CmdLine, typename IsSwitch>
-    class command_line_switch_iterator :
-        public std::iterator<std::forward_iterator_tag, typename const CmdLine::value_type>
-    {
-        /*
-         * Private types
-         */
-        using parent_type = command_line_iterator<CmdLine, IsSwitch>;
-        using container = typename const CmdLine::container;
-        using index_t = typename container::size_type;
-
-    public:
-        /*
-         * Constructor(s)/Destructor
-         */
-        command_line_switch_iterator(const IsSwitch &isSwitch) :
-            _parent(nullptr),
-            _isEnd(true),
-            _isSwitch(isSwitch)
+        template <typename CmdLine, typename IsSwitch>
+        class command_line_switch_iterator :
+            public std::iterator<std::forward_iterator_tag, typename const CmdLine::value_type>
         {
-        }
+            /*
+             * Private types
+             */
+            using parent_type = command_line_iterator<CmdLine, IsSwitch>;
+            using container = typename const CmdLine::container;
+            using index_t = typename container::size_type;
 
-        command_line_switch_iterator(parent_type *parent, const IsSwitch &isSwitch) :
-            _parent(parent),
-            _isEnd(false),
-            _isSwitch(isSwitch)
-        {
-            this->UpdateIsEnd();
-
-            // We also have the initial constraint that if our parent is not a switch, this is an end iterator
-            if (!this->_isEnd)
+        public:
+            /*
+             * Constructor(s)/Destructor
+             */
+            command_line_switch_iterator(const IsSwitch &isSwitch) :
+                _parent(nullptr),
+                _isEnd(true),
+                _isSwitch(isSwitch)
             {
-                this->_isEnd = !this->_isSwitch(**this->_parent);
-            }
-        }
-
-
-
-        /*
-         * Forward Iterator Functions
-         */
-        bool operator==(const command_line_switch_iterator &other) const
-        {
-            if (!this->_isEnd && !other._isEnd)
-            {
-                return (*this->_parent) == (*other._parent);
             }
 
-            // At least one is an end iterator; therefore, they evaluate equal only if both are end iterators
-            return this->_isEnd && other._isEnd;
-        }
-
-        bool operator!=(const command_line_switch_iterator &other) const
-        {
-            return !(*this == other);
-        }
-
-        value_type &operator*(void) const
-        {
-            return (*this->_parent->_container)[this->_parent->_index + 1];
-        }
-
-        value_type *operator->(void) const
-        {
-            return &(**this);
-        }
-
-        command_line_switch_iterator &operator++(void)
-        {
-            ++(*this->_parent);
-            this->UpdateIsEnd();
-            return *this;
-        }
-
-        command_line_switch_iterator operator++(int /*unused*/)
-        {
-            auto copy = *this;
-            ++(*this);
-            return copy;
-        }
-
-
-
-    private:
-
-        void UpdateIsEnd(void)
-        {
-            // The conditions for an end iterator are:
-            //      1. Our parent is at the last element in its collection
-            //      2. Our parent is one away from another switch
-            if ((this->_parent->_index == this->_parent->_container->size() - 1) || this->_isSwitch(**this))
+            command_line_switch_iterator(parent_type *parent, const IsSwitch &isSwitch) :
+                _parent(parent),
+                _isEnd(false),
+                _isSwitch(isSwitch)
             {
-                this->_isEnd = true;
+                this->UpdateIsEnd();
+
+                // We also have the initial constraint that if our parent is not a switch, this is an end iterator
+                if (!this->_isEnd)
+                {
+                    this->_isEnd = !this->_isSwitch(**this->_parent);
+                }
             }
-        }
-
-        parent_type *_parent;
-        bool _isEnd;
-        IsSwitch _isSwitch;
-    };
 
 
 
-    template <typename CmdLine, typename IsSwitch>
-    class command_line_iterator :
-        public std::iterator<std::forward_iterator_tag, typename const CmdLine::value_type>
-    {
-        /*
-         * Private types
-         */
-        using container = typename const CmdLine::container;
-        using index_t = typename container::size_type;
+            /*
+             * Forward Iterator Functions
+             */
+            bool operator==(const command_line_switch_iterator &other) const
+            {
+                if (!this->_isEnd && !other._isEnd)
+                {
+                    return (*this->_parent) == (*other._parent);
+                }
 
-    public:
-        /*
-         * Public Types
-         */
-        using iterator = command_line_switch_iterator<CmdLine, IsSwitch>;
-        using const_iterator = iterator;
+                // At least one is an end iterator; therefore, they evaluate equal only if both are end iterators
+                return this->_isEnd && other._isEnd;
+            }
+
+            bool operator!=(const command_line_switch_iterator &other) const
+            {
+                return !(*this == other);
+            }
+
+            value_type &operator*(void) const
+            {
+                return (*this->_parent->_container)[this->_parent->_index + 1];
+            }
+
+            value_type *operator->(void) const
+            {
+                return &(**this);
+            }
+
+            command_line_switch_iterator &operator++(void)
+            {
+                ++(*this->_parent);
+                this->UpdateIsEnd();
+                return *this;
+            }
+
+            command_line_switch_iterator operator++(int /*unused*/)
+            {
+                auto copy = *this;
+                ++(*this);
+                return copy;
+            }
 
 
 
-        /*
-         * Constructor(s)/Destructor
-         */
-        command_line_iterator(void) :
-            _container(nullptr),
-            _index(0)
+        private:
+
+            void UpdateIsEnd(void)
+            {
+                // The conditions for an end iterator are:
+                //      1. Our parent is at the last element in its collection
+                //      2. Our parent is one away from another switch
+                if ((this->_parent->_index == this->_parent->_container->size() - 1) || this->_isSwitch(**this))
+                {
+                    this->_isEnd = true;
+                }
+            }
+
+            parent_type *_parent;
+            bool _isEnd;
+            IsSwitch _isSwitch;
+        };
+
+
+
+        template <typename CmdLine, typename IsSwitch>
+        class command_line_iterator :
+            public std::iterator<std::forward_iterator_tag, typename const CmdLine::value_type>
         {
-        }
+            /*
+             * Private types
+             */
+            using container = typename const CmdLine::container;
+            using index_t = typename container::size_type;
 
-        command_line_iterator(const IsSwitch &isSwitch) :
-            _container(nullptr),
-            _index(0),
-            _isSwitch(isSwitch)
-        {
-        }
-
-        command_line_iterator(container *container, index_t index) :
-            _container(container),
-            _index(index)
-        {
-        }
-
-        command_line_iterator(container *container, index_t index, const IsSwitch &isSwitch) :
-            _container(container),
-            _index(index),
-            _isSwitch(isSwitch)
-        {
-        }
+        public:
+            /*
+             * Public Types
+             */
+            using iterator = command_line_switch_iterator<CmdLine, IsSwitch>;
+            using const_iterator = iterator;
 
 
 
-        /*
-         * Switch Iterators
-         */
-        iterator begin(void)
-        {
-            return iterator(this, this->_isSwitch);
-        }
+            /*
+             * Constructor(s)/Destructor
+             */
+            command_line_iterator(void) :
+                _container(nullptr),
+                _index(0)
+            {
+            }
 
-        const_iterator cbegin(void)
-        {
-            return begin();
-        }
+            command_line_iterator(const IsSwitch &isSwitch) :
+                _container(nullptr),
+                _index(0),
+                _isSwitch(isSwitch)
+            {
+            }
 
-        iterator end(void)
-        {
-            // Empty command_line_const_iterator represents an end iterator
-            return iterator(this->_isSwitch);
-        }
+            command_line_iterator(container *container, index_t index) :
+                _container(container),
+                _index(index)
+            {
+            }
 
-        const_iterator cend(void)
-        {
-            return end();
-        }
-
-
-
-        /*
-         * Forward Iterator Functions
-         */
-        bool operator==(const command_line_iterator &other) const
-        {
-            return (other._container == this->_container) && (other._index == this->_index);
-        }
-
-        bool operator!=(const command_line_iterator &other) const
-        {
-            return !(*this == other);
-        }
-
-        value_type &operator*(void) const
-        {
-            return (*this->_container)[this->_index];
-        }
-
-        value_type *operator->(void) const
-        {
-            return &(*this->_container)[this->_index];
-        }
-
-        command_line_iterator &operator++(void)
-        {
-            ++this->_index;
-            return *this;
-        }
-
-        command_line_iterator operator++(int /*unused*/)
-        {
-            auto copy = *this;
-            ++(*this);
-            return copy;
-        }
+            command_line_iterator(container *container, index_t index, const IsSwitch &isSwitch) :
+                _container(container),
+                _index(index),
+                _isSwitch(isSwitch)
+            {
+            }
 
 
 
-    private:
+            /*
+             * Switch Iterators
+             */
+            iterator begin(void)
+            {
+                return iterator(this, this->_isSwitch);
+            }
 
-        friend class command_line_switch_iterator<CmdLine, IsSwitch>;
+            const_iterator cbegin(void)
+            {
+                return begin();
+            }
 
-        container *_container;
-        index_t _index;
-        IsSwitch _isSwitch;
-    };
+            iterator end(void)
+            {
+                // Empty command_line_const_iterator represents an end iterator
+                return iterator(this->_isSwitch);
+            }
+
+            const_iterator cend(void)
+            {
+                return end();
+            }
+
+
+
+            /*
+             * Forward Iterator Functions
+             */
+            bool operator==(const command_line_iterator &other) const
+            {
+                return (other._container == this->_container) && (other._index == this->_index);
+            }
+
+            bool operator!=(const command_line_iterator &other) const
+            {
+                return !(*this == other);
+            }
+
+            value_type &operator*(void) const
+            {
+                return (*this->_container)[this->_index];
+            }
+
+            value_type *operator->(void) const
+            {
+                return &(*this->_container)[this->_index];
+            }
+
+            command_line_iterator &operator++(void)
+            {
+                ++this->_index;
+                return *this;
+            }
+
+            command_line_iterator operator++(int /*unused*/)
+            {
+                auto copy = *this;
+                ++(*this);
+                return copy;
+            }
+
+
+
+        private:
+
+            friend class command_line_switch_iterator<CmdLine, IsSwitch>;
+
+            container *_container;
+            index_t _index;
+            IsSwitch _isSwitch;
+        };
 
 #pragma endregion
+    }
 }

@@ -124,7 +124,7 @@ namespace dhorn
         {
             TEST_METHOD(BasicLockingTest)
             {
-                dhorn::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<size_t> val = 0;
                 std::vector<std::thread> threads;
 
                 static const size_t num_threads = 12;
@@ -154,7 +154,7 @@ namespace dhorn
 
             TEST_METHOD(BasicIncorrectLockingTest)
             {
-                dhorn::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<size_t> val = 0;
                 std::vector<std::thread> threads;
 
                 static const size_t num_threads = 12;
@@ -186,7 +186,7 @@ namespace dhorn
 
             TEST_METHOD(BasicMonitorTest)
             {
-                dhorn::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<size_t> val = 0;
                 std::condition_variable cond;
                 std::vector<std::thread> threads;
 
@@ -221,7 +221,7 @@ namespace dhorn
 
             TEST_METHOD(RecursiveMutexTest)
             {
-                dhorn::synchronized_object<size_t, std::recursive_mutex> val = 0;
+                dhorn::experimental::synchronized_object<size_t, std::recursive_mutex> val = 0;
                 val.execute_with_lock([&](auto &, auto &)
                 {
                     // Shouldn't deadlock
@@ -236,7 +236,7 @@ namespace dhorn
 
             TEST_METHOD(CopyLockedLockedTest)
             {
-                dhorn::synchronized_object<copy_count> val;
+                dhorn::experimental::synchronized_object<copy_count> val;
                 std::vector<std::thread> threads;
 
                 static const size_t num_threads = 12;
@@ -268,7 +268,7 @@ namespace dhorn
 
             TEST_METHOD(CopyUnlockedLockedTest)
             {
-                dhorn::synchronized_object<copy_count> val;
+                dhorn::experimental::synchronized_object<copy_count> val;
                 std::vector<std::thread> threads;
 
                 static const size_t num_threads = 12;
@@ -310,7 +310,7 @@ namespace dhorn
             TEST_METHOD(SetLockedTest)
             {
                 using array_type = dynamically_allocated_array<size_t, 1000>;
-                dhorn::synchronized_object<array_type> val;
+                dhorn::experimental::synchronized_object<array_type> val;
                 std::vector<std::thread> threads;
                 std::vector<array_type> thread_vals;
 
@@ -363,7 +363,7 @@ namespace dhorn
             TEST_METHOD(SetUnlockedTest)
             {
                 using array_type = dynamically_allocated_array<size_t, 1000>;
-                dhorn::synchronized_object<array_type> val;
+                dhorn::experimental::synchronized_object<array_type> val;
                 std::vector<std::thread> threads;
                 std::vector<array_type> thread_vals;
 
@@ -425,7 +425,7 @@ namespace dhorn
 
             TEST_METHOD(LockNormalTest)
             {
-                dhorn::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<size_t> val = 0;
                 std::vector<std::thread> threads;
 
                 static const size_t num_threads = 12;
@@ -453,7 +453,7 @@ namespace dhorn
 
             TEST_METHOD(TryToLockTest)
             {
-                dhorn::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<size_t> val = 0;
                 std::vector<std::thread> threads;
 
                 static const size_t num_threads = 12;
@@ -486,7 +486,7 @@ namespace dhorn
 
             TEST_METHOD(DeferLockTest)
             {
-                dhorn::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<size_t> val = 0;
                 std::vector<std::thread> threads;
 
                 static const size_t num_threads = 12;

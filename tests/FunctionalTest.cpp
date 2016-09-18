@@ -48,28 +48,28 @@ namespace dhorn
 
                 // Test the do_multiply function
                 std::function<int(void)> mult;
-                mult = dhorn::bind_member_function(&test_class::do_multiply, obj);
+                mult = dhorn::experimental::bind_member_function(&test_class::do_multiply, obj);
                 Assert::AreEqual(mult(), 50);
                 obj.val0 = 1;
                 Assert::AreEqual(mult(), 5);
 
-                mult = dhorn::bind_member_function(&test_class::do_multiply, obj2);
+                mult = dhorn::experimental::bind_member_function(&test_class::do_multiply, obj2);
                 Assert::AreEqual(mult(), 20);
 
-                mult = dhorn::bind_member_function(&test_class::do_multiply, pObj);
+                mult = dhorn::experimental::bind_member_function(&test_class::do_multiply, pObj);
                 Assert::AreEqual(mult(), 5);
                 obj.val1 = 50;
                 Assert::AreEqual(mult(), 50);
 
                 // Test the add function
                 std::function<int(int, int)> add;
-                add = dhorn::bind_member_function(&test_class::add, obj);
+                add = dhorn::experimental::bind_member_function(&test_class::add, obj);
                 Assert::AreEqual(add(2, 5), 7);
-                add = dhorn::bind_member_function(&test_class::add, pObj);
+                add = dhorn::experimental::bind_member_function(&test_class::add, pObj);
                 Assert::AreEqual(add(20, 30), 50);
 
                 // Test the min function (with the current add object)
-                add = dhorn::bind_member_function(&test_class::min, obj);
+                add = dhorn::experimental::bind_member_function(&test_class::min, obj);
                 Assert::AreEqual(add(10, 5), 5);
             }
         };

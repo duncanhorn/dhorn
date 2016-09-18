@@ -21,12 +21,12 @@ namespace dhorn
             TEST_METHOD(TrimEmptyStringTest)
             {
                 std::string str;
-                dhorn::trim(str);
+                dhorn::experimental::trim(str);
                 Assert::IsTrue(str.empty());
                 Assert::AreEqual(0u, str.size());
 
                 std::wstring wstr;
-                dhorn::trim(wstr);
+                dhorn::experimental::trim(wstr);
                 Assert::IsTrue(wstr.empty());
                 Assert::AreEqual(0u, wstr.size());
             }
@@ -34,12 +34,12 @@ namespace dhorn
             TEST_METHOD(TrimAllWhitespaceTest)
             {
                 std::string str("    \t\n");
-                dhorn::trim(str);
+                dhorn::experimental::trim(str);
                 Assert::IsTrue(str.empty());
                 Assert::AreEqual(0u, str.size());
 
                 std::wstring wstr(L"    \t\n");
-                dhorn::trim(wstr);
+                dhorn::experimental::trim(wstr);
                 Assert::IsTrue(wstr.empty());
                 Assert::AreEqual(0u, wstr.size());
             }
@@ -47,44 +47,44 @@ namespace dhorn
             TEST_METHOD(TrimSingleWordTest)
             {
                 std::string str("foo");
-                dhorn::trim(str);
+                dhorn::experimental::trim(str);
                 Assert::IsTrue(str == "foo");
 
                 std::wstring wstr(L"foo");
-                dhorn::trim(wstr);
+                dhorn::experimental::trim(wstr);
                 Assert::IsTrue(wstr == L"foo");
             }
 
             TEST_METHOD(TrimSentenceTest)
             {
                 std::string str("foo bar");
-                dhorn::trim(str);
+                dhorn::experimental::trim(str);
                 Assert::IsTrue(str == "foo bar");
 
                 std::wstring wstr(L"foo bar");
-                dhorn::trim(wstr);
+                dhorn::experimental::trim(wstr);
                 Assert::IsTrue(wstr == L"foo bar");
             }
 
             TEST_METHOD(TrimLeadingWhitespaceTest)
             {
                 std::string str("   \t\nfoo");
-                dhorn::trim(str);
+                dhorn::experimental::trim(str);
                 Assert::IsTrue(str == "foo");
 
                 std::wstring wstr(L"   \t\nfoo");
-                dhorn::trim(wstr);
+                dhorn::experimental::trim(wstr);
                 Assert::IsTrue(wstr == L"foo");
             }
 
             TEST_METHOD(TrimTrailingWhitespaceTest)
             {
                 std::string str("foo   \t\n");
-                dhorn::trim(str);
+                dhorn::experimental::trim(str);
                 Assert::IsTrue(str == "foo");
 
                 std::wstring wstr(L"foo   \t\n");
-                dhorn::trim(wstr);
+                dhorn::experimental::trim(wstr);
                 Assert::IsTrue(wstr == L"foo");
             }
 
@@ -93,11 +93,11 @@ namespace dhorn
                 auto values = { 'a', 'e', 'i', 'o', 'u' };
 
                 std::string str("aeioufoo baruoiea");
-                dhorn::trim(str, std::begin(values), std::end(values));
+                dhorn::experimental::trim(str, std::begin(values), std::end(values));
                 Assert::IsTrue(str == "foo bar");
 
                 std::wstring wstr(L"aeioufoo baruoiea");
-                dhorn::trim(wstr, std::begin(values), std::end(values));
+                dhorn::experimental::trim(wstr, std::begin(values), std::end(values));
                 Assert::IsTrue(wstr == L"foo bar");
             }
 
@@ -110,12 +110,12 @@ namespace dhorn
             TEST_METHOD(SplitEmptyStringTest)
             {
                 std::string str;
-                auto values = dhorn::split(str, ',');
+                auto values = dhorn::experimental::split(str, ',');
                 Assert::AreEqual(1u, values.size());
                 Assert::IsTrue(values[0].empty());
 
                 std::wstring wstr;
-                auto wvalues = dhorn::split(wstr, L',');
+                auto wvalues = dhorn::experimental::split(wstr, L',');
                 Assert::AreEqual(1u, wvalues.size());
                 Assert::IsTrue(wvalues[0].empty());
             }
@@ -123,23 +123,23 @@ namespace dhorn
             TEST_METHOD(SplitEmptyValuesTest)
             {
                 std::string str(",,,");
-                auto values = dhorn::split(str, ',');
+                auto values = dhorn::experimental::split(str, ',');
                 Assert::AreEqual(4u, values.size());
 
                 std::wstring wstr(L",,,");
-                auto wvalues = dhorn::split(wstr, L',');
+                auto wvalues = dhorn::experimental::split(wstr, L',');
                 Assert::AreEqual(4u, wvalues.size());
             }
 
             TEST_METHOD(NoSplitTest)
             {
                 std::string str("foo");
-                auto values = dhorn::split(str, ',');
+                auto values = dhorn::experimental::split(str, ',');
                 Assert::AreEqual(1u, values.size());
                 Assert::IsTrue(values[0] == "foo");
 
                 std::wstring wstr(L"foo");
-                auto wvalues = dhorn::split(wstr, L',');
+                auto wvalues = dhorn::experimental::split(wstr, L',');
                 Assert::AreEqual(1u, wvalues.size());
                 Assert::IsTrue(wvalues[0] == L"foo");
             }
@@ -147,7 +147,7 @@ namespace dhorn
             TEST_METHOD(MultiValueSplitTest)
             {
                 std::string str("foo,bar,,foo bar,");
-                auto values = dhorn::split(str, ',');
+                auto values = dhorn::experimental::split(str, ',');
                 Assert::AreEqual(5u, values.size());
                 Assert::IsTrue(values[0] == "foo");
                 Assert::IsTrue(values[1] == "bar");
@@ -156,7 +156,7 @@ namespace dhorn
                 Assert::IsTrue(values[4] == "");
 
                 std::wstring wstr(L"foo,bar,,foo bar,");
-                auto wvalues = dhorn::split(wstr, L',');
+                auto wvalues = dhorn::experimental::split(wstr, L',');
                 Assert::AreEqual(5u, wvalues.size());
                 Assert::IsTrue(wvalues[0] == L"foo");
                 Assert::IsTrue(wvalues[1] == L"bar");
@@ -170,7 +170,7 @@ namespace dhorn
                 auto splits = { ',', ';', '\'', ':' };
 
                 std::string str("foo,bar;'foo bar:");
-                auto values = dhorn::split(str, std::begin(splits), std::end(splits));
+                auto values = dhorn::experimental::split(str, std::begin(splits), std::end(splits));
                 Assert::AreEqual(5u, values.size());
                 Assert::IsTrue(values[0] == "foo");
                 Assert::IsTrue(values[1] == "bar");
@@ -179,7 +179,7 @@ namespace dhorn
                 Assert::IsTrue(values[4] == "");
 
                 std::wstring wstr(L"foo,bar;'foo bar:");
-                auto wvalues = dhorn::split(wstr, std::begin(splits), std::end(splits));
+                auto wvalues = dhorn::experimental::split(wstr, std::begin(splits), std::end(splits));
                 Assert::AreEqual(5u, wvalues.size());
                 Assert::IsTrue(wvalues[0] == L"foo");
                 Assert::IsTrue(wvalues[1] == L"bar");

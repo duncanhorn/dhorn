@@ -61,7 +61,7 @@ namespace dhorn
 
             TEST_METHOD(LazyInitSharedPtrGetInstanceTest)
             {
-                dhorn::lazy_init_instance_t<test_class> obj;
+                dhorn::experimental::lazy_init_instance_t<test_class> obj;
 
                 // Lazy init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
@@ -79,7 +79,7 @@ namespace dhorn
 
             TEST_METHOD(LazyInitRawPointerGetInstanceTest)
             {
-                dhorn::lazy_init_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::lazy_init_instance_t<test_class, test_class *> obj;
 
                 // Lazy init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
@@ -97,7 +97,7 @@ namespace dhorn
 
             TEST_METHOD(EagerInitSharedPtrGetInstanceTest)
             {
-                dhorn::eager_init_instance_t<test_class> obj;
+                dhorn::experimental::eager_init_instance_t<test_class> obj;
 
                 // Eager init creates the object right away
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -115,7 +115,7 @@ namespace dhorn
 
             TEST_METHOD(EagerInitRawPtrGetInstanceTest)
             {
-                dhorn::eager_init_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::eager_init_instance_t<test_class, test_class *> obj;
 
                 // Eager init creates the object right away
                 Assert::AreEqual(1u, test_class::instance_count.load());
@@ -133,7 +133,7 @@ namespace dhorn
 
             TEST_METHOD(AtomicExchangeSharedPtrGetInstanceTest)
             {
-                dhorn::atomic_exchange_instance_t<test_class> obj;
+                dhorn::experimental::atomic_exchange_instance_t<test_class> obj;
 
                 // Atomic exchange init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
@@ -151,7 +151,7 @@ namespace dhorn
 
             TEST_METHOD(AtomicExchangeRawPtrGetInstanceTest)
             {
-                dhorn::atomic_exchange_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::atomic_exchange_instance_t<test_class, test_class *> obj;
 
                 // Atomic exchange init shouldn't create until we access it
                 Assert::AreEqual(0u, test_class::instance_count.load());
@@ -176,7 +176,7 @@ namespace dhorn
                 {
                     std::shared_ptr<test_class> ptr;
                     {
-                        dhorn::lazy_init_instance_t<test_class> obj;
+                        dhorn::experimental::lazy_init_instance_t<test_class> obj;
                         ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
@@ -194,7 +194,7 @@ namespace dhorn
                 {
                     test_class *ptr;
                     {
-                        dhorn::lazy_init_instance_t<test_class, test_class *> obj;
+                        dhorn::experimental::lazy_init_instance_t<test_class, test_class *> obj;
                         ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
@@ -213,7 +213,7 @@ namespace dhorn
                 {
                     std::shared_ptr<test_class> ptr;
                     {
-                        dhorn::eager_init_instance_t<test_class> obj;
+                        dhorn::experimental::eager_init_instance_t<test_class> obj;
                         ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
@@ -231,7 +231,7 @@ namespace dhorn
                 {
                     test_class *ptr;
                     {
-                        dhorn::eager_init_instance_t<test_class, test_class *> obj;
+                        dhorn::experimental::eager_init_instance_t<test_class, test_class *> obj;
                         ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
@@ -250,7 +250,7 @@ namespace dhorn
                 {
                     std::shared_ptr<test_class> ptr;
                     {
-                        dhorn::atomic_exchange_instance_t<test_class> obj;
+                        dhorn::experimental::atomic_exchange_instance_t<test_class> obj;
                         ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
@@ -268,7 +268,7 @@ namespace dhorn
                 {
                     test_class *ptr;
                     {
-                        dhorn::atomic_exchange_instance_t<test_class, test_class *> obj;
+                        dhorn::experimental::atomic_exchange_instance_t<test_class, test_class *> obj;
                         ptr = obj.get();
                         Assert::AreEqual(1u, test_class::instance_count.load());
                     }
@@ -288,7 +288,7 @@ namespace dhorn
 
             TEST_METHOD(LazyInitSharedPtrOperatorArrowTest)
             {
-                dhorn::lazy_init_instance_t<test_class> obj;
+                dhorn::experimental::lazy_init_instance_t<test_class> obj;
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
@@ -298,7 +298,7 @@ namespace dhorn
 
             TEST_METHOD(LazyInitRawPtrOperatorArrowTest)
             {
-                dhorn::lazy_init_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::lazy_init_instance_t<test_class, test_class *> obj;
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
@@ -308,7 +308,7 @@ namespace dhorn
 
             TEST_METHOD(LazyInitSharedPtrOperatorStarTest)
             {
-                dhorn::lazy_init_instance_t<test_class> obj;
+                dhorn::experimental::lazy_init_instance_t<test_class> obj;
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
@@ -318,7 +318,7 @@ namespace dhorn
 
             TEST_METHOD(LazyInitRawPtrOperatorStarTest)
             {
-                dhorn::lazy_init_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::lazy_init_instance_t<test_class, test_class *> obj;
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
@@ -328,7 +328,7 @@ namespace dhorn
 
             TEST_METHOD(EagerInitSharedPtrOperatorArrowTest)
             {
-                dhorn::eager_init_instance_t<test_class> obj;
+                dhorn::experimental::eager_init_instance_t<test_class> obj;
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
@@ -338,7 +338,7 @@ namespace dhorn
 
             TEST_METHOD(EagerInitRawPtrOperatorArrowTest)
             {
-                dhorn::eager_init_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::eager_init_instance_t<test_class, test_class *> obj;
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
@@ -348,7 +348,7 @@ namespace dhorn
 
             TEST_METHOD(EagerInitSharedPtrOperatorStarTest)
             {
-                dhorn::eager_init_instance_t<test_class> obj;
+                dhorn::experimental::eager_init_instance_t<test_class> obj;
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
@@ -358,7 +358,7 @@ namespace dhorn
 
             TEST_METHOD(EagerInitRawPtrOperatorStarTest)
             {
-                dhorn::eager_init_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::eager_init_instance_t<test_class, test_class *> obj;
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
@@ -368,7 +368,7 @@ namespace dhorn
 
             TEST_METHOD(AtomicExchangeSharedPtrOperatorArrowTest)
             {
-                dhorn::atomic_exchange_instance_t<test_class> obj;
+                dhorn::experimental::atomic_exchange_instance_t<test_class> obj;
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
@@ -378,7 +378,7 @@ namespace dhorn
 
             TEST_METHOD(AtomicExchangeRawPtrOperatorArrowTest)
             {
-                dhorn::atomic_exchange_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::atomic_exchange_instance_t<test_class, test_class *> obj;
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
@@ -388,7 +388,7 @@ namespace dhorn
 
             TEST_METHOD(AtomicExchangeSharedPtrOperatorStarTest)
             {
-                dhorn::atomic_exchange_instance_t<test_class> obj;
+                dhorn::experimental::atomic_exchange_instance_t<test_class> obj;
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
@@ -398,7 +398,7 @@ namespace dhorn
 
             TEST_METHOD(AtomicExchangeRawPtrOperatorStarTest)
             {
-                dhorn::atomic_exchange_instance_t<test_class, test_class *> obj;
+                dhorn::experimental::atomic_exchange_instance_t<test_class, test_class *> obj;
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
@@ -422,7 +422,7 @@ namespace dhorn
                     test_class::created_count = 0;
                     test_class::destroyed_count = 0;
 
-                    dhorn::lazy_init_instance_t<test_class> obj;
+                    dhorn::experimental::lazy_init_instance_t<test_class> obj;
                     std::vector<std::thread> threads;
                     std::condition_variable sync;
                     std::mutex mutex;
@@ -471,7 +471,7 @@ namespace dhorn
                     test_class::created_count = 0;
                     test_class::destroyed_count = 0;
 
-                    dhorn::eager_init_instance_t<test_class> obj;
+                    dhorn::experimental::eager_init_instance_t<test_class> obj;
                     std::vector<std::thread> threads;
                     std::condition_variable sync;
                     std::mutex mutex;
@@ -522,7 +522,7 @@ namespace dhorn
                     test_class::created_count = 0;
                     test_class::destroyed_count = 0;
 
-                    dhorn::atomic_exchange_instance_t<test_class> obj;
+                    dhorn::experimental::atomic_exchange_instance_t<test_class> obj;
                     std::vector<std::thread> threads;
                     std::condition_variable sync;
                     std::mutex mutex;

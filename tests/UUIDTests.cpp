@@ -3,7 +3,7 @@
  *
  * UUIDTests.cpp
  *
- * Tests for dhorn::uuid structure
+ * Tests for dhorn::experimental::uuid structure
  */
 #include "stdafx.h"
 
@@ -24,7 +24,7 @@ namespace dhorn
         {
             TEST_METHOD(DefaultConstructorTest)
             {
-                dhorn::uuid id;
+                dhorn::experimental::uuid id;
 
                 // Make sure all fields are zero
                 for (size_t i = 0; i < 16; i++)
@@ -42,10 +42,10 @@ namespace dhorn
                 // Cannot construct with non-16-size uint8_t array
                 uint8_t invalid_array[] = { 1, 2, 3, 4 };
                 (void)invalid_array;
-                Assert::IsFalse(std::is_constructible<dhorn::uuid, decltype(invalid_array)>::value);
+                Assert::IsFalse(std::is_constructible<dhorn::experimental::uuid, decltype(invalid_array)>::value);
 
                 // Should be able to contruct with uint8_t[16]
-                dhorn::uuid id(byte_array);
+                dhorn::experimental::uuid id(byte_array);
 
                 for (size_t i = 0; i < 16; i++)
                 {
@@ -67,10 +67,10 @@ namespace dhorn
                 // Cannot construct with non-16-size uint8_t array
                 uint32_t invalid_array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
                 (void)invalid_array;
-                Assert::IsFalse(std::is_constructible<dhorn::uuid, decltype(invalid_array)>::value);
+                Assert::IsFalse(std::is_constructible<dhorn::experimental::uuid, decltype(invalid_array)>::value);
 
                 // Should be able to contruct with uint8_t[16]
-                dhorn::uuid id(int_array);
+                dhorn::experimental::uuid id(int_array);
 
                 for (size_t i = 0; i < 4; i++)
                 {
@@ -89,7 +89,7 @@ namespace dhorn
             TEST_METHOD(GuidConstructorAssignmentTest)
             {
                 // Assuming little endian, so the non-8-bit integers' bytes are reversed
-                dhorn::uuid id = { 0x33221100, 0x5544, 0x7766,
+                dhorn::experimental::uuid id = { 0x33221100, 0x5544, 0x7766,
                     { 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF } };
 
                 for (size_t i = 0; i < 16; i++)
@@ -113,8 +113,8 @@ namespace dhorn
 
             TEST_METHOD(CopyConstructorTest)
             {
-                dhorn::uuid id(byte_array);
-                dhorn::uuid id2 = id;
+                dhorn::experimental::uuid id(byte_array);
+                dhorn::experimental::uuid id2 = id;
 
                 for (size_t i = 0; i < 16; i++)
                 {
@@ -124,9 +124,9 @@ namespace dhorn
 
             TEST_METHOD(ComparisonTest)
             {
-                dhorn::uuid x = { 0xa160dd94, 0x3c9d, 0x49cf,
+                dhorn::experimental::uuid x = { 0xa160dd94, 0x3c9d, 0x49cf,
                     { 0xaf, 0x65, 0xf7, 0xa6, 0x59, 0x23, 0x25, 0xfd } };
-                dhorn::uuid y = { 0xd51675dc, 0xdebc, 0x49bc,
+                dhorn::experimental::uuid y = { 0xd51675dc, 0xdebc, 0x49bc,
                     { 0x91, 0xa9, 0xf4, 0xa2, 0x85, 0x95, 0x7e, 0x6e } };
 
                 Assert::IsTrue(x == x);
@@ -145,19 +145,19 @@ namespace dhorn
 
             TEST_METHOD(HashTest)
             {
-                dhorn::uuid x = { 0xa160dd94, 0x3c9d, 0x49cf,
+                dhorn::experimental::uuid x = { 0xa160dd94, 0x3c9d, 0x49cf,
                 { 0xaf, 0x65, 0xf7, 0xa6, 0x59, 0x23, 0x25, 0xfd } };
-                dhorn::uuid y = { 0xd51675dc, 0xdebc, 0x49bc,
+                dhorn::experimental::uuid y = { 0xd51675dc, 0xdebc, 0x49bc,
                 { 0x91, 0xa9, 0xf4, 0xa2, 0x85, 0x95, 0x7e, 0x6e } };
 
-                std::hash<uuid> hasher;
+                std::hash<dhorn::experimental::uuid> hasher;
                 Assert::IsTrue(hasher(x) != hasher(y));
             }
 
 #ifdef _DEBUG
             TEST_METHOD(DestructorTest)
             {
-                dhorn::uuid id;
+                dhorn::experimental::uuid id;
 
                 // Should be zero-initialized. Once we run the destructor, it should be filled with
                 // the patern 0xCC...

@@ -29,8 +29,8 @@ namespace dhorn
                 // Test with unique_handle
                 {
                     // Write some data
-                    dhorn::unique_handle x;
-                    x = dhorn::win32::create_file(L"foo.txt", GENERIC_READ | GENERIC_WRITE, 0,
+                    dhorn::experimental::unique_handle x;
+                    x = dhorn::experimental::win32::create_file(L"foo.txt", GENERIC_READ | GENERIC_WRITE, 0,
                         nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL);
 
                     char message[] = "Hello, world!";
@@ -38,7 +38,7 @@ namespace dhorn
                     x.reset();
 
                     // Now read what we wrote
-                    x = dhorn::win32::create_file(L"foo.txt", GENERIC_READ | GENERIC_WRITE, 0,
+                    x = dhorn::experimental::win32::create_file(L"foo.txt", GENERIC_READ | GENERIC_WRITE, 0,
                         nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL);
 
                     char result[sizeof(message)]; result[sizeof(message) - 1] = '\0';
@@ -50,14 +50,14 @@ namespace dhorn
                 try
                 {
                     {
-                        dhorn::unique_handle h =
-                            dhorn::win32::create_file(L"this\\is\\bogus.txt", GENERIC_READ, 0,
+                        dhorn::experimental::unique_handle h =
+                            dhorn::experimental::win32::create_file(L"this\\is\\bogus.txt", GENERIC_READ, 0,
                             nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL);
                         (void)h;
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (win32_exception &e)
+                catch (dhorn::experimental::win32_exception &e)
                 {
                     Assert::IsTrue(e.get_status() == ERROR_PATH_NOT_FOUND);
                 }
@@ -75,12 +75,12 @@ namespace dhorn
             {
                 // Should be larger than what we provide
                 RECT input{ 0, 0, 100, 100 };
-                RECT output = dhorn::win32::adjust_window_rect(input, WS_OVERLAPPEDWINDOW, false);
+                RECT output = dhorn::experimental::win32::adjust_window_rect(input, WS_OVERLAPPEDWINDOW, false);
                 Assert::IsTrue((output.right - output.left > 100));
                 Assert::IsTrue((output.bottom - output.top) > 100);
 
                 // Test the Ex version
-                output = dhorn::win32::adjust_window_rect(input, WS_OVERLAPPED, false, WS_EX_OVERLAPPEDWINDOW);
+                output = dhorn::experimental::win32::adjust_window_rect(input, WS_OVERLAPPED, false, WS_EX_OVERLAPPEDWINDOW);
                 Assert::IsTrue((output.right - output.left > 100));
                 Assert::IsTrue((output.bottom - output.top) > 100);
             }
@@ -91,10 +91,10 @@ namespace dhorn
                 // high probability
                 try
                 {
-                    dhorn::win32::allow_set_foreground_window(87322456);
+                    dhorn::experimental::win32::allow_set_foreground_window(87322456);
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (win32_exception &)
+                catch (dhorn::experimental::win32_exception &)
                 {
                 }
             }

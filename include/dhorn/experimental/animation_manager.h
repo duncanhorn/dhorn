@@ -55,314 +55,317 @@
 
 namespace dhorn
 {
-    // Forward declarations
-    class animation_manager;
-
-
-
-    /*
-     * Types
-     */
-    using animation_cookie = size_t;
-    static const animation_cookie invalid_animation_cookie = 0;
-
-
-
-    /*
-     * animation_handle
-     */
-    class animation_handle final
+    namespace experimental
     {
-        friend class animation_manager;
-
-        using DestroyCallback = std::function<void(animation_cookie)>;
-
-    public:
-        /*
-         * Constructor(s)/Destructor
-         */
-        animation_handle(animation_cookie cookie, DestroyCallback callback) :
-            _cookie(cookie),
-            _callback(std::move(callback))
-        {
-        }
-
-        ~animation_handle(void)
-        {
-            this->_callback(this->_cookie);
-        }
-
-        // Cannot copy (otherwise we screw up the reference count)
-        animation_handle(const animation_handle &) = delete;
-        animation_handle &operator=(const animation_handle &) = delete;
+        // Forward declarations
+        class animation_manager;
 
 
 
         /*
-         * Public Functions
+         * Types
          */
-        animation_cookie id(void) const
-        {
-            return this->_cookie;
-        }
-
-
-
-    private:
-
-        void NotifyAnimationManagerDestroyed()
-        {
-            // There is nothing to notify when we are destroyed anymore, so just nop
-            this->_callback = [](animation_cookie) {};
-        }
-
-        animation_cookie _cookie;
-        DestroyCallback _callback;
-    };
-
-
-
-    /*
-     * animation_manager
-     */
-    class animation_manager final
-    {
-        /*
-         * Private types
-         */
-        using clock = std::chrono::high_resolution_clock;
-        using time_point = clock::time_point;
+        using animation_cookie = size_t;
+        static const animation_cookie invalid_animation_cookie = 0;
 
 
 
         /*
-         * Internal animation_info state object
+         * animation_handle
          */
-        struct animation_info
+        class animation_handle final
         {
-            std::shared_ptr<animation> instance;
-            std::function<void(void)> notify_destroyed;
-            animation_state state;
-            time_point prev_time;
-            bool has_references;
+            friend class animation_manager;
 
-            // Constructor
-            animation_info(std::shared_ptr<animation> animation, std::function<void(void)> notifyDestroyed) :
-                instance(std::move(animation)),
-                notify_destroyed(std::move(notifyDestroyed)),
-                state(animation_state::running),
-                prev_time(clock::now()),
-                has_references(true)
+            using DestroyCallback = std::function<void(animation_cookie)>;
+
+        public:
+            /*
+             * Constructor(s)/Destructor
+             */
+            animation_handle(animation_cookie cookie, DestroyCallback callback) :
+                _cookie(cookie),
+                _callback(std::move(callback))
             {
-                instance->on_state_change(animation_state::running);
             }
 
-            void update_state(animation_state newState)
+            ~animation_handle(void)
             {
-                if (newState != this->state)
-                {
-                    this->state = newState;
-                    instance->on_state_change(this->state);
-                }
+                this->_callback(this->_cookie);
             }
+
+            // Cannot copy (otherwise we screw up the reference count)
+            animation_handle(const animation_handle &) = delete;
+            animation_handle &operator=(const animation_handle &) = delete;
+
+
+
+            /*
+             * Public Functions
+             */
+            animation_cookie id(void) const
+            {
+                return this->_cookie;
+            }
+
+
+
+        private:
+
+            void NotifyAnimationManagerDestroyed()
+            {
+                // There is nothing to notify when we are destroyed anymore, so just nop
+                this->_callback = [](animation_cookie) {};
+            }
+
+            animation_cookie _cookie;
+            DestroyCallback _callback;
         };
-        using AnimationMap = std::map<animation_cookie, animation_info>;
-
-
-
-    public:
-        /*
-         * Public types
-         */
-        using duration = clock::duration;
 
 
 
         /*
-         * Constructor(s)/Destructor
+         * animation_manager
          */
-        animation_manager(void) :
-            _nextCookie(1)
+        class animation_manager final
         {
-        }
+            /*
+             * Private types
+             */
+            using clock = std::chrono::high_resolution_clock;
+            using time_point = clock::time_point;
 
-        ~animation_manager(void)
-        {
-            for (auto &pair : this->_animationInfo)
+
+
+            /*
+             * Internal animation_info state object
+             */
+            struct animation_info
             {
-                pair.second.notify_destroyed();
-            }
-        }
+                std::shared_ptr<animation> instance;
+                std::function<void(void)> notify_destroyed;
+                animation_state state;
+                time_point prev_time;
+                bool has_references;
 
-
-
-        /*
-         * Client functions
-         */
-        void update(void)
-        {
-            auto now = clock::now();
-
-            for (auto itr = std::begin(this->_animationInfo); itr != std::end(this->_animationInfo); )
-            {
-                // Force info to fall out of scope before calling TryRemove to help prevent logic errors
+                // Constructor
+                animation_info(std::shared_ptr<animation> animation, std::function<void(void)> notifyDestroyed) :
+                    instance(std::move(animation)),
+                    notify_destroyed(std::move(notifyDestroyed)),
+                    state(animation_state::running),
+                    prev_time(clock::now()),
+                    has_references(true)
                 {
-                    auto &info = itr->second;
-                    if (details::is_running(info.state))
-                    {
-                        auto elapsedTime = now - info.prev_time;
-                        info.prev_time = now;
-
-                        info.update_state(info.instance->on_update(elapsedTime));
-                    }
-
-                    // We are expected to transfer any canceled animation to the completed state prior to destroying
-                    if (info.state == animation_state::canceled)
-                    {
-                        info.update_state(animation_state::completed);
-                    }
+                    instance->on_state_change(animation_state::running);
                 }
 
-                // NOTE: TryRemove must be last call since the iterator (and its data) may become invalid
-                auto prev = itr;
-                ++itr;
-                TryRemove(prev);
-            }
-        }
+                void update_state(animation_state newState)
+                {
+                    if (newState != this->state)
+                    {
+                        this->state = newState;
+                        instance->on_state_change(this->state);
+                    }
+                }
+            };
+            using AnimationMap = std::map<animation_cookie, animation_info>;
 
-        std::shared_ptr<animation_handle> submit(animation *instance)
-        {
-            return this->submit(std::shared_ptr<animation>(instance));
-        }
 
-        std::shared_ptr<animation_handle> submit(std::shared_ptr<animation> instance)
-        {
-            auto cookie = this->NextCookie();
-            auto result = std::make_shared<animation_handle>(
-                cookie,
-                bind_member_function(&animation_manager::AnimationHandleDestroyedCallback, this));
 
-            auto pair = this->_animationInfo.emplace(
-                std::piecewise_construct,
-                std::forward_as_tuple(cookie),
-                std::forward_as_tuple(
-                    std::move(instance),
-                    std::bind(&animation_handle::NotifyAnimationManagerDestroyed, result.get())));
-            assert(pair.second);
+        public:
+            /*
+             * Public types
+             */
+            using duration = clock::duration;
 
-            return result;
-        }
 
-        bool pause(const animation_handle *handle)
-        {
-            auto itr = this->FindInfo(handle->id());
-            auto &info = itr->second;
-            if (!details::is_running(info.state))
+
+            /*
+             * Constructor(s)/Destructor
+             */
+            animation_manager(void) :
+                _nextCookie(1)
             {
-                // Cannot be paused if not running
-                return false;
             }
 
-            info.update_state(animation_state::paused);
-            return true;
-        }
-
-        bool resume(const animation_handle *handle)
-        {
-            auto itr = this->FindInfo(handle->id());
-            auto &info = itr->second;
-            if (!details::is_paused(info.state))
+            ~animation_manager(void)
             {
-                // Can't resume if not paused
-                return false;
+                for (auto &pair : this->_animationInfo)
+                {
+                    pair.second.notify_destroyed();
+                }
             }
 
-            info.update_state(animation_state::running);
-            return true;
-        }
 
-        bool cancel(const animation_handle *handle)
-        {
-            auto itr = this->FindInfo(handle->id());
-            auto &info = itr->second;
-            if (details::is_complete(info.state))
+
+            /*
+             * Client functions
+             */
+            void update(void)
             {
-                // Can't cancel if already complete
-                return false;
+                auto now = clock::now();
+
+                for (auto itr = std::begin(this->_animationInfo); itr != std::end(this->_animationInfo); )
+                {
+                    // Force info to fall out of scope before calling TryRemove to help prevent logic errors
+                    {
+                        auto &info = itr->second;
+                        if (details::is_running(info.state))
+                        {
+                            auto elapsedTime = now - info.prev_time;
+                            info.prev_time = now;
+
+                            info.update_state(info.instance->on_update(elapsedTime));
+                        }
+
+                        // We are expected to transfer any canceled animation to the completed state prior to destroying
+                        if (info.state == animation_state::canceled)
+                        {
+                            info.update_state(animation_state::completed);
+                        }
+                    }
+
+                    // NOTE: TryRemove must be last call since the iterator (and its data) may become invalid
+                    auto prev = itr;
+                    ++itr;
+                    TryRemove(prev);
+                }
             }
 
-            info.update_state(animation_state::canceled);
-            return true;
-        }
-
-        animation_state query_state(const animation_handle *handle) const
-        {
-            return this->FindInfo(handle->id())->second.state;
-        }
-
-
-
-    private:
-
-        animation_cookie NextCookie(void)
-        {
-            while ((this->_nextCookie == invalid_animation_cookie) ||
-                   (this->_animationInfo.find(this->_nextCookie) != std::end(this->_animationInfo)))
+            std::shared_ptr<animation_handle> submit(animation *instance)
             {
-                ++this->_nextCookie;
+                return this->submit(std::shared_ptr<animation>(instance));
             }
 
-            return this->_nextCookie;
-        }
-
-        AnimationMap::iterator FindInfo(animation_cookie cookie)
-        {
-            auto itr = this->_animationInfo.find(cookie);
-            if (itr == std::end(this->_animationInfo))
+            std::shared_ptr<animation_handle> submit(std::shared_ptr<animation> instance)
             {
-                throw std::out_of_range("animation not found");
+                auto cookie = this->NextCookie();
+                auto result = std::make_shared<animation_handle>(
+                    cookie,
+                    bind_member_function(&animation_manager::AnimationHandleDestroyedCallback, this));
+
+                auto pair = this->_animationInfo.emplace(
+                    std::piecewise_construct,
+                    std::forward_as_tuple(cookie),
+                    std::forward_as_tuple(
+                        std::move(instance),
+                        std::bind(&animation_handle::NotifyAnimationManagerDestroyed, result.get())));
+                assert(pair.second);
+
+                return result;
             }
 
-            return itr;
-        }
-
-        AnimationMap::const_iterator FindInfo(animation_cookie cookie) const
-        {
-            auto itr = this->_animationInfo.find(cookie);
-            if (itr == std::end(this->_animationInfo))
+            bool pause(const animation_handle *handle)
             {
-                throw std::out_of_range("animation not found");
-            }
+                auto itr = this->FindInfo(handle->id());
+                auto &info = itr->second;
+                if (!details::is_running(info.state))
+                {
+                    // Cannot be paused if not running
+                    return false;
+                }
 
-            return itr;
-        }
-
-        void AnimationHandleDestroyedCallback(animation_cookie cookie)
-        {
-            // We don't call TryRemove here since it could be possible that the last reference to the animation_handle
-            // was released off of the UI thread (which is not desired, but is a lot harder for clients to control). If
-            // this is the case, and we do call TryRemove while the main update loop is running, things could get into
-            // a pretty bad state very easily... Therefore, just let the update loop do the remove
-            auto itr = this->FindInfo(cookie);
-            auto &info = itr->second;
-            info.notify_destroyed = []() {};
-            info.has_references = false;
-        }
-
-        bool TryRemove(const AnimationMap::iterator &pos)
-        {
-            auto &info = pos->second;
-            if (!info.has_references && details::is_complete(info.state))
-            {
-                this->_animationInfo.erase(pos);
+                info.update_state(animation_state::paused);
                 return true;
             }
 
-            return false;
-        }
+            bool resume(const animation_handle *handle)
+            {
+                auto itr = this->FindInfo(handle->id());
+                auto &info = itr->second;
+                if (!details::is_paused(info.state))
+                {
+                    // Can't resume if not paused
+                    return false;
+                }
 
-        // Animation state
-        AnimationMap _animationInfo;
-        animation_cookie _nextCookie;
-    };
+                info.update_state(animation_state::running);
+                return true;
+            }
+
+            bool cancel(const animation_handle *handle)
+            {
+                auto itr = this->FindInfo(handle->id());
+                auto &info = itr->second;
+                if (details::is_complete(info.state))
+                {
+                    // Can't cancel if already complete
+                    return false;
+                }
+
+                info.update_state(animation_state::canceled);
+                return true;
+            }
+
+            animation_state query_state(const animation_handle *handle) const
+            {
+                return this->FindInfo(handle->id())->second.state;
+            }
+
+
+
+        private:
+
+            animation_cookie NextCookie(void)
+            {
+                while ((this->_nextCookie == invalid_animation_cookie) ||
+                    (this->_animationInfo.find(this->_nextCookie) != std::end(this->_animationInfo)))
+                {
+                    ++this->_nextCookie;
+                }
+
+                return this->_nextCookie;
+            }
+
+            AnimationMap::iterator FindInfo(animation_cookie cookie)
+            {
+                auto itr = this->_animationInfo.find(cookie);
+                if (itr == std::end(this->_animationInfo))
+                {
+                    throw std::out_of_range("animation not found");
+                }
+
+                return itr;
+            }
+
+            AnimationMap::const_iterator FindInfo(animation_cookie cookie) const
+            {
+                auto itr = this->_animationInfo.find(cookie);
+                if (itr == std::end(this->_animationInfo))
+                {
+                    throw std::out_of_range("animation not found");
+                }
+
+                return itr;
+            }
+
+            void AnimationHandleDestroyedCallback(animation_cookie cookie)
+            {
+                // We don't call TryRemove here since it could be possible that the last reference to the animation_handle
+                // was released off of the UI thread (which is not desired, but is a lot harder for clients to control). If
+                // this is the case, and we do call TryRemove while the main update loop is running, things could get into
+                // a pretty bad state very easily... Therefore, just let the update loop do the remove
+                auto itr = this->FindInfo(cookie);
+                auto &info = itr->second;
+                info.notify_destroyed = []() {};
+                info.has_references = false;
+            }
+
+            bool TryRemove(const AnimationMap::iterator &pos)
+            {
+                auto &info = pos->second;
+                if (!info.has_references && details::is_complete(info.state))
+                {
+                    this->_animationInfo.erase(pos);
+                    return true;
+                }
+
+                return false;
+            }
+
+            // Animation state
+            AnimationMap _animationInfo;
+            animation_cookie _nextCookie;
+        };
+    }
 }

@@ -27,14 +27,14 @@ namespace dhorn
                 typename = typename std::enable_if<!std::is_same<Ty, double>::value>::type>
             void DoTest(const StringType &str, Ty expected)
             {
-                auto val = numeric_cast<Ty>(str);
+                auto val = dhorn::experimental::numeric_cast<Ty>(str);
                 Assert::AreEqual(expected, val);
             }
 
             template <typename, typename StringType>
             void DoTest(const StringType &str, double expected)
             {
-                auto val = numeric_cast<double>(str);
+                auto val = dhorn::experimental::numeric_cast<double>(str);
                 Assert::AreEqual(expected, val, tolerance);
             }
 
@@ -43,7 +43,7 @@ namespace dhorn
             {
                 try
                 {
-                    numeric_cast<Ty>(str);
+                    dhorn::experimental::numeric_cast<Ty>(str);
                     Assert::Fail(L"Expected an exception");
                 }
                 catch (std::invalid_argument &)
@@ -357,19 +357,19 @@ namespace dhorn
 
             TEST_METHOD(Utf8UtfStringTest)
             {
-                utf8_string str = u8"123.456e1";
+                dhorn::experimental::utf8_string str = u8"123.456e1";
                 DoTest<double>(str, 1234.56);
             }
 
             TEST_METHOD(Utf16UtfStringTest)
             {
-                utf16_string str = u"123.456e1";
+                dhorn::experimental::utf16_string str = u"123.456e1";
                 DoTest<double>(str, 1234.56);
             }
 
             TEST_METHOD(Utf32UtfStringTest)
             {
-                utf32_string str = U"123.456e1";
+                dhorn::experimental::utf32_string str = U"123.456e1";
                 DoTest<double>(str, 1234.56);
             }
 

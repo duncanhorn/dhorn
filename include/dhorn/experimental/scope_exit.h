@@ -14,53 +14,56 @@
 
 namespace dhorn
 {
-    /*
-     * scope_exit
-     */
-    template <typename FuncTy>
-    class scope_exit
+    namespace experimental
     {
-    public:
-        scope_exit(FuncTy func) :
-            _func(std::move(func))
+        /*
+         * scope_exit
+         */
+        template <typename FuncTy>
+        class scope_exit
         {
-        }
-
-        ~scope_exit(void) noexcept(noexcept(this->_func()))
-        {
-            if (!this->_cancelled)
+        public:
+            scope_exit(FuncTy func) :
+                _func(std::move(func))
             {
-                this->_func();
             }
-        }
 
-        // Can't copy, but can move
-        scope_exit(const scope_exit &) = delete;
-        scope_exit &operator=(const scope_exit &) = delete;
+            ~scope_exit(void) noexcept(noexcept(this->_func()))
+            {
+                if (!this->_cancelled)
+                {
+                    this->_func();
+                }
+            }
 
-        scope_exit(scope_exit &&other) :
-            _func(std::move(other._func))
+            // Can't copy, but can move
+            scope_exit(const scope_exit &) = delete;
+            scope_exit &operator=(const scope_exit &) = delete;
+
+            scope_exit(scope_exit &&other) :
+                _func(std::move(other._func))
+            {
+                this->_cancelled = other._cancelled;
+                other._cancelled = true;
+            }
+
+
+
+            void cancel(void)
+            {
+                this->_cancelled = true;
+            }
+
+        private:
+
+            FuncTy _func;
+            bool _cancelled = false;
+        };
+
+        template <typename FuncTy>
+        inline scope_exit<std::decay_t<FuncTy>> make_scope_exit(FuncTy&& func)
         {
-            this->_cancelled = other._cancelled;
-            other._cancelled = true;
+            return scope_exit<std::decay_t<FuncTy>>(std::forward<FuncTy>(func));
         }
-
-
-
-        void cancel(void)
-        {
-            this->_cancelled = true;
-        }
-
-    private:
-
-        FuncTy _func;
-        bool _cancelled = false;
-    };
-
-    template <typename FuncTy>
-    inline scope_exit<std::decay_t<FuncTy>> make_scope_exit(FuncTy&& func)
-    {
-        return scope_exit<std::decay_t<FuncTy>>(std::forward<FuncTy>(func));
     }
 }

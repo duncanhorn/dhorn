@@ -49,23 +49,23 @@ private:
     void synchronize_update(void);
     void update_size(void);
 
-    dhorn::win32::callback_handler::result_type on_paint(
-        dhorn::win32::window *pWindow,
+    dhorn::experimental::win32::callback_handler::result_type on_paint(
+        dhorn::experimental::win32::window *pWindow,
         uintptr_t wparam,
         intptr_t lparam);
 
-    dhorn::win32::callback_handler::result_type on_resize(
-        dhorn::win32::window *pWindow,
+    dhorn::experimental::win32::callback_handler::result_type on_resize(
+        dhorn::experimental::win32::window *pWindow,
         uintptr_t wparam,
         intptr_t lparam);
 
-    dhorn::win32::callback_handler::result_type on_erase_background(
-        dhorn::win32::window *pWindow,
+    dhorn::experimental::win32::callback_handler::result_type on_erase_background(
+        dhorn::experimental::win32::window *pWindow,
         uintptr_t wparam,
         intptr_t lparam);
 
-    dhorn::win32::callback_handler::result_type on_scrollwheel(
-        dhorn::win32::window *pWindow,
+    dhorn::experimental::win32::callback_handler::result_type on_scrollwheel(
+        dhorn::experimental::win32::window *pWindow,
         uintptr_t wparam,
         intptr_t lparam);
 

@@ -19,9 +19,9 @@ namespace dhorn
         {
             TEST_METHOD(EqualityTest)
             {
-                dhorn::meters v1(100);
-                dhorn::meters v2(150);
-                dhorn::meters v3(100);
+                dhorn::experimental::meters v1(100);
+                dhorn::experimental::meters v2(150);
+                dhorn::experimental::meters v3(100);
 
                 Assert::IsFalse(v1 == v2);
                 Assert::IsFalse(v2 == v1);
@@ -38,9 +38,9 @@ namespace dhorn
 
             TEST_METHOD(InequalityTest)
             {
-                dhorn::meters v1(100);
-                dhorn::meters v2(150);
-                dhorn::meters v3(100);
+                dhorn::experimental::meters v1(100);
+                dhorn::experimental::meters v2(150);
+                dhorn::experimental::meters v3(100);
 
                 Assert::IsTrue(v1 != v2);
                 Assert::IsTrue(v2 != v1);
@@ -57,7 +57,7 @@ namespace dhorn
 
             TEST_METHOD(PositiveTest)
             {
-                dhorn::meters val(1);
+                dhorn::experimental::meters val(1);
                 Assert::IsTrue((+val).value() == 1);
 
                 val = -2;
@@ -69,7 +69,7 @@ namespace dhorn
 
             TEST_METHOD(NegateTest)
             {
-                dhorn::meters val(1);
+                dhorn::experimental::meters val(1);
                 Assert::IsTrue((-val).value() == -1);
 
                 val = -2;
@@ -81,7 +81,7 @@ namespace dhorn
 
             TEST_METHOD(IncrementTest)
             {
-                dhorn::meters val(0);
+                dhorn::experimental::meters val(0);
 
                 Assert::IsTrue((++val).value() == 1);
                 Assert::IsTrue(val.value() == 1);
@@ -92,7 +92,7 @@ namespace dhorn
 
             TEST_METHOD(DecrementTest)
             {
-                dhorn::meters val(0);
+                dhorn::experimental::meters val(0);
 
                 Assert::IsTrue((--val).value() == -1);
                 Assert::IsTrue(val.value() == -1);
@@ -103,7 +103,7 @@ namespace dhorn
 
             TEST_METHOD(MultiplyTest)
             {
-                dhorn::meters val(10);
+                dhorn::experimental::meters val(10);
                 Assert::IsTrue((val * 10).value() == 100);
 
                 val *= 3;
@@ -118,7 +118,7 @@ namespace dhorn
 
             TEST_METHOD(DivideTest)
             {
-                dhorn::meters val(100);
+                dhorn::experimental::meters val(100);
                 Assert::IsTrue((val / 2).value() == 50);
 
                 val /= 20;
@@ -133,7 +133,7 @@ namespace dhorn
 
             TEST_METHOD(ModulousTest)
             {
-                dhorn::meters val(10);
+                dhorn::experimental::meters val(10);
                 Assert::IsTrue((val % 3).value() == 1);
 
                 val %= 6;
@@ -148,8 +148,8 @@ namespace dhorn
 
             TEST_METHOD(AdditionTest)
             {
-                dhorn::meters v1(100);
-                dhorn::meters v2(250);
+                dhorn::experimental::meters v1(100);
+                dhorn::experimental::meters v2(250);
 
                 Assert::IsTrue((v1 + 50).value() == 150);
                 Assert::IsTrue((150 + v2).value() == 400);
@@ -158,8 +158,8 @@ namespace dhorn
 
             TEST_METHOD(SubtractionTest)
             {
-                dhorn::meters v1(100);
-                dhorn::meters v2(250);
+                dhorn::experimental::meters v1(100);
+                dhorn::experimental::meters v2(250);
 
                 Assert::IsTrue((v1 - 50).value() == 50);
                 Assert::IsTrue((150 - v2).value() == -100);
@@ -168,39 +168,39 @@ namespace dhorn
 
             TEST_METHOD(UnitCastTest)
             {
-                dhorn::kilometers km(1);
+                dhorn::experimental::kilometers km(1);
 
                 // Same type should give same value
-                auto other = dhorn::unit_cast<dhorn::kilometers>(km);
+                auto other = dhorn::experimental::unit_cast<dhorn::experimental::kilometers>(km);
                 Assert::IsTrue(other.value() == 1);
 
                 // One kilometer is 1000 meters
-                auto m = dhorn::unit_cast<dhorn::meters>(km);
+                auto m = dhorn::experimental::unit_cast<dhorn::experimental::meters>(km);
                 Assert::IsTrue(m.value() == 1000);
 
                 // 2500 meters is 2.5 (rounds down to 2) kilometers
-                m = dhorn::meters(2500);
-                km = dhorn::unit_cast<dhorn::kilometers>(m);
+                m = dhorn::experimental::meters(2500);
+                km = dhorn::experimental::unit_cast<dhorn::experimental::kilometers>(m);
                 Assert::IsTrue(km.value() == 2);
             }
 
             TEST_METHOD(ConstructConvertTest)
             {
-                dhorn::kilometers km(1);
+                dhorn::experimental::kilometers km(1);
 
-                dhorn::meters m(km);
+                dhorn::experimental::meters m(km);
                 Assert::IsTrue(m.value() == 1000);
 
                 m = 2000;
-                dhorn::kilometers km2(m);
+                dhorn::experimental::kilometers km2(m);
                 Assert::IsTrue(km2.value() == 2);
             }
 
             TEST_METHOD(AssignConvertTest)
             {
-                dhorn::kilometers km(1);
+                dhorn::experimental::kilometers km(1);
 
-                dhorn::meters m(1);
+                dhorn::experimental::meters m(1);
                 Assert::IsTrue(m.value() == 1); // Prevent optimizations
                 m = km;
                 Assert::IsTrue(m.value() == 1000);

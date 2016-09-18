@@ -3,7 +3,7 @@
  *
  * TaskPoolTests.cpp
  *
- * Tests for dhorn::task_pool
+ * Tests for dhorn::experimental::task_pool
  */
 #include "stdafx.h"
 
@@ -25,7 +25,7 @@ namespace dhorn
             template <size_t TestCount, size_t ThreadPoolSize>
             void DoSimpleTest()
             {
-                dhorn::task_pool taskPool(ThreadPoolSize);
+                dhorn::experimental::task_pool taskPool(ThreadPoolSize);
                 std::atomic_size_t x{};
 
                 for (size_t i = 0; i < TestCount; ++i)
@@ -53,8 +53,8 @@ namespace dhorn
             template <size_t TestCount, size_t ThreadPoolSize, size_t TestPoolSize>
             void DoFutureTest()
             {
-                dhorn::task_pool taskPool(ThreadPoolSize);
-                dhorn::task_pool testPool(TestPoolSize);
+                dhorn::experimental::task_pool taskPool(ThreadPoolSize);
+                dhorn::experimental::task_pool testPool(TestPoolSize);
                 std::atomic_size_t x{};
 
                 size_t first_pass = static_cast<size_t>(std::sqrt(TestCount));
@@ -106,8 +106,8 @@ namespace dhorn
             {
                 const size_t test_pool_size = 50; // To test against deadlock
 
-                dhorn::task_pool testPool(test_pool_size);
-                dhorn::task_pool taskPool(4);
+                dhorn::experimental::task_pool testPool(test_pool_size);
+                dhorn::experimental::task_pool taskPool(4);
 
                 // Repeat test 20 times to be safe
                 for (size_t i = 0; i < 20; ++i)

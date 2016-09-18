@@ -13,61 +13,64 @@
 
 namespace dhorn
 {
-    /*
-     * discrete_animation
-     */
-    template <typename Ty>
-    class discrete_animation final :
-        public details::key_frame_animation<Ty>
+    namespace experimental
     {
-        using MyBase = details::key_frame_animation<Ty>;
-
-    public:
         /*
-         * Constructor(s)/Destructor
+         * discrete_animation
          */
-        discrete_animation(void) :
-            _prev(this->next())
+        template <typename Ty>
+        class discrete_animation final :
+            public details::key_frame_animation<Ty>
         {
-        }
+            using MyBase = details::key_frame_animation<Ty>;
 
-        discrete_animation(update_function func) :
-            MyBase(std::move(func)),
-            _prev(this->next())
-        {
-        }
-
-
-
-        /*
-         * Overloaded animation functions
-         */
-        virtual animation_state on_update(duration elapsedTime)
-        {
-            auto state = MyBase::on_update(elapsedTime);
-
-            // Ignore any updates until the animation has started
-            if (this->begun())
+        public:
+            /*
+             * Constructor(s)/Destructor
+             */
+            discrete_animation(void) :
+                _prev(this->next())
             {
-                // Only update if our next iterator changes
-                auto next = this->next();
-                --next;
-
-                if (next != this->_prev)
-                {
-                    this->_prev = next;
-                    this->update(next->second);
-                }
             }
 
-            return state;
-        }
+            discrete_animation(update_function func) :
+                MyBase(std::move(func)),
+                _prev(this->next())
+            {
+            }
 
 
 
-    private:
+            /*
+             * Overloaded animation functions
+             */
+            virtual animation_state on_update(duration elapsedTime)
+            {
+                auto state = MyBase::on_update(elapsedTime);
 
-        // NOTE: _prev will be an end iterator up until the animation begins
-        iterator_type _prev;
-    };
+                // Ignore any updates until the animation has started
+                if (this->begun())
+                {
+                    // Only update if our next iterator changes
+                    auto next = this->next();
+                    --next;
+
+                    if (next != this->_prev)
+                    {
+                        this->_prev = next;
+                        this->update(next->second);
+                    }
+                }
+
+                return state;
+            }
+
+
+
+        private:
+
+            // NOTE: _prev will be an end iterator up until the animation begins
+            iterator_type _prev;
+        };
+    }
 }

@@ -20,14 +20,17 @@ namespace dhorn
         int val = 8;
     };
 
-    template <>
-    struct service_type_traits<test_type_1>
+    namespace experimental
     {
-        inline static const dhorn::uuid id(void)
+        template <>
+        struct service_type_traits<test_type_1>
         {
-            return { 0x7c026cbf, 0x3df9, 0x4a70, { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
-        }
-    };
+            inline static const dhorn::experimental::uuid id(void)
+            {
+                return{ 0x7c026cbf, 0x3df9, 0x4a70, { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
+            }
+        };
+    }
 
     struct fake_test_type_1
     {
@@ -35,14 +38,17 @@ namespace dhorn
         int val = -1;
     };
 
-    template <>
-    struct service_type_traits<fake_test_type_1>
+    namespace experimental
     {
-        inline static const dhorn::uuid id(void)
+        template <>
+        struct service_type_traits<fake_test_type_1>
         {
-            return { 0x7c026cbf, 0x3df9, 0x4a70, { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
-        }
-    };
+            inline static const dhorn::experimental::uuid id(void)
+            {
+                return{ 0x7c026cbf, 0x3df9, 0x4a70, { 0xae, 0x26, 0xef, 0x30, 0x11, 0xf1, 0xfe, 0xe2 } };
+            }
+        };
+    }
 
 
 
@@ -53,14 +59,17 @@ namespace dhorn
         int val = 42;
     };
 
-    template <>
-    struct service_type_traits<test_type_2>
+    namespace experimental
     {
-        inline static const dhorn::uuid id(void)
+        template <>
+        struct service_type_traits<test_type_2>
         {
-            return { 0xa8582c22, 0xf943, 0x426d, { 0x93, 0x21, 0x76, 0xd, 0x78, 0xc0, 0x4, 0x2 } };
-        }
-    };
+            inline static const dhorn::experimental::uuid id(void)
+            {
+                return{ 0xa8582c22, 0xf943, 0x426d, { 0x93, 0x21, 0x76, 0xd, 0x78, 0xc0, 0x4, 0x2 } };
+            }
+        };
+    }
 
 
 
@@ -70,20 +79,20 @@ namespace dhorn
         {
             TEST_METHOD(DefaultConstructorTest)
             {
-                dhorn::service_container x;
+                dhorn::experimental::service_container x;
                 Assert::IsTrue(x.size() == 0);
                 Assert::IsTrue(x.empty());
             }
 
             TEST_METHOD(MoveConstructorTest)
             {
-                dhorn::service_container x;
+                dhorn::experimental::service_container x;
 
                 x.insert(new test_type_1());
                 x.insert(new test_type_2());
                 Assert::IsTrue(x.size() == 2);
 
-                dhorn::service_container y(std::move(x));
+                dhorn::experimental::service_container y(std::move(x));
                 Assert::IsTrue(y.size() == 2);
 
                 // Pointers should still be there
@@ -96,16 +105,16 @@ namespace dhorn
                     y.find<fake_test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &)
+                catch (dhorn::experimental::service_not_published &)
                 {
                 }
             }
 
             TEST_METHOD(MoveAssignmentTest)
             {
-                dhorn::service_container y;
+                dhorn::experimental::service_container y;
                 {
-                    dhorn::service_container x;
+                    dhorn::experimental::service_container x;
 
                     x.insert(new test_type_1());
                     x.insert(new test_type_2());
@@ -126,14 +135,14 @@ namespace dhorn
                     y.find<fake_test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &)
+                catch (dhorn::experimental::service_not_published &)
                 {
                 }
             }
 
             TEST_METHOD(PointerInsertTest)
             {
-                dhorn::service_container x;
+                dhorn::experimental::service_container x;
                 Assert::IsTrue(x.size() == 0);
 
                 x.insert(new test_type_1());
@@ -148,9 +157,8 @@ namespace dhorn
                     x.insert(new test_type_1());
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_published &e)
+                catch (dhorn::experimental::service_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::test_type_1"));
                 }
                 Assert::IsTrue(x.size() == 2);
 
@@ -159,9 +167,8 @@ namespace dhorn
                     x.insert(new test_type_2());
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_published &e)
+                catch (dhorn::experimental::service_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::test_type_2"));
                 }
                 Assert::IsTrue(x.size() == 2);
 
@@ -171,16 +178,15 @@ namespace dhorn
                     x.insert(new fake_test_type_1());
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_published &e)
+                catch (dhorn::experimental::service_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::fake_test_type_1"));
                 }
                 Assert::IsTrue(x.size() == 2);
             }
 
             TEST_METHOD(EmplaceTest)
             {
-                dhorn::service_container x;
+                dhorn::experimental::service_container x;
                 Assert::IsTrue(x.size() == 0);
 
                 x.emplace<test_type_1>();
@@ -195,9 +201,8 @@ namespace dhorn
                     x.emplace<test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_published &e)
+                catch (dhorn::experimental::service_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::test_type_1"));
                 }
                 Assert::IsTrue(x.size() == 2);
 
@@ -206,9 +211,8 @@ namespace dhorn
                     x.emplace<test_type_2>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_published &e)
+                catch (dhorn::experimental::service_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::test_type_2"));
                 }
                 Assert::IsTrue(x.size() == 2);
 
@@ -218,16 +222,15 @@ namespace dhorn
                     x.emplace<fake_test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_published &e)
+                catch (dhorn::experimental::service_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::fake_test_type_1"));
                 }
                 Assert::IsTrue(x.size() == 2);
             }
 
             TEST_METHOD(AllocateTest)
             {
-                dhorn::service_container x;
+                dhorn::experimental::service_container x;
                 Assert::IsTrue(x.size() == 0);
                 Assert::IsTrue(x.empty());
 
@@ -241,15 +244,14 @@ namespace dhorn
                 {
                     x.allocate<test_type_1>(std::allocator<test_type_1>());
                 }
-                catch (dhorn::service_published &e)
+                catch (dhorn::experimental::service_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_published : struct dhorn::test_type_1"));
                 }
             }
 
             TEST_METHOD(FindTest)
             {
-                dhorn::service_container x;
+                dhorn::experimental::service_container x;
 
                 // Should throw exception
                 try
@@ -257,9 +259,8 @@ namespace dhorn
                     x.find<test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &e)
+                catch (dhorn::experimental::service_not_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_not_published : struct dhorn::test_type_1"));
                 }
 
                 // No exception after inserting
@@ -273,9 +274,8 @@ namespace dhorn
                     x.find<test_type_2>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &e)
+                catch (dhorn::experimental::service_not_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_not_published : struct dhorn::test_type_2"));
                 }
 
                 // No exception after inserting
@@ -293,14 +293,14 @@ namespace dhorn
                     x.find<fake_test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &)
+                catch (dhorn::experimental::service_not_published &)
                 {
                 }
             }
 
             TEST_METHOD(RemoveTest)
             {
-                dhorn::service_container x;
+                dhorn::experimental::service_container x;
                 x.insert(new test_type_1());
                 x.insert(new test_type_2());
                 Assert::IsTrue(x.size() == 2);
@@ -311,7 +311,7 @@ namespace dhorn
                     x.remove<fake_test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &)
+                catch (dhorn::experimental::service_not_published &)
                 {
                 }
                 Assert::IsTrue(x.size() == 2);
@@ -327,9 +327,8 @@ namespace dhorn
                     x.find<test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &e)
+                catch (dhorn::experimental::service_not_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_not_published : struct dhorn::test_type_1"));
                 }
 
                 // Should be able to add test_type_1 again
@@ -348,9 +347,8 @@ namespace dhorn
                     x.remove<test_type_1>();
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::service_not_published &e)
+                catch (dhorn::experimental::service_not_published &)
                 {
-                    Assert::IsTrue(e.what() == std::string("service_not_published : struct dhorn::test_type_1"));
                 }
 
                 // Removing test_type_2 should give valid pointer that gets the destructor run
@@ -374,7 +372,7 @@ namespace dhorn
                 _CrtMemCheckpoint(&start);
 
                 {
-                    dhorn::service_container x;
+                    dhorn::experimental::service_container x;
                     auto ptr1 = x.insert(new test_type_1());
                     auto ptr2 = x.insert(new test_type_2());
 
@@ -384,7 +382,7 @@ namespace dhorn
                         auto ptr = x.insert(new test_type_1());
                         Assert::Fail(L"Expected an exception");
                     }
-                    catch (dhorn::service_published &)
+                    catch (dhorn::experimental::service_published &)
                     {
                     }
 
@@ -393,7 +391,7 @@ namespace dhorn
                         auto ptr = x.emplace<test_type_2>();
                         Assert::Fail(L"Expected an exception");
                     }
-                    catch (dhorn::service_published &)
+                    catch (dhorn::experimental::service_published &)
                     {
                     }
 
@@ -402,7 +400,7 @@ namespace dhorn
                         auto ptr = x.allocate<test_type_1>(std::allocator<test_type_1>());
                         Assert::Fail(L"Expected an exception");
                     }
-                    catch (dhorn::service_published &)
+                    catch (dhorn::experimental::service_published &)
                     {
                     }
 
@@ -413,7 +411,7 @@ namespace dhorn
                     Assert::IsTrue(x.remove<test_type_1>() == ptr1);
 
                     // Moving shouldn't have any effect on memory
-                    dhorn::service_container y(std::move(x));
+                    dhorn::experimental::service_container y(std::move(x));
                     y.emplace<test_type_1>();
                     Assert::IsTrue(y.find<test_type_1>() != ptr1);
 

@@ -3,7 +3,7 @@
  *
  * HStringTests.cpp
  *
- * Tests for the hstring.h functions
+ * Tests for the dhorn::experimental::hstring.h functions
  */
 #include "stdafx.h"
 
@@ -23,7 +23,7 @@ namespace dhorn
         TEST_CLASS(HStringReferenceTests)
         {
             template <typename StringT>
-            void AssertEquals(const hstring_reference &lhs, StringT&& rhs)
+            void AssertEquals(const dhorn::experimental::hstring_reference &lhs, StringT&& rhs)
             {
                 int result;
                 Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
@@ -38,7 +38,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoConstructorTest(Ty&& value, const wchar_t (&expected)[Size])
             {
-                hstring_reference str(std::forward<Ty>(value));
+                dhorn::experimental::hstring_reference str(std::forward<Ty>(value));
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
@@ -46,7 +46,7 @@ namespace dhorn
 
             TEST_METHOD(DefaultConstructorTest)
             {
-                hstring_reference str;
+                dhorn::experimental::hstring_reference str;
                 Assert::IsFalse(static_cast<bool>(str));
                 Assert::IsTrue(str.get() == nullptr);
             }
@@ -79,7 +79,7 @@ namespace dhorn
             {
                 static const wchar_t *cstr = L"foo\0bar";
 
-                hstring_reference str(cstr, 7);
+                dhorn::experimental::hstring_reference str(cstr, 7);
                 Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
 
                 int result;
@@ -92,8 +92,8 @@ namespace dhorn
 
             TEST_METHOD(CopyConstructorTest)
             {
-                hstring_reference str1(L"foo\0bar");
-                hstring_reference str2(str1);
+                dhorn::experimental::hstring_reference str1(L"foo\0bar");
+                dhorn::experimental::hstring_reference str2(str1);
 
                 Assert::IsTrue(str2.get() != nullptr);
 
@@ -109,7 +109,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoAssignmentOperatorTest(Ty&& value, const wchar_t (&expected)[Size])
             {
-                hstring_reference str(L"initvalue");
+                dhorn::experimental::hstring_reference str(L"initvalue");
                 str = std::forward<Ty>(value);
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
@@ -142,13 +142,13 @@ namespace dhorn
 
             TEST_METHOD(CopyAssignmentOperatorTest)
             {
-                hstring_reference str1(L"foo\0bar");
+                dhorn::experimental::hstring_reference str1(L"foo\0bar");
                 DoAssignmentOperatorTest(str1, L"foo\0bar");
 
-                hstring_reference str;
+                dhorn::experimental::hstring_reference str;
                 const wchar_t strArray[] = L"foo\0bar";
                 {
-                    hstring_reference exitingStr = strArray;
+                    dhorn::experimental::hstring_reference exitingStr = strArray;
                     str = exitingStr;
                 }
 
@@ -163,7 +163,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoAssignTest(Ty&& value, const wchar_t(&expected)[Size])
             {
-                hstring_reference str(L"initvalue");
+                dhorn::experimental::hstring_reference str(L"initvalue");
                 str.assign(std::forward<Ty>(value));
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
@@ -196,7 +196,7 @@ namespace dhorn
 
             TEST_METHOD(CopyAssignTest)
             {
-                hstring_reference str1(L"foo\0bar");
+                dhorn::experimental::hstring_reference str1(L"foo\0bar");
                 DoAssignTest(str1, L"foo\0bar");
             }
 
@@ -206,7 +206,7 @@ namespace dhorn
 
             TEST_METHOD(OperatorBoolTest)
             {
-                hstring_reference str;
+                dhorn::experimental::hstring_reference str;
                 Assert::IsFalse(str);
 
                 str = L"";
@@ -221,13 +221,13 @@ namespace dhorn
 
             TEST_METHOD(CStrTest)
             {
-                hstring_reference str = L"foo";
+                dhorn::experimental::hstring_reference str = L"foo";
                 Assert::AreEqual(0, wcscmp(str.c_str(), L"foo"));
             }
 
             TEST_METHOD(ClearTest)
             {
-                hstring_reference str = L"foo";
+                dhorn::experimental::hstring_reference str = L"foo";
                 str.clear();
                 Assert::IsFalse(str);
                 Assert::IsTrue(str.get() == nullptr);
@@ -235,7 +235,7 @@ namespace dhorn
 
             TEST_METHOD(CopyToTest)
             {
-                hstring_reference str = L"foo\0bar";
+                dhorn::experimental::hstring_reference str = L"foo\0bar";
                 HString hstr;
                 str.copy_to(hstr.GetAddressOf());
 
@@ -246,13 +246,13 @@ namespace dhorn
 
             TEST_METHOD(DataTest)
             {
-                hstring_reference str = L"foo";
+                dhorn::experimental::hstring_reference str = L"foo";
                 Assert::AreEqual(0, wcscmp(str.data(), L"foo"));
             }
 
             TEST_METHOD(EmptyTest)
             {
-                hstring_reference str;
+                dhorn::experimental::hstring_reference str;
                 Assert::IsTrue(str.empty());
 
                 str = L"foo";
@@ -267,7 +267,7 @@ namespace dhorn
 
             TEST_METHOD(LengthAndSizeTest)
             {
-                hstring_reference str;
+                dhorn::experimental::hstring_reference str;
                 Assert::AreEqual(0u, str.length());
                 Assert::AreEqual(0u, str.size());
 
@@ -286,7 +286,7 @@ namespace dhorn
 
             TEST_METHOD(ResetTest)
             {
-                hstring_reference str = L"foo";
+                dhorn::experimental::hstring_reference str = L"foo";
                 str.reset();
                 Assert::IsFalse(str);
                 Assert::IsTrue(str.get() == nullptr);
@@ -294,8 +294,8 @@ namespace dhorn
 
             TEST_METHOD(SwapTest)
             {
-                hstring_reference foo = L"foo";
-                hstring_reference bar = L"bar";
+                dhorn::experimental::hstring_reference foo = L"foo";
+                dhorn::experimental::hstring_reference bar = L"bar";
 
                 foo.swap(bar);
                 AssertEquals(foo, L"bar");
@@ -308,7 +308,7 @@ namespace dhorn
         TEST_CLASS(HStringTests)
         {
             template <typename StringT>
-            void AssertEquals(const hstring &lhs, StringT&& rhs)
+            void AssertEquals(const dhorn::experimental::hstring &lhs, StringT&& rhs)
             {
                 int result;
                 Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
@@ -323,7 +323,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoConstructorTest(Ty&& value, const wchar_t(&expected)[Size])
             {
-                hstring str(std::forward<Ty>(value));
+                dhorn::experimental::hstring str(std::forward<Ty>(value));
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
@@ -331,7 +331,7 @@ namespace dhorn
 
             TEST_METHOD(DefaultConstructorTest)
             {
-                hstring str;
+                dhorn::experimental::hstring str;
                 Assert::IsFalse(static_cast<bool>(str));
                 Assert::IsTrue(str.get() == nullptr);
             }
@@ -374,7 +374,7 @@ namespace dhorn
             {
                 static const wchar_t *cstr = L"foo\0bar";
 
-                hstring str(cstr, 7);
+                dhorn::experimental::hstring str(cstr, 7);
                 Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
 
                 int result;
@@ -389,7 +389,7 @@ namespace dhorn
             {
                 std::wstring wstr(L"foo\0bar", 7);
 
-                hstring str(std::begin(wstr), std::end(wstr));
+                dhorn::experimental::hstring str(std::begin(wstr), std::end(wstr));
                 Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
 
                 int result;
@@ -402,8 +402,8 @@ namespace dhorn
 
             TEST_METHOD(CopyConstructorTest)
             {
-                hstring str1(L"foo\0bar");
-                hstring str2(str1);
+                dhorn::experimental::hstring str1(L"foo\0bar");
+                dhorn::experimental::hstring str2(str1);
 
                 Assert::IsTrue(str2.get() != nullptr);
 
@@ -414,10 +414,10 @@ namespace dhorn
 
             TEST_METHOD(MoveConstructorTest)
             {
-                hstring str1(L"foo\0bar");
+                dhorn::experimental::hstring str1(L"foo\0bar");
                 auto hstr = str1.get();
 
-                hstring str2(std::move(str1));
+                dhorn::experimental::hstring str2(std::move(str1));
                 Assert::IsTrue(hstr == str2.get());
                 Assert::IsTrue(str1.get() == nullptr);
             }
@@ -429,7 +429,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoAssignmentOperatorTest(Ty&& value, const wchar_t(&expected)[Size])
             {
-                hstring str(L"initvalue");
+                dhorn::experimental::hstring str(L"initvalue");
                 str = std::forward<Ty>(value);
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
@@ -472,12 +472,12 @@ namespace dhorn
 
             TEST_METHOD(CopyAssignmentOperatorTest)
             {
-                hstring str1(L"foo\0bar");
+                dhorn::experimental::hstring str1(L"foo\0bar");
                 DoAssignmentOperatorTest(str1, L"foo\0bar");
 
-                hstring str;
+                dhorn::experimental::hstring str;
                 {
-                    hstring exitingStr = L"foo\0bar";
+                    dhorn::experimental::hstring exitingStr = L"foo\0bar";
                     str = exitingStr;
                 }
 
@@ -486,17 +486,17 @@ namespace dhorn
 
             TEST_METHOD(MoveAssignmentOperatorTest)
             {
-                hstring str1(L"foo\0bar");
+                dhorn::experimental::hstring str1(L"foo\0bar");
                 auto hstr = str1.get();
 
-                hstring str2(L"initvalue");
+                dhorn::experimental::hstring str2(L"initvalue");
                 str2 = std::move(str1);
 
                 Assert::IsTrue(hstr == str2.get());
 
-                hstring str;
+                dhorn::experimental::hstring str;
                 {
-                    hstring exitingStr = L"foo\0bar";
+                    dhorn::experimental::hstring exitingStr = L"foo\0bar";
                     str = std::move(exitingStr);
                 }
 
@@ -510,7 +510,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoAssignTest(Ty&& value, const wchar_t(&expected)[Size])
             {
-                hstring str(L"initvalue");
+                dhorn::experimental::hstring str(L"initvalue");
                 str.assign(std::forward<Ty>(value));
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
@@ -553,16 +553,16 @@ namespace dhorn
 
             TEST_METHOD(CopyAssignTest)
             {
-                hstring str1(L"foo\0bar");
+                dhorn::experimental::hstring str1(L"foo\0bar");
                 DoAssignTest(str1, L"foo\0bar");
             }
 
             TEST_METHOD(MoveAssignTest)
             {
-                hstring str1(L"foo\0bar");
+                dhorn::experimental::hstring str1(L"foo\0bar");
                 auto hstr = str1.get();
 
-                hstring str2(L"initvalue");
+                dhorn::experimental::hstring str2(L"initvalue");
                 str2.assign(std::move(str1));
 
                 Assert::IsTrue(hstr == str2.get());
@@ -575,7 +575,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoAppendOperatorTest(Ty&& value, const wchar_t(&expected)[Size])
             {
-                hstring str(L"foo");
+                dhorn::experimental::hstring str(L"foo");
                 str += std::forward<Ty>(value);
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
@@ -618,13 +618,13 @@ namespace dhorn
 
             TEST_METHOD(WrlppHStringAppendOperatorTest)
             {
-                hstring str(L"bar\0car");
+                dhorn::experimental::hstring str(L"bar\0car");
                 DoAppendOperatorTest(str, L"foobar\0car");
             }
 
             TEST_METHOD(SelfAppendOperatorTest)
             {
-                hstring str(L"foo");
+                dhorn::experimental::hstring str(L"foo");
                 str += str;
                 AssertEquals(str, L"foofoo");
             }
@@ -636,7 +636,7 @@ namespace dhorn
             template <typename Ty, size_t Size>
             void DoAppendTest(Ty&& value, const wchar_t(&expected)[Size])
             {
-                hstring str(L"foo");
+                dhorn::experimental::hstring str(L"foo");
                 str.append(std::forward<Ty>(value));
 
                 Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
@@ -681,7 +681,7 @@ namespace dhorn
             {
                 static const wchar_t *cstr = L"bar\0car";
 
-                hstring str(L"foo");
+                dhorn::experimental::hstring str(L"foo");
                 str.append(cstr, 7);
 
                 Assert::AreEqual(10u, ::WindowsGetStringLen(str.get()));
@@ -690,13 +690,13 @@ namespace dhorn
 
             TEST_METHOD(WrlppHStringAppendTest)
             {
-                hstring str(L"bar\0car");
+                dhorn::experimental::hstring str(L"bar\0car");
                 DoAppendTest(str, L"foobar\0car");
             }
 
             TEST_METHOD(SelfAppendTest)
             {
-                hstring str(L"foo");
+                dhorn::experimental::hstring str(L"foo");
                 str.append(str);
                 AssertEquals(str, L"foofoo");
             }
@@ -707,7 +707,7 @@ namespace dhorn
 
             TEST_METHOD(AddressOfOperatorTest)
             {
-                hstring str(L"foo");
+                dhorn::experimental::hstring str(L"foo");
                 auto ptr = &str;
 
                 Assert::IsTrue(std::is_same<decltype(ptr), HSTRING *>::value);
@@ -716,7 +716,7 @@ namespace dhorn
 
             TEST_METHOD(OperatorBoolTest)
             {
-                hstring str;
+                dhorn::experimental::hstring str;
                 Assert::IsFalse(str);
 
                 str = L"";
@@ -738,20 +738,20 @@ namespace dhorn
                 HSTRING hstr;
                 Assert::IsTrue(SUCCEEDED(::WindowsCreateString(L"foo", 3, &hstr)));
 
-                hstring str;
+                dhorn::experimental::hstring str;
                 str.attach(hstr);
                 Assert::IsTrue(str.get() == hstr);
             }
 
             TEST_METHOD(CStrTest)
             {
-                hstring str = L"foo";
+                dhorn::experimental::hstring str = L"foo";
                 Assert::AreEqual(0, wcscmp(str.c_str(), L"foo"));
             }
 
             TEST_METHOD(ClearTest)
             {
-                hstring str = L"foo";
+                dhorn::experimental::hstring str = L"foo";
                 str.clear();
                 Assert::IsFalse(str);
                 Assert::IsTrue(str.get() == nullptr);
@@ -759,7 +759,7 @@ namespace dhorn
 
             TEST_METHOD(CopyToTest)
             {
-                hstring str = L"foo\0bar";
+                dhorn::experimental::hstring str = L"foo\0bar";
                 HString hstr;
                 str.copy_to(hstr.GetAddressOf());
 
@@ -770,13 +770,13 @@ namespace dhorn
 
             TEST_METHOD(DataTest)
             {
-                hstring str = L"foo";
+                dhorn::experimental::hstring str = L"foo";
                 Assert::AreEqual(0, wcscmp(str.data(), L"foo"));
             }
 
             TEST_METHOD(DetachTest)
             {
-                hstring str = L"foo";
+                dhorn::experimental::hstring str = L"foo";
                 auto value = str.get();
 
                 auto hstr = str.detach();
@@ -787,7 +787,7 @@ namespace dhorn
 
             TEST_METHOD(EmptyTest)
             {
-                hstring str;
+                dhorn::experimental::hstring str;
                 Assert::IsTrue(str.empty());
 
                 str = L"foo";
@@ -808,7 +808,7 @@ namespace dhorn
 
             TEST_METHOD(LengthAndSizeTest)
             {
-                hstring str;
+                dhorn::experimental::hstring str;
                 Assert::AreEqual(0u, str.length());
                 Assert::AreEqual(0u, str.size());
 
@@ -834,7 +834,7 @@ namespace dhorn
 
             TEST_METHOD(ReleaseTest)
             {
-                hstring str = L"foo";
+                dhorn::experimental::hstring str = L"foo";
                 auto value = str.get();
 
                 auto hstr = str.release();
@@ -845,7 +845,7 @@ namespace dhorn
 
             TEST_METHOD(ResetTest)
             {
-                hstring str = L"foo";
+                dhorn::experimental::hstring str = L"foo";
                 str.reset();
                 Assert::IsFalse(str);
                 Assert::IsTrue(str.get() == nullptr);
@@ -853,8 +853,8 @@ namespace dhorn
 
             TEST_METHOD(SwapTest)
             {
-                hstring foo = L"foo";
-                hstring bar = L"bar";
+                dhorn::experimental::hstring foo = L"foo";
+                dhorn::experimental::hstring bar = L"bar";
 
                 foo.swap(bar);
                 AssertEquals(foo, L"bar");
@@ -867,12 +867,12 @@ namespace dhorn
 
 
         // Values for comparison tests
-        static hstring hfoo = L"foo";
-        static hstring hbar = L"bar";
-        static hstring hfoobar = L"foo\0bar";
-        static hstring_reference rfoo = L"foo";
-        static hstring_reference rbar = L"bar";
-        static hstring_reference rfoobar = L"foo\0bar";
+        static dhorn::experimental::hstring hfoo = L"foo";
+        static dhorn::experimental::hstring hbar = L"bar";
+        static dhorn::experimental::hstring hfoobar = L"foo\0bar";
+        static dhorn::experimental::hstring_reference rfoo = L"foo";
+        static dhorn::experimental::hstring_reference rbar = L"bar";
+        static dhorn::experimental::hstring_reference rfoobar = L"foo\0bar";
 
         TEST_CLASS(HStringEqualityOperatorTests)
         {
@@ -1705,7 +1705,7 @@ namespace dhorn
             void DoAppendTest(LhsTy &&lhs, RhsTy &&rhs, ResultTy &&expected)
             {
                 auto result = lhs + rhs;
-                Assert::IsTrue(std::is_same<decltype(result), hstring>::value);
+                Assert::IsTrue(std::is_same<decltype(result), dhorn::experimental::hstring>::value);
                 Assert::IsTrue(result == expected);
 
                 if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
