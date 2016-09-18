@@ -5,10 +5,9 @@
  *
  * Tests for dhorn::uuid structure
  */
-
 #include "stdafx.h"
 
-#include <dhorn/uuid.h>
+#include <dhorn/experimental/uuid.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

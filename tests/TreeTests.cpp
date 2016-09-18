@@ -5,13 +5,13 @@
  *
  * Tests for the dhorn sockets classes, structures, functions, etc.
  */
-
 #include "stdafx.h"
 
-#include "dhorn/tree.h"
-#include "dhorn/type_traits.h"
 #include <type_traits>
 #include <vector>
+
+#include <dhorn/experimental/tree.h>
+#include <dhorn/experimental/type_traits.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

@@ -5,12 +5,10 @@
  *
  * Tests for the array_reference type
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/array_reference.h>
-#include <dhorn/type_traits.h>
+#include <dhorn/experimental/array_reference.h>
+#include <dhorn/experimental/type_traits.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

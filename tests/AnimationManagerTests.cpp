@@ -5,11 +5,9 @@
  *
  * Tests for the animation_manager.h types/functions
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/animation_manager.h>
+#include <dhorn/experimental/animation_manager.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

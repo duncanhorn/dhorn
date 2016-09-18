@@ -5,11 +5,9 @@
  *
  * Tests for the algorithms.h functions
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/algorithm.h>
+#include <dhorn/experimental/algorithm.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

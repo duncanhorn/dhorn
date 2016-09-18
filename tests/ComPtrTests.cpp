@@ -5,10 +5,9 @@
  *
  * Tests for the throwing com_ptr
  */
-
 #include "stdafx.h"
 
-#include "dhorn/com_ptr.h"
+#include <dhorn/experimental/com_ptr.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

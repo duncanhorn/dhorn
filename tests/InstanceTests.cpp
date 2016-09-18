@@ -5,15 +5,13 @@
  *
  * Tests for the dhorn instance class
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
 #include <condition_variable>
 #include <thread>
 #include <vector>
 
-#include <dhorn/instance.h>
+#include <dhorn/experimental/instance.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

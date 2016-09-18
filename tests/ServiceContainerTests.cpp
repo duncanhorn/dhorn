@@ -5,10 +5,9 @@
  *
  * Tests for various Win32 functions and wrappers
  */
-
 #include "stdafx.h"
 
-#include <dhorn/service_container.h>
+#include <dhorn/experimental/service_container.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

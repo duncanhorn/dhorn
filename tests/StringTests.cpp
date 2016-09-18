@@ -5,11 +5,9 @@
  *
  * Tests for string.h
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/string.h>
+#include <dhorn/experimental/string.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

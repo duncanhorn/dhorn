@@ -7,8 +7,8 @@
  */
 #pragma once
 
-#include <dhorn/d3d/camera.h>
-#include <dhorn/d3d11/d3d11_window.h>
+#include <dhorn/experimental/d3d/camera.h>
+#include <dhorn/experimental/d3d11/d3d11_window.h>
 
 namespace globals
 {

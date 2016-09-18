@@ -5,11 +5,9 @@
  *
  * Tests for the command_line type
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/command_line.h>
+#include <dhorn/experimental/command_line.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

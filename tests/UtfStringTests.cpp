@@ -5,12 +5,10 @@
  *
  * Tests for the dhorn utf_string classes, structures, functions, etc.
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/type_traits.h>
-#include <dhorn/utf_string.h>
+#include <dhorn/experimental/type_traits.h>
+#include <dhorn/experimental/utf_string.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

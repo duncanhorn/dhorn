@@ -5,11 +5,9 @@
  *
  * Tests for the scope_exit.h functions
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/scope_exit.h>
+#include <dhorn/experimental/scope_exit.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

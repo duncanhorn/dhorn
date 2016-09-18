@@ -5,11 +5,9 @@
  *
  * Tests for the units.h types/functions
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/units.h>
+#include <dhorn/experimental/units.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

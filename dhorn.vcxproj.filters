@@ -4,166 +4,169 @@
     <Filter Include="include">
       <UniqueIdentifier>{05f489c8-d8cd-4b4d-a6bb-ad48fd65b702}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\d3d">
-      <UniqueIdentifier>{9c283b65-6d25-44e6-a072-b51f51168f40}</UniqueIdentifier>
+    <Filter Include="include\experimental">
+      <UniqueIdentifier>{3ce46009-063f-4c5e-b20d-8701684a7d92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\windows">
-      <UniqueIdentifier>{4bda7774-65ee-4685-bb92-1466e1b4b3ad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\dynamic_ui">
+    <Filter Include="include\experimental\dynamic_ui">
       <UniqueIdentifier>{72cc98d2-37a1-4787-ab03-492bf8089f92}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\d3d11">
+    <Filter Include="include\experimental\dynamic_ui\details">
+      <UniqueIdentifier>{63e3207e-c299-4959-9e91-505f828e56d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\experimental\d3d11">
       <UniqueIdentifier>{2fee7d41-2e82-4124-9cc5-67f938d7eb82}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\dynamic_ui\details">
-      <UniqueIdentifier>{63e3207e-c299-4959-9e91-505f828e56d7}</UniqueIdentifier>
+    <Filter Include="include\experimental\d3d">
+      <UniqueIdentifier>{9c283b65-6d25-44e6-a072-b51f51168f40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\experimental\windows">
+      <UniqueIdentifier>{4bda7774-65ee-4685-bb92-1466e1b4b3ad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\dhorn\sockets.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\algorithm.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\tree.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\animation.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\type_traits.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\animation_manager.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\windows\windows.h">
-      <Filter>include\windows</Filter>
+    <ClInclude Include="include\dhorn\experimental\array_reference.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\service_container.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\bitmask.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\uuid.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\com_ptr.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\windows\window.h">
-      <Filter>include\windows</Filter>
+    <ClInclude Include="include\dhorn\experimental\com_utility.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\functional.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\command_line.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\utf_string.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\console.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\event_source.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\discrete_animation.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="Include\dhorn\math.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\event_source.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\message_queue.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\functional.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\scope_exit.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\hstring.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\socket_stream.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\instance.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\task_pool.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\json.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\unique_any.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\linear_animation.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\algorithm.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\math.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\animation_manager.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\message_queue.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\animation.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\nullable_value.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\camera.h">
-      <Filter>include\d3d</Filter>
+    <ClInclude Include="include\dhorn\experimental\numeric.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\linear_animation.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\scope_exit.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\discrete_animation.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\service_container.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\colors.h">
-      <Filter>include\d3d</Filter>
+    <ClInclude Include="include\dhorn\experimental\socket_stream.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\shapes.h">
-      <Filter>include\d3d</Filter>
+    <ClInclude Include="include\dhorn\experimental\sockets.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\units.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\string.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\dynamic_ui\render_tree.h">
-      <Filter>include\dynamic_ui</Filter>
+    <ClInclude Include="include\dhorn\experimental\synchronized_object.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\dynamic_ui\render_node.h">
-      <Filter>include\dynamic_ui</Filter>
+    <ClInclude Include="include\dhorn\experimental\task_pool.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\unique_event_cookie.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\tree.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\json.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\type_traits.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\numeric.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\unique_any.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\synchronized_object.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\unique_event_cookie.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\instance.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\units.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\command_line.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\utf_iterator.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d11\d3d11_utils.h">
-      <Filter>include\d3d11</Filter>
+    <ClInclude Include="include\dhorn\experimental\utf_string.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d11\d3d11_window.h">
-      <Filter>include\d3d11</Filter>
+    <ClInclude Include="include\dhorn\experimental\uuid.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\d3d\d3d_utils.h">
-      <Filter>include\d3d</Filter>
+    <ClInclude Include="include\dhorn\experimental\windows_exception.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\bitmask.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\winrt_utility.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\array_reference.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\windows\window.h">
+      <Filter>include\experimental\windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\nullable_value.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\windows\windows.h">
+      <Filter>include\experimental\windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\com_ptr.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\dynamic_ui\render_node.h">
+      <Filter>include\experimental\dynamic_ui</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\windows_exception.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\dynamic_ui\render_tree.h">
+      <Filter>include\experimental\dynamic_ui</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\com_utility.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\dynamic_ui\details\render_types.h">
+      <Filter>include\experimental\dynamic_ui\details</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\hstring.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_utils.h">
+      <Filter>include\experimental\d3d11</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\winrt_utility.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_window.h">
+      <Filter>include\experimental\d3d11</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\console.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\d3d\camera.h">
+      <Filter>include\experimental\d3d</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\string.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\d3d\colors.h">
+      <Filter>include\experimental\d3d</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\utf_iterator.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\experimental\d3d\d3d_utils.h">
+      <Filter>include\experimental\d3d</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\dynamic_ui\details\render_types.h">
-      <Filter>include\dynamic_ui\details</Filter>
+    <ClInclude Include="include\dhorn\experimental\d3d\shapes.h">
+      <Filter>include\experimental\d3d</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

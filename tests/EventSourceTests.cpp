@@ -5,11 +5,10 @@
  *
  * Tests for the dhorn event_source class
  */
-
 #include "stdafx.h"
 
-#include "dhorn/unique_event_cookie.h"
-#include "dhorn/event_source.h"
+#include <dhorn/experimental/event_source.h>
+#include <dhorn/experimental/unique_event_cookie.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

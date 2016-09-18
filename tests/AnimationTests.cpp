@@ -5,12 +5,10 @@
  *
  * Tests for the various animations functions/types
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/discrete_animation.h>
-#include <dhorn/linear_animation.h>
+#include <dhorn/experimental/discrete_animation.h>
+#include <dhorn/experimental/linear_animation.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

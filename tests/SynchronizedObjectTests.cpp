@@ -5,16 +5,14 @@
  *
  * Tests for synchronized_object.h
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
 #include <atomic>
 #include <condition_variable>
 #include <thread>
 #include <vector>
 
-#include <dhorn/synchronized_object.h>
+#include <dhorn/experimental/synchronized_object.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

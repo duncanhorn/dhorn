@@ -5,11 +5,9 @@
  *
  * Tests for the numeric.h functions
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/numeric.h>
+#include <dhorn/experimental/numeric.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

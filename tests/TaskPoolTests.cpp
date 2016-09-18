@@ -5,7 +5,6 @@
  *
  * Tests for dhorn::task_pool
  */
-
 #include "stdafx.h"
 
 #include <atomic>
@@ -13,7 +12,7 @@
 #include <functional>
 #include <random>
 
-#include "dhorn/task_pool.h"
+#include <dhorn/experimental/task_pool.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

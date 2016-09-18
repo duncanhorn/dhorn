@@ -5,13 +5,13 @@
  *
  * Tests for various Win32 functions and wrappers
  */
-
 #include "stdafx.h"
 
-#include "dhorn/unique_any.h"
-#include "dhorn/windows/windows.h"
 #include <functional>
 #include <vector>
+
+#include <dhorn/experimental/unique_any.h>
+#include <dhorn/experimental/windows/windows.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

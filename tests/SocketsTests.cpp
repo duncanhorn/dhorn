@@ -5,14 +5,13 @@
  *
  * Tests for the dhorn sockets classes, structures, functions, etc.
  */
-
 #include "stdafx.h"
 
 #include <string>
 #include <thread>
 #include <vector>
 
-#include "dhorn/sockets.h"
+#include <dhorn/experimental/sockets.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

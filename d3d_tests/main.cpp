@@ -6,10 +6,10 @@
  * Functional tests for the dhorn::d3d namespace. Namely the d3d_window class
  */
 
-#include <dhorn/d3d11/d3d11_utils.h>
-#include <dhorn/d3d11/d3d11_window.h>
-#include <dhorn/d3d/colors.h>
-#include <dhorn/d3d/shapes.h>
+#include <dhorn/experimental/d3d11/d3d11_utils.h>
+#include <dhorn/experimental/d3d11/d3d11_window.h>
+#include <dhorn/experimental/d3d/colors.h>
+#include <dhorn/experimental/d3d/shapes.h>
 
 #include "geometry.h"
 #include "globals.h"

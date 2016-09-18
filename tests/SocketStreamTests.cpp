@@ -5,15 +5,13 @@
  *
  * Tests for the dhorn socket_stream classes, structures, functions, etc.
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
 #include <string>
 #include <thread>
 #include <vector>
 
-#include "dhorn/socket_stream.h"
+#include <dhorn/experimental/socket_stream.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

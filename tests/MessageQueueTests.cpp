@@ -5,7 +5,6 @@
  *
  * Tests for message_queue<void(void)>
  */
-
 #include "stdafx.h"
 
 #include <atomic>
@@ -13,7 +12,7 @@
 #include <thread>
 #include <vector>
 
-#include "dhorn/message_queue.h"
+#include <dhorn/experimental/message_queue.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

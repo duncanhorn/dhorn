@@ -5,11 +5,9 @@
  *
  * Tests for the type_traits.h functions
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/type_traits.h>
+#include <dhorn/experimental/type_traits.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

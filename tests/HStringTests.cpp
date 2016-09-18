@@ -5,12 +5,11 @@
  *
  * Tests for the hstring.h functions
  */
-
 #include "stdafx.h"
-#include "CppUnitTest.h"
 
-#include <dhorn/hstring.h>
 #include <wrl/wrappers/corewrappers.h>
+
+#include <dhorn/experimental/hstring.h>
 
 #pragma comment(lib, "runtimeobject")
 
