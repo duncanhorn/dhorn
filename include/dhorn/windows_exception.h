@@ -8,11 +8,11 @@
  */
 #pragma once
 
-#if !(defined WIN32_LEAN_AND_MEAN) && !(defined _DHORN_NO_WIN32_LEAN_AND_MEAN)
+#if !(defined WIN32_LEAN_AND_MEAN) && !(defined DHORN_NO_WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN 1
 #endif
 
-#if !(defined NOMINMAX) && !(defined _DHORN_NO_NOMINMAX)
+#if !(defined NOMINMAX) && !(defined DHORN_NO_NOMINMAX)
 #define NOMINMAX 1
 #endif
 
@@ -38,7 +38,7 @@ namespace dhorn
     /*
      * Exception for HRESULT
      */
-#pragma region HRESULT Exception
+#pragma region hresult_exception
 
     class hresult_exception final :
         public windows_exception
@@ -101,7 +101,7 @@ namespace dhorn
     /*
      * Exception for Win32 errors
      */
-#pragma region WIN32 Exception
+#pragma region win32_exception
 
     class win32_exception final :
         public windows_exception

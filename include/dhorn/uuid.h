@@ -13,13 +13,13 @@
 #include <cstdint>
 #include <type_traits>
 
-#ifdef  WIN32
+#ifdef WIN32
 #include <Windows.h>
-#endif  /*WIN32*/
+#endif
 
 // On debug, set uuid to {CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCCC}
 #ifndef DHORN_DEBUG_UUID
-#define DHORN_DEBUG_UUID       (0xCCCCCCCC)
+#define DHORN_DEBUG_UUID        (0xCCCCCCCC)
 #endif
 
 #ifdef _MSC_VER
@@ -33,7 +33,7 @@ namespace dhorn
     class uuid
     {
     public:
-        // Data can be publically accessed. This is defined as a union for easier use as GUID, etc.
+        // Data can be publicly accessed. This is defined as a union for easier use as GUID, etc.
         union
         {
             uint8_t  data[16];
@@ -54,7 +54,7 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         uuid(void) :
-            data{}      // zero init
+            data{}
         {
         }
 
@@ -106,7 +106,7 @@ namespace dhorn
             }
         }
 
-#ifdef  WIN32
+#ifdef WIN32
 
         uuid(const GUID &guid) :
             Data1(guid.Data1),
@@ -120,7 +120,7 @@ namespace dhorn
             to = from;
         }
 
-#endif  /*WIN32*/
+#endif
 
 #ifdef _DEBUG
         ~uuid(void)
@@ -196,7 +196,7 @@ namespace dhorn
     };
 }
 
-#ifdef  WIN32
+#ifdef WIN32
 static_assert(sizeof(dhorn::uuid) == sizeof(GUID), "dhorn::uuid must be same size as GUID");
 #endif
 
@@ -219,7 +219,7 @@ namespace std
     };
 }
 
-#endif  /*DHORN_NO_STD*/
+#endif
 
 
 
