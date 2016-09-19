@@ -91,109 +91,111 @@ namespace dhorn
 
 
         /*
-         * Console Attributes
+         * console
          */
-#pragma region Console Size
-
-        inline size<int16_t> console_size()
+        struct console
         {
-            auto info = details::console_info(console_device::output);
-            return{ info.dwSize.X, info.dwSize.Y };
-        }
-
-        inline point<int16_t> console_cursor_position()
-        {
-            auto info = details::console_info(console_device::output);
-            return{ info.dwCursorPosition.X, info.dwCursorPosition.Y };
-        }
-
-        inline console_color console_foreground_color()
-        {
-            auto info = details::console_info(console_device::output);
-            return static_cast<console_color>(info.wAttributes & 0x0F);
-        }
-
-        inline console_color console_background_color()
-        {
-            auto info = details::console_info(console_device::output);
-            return static_cast<console_color>((info.wAttributes >> 4) & 0x0F);
-        }
-
-        inline void set_console_title(const wchar_t *title)
-        {
-            throw_last_error_if_false(::SetConsoleTitle(title));
-        }
-
-#pragma endregion
-
-
-
-        /*
-         * Console Text Modifications
-         */
-#pragma region Console Text Modifications
-
-        inline auto change_console_foreground(console_color color)
-        {
-            auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
-            auto info = details::console_info(handle);
-            auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+            static rect<int16_t> bounds(void)
             {
-                ::SetConsoleTextAttribute(handle, attr);
-            });
-
-            info.wAttributes = clear_flag(info.wAttributes, 0x0F);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(color));
-            if (!::SetConsoleTextAttribute(handle, info.wAttributes))
-            {
-                result.cancel();
-                throw_last_error();
+                auto info = details::console_info(console_device::output);
+                return
+                {
+                    info.srWindow.Left,
+                    info.srWindow.Top,
+                    info.srWindow.Right - info.srWindow.Left + 1,
+                    info.srWindow.Bottom - info.srWindow.Top + 1
+                };
             }
 
-            return result;
-        }
-
-        inline auto change_console_background(console_color color)
-        {
-            auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
-            auto info = details::console_info(handle);
-            auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+            static size<int16_t> buffer_size(void)
             {
-                ::SetConsoleTextAttribute(handle, attr);
-            });
-
-            info.wAttributes = clear_flag(info.wAttributes, 0x00F0);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(color) << 4);
-            if (!::SetConsoleTextAttribute(handle, info.wAttributes))
-            {
-                result.cancel();
-                throw_last_error();
+                auto info = details::console_info(console_device::output);
+                return{ info.dwSize.X, info.dwSize.Y };
             }
 
-            return result;
-        }
-
-        inline auto change_console_colors(console_color foregroundColor, console_color backgroundColor)
-        {
-            auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
-            auto info = details::console_info(handle);
-            auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+            static point<int16_t> cursor_position(void)
             {
-                ::SetConsoleTextAttribute(handle, attr);
-            });
-
-            info.wAttributes = clear_flag(info.wAttributes, 0x00FF);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(foregroundColor));
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(backgroundColor) << 4);
-            if (!::SetConsoleTextAttribute(handle, info.wAttributes))
-            {
-                result.cancel();
-                throw_last_error();
+                auto info = details::console_info(console_device::output);
+                return{ info.dwCursorPosition.X, info.dwCursorPosition.Y };
             }
 
-            return result;
-        }
+            static void set_title(const wchar_t *title)
+            {
+                throw_last_error_if_false(!!::SetConsoleTitle(title));
+            }
 
-#pragma endregion
+            static console_color foreground(void)
+            {
+                auto info = details::console_info(console_device::output);
+                return static_cast<console_color>(info.wAttributes & 0x0F);
+            }
+
+            static auto set_foreground(console_color color)
+            {
+                auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
+                auto info = details::console_info(handle);
+                auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+                {
+                    ::SetConsoleTextAttribute(handle, attr);
+                });
+
+                info.wAttributes = clear_flag(info.wAttributes, 0x0F);
+                info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(color));
+                if (!::SetConsoleTextAttribute(handle, info.wAttributes))
+                {
+                    result.cancel();
+                    throw_last_error();
+                }
+
+                return result;
+            }
+
+            static console_color background(void)
+            {
+                auto info = details::console_info(console_device::output);
+                return static_cast<console_color>((info.wAttributes >> 4) & 0x0F);
+            }
+
+            static auto set_background(console_color color)
+            {
+                auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
+                auto info = details::console_info(handle);
+                auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+                {
+                    ::SetConsoleTextAttribute(handle, attr);
+                });
+
+                info.wAttributes = clear_flag(info.wAttributes, 0x00F0);
+                info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(color) << 4);
+                if (!::SetConsoleTextAttribute(handle, info.wAttributes))
+                {
+                    result.cancel();
+                    throw_last_error();
+                }
+
+                return result;
+            }
+
+            inline auto set_colors(console_color foregroundColor, console_color backgroundColor)
+            {
+                auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
+                auto info = details::console_info(handle);
+                auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+                {
+                    ::SetConsoleTextAttribute(handle, attr);
+                });
+
+                info.wAttributes = clear_flag(info.wAttributes, 0x00FF);
+                info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(foregroundColor));
+                info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(backgroundColor) << 4);
+                if (!::SetConsoleTextAttribute(handle, info.wAttributes))
+                {
+                    result.cancel();
+                    throw_last_error();
+                }
+
+                return result;
+            }
+        };
     }
 }
