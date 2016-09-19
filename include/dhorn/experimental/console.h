@@ -95,28 +95,33 @@ namespace dhorn
          */
 #pragma region Console Size
 
-        inline size<int16_t> console_size(console_device device = console_device::output)
+        inline size<int16_t> console_size()
         {
-            auto info = details::console_info(device);
+            auto info = details::console_info(console_device::output);
             return{ info.dwSize.X, info.dwSize.Y };
         }
 
-        inline point<int16_t> console_cursor_position(console_device device = console_device::output)
+        inline point<int16_t> console_cursor_position()
         {
-            auto info = details::console_info(device);
+            auto info = details::console_info(console_device::output);
             return{ info.dwCursorPosition.X, info.dwCursorPosition.Y };
         }
 
-        inline console_color console_foreground_color(console_device device = console_device::output)
+        inline console_color console_foreground_color()
         {
-            auto info = details::console_info(device);
+            auto info = details::console_info(console_device::output);
             return static_cast<console_color>(info.wAttributes & 0x0F);
         }
 
-        inline console_color console_background_color(console_device device = console_device::output)
+        inline console_color console_background_color()
         {
-            auto info = details::console_info(device);
+            auto info = details::console_info(console_device::output);
             return static_cast<console_color>((info.wAttributes >> 4) & 0x0F);
+        }
+
+        inline void set_console_title(const wchar_t *title)
+        {
+            throw_last_error_if_false(::SetConsoleTitle(title));
         }
 
 #pragma endregion
@@ -128,9 +133,9 @@ namespace dhorn
          */
 #pragma region Console Text Modifications
 
-        inline auto change_console_foreground(console_color color, console_device device = console_device::output)
+        inline auto change_console_foreground(console_color color)
         {
-            auto handle = ::GetStdHandle(static_cast<DWORD>(device));
+            auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
             auto info = details::console_info(handle);
             auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
             {
@@ -148,9 +153,9 @@ namespace dhorn
             return result;
         }
 
-        inline auto change_console_background(console_color color, console_device device = console_device::output)
+        inline auto change_console_background(console_color color)
         {
-            auto handle = ::GetStdHandle(static_cast<DWORD>(device));
+            auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
             auto info = details::console_info(handle);
             auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
             {
@@ -168,12 +173,9 @@ namespace dhorn
             return result;
         }
 
-        inline auto change_console_colors(
-            console_color foregroundColor,
-            console_color backgroundColor,
-            console_device device = console_device::output)
+        inline auto change_console_colors(console_color foregroundColor, console_color backgroundColor)
         {
-            auto handle = ::GetStdHandle(static_cast<DWORD>(device));
+            auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
             auto info = details::console_info(handle);
             auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
             {

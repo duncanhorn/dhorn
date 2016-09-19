@@ -142,6 +142,22 @@ namespace dhorn
             }
         }
 
+        inline void throw_last_error_if(bool value)
+        {
+            if (value)
+            {
+                throw_last_error();
+            }
+        }
+
+        inline void throw_last_error_if_false(bool value)
+        {
+            if (!value)
+            {
+                throw_last_error();
+            }
+        }
+
         inline void expect_error(uint32_t expect)
         {
             auto error = ::GetLastError();
