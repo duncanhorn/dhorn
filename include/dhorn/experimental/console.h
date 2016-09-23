@@ -21,6 +21,8 @@ namespace dhorn
     {
         /*
          * console_device
+         *
+         * Represents a console device (input, output, or error) that is required for several of the console functions.
          */
         enum class console_device : uint32_t
         {
@@ -34,7 +36,7 @@ namespace dhorn
         /*
          * console_color
          *
-         * Represents a foreground or background color within the console
+         * Represents a foreground or background color within the console.
          */
         enum class console_color : uint8_t
         {
@@ -95,6 +97,12 @@ namespace dhorn
          */
         struct console
         {
+            /*
+             * console::bounds
+             *
+             * Returns the size of the console buffer that is visible in units of rows x columns as well as the
+             * position of the console buffer that is visible in the top left corner as a (row, column) pair.
+             */
             static rect<int16_t> bounds(void)
             {
                 auto info = details::console_info(console_device::output);
@@ -107,29 +115,56 @@ namespace dhorn
                 };
             }
 
+            /*
+             * console::buffer_size
+             *
+             * Returns the size of the console buffer in units of rows x columns. Note how this differs from the
+             * bounds, which only includes the size of the console buffer that is visible to the user.
+             */
             static size<int16_t> buffer_size(void)
             {
                 auto info = details::console_info(console_device::output);
                 return{ info.dwSize.X, info.dwSize.Y };
             }
 
+            /*
+             * console::cursor_position
+             *
+             * Returns the position of the cursor within the console buffer. Note that this is the position relative to
+             * the console buffer, and *not* the visible window (i.e. not relative to the bounds).
+             */
             static point<int16_t> cursor_position(void)
             {
                 auto info = details::console_info(console_device::output);
                 return{ info.dwCursorPosition.X, info.dwCursorPosition.Y };
             }
 
+            /*
+             * console::set_title
+             *
+             * Sets the title of the console window.
+             */
             static void set_title(const wchar_t *title)
             {
                 throw_last_error_if_false(!!::SetConsoleTitle(title));
             }
 
+            /*
+             * console::foreground
+             *
+             * Returns the color that's currently being used for the foreground text of the console window.
+             */
             static console_color foreground(void)
             {
                 auto info = details::console_info(console_device::output);
                 return static_cast<console_color>(info.wAttributes & 0x0F);
             }
 
+            /*
+             * console::set_foreground
+             *
+             * Sets the foreground text color
+             */
             static auto set_foreground(console_color color)
             {
                 auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
