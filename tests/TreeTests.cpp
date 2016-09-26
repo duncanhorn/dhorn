@@ -437,21 +437,21 @@ namespace dhorn
                 Assert::IsFalse(ritr != critr);
                 Assert::IsFalse(critr != ritr);
 
-                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(itr), decltype(citr)>::value);
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(itr), decltype(ritr)>::value);
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(itr), decltype(critr)>::value);
+                Assert::IsTrue(dhorn::is_comparable<decltype(itr), decltype(citr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(itr), decltype(ritr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(itr), decltype(critr)>::value);
 
-                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(citr), decltype(itr)>::value);
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(citr), decltype(ritr)>::value);
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(citr), decltype(critr)>::value);
+                Assert::IsTrue(dhorn::is_comparable<decltype(citr), decltype(itr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(citr), decltype(ritr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(citr), decltype(critr)>::value);
 
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(ritr), decltype(itr)>::value);
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(ritr), decltype(citr)>::value);
-                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(ritr), decltype(critr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(ritr), decltype(itr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(ritr), decltype(citr)>::value);
+                Assert::IsTrue(dhorn::is_comparable<decltype(ritr), decltype(critr)>::value);
 
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(critr), decltype(itr)>::value);
-                Assert::IsFalse(dhorn::experimental::is_comparable<decltype(critr), decltype(citr)>::value);
-                Assert::IsTrue(dhorn::experimental::is_comparable<decltype(critr), decltype(ritr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(critr), decltype(itr)>::value);
+                Assert::IsFalse(dhorn::is_comparable<decltype(critr), decltype(citr)>::value);
+                Assert::IsTrue(dhorn::is_comparable<decltype(critr), decltype(ritr)>::value);
 
                 // Insert a value and assert that begin() != end
                 x.insert(std::begin(x), node_test_class());

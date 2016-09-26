@@ -58,11 +58,11 @@ namespace dhorn
             TEST_METHOD(MultiElementArrayTest)
             {
                 int vals[] = { 0, 1, 2, 3, 4 };
-                dhorn::experimental::array_reference<int> arr(vals, dhorn::experimental::array_size(vals));
+                dhorn::experimental::array_reference<int> arr(vals, dhorn::array_size(vals));
 
-                Assert::AreEqual(dhorn::experimental::array_size(vals), arr.size());
+                Assert::AreEqual(dhorn::array_size(vals), arr.size());
 
-                for (size_t i = 0; i < dhorn::experimental::array_size(vals); ++i)
+                for (size_t i = 0; i < dhorn::array_size(vals); ++i)
                 {
                     Assert::AreEqual(vals[i], arr.at(i));
                     Assert::AreEqual(vals[i], arr[i]);
@@ -74,9 +74,9 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals);
 
-                Assert::AreEqual(dhorn::experimental::array_size(vals), arr.size());
+                Assert::AreEqual(dhorn::array_size(vals), arr.size());
 
-                for (size_t i = 0; i < dhorn::experimental::array_size(vals); ++i)
+                for (size_t i = 0; i < dhorn::array_size(vals); ++i)
                 {
                     Assert::AreEqual(vals[i], arr.at(i));
                 }
@@ -156,7 +156,7 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals);
 
-                size_t i = dhorn::experimental::array_size(vals) - 1;
+                size_t i = dhorn::array_size(vals) - 1;
                 for (auto itr = arr.rbegin(); itr != arr.crend(); ++itr)
                 {
                     auto value = vals[i--];
@@ -174,7 +174,7 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals);
 
-                size_t i = dhorn::experimental::array_size(vals) - 1;
+                size_t i = dhorn::array_size(vals) - 1;
                 for (auto itr = arr.crbegin(); itr != arr.rend(); ++itr)
                 {
                     auto value = vals[i--];
@@ -328,15 +328,15 @@ namespace dhorn
 
                 Assert::AreEqual(2u, arr.size());
 
-                arr.resize(dhorn::experimental::array_size(vals));
-                Assert::AreEqual(dhorn::experimental::array_size(vals), arr.size());
+                arr.resize(dhorn::array_size(vals));
+                Assert::AreEqual(dhorn::array_size(vals), arr.size());
 
                 size_t i = 0;
                 for (auto &val : arr)
                 {
                     Assert::AreEqual(vals[i++], val);
                 }
-                Assert::AreEqual(dhorn::experimental::array_size(vals), i);
+                Assert::AreEqual(dhorn::array_size(vals), i);
             }
 
             TEST_METHOD(CastToTest)
@@ -345,7 +345,7 @@ namespace dhorn
                 dhorn::experimental::array_reference<uint32_t> arr32(vals32);
 
                 auto arr8 = arr32.cast_to<uint8_t>();
-                Assert::AreEqual(dhorn::experimental::array_size(vals32) * 4, arr8.size());
+                Assert::AreEqual(dhorn::array_size(vals32) * 4, arr8.size());
 
                 auto arr32_2 = arr8.cast_to<uint32_t>();
                 Assert::AreEqual(arr32.size(), arr32_2.size());
@@ -382,7 +382,7 @@ namespace dhorn
             TEST_METHOD(DecrementTest)
             {
                 int vals[] = { 0, 1, 2, 3, 4 };
-                dhorn::experimental::array_reference<int> arr(vals + dhorn::experimental::array_size(vals), 0);
+                dhorn::experimental::array_reference<int> arr(vals + dhorn::array_size(vals), 0);
 
                 auto test = arr - 1;
                 Assert::AreEqual(4, *test);

@@ -32,26 +32,26 @@ namespace dhorn
         {
             TEST_METHOD(EqualityComparableTest)
             {
-                Assert::IsTrue(dhorn::experimental::is_comparable_v<comp1, comp2>);
+                Assert::IsTrue(dhorn::is_comparable_v<comp1, comp2>);
 
-                Assert::IsFalse(dhorn::experimental::is_comparable_v<comp1, comp1>);
-                Assert::IsFalse(dhorn::experimental::is_comparable_v<comp2, comp2>);
-                Assert::IsFalse(dhorn::experimental::is_comparable_v<comp2, comp1>);
+                Assert::IsFalse(dhorn::is_comparable_v<comp1, comp1>);
+                Assert::IsFalse(dhorn::is_comparable_v<comp2, comp2>);
+                Assert::IsFalse(dhorn::is_comparable_v<comp2, comp1>);
             }
 
             TEST_METHOD(LessThanComparableTest)
             {
-                Assert::IsTrue(dhorn::experimental::is_less_than_comparable_v<comp1, comp2>);
+                Assert::IsTrue(dhorn::is_less_than_comparable_v<comp1, comp2>);
 
-                Assert::IsFalse(dhorn::experimental::is_less_than_comparable_v<comp1, comp1>);
-                Assert::IsFalse(dhorn::experimental::is_less_than_comparable_v<comp2, comp2>);
-                Assert::IsFalse(dhorn::experimental::is_less_than_comparable_v<comp2, comp1>);
+                Assert::IsFalse(dhorn::is_less_than_comparable_v<comp1, comp1>);
+                Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp2>);
+                Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp1>);
             }
 
             TEST_METHOD(ArraySizeTest)
             {
                 char arr[100];
-                Assert::AreEqual(dhorn::experimental::array_size(arr), 100u);
+                Assert::AreEqual(dhorn::array_size(arr), 100u);
             }
 
             TEST_METHOD(ByteOffsetTest)
@@ -65,9 +65,9 @@ namespace dhorn
 
                 // NOTE: The compiler can arrange these how it wants and sometimes inserts extra space for alignment
                 // resons. Thus, we compare to offsetof
-                Assert::AreEqual(dhorn::experimental::byte_offset(&foo::int32), offsetof(foo, int32));
-                Assert::AreEqual(dhorn::experimental::byte_offset(&foo::uint32), offsetof(foo, uint32));
-                Assert::AreEqual(dhorn::experimental::byte_offset(&foo::ch), offsetof(foo, ch));
+                Assert::AreEqual(dhorn::byte_offset(&foo::int32), offsetof(foo, int32));
+                Assert::AreEqual(dhorn::byte_offset(&foo::uint32), offsetof(foo, uint32));
+                Assert::AreEqual(dhorn::byte_offset(&foo::ch), offsetof(foo, ch));
             }
         };
 
@@ -76,15 +76,15 @@ namespace dhorn
             template <typename Ty>
             void DoFunctionTest(const Ty &, bool expected)
             {
-                Assert::AreEqual(expected, dhorn::experimental::is_c_string<Ty>::value);
+                Assert::AreEqual(expected, dhorn::is_c_string<Ty>::value);
             }
 
             TEST_METHOD(CharStringLiteralTest)
             {
-                Assert::IsTrue(dhorn::experimental::is_c_string<char *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const char *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<char * const>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const char * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<char *>::value);
+                Assert::IsTrue(dhorn::is_c_string<const char *>::value);
+                Assert::IsTrue(dhorn::is_c_string<char * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<const char * const>::value);
 
                 DoFunctionTest(static_cast<char *>("foo"), true);
                 DoFunctionTest(static_cast<char *>(u8"foo"), true);
@@ -94,10 +94,10 @@ namespace dhorn
 
             TEST_METHOD(WCharStringLiteralTest)
             {
-                Assert::IsTrue(dhorn::experimental::is_c_string<wchar_t *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const wchar_t *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<wchar_t * const>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const wchar_t * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<wchar_t *>::value);
+                Assert::IsTrue(dhorn::is_c_string<const wchar_t *>::value);
+                Assert::IsTrue(dhorn::is_c_string<wchar_t * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<const wchar_t * const>::value);
 
                 DoFunctionTest(static_cast<wchar_t *>(L"foo"), true);
                 DoFunctionTest(static_cast<wchar_t *>(L"foo"), true);
@@ -107,10 +107,10 @@ namespace dhorn
 
             TEST_METHOD(Char16StringLiteralTest)
             {
-                Assert::IsTrue(dhorn::experimental::is_c_string<char16_t *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const char16_t *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<char16_t * const>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const char16_t * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<char16_t *>::value);
+                Assert::IsTrue(dhorn::is_c_string<const char16_t *>::value);
+                Assert::IsTrue(dhorn::is_c_string<char16_t * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<const char16_t * const>::value);
 
                 DoFunctionTest(static_cast<char16_t *>(u"foo"), true);
                 DoFunctionTest(static_cast<char16_t *>(u"foo"), true);
@@ -120,10 +120,10 @@ namespace dhorn
 
             TEST_METHOD(Char32StringLiteralTest)
             {
-                Assert::IsTrue(dhorn::experimental::is_c_string<char32_t *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const char32_t *>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<char32_t * const>::value);
-                Assert::IsTrue(dhorn::experimental::is_c_string<const char32_t * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<char32_t *>::value);
+                Assert::IsTrue(dhorn::is_c_string<const char32_t *>::value);
+                Assert::IsTrue(dhorn::is_c_string<char32_t * const>::value);
+                Assert::IsTrue(dhorn::is_c_string<const char32_t * const>::value);
 
                 DoFunctionTest(static_cast<char32_t *>(U"foo"), true);
                 DoFunctionTest(static_cast<char32_t *>(U"foo"), true);
@@ -133,27 +133,27 @@ namespace dhorn
 
             TEST_METHOD(VoidPointerTest)
             {
-                Assert::IsFalse(dhorn::experimental::is_c_string<void *>::value);
+                Assert::IsFalse(dhorn::is_c_string<void *>::value);
                 DoFunctionTest(static_cast<void *>("foo"), false);
             }
 
             TEST_METHOD(CharArrayTest)
             {
                 char arr[] = "foo";
-                Assert::IsFalse(dhorn::experimental::is_c_string<decltype(arr)>::value);
+                Assert::IsFalse(dhorn::is_c_string<decltype(arr)>::value);
                 DoFunctionTest(arr, false);
             }
 
             TEST_METHOD(ConstCharArrayTest)
             {
                 const char arr[] = "foo";
-                Assert::IsFalse(dhorn::experimental::is_c_string<decltype(arr)>::value);
+                Assert::IsFalse(dhorn::is_c_string<decltype(arr)>::value);
                 DoFunctionTest(arr, false);
             }
 
             TEST_METHOD(ValueTest)
             {
-                Assert::IsFalse(dhorn::experimental::is_c_string<int>::value);
+                Assert::IsFalse(dhorn::is_c_string<int>::value);
                 DoFunctionTest(1, false);
             }
         };
