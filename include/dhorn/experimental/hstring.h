@@ -11,7 +11,7 @@
 #include <string>
 #include <winstring.h>
 
-#include "type_traits.h"
+#include "../type_traits.h"
 #include "windows_exception.h"
 
 namespace dhorn

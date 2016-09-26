@@ -15,7 +15,7 @@
 
 #include "../com_ptr.h"
 #include "../d3d/d3d_utils.h"
-#include "../type_traits.h"
+#include "../../type_traits.h"
 #include "../windows_exception.h"
 
 namespace dhorn

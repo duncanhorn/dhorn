@@ -105,9 +105,6 @@
     <ClInclude Include="include\dhorn\experimental\tree.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\type_traits.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\unique_any.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -167,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\experimental\algorithm.h">
       <Filter>include\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\type_traits.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

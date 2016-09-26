@@ -8,7 +8,7 @@
 #include "stdafx.h"
 
 #include <dhorn/experimental/array_reference.h>
-#include <dhorn/experimental/type_traits.h>
+#include <dhorn/type_traits.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

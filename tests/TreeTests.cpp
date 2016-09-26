@@ -11,7 +11,7 @@
 #include <vector>
 
 #include <dhorn/experimental/tree.h>
-#include <dhorn/experimental/type_traits.h>
+#include <dhorn/type_traits.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
