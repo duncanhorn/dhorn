@@ -16,6 +16,8 @@ namespace dhorn
     {
         /*
          * is_comparable
+         *
+         * Type trait for determining if operator== is well formed for the two specified types
          */
 #pragma region is_comparable
 
@@ -26,7 +28,7 @@ namespace dhorn
             {
                 template <typename Left, typename Right>
                 static auto Fn(int) ->
-                    decltype((std::declval<Left>() == std::declval<Right>()), std::true_type())
+                    decltype((std::declval<Left>() == std::declval<Right>()), std::true_type{})
                 {
                 }
 
@@ -56,6 +58,8 @@ namespace dhorn
 
         /*
          * is_less_than_comparable
+         *
+         * Type trait for determining if operator< is well formed for the two specified types
          */
 #pragma region is_less_than_comparable
 
@@ -66,7 +70,7 @@ namespace dhorn
             {
                 template <typename Left, typename Right>
                 static auto Fn(int) ->
-                    decltype((std::declval<Left>() < std::declval<Right>()), std::true_type())
+                    decltype((std::declval<Left>() < std::declval<Right>()), std::true_type{})
                 {
                 }
 
@@ -95,37 +99,10 @@ namespace dhorn
 
 
         /*
-         * array_traits
-         */
-#pragma region array_traits
-
-        template <typename Ty>
-        struct array_traits
-        {
-            static const bool is_array = false;
-        };
-
-        template <typename Ty>
-        struct array_traits<Ty[]>
-        {
-            static const bool is_array = true;
-            using value_type = Ty;
-        };
-
-        template <typename Ty, size_t Size>
-        struct array_traits<Ty[Size]>
-        {
-            static const bool is_array = true;
-            using value_type = Ty;
-            static const size_t size = Size;
-        };
-
-#pragma endregion
-
-
-
-        /*
          * array_size
+         *
+         * An easy, safe alternative to get the size of an array (in terms of number of elements, not byte size) as a
+         * constexpr function.
          */
         template <typename Ty, size_t size>
         inline constexpr size_t array_size(const Ty(&)[size])
@@ -137,6 +114,22 @@ namespace dhorn
 
         /*
          * byte_offset
+         *
+         * An easy way to get the byte offset of a member within a struct. This works similar to the macro offsetof, but
+         * with different syntax:
+         * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         * struct my_struct
+         * {
+         *     uint32_t member1;
+         *     uint32_t member2;
+         * };
+         *
+         * std::cout << byte_offset(&mystruct::member1) << std::endl;
+         * std::cout << byte_offset(&mystruct::member2) << std::endl;
+         * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+         * Possible output:
+         * 0
+         * 4
          */
         template <typename Ty, typename Struct>
         inline constexpr size_t byte_offset(Ty Struct::*member)
@@ -149,96 +142,11 @@ namespace dhorn
 
 
         /*
-         * select_integer
-         */
-#pragma region select_integer
-
-        template <size_t Bytes>
-        struct select_integer_t;
-
-        template <size_t Bytes>
-        struct select_unsigned_t;
-
-        template <typename Ty>
-        using select_integer = typename select_integer_t<sizeof(Ty)>::type;
-
-        template <typename Ty>
-        using select_unsigned = typename select_unsigned_t<sizeof(Ty)>::type;
-
-
-
-        /*
-         * int8_t
-         */
-        template <>
-        struct select_integer_t<1>
-        {
-            using type = int8_t;
-        };
-
-        template <>
-        struct select_unsigned_t<1>
-        {
-            using type = uint8_t;
-        };
-
-
-
-        /*
-         * int16_t
-         */
-        template <>
-        struct select_integer_t<2>
-        {
-            using type = int16_t;
-        };
-
-        template <>
-        struct select_unsigned_t<2>
-        {
-            using type = uint16_t;
-        };
-
-
-
-        /*
-         * int32_t
-         */
-        template <>
-        struct select_integer_t<4>
-        {
-            using type = int32_t;
-        };
-
-        template <>
-        struct select_unsigned_t<4>
-        {
-            using type = uint32_t;
-        };
-
-
-
-        /*
-         * int64_t
-         */
-        template <>
-        struct select_integer_t<8>
-        {
-            using type = int64_t;
-        };
-
-        template <>
-        struct select_unsigned_t<8>
-        {
-            using type = uint64_t;
-        };
-
-#pragma endregion
-
-
-
-        /*
          * is_c_string
+         *
+         * Type trait for determining if a type is a "C-style" string. That is, if it is a pointer to a char type (char,
+         * wchar_t, char16_t, or char32_t). Note that this does *not* include arrays (e.g. char[]). Arrays need to be
+         * decayed for them to give a value of 'true' for 'is_c_string'.
          */
 #pragma region is_c_string
 

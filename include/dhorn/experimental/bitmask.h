@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#include "type_traits.h"
+#include <type_traits>
 
 namespace dhorn
 {
@@ -58,19 +58,19 @@ namespace dhorn
 #define DHORN_DECLARE_BITMASK_OPERATORS(Type)   \
 inline constexpr Type operator|(const Type &lhs, const Type &rhs)                       \
 {                                                                                       \
-    using IntType = dhorn::experimental::select_unsigned<Type>;                         \
+    using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(static_cast<IntType>(lhs) | static_cast<IntType>(rhs));    \
 }                                                                                       \
                                                                                         \
 inline constexpr Type operator&(const Type &lhs, const Type &rhs)                       \
 {                                                                                       \
-    using IntType = dhorn::experimental::select_unsigned<Type>;                         \
+    using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(static_cast<IntType>(lhs) & static_cast<IntType>(rhs));    \
 }                                                                                       \
                                                                                         \
 inline constexpr Type operator^(const Type &lhs, const Type &rhs)                       \
 {                                                                                       \
-    using IntType = dhorn::experimental::select_unsigned<Type>;                         \
+    using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(static_cast<IntType>(lhs) ^ static_cast<IntType>(rhs));    \
 }
 

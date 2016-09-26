@@ -15,6 +15,62 @@ namespace dhorn
 {
     namespace tests
     {
+        struct comp1
+        {
+            int value;
+        };
+
+        struct comp2
+        {
+            int value;
+        };
+
+        inline constexpr bool operator==(const comp1& lhs, const comp2& rhs) { return lhs.value == rhs.value; }
+        inline constexpr bool operator<(const comp1& lhs, const comp2& rhs) { return lhs.value < rhs.value; }
+
+        TEST_CLASS(TypeTraitsTests)
+        {
+            TEST_METHOD(EqualityComparableTest)
+            {
+                Assert::IsTrue(dhorn::experimental::is_comparable_v<comp1, comp2>);
+
+                Assert::IsFalse(dhorn::experimental::is_comparable_v<comp1, comp1>);
+                Assert::IsFalse(dhorn::experimental::is_comparable_v<comp2, comp2>);
+                Assert::IsFalse(dhorn::experimental::is_comparable_v<comp2, comp1>);
+            }
+
+            TEST_METHOD(LessThanComparableTest)
+            {
+                Assert::IsTrue(dhorn::experimental::is_less_than_comparable_v<comp1, comp2>);
+
+                Assert::IsFalse(dhorn::experimental::is_less_than_comparable_v<comp1, comp1>);
+                Assert::IsFalse(dhorn::experimental::is_less_than_comparable_v<comp2, comp2>);
+                Assert::IsFalse(dhorn::experimental::is_less_than_comparable_v<comp2, comp1>);
+            }
+
+            TEST_METHOD(ArraySizeTest)
+            {
+                char arr[100];
+                Assert::AreEqual(dhorn::experimental::array_size(arr), 100u);
+            }
+
+            TEST_METHOD(ByteOffsetTest)
+            {
+                struct foo
+                {
+                    int32_t int32;
+                    uint32_t uint32;
+                    char ch;
+                };
+
+                // NOTE: The compiler can arrange these how it wants and sometimes inserts extra space for alignment
+                // resons. Thus, we compare to offsetof
+                Assert::AreEqual(dhorn::experimental::byte_offset(&foo::int32), offsetof(foo, int32));
+                Assert::AreEqual(dhorn::experimental::byte_offset(&foo::uint32), offsetof(foo, uint32));
+                Assert::AreEqual(dhorn::experimental::byte_offset(&foo::ch), offsetof(foo, ch));
+            }
+        };
+
         TEST_CLASS(IsCStringTests)
         {
             template <typename Ty>
