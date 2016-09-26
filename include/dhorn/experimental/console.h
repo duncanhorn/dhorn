@@ -163,7 +163,24 @@ namespace dhorn
             /*
              * console::set_foreground
              *
-             * Sets the foreground text color
+             * Sets the foreground text color of the console window. Note that this only applies to the text that has
+             * yet to be printed out. This function returns a scope exit function that, when destroyed, reverts the
+             * foreground color back to what it was before. For example:
+             * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             * // Foreground color is currently gray
+             * {
+             *     auto printRed = console::set_foreground(console_color::red);
+             *     // Foreground color is now red
+             * }
+             * // Foreground color is gray again
+             * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             * // Foreground color is currently gray
+             * {
+             *     auto printRed = console::set_foreground(console_color::red);
+             *     // Foreground color is now red
+             *     printRed.cancel();
+             * }
+             * // Foreground color is still red
              */
             static auto set_foreground(console_color color)
             {
@@ -184,13 +201,40 @@ namespace dhorn
 
                 return result;
             }
-
+            
+            /*
+             * console::background
+             *
+             * Returns the color that's currently being used for the background of the console window.
+             */
             static console_color background(void)
             {
                 auto info = details::console_info(console_device::output);
                 return static_cast<console_color>((info.wAttributes >> 4) & 0x0F);
             }
-
+            
+            /*
+             * console::set_background
+             *
+             * Sets the background color of the console window. Note that this only applies to the text that has yet to
+             * be printed out. This function returns a scope exit function that, when destroyed, reverts the background
+             * color back to what it was before. For example:
+             * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             * // Background color is currently black
+             * {
+             *     auto printRed = console::set_background(console_color::red);
+             *     // Background color is now red
+             * }
+             * // Background color is black again
+             * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+             * // Background color is currently gray
+             * {
+             *     auto printRed = console::set_background(console_color::red);
+             *     // Background color is now red
+             *     printRed.cancel();
+             * }
+             * // Background color is still red
+             */
             static auto set_background(console_color color)
             {
                 auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
@@ -211,6 +255,11 @@ namespace dhorn
                 return result;
             }
 
+            /*
+             * console::set_colors
+             *
+             * Sets both the foreground text color as well as the background color of the console. 
+             */
             inline auto set_colors(console_color foregroundColor, console_color backgroundColor)
             {
                 auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
