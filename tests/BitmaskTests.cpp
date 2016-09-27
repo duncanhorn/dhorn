@@ -15,6 +15,16 @@ namespace dhorn
 {
     namespace tests
     {
+        enum class test_enum
+        {
+            value0 = 0x00,
+            value1 = 0x01,
+            value2 = 0x02,
+            value3 = 0x03,
+            value4 = 0x04,
+        };
+        DHORN_DECLARE_BITMASK_OPERATORS(test_enum);
+
         TEST_CLASS(BitmaskTests)
         {
             TEST_METHOD(SetFlagTest)
@@ -92,6 +102,42 @@ namespace dhorn
                 Assert::IsTrue(dhorn::experimental::are_all_flags_clear(value, 0x00));
                 Assert::IsTrue(dhorn::experimental::are_all_flags_clear(value, 0xFC));
                 Assert::IsTrue(dhorn::experimental::are_all_flags_clear(value, 0xF0));
+            }
+
+            TEST_METHOD(EnumOperatorOrTest)
+            {
+                Assert::IsTrue((test_enum::value1 | test_enum::value2) == test_enum::value3);
+                static_assert((test_enum::value1 | test_enum::value2) == test_enum::value3,
+                    "Should be static_assert-able");
+
+                Assert::IsTrue((test_enum::value1 | test_enum::value0) == test_enum::value1);
+                Assert::IsTrue((test_enum::value2 | test_enum::value0) == test_enum::value2);
+                Assert::IsTrue((test_enum::value3 | test_enum::value0) == test_enum::value3);
+                Assert::IsTrue((test_enum::value4 | test_enum::value0) == test_enum::value4);
+            }
+
+            TEST_METHOD(EnumOperatorAndTest)
+            {
+                Assert::IsTrue((test_enum::value3 & test_enum::value1) == test_enum::value1);
+                static_assert((test_enum::value3 & test_enum::value1) == test_enum::value1,
+                    "Should be static_assert-able");
+
+                Assert::IsTrue((test_enum::value1 & test_enum::value0) == test_enum::value0);
+                Assert::IsTrue((test_enum::value2 & test_enum::value0) == test_enum::value0);
+                Assert::IsTrue((test_enum::value3 & test_enum::value0) == test_enum::value0);
+                Assert::IsTrue((test_enum::value4 & test_enum::value0) == test_enum::value0);
+            }
+
+            TEST_METHOD(EnumOperatorXorTest)
+            {
+                Assert::IsTrue((test_enum::value3 ^ test_enum::value1) == test_enum::value2);
+                static_assert((test_enum::value3 ^ test_enum::value1) == test_enum::value2,
+                    "Should be static_assert-able");
+
+                Assert::IsTrue((test_enum::value1 ^ test_enum::value0) == test_enum::value1);
+                Assert::IsTrue((test_enum::value2 ^ test_enum::value0) == test_enum::value2);
+                Assert::IsTrue((test_enum::value3 ^ test_enum::value0) == test_enum::value3);
+                Assert::IsTrue((test_enum::value4 ^ test_enum::value0) == test_enum::value4);
             }
         };
     }
