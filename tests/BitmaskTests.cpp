@@ -17,6 +17,7 @@ namespace dhorn
     {
         enum class test_enum
         {
+            invalid = -1,
             value0 = 0x00,
             value1 = 0x01,
             value2 = 0x02,
@@ -138,6 +139,16 @@ namespace dhorn
                 Assert::IsTrue((test_enum::value2 ^ test_enum::value0) == test_enum::value2);
                 Assert::IsTrue((test_enum::value3 ^ test_enum::value0) == test_enum::value3);
                 Assert::IsTrue((test_enum::value4 ^ test_enum::value0) == test_enum::value4);
+            }
+
+            TEST_METHOD(EnumOperatorBitwiseComplementTest)
+            {
+                Assert::IsTrue(~test_enum::value0 == test_enum::invalid);
+                static_assert(~test_enum::value0 == test_enum::invalid, "Should be static_assert-able");
+
+                // clear_flags uses operator~
+                Assert::IsTrue(dhorn::experimental::clear_flags(test_enum::value3, test_enum::value2) ==
+                    test_enum::value1);
             }
         };
     }

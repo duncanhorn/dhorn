@@ -173,6 +173,11 @@ namespace dhorn
 
 
 
+/*
+ * DHORN_DECLARE_BITMASK_OPERATORS
+ *
+ * Declares operator|, operator&, operator^, and operator~ for the specified enum type.
+ */
 #ifndef DHORN_NO_BITMASK_OPERATORS
 
 #define DHORN_DECLARE_BITMASK_OPERATORS(Type)   \
@@ -192,6 +197,12 @@ inline constexpr Type operator^(const Type &lhs, const Type &rhs)               
 {                                                                                       \
     using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(static_cast<IntType>(lhs) ^ static_cast<IntType>(rhs));    \
+}                                                                                       \
+                                                                                        \
+inline constexpr Type operator~(const Type &lhs)                                        \
+{                                                                                       \
+    using IntType = std::underlying_type_t<Type>;                                       \
+    return static_cast<Type>(~static_cast<IntType>(lhs));                               \
 }
 
 #endif
