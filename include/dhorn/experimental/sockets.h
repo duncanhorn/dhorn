@@ -29,7 +29,7 @@
 
 #endif
 
-#include "bitmask.h"
+#include "../bitmask.h"
 
 namespace dhorn
 {

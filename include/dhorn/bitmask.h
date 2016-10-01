@@ -130,8 +130,8 @@ namespace dhorn
     /*
      * are_all_flags_set
      *
-     * Returns true if all bits set in 'mask' are set in 'value', else false. Note that this implies an empty mask
-     * will always give a result of true.
+     * Returns true if all bits set in 'mask' are set in 'value', else false. Note that this implies an empty mask will
+     * always give a result of true.
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * std::cout << std::boolalpha;
      * std::cout << are_all_flags_clear(0x04, 0xFF) << std::endl;
@@ -150,8 +150,8 @@ namespace dhorn
     /*
      * are_all_flags_clear
      *
-     * Returns true if all bits set in 'mask' are not set in 'value', else false. Note that this implies an empty
-     * mask will always give a result of true.
+     * Returns true if all bits set in 'mask' are not set in 'value', else false. Note that this implies an empty mask
+     * will always give a result of true.
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * std::cout << std::boolalpha;
      * std::cout << are_all_flags_clear(0x04, 0xC2) << std::endl;

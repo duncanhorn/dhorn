@@ -3,11 +3,11 @@
  *
  * BitmaskTests.cpp
  *
- * Tests for the various animations functions/types
+ * Tests for the bitmask.h header file
  */
 #include "stdafx.h"
 
-#include <dhorn/experimental/bitmask.h>
+#include <dhorn/bitmask.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
