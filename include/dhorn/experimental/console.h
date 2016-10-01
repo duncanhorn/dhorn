@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "bitmask.h"
+#include "../bitmask.h"
 #include "math.h"
 #include "scope_exit.h"
 #include "windows_exception.h"
