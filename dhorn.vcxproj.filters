@@ -90,9 +90,6 @@
     <ClInclude Include="include\dhorn\experimental\sockets.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\string.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\synchronized_object.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -166,6 +163,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\bitmask.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\string.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

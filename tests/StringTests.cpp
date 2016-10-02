@@ -7,7 +7,7 @@
  */
 #include "stdafx.h"
 
-#include <dhorn/experimental/string.h>
+#include <dhorn/string.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

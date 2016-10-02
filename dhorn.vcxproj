@@ -178,7 +178,6 @@
     <ClInclude Include="include\dhorn\experimental\service_container.h" />
     <ClInclude Include="include\dhorn\experimental\sockets.h" />
     <ClInclude Include="include\dhorn\experimental\socket_stream.h" />
-    <ClInclude Include="include\dhorn\experimental\string.h" />
     <ClInclude Include="include\dhorn\experimental\synchronized_object.h" />
     <ClInclude Include="include\dhorn\experimental\task_pool.h" />
     <ClInclude Include="include\dhorn\experimental\tree.h" />
@@ -192,6 +191,7 @@
     <ClInclude Include="include\dhorn\experimental\windows\windows.h" />
     <ClInclude Include="include\dhorn\experimental\windows_exception.h" />
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h" />
+    <ClInclude Include="include\dhorn\string.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

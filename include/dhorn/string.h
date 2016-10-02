@@ -18,10 +18,10 @@ namespace dhorn
      *
      * Removes all characters from the start and end of a string that match a particular criteria. There are three
      * overloads for the trim function: one that takes a function object whose signature should be `bool(CharT)`,
-     * another that takes no extra arguments and calls the former overload with the `isspace` function, and a third
-     * that takes two iterators and calls the first with a function object that returns true if any value in the
-     * range is equal to the input character.
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * another that takes no extra arguments and calls the former overload with the `isspace` function, and a third that
+     * takes two iterators and calls the first with a function object that returns true if any value in the range is
+     * equal to the input character.
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * auto str = "   foo bar  \r\n\t"s;
      *
      * // Overload 1
@@ -33,7 +33,7 @@ namespace dhorn
      * // Overload 3
      * char arr[] = { ' ', '\r', '\t' };
      * auto str3 = trim(str, std::begin(arr), std::end(arr));
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * The above example results in the following:
      *      str1: "foo bar  \r\n\t"
      *      str2: "foo bar"
@@ -79,11 +79,11 @@ namespace dhorn
     /*
      * split
      *
-     * Splits the specified string at each character matching a specified criteria. There are three overloads for
-     * the split function: one that takes a function object whose signature should be `bool(CharT)`, another that
-     * takes a single character to split at, and a third that takes a begin/end iterator representing a range of
-     * characters to split at.
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * Splits the specified string at each character matching a specified criteria. There are three overloads for the
+     * split function: one that takes a function object whose signature should be `bool(CharT)`, another that takes a
+     * single character to split at, and a third that takes a begin/end iterator representing a range of characters to
+     * split at.
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * auto str = "foo bar. foobar "s;
      *
      * // Overload 1
@@ -95,7 +95,7 @@ namespace dhorn
      * // Overload 3
      * char arr[] = { ' ', '.' };
      * auto vec3 = split(str, std::begin(arr), std::end(arr));
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * The above example results in the following:
      *      vec1: { "foo", "bar.", "foobar", "" }
      *      vec2: { "foo", "bar.", "foobar", "" }
