@@ -12,7 +12,7 @@
 #include <functional>
 #include <mutex>
 
-#include "scope_guard.h"
+#include "../scope_guard.h"
 
 namespace dhorn
 {

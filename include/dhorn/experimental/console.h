@@ -12,7 +12,7 @@
 
 #include "../bitmask.h"
 #include "math.h"
-#include "scope_guard.h"
+#include "../scope_guard.h"
 #include "windows_exception.h"
 
 namespace dhorn

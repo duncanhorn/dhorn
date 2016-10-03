@@ -38,7 +38,7 @@
 #include <vector>
 
 #include "../math.h"
-#include "../scope_guard.h"
+#include "../../scope_guard.h"
 #include "windows.h"
 
 namespace dhorn

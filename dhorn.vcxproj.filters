@@ -165,8 +165,8 @@
     <ClInclude Include="include\dhorn\string.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\scope_guard.h">
-      <Filter>include\experimental</Filter>
+    <ClInclude Include="include\dhorn\scope_guard.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

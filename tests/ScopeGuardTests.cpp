@@ -7,7 +7,7 @@
  */
 #include "stdafx.h"
 
-#include <dhorn/experimental/scope_guard.h>
+#include <dhorn/scope_guard.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
