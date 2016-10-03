@@ -46,89 +46,86 @@
 
 namespace dhorn
 {
-    namespace experimental
+    /*
+     * scope_guard
+     */
+    template <typename FuncTy>
+    class scope_guard
     {
+    public:
         /*
-         * scope_guard
+         * Constructor(s)/Destructor
          */
-        template <typename FuncTy>
-        class scope_guard
+        template <typename Func>
+        explicit scope_guard(Func &&func) :
+            _func(std::forward<Func>(func))
         {
-        public:
-            /*
-             * Constructor(s)/Destructor
-             */
-            template <typename Func>
-            explicit scope_guard(Func &&func) :
-                _func(std::forward<Func>(func))
+        }
+
+        ~scope_guard(void)
+        {
+            if (this->_shouldInvoke)
             {
+                this->_func();
             }
+        }
 
-            ~scope_guard(void)
-            {
-                if (this->_shouldInvoke)
-                {
-                    this->_func();
-                }
-            }
+        // Can't copy, but can move
+        scope_guard(const scope_guard &) = delete;
+        scope_guard &operator=(const scope_guard &) = delete;
 
-            // Can't copy, but can move
-            scope_guard(const scope_guard &) = delete;
-            scope_guard &operator=(const scope_guard &) = delete;
-
-            scope_guard(scope_guard &&other) :
-                _func(std::move(other._func))
-            {
-                this->_shouldInvoke = other._shouldInvoke;
-                other._shouldInvoke = false;
-            }
+        scope_guard(scope_guard &&other) :
+            _func(std::move(other._func))
+        {
+            this->_shouldInvoke = other._shouldInvoke;
+            other._shouldInvoke = false;
+        }
 
 
 
-            /*
-             * cancel
-             *
-             * Sets a bit on the scope_guard to prevent it from executing the function object, if it hasn't already.
-             */
-            void cancel(void)
+        /*
+         * cancel
+         *
+         * Sets a bit on the scope_guard to prevent it from executing the function object, if it hasn't already.
+         */
+        void cancel(void)
+        {
+            this->_shouldInvoke = false;
+        }
+
+        /*
+         * operator()
+         *
+         * Invokes the function object if it hasn't been cancelled or executed already.
+         */
+        void operator()(void)
+        {
+            // Can only invoke once
+            if (this->_shouldInvoke)
             {
                 this->_shouldInvoke = false;
+                this->_func();
             }
-
-            /*
-             * operator()
-             *
-             * Invokes the function object if it hasn't been cancelled or executed already.
-             */
-            void operator()(void)
-            {
-                // Can only invoke once
-                if (this->_shouldInvoke)
-                {
-                    this->_shouldInvoke = false;
-                    this->_func();
-                }
-            }
-
-
-
-        private:
-
-            FuncTy _func;
-            bool _shouldInvoke = true;
-        };
-
-
-
-        /*
-         * make_scope_guard
-         *
-         * Makes a scope_guard object for the input function object (generally a lambda).
-         */
-        template <typename FuncTy>
-        inline scope_guard<std::decay_t<FuncTy>> make_scope_guard(FuncTy&& func)
-        {
-            return scope_guard<std::decay_t<FuncTy>>(std::forward<FuncTy>(func));
         }
+
+
+
+    private:
+
+        FuncTy _func;
+        bool _shouldInvoke = true;
+    };
+
+
+
+    /*
+     * make_scope_guard
+     *
+     * Makes a scope_guard object for the input function object (generally a lambda).
+     */
+    template <typename FuncTy>
+    inline scope_guard<std::decay_t<FuncTy>> make_scope_guard(FuncTy&& func)
+    {
+        return scope_guard<std::decay_t<FuncTy>>(std::forward<FuncTy>(func));
     }
 }
