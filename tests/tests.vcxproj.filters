@@ -101,9 +101,6 @@
     <ClCompile Include="ArrayReferenceTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScopeExitTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NullableValueTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -117,6 +114,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UtfIteratorTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScopeGuardTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -12,7 +12,7 @@
 #include <functional>
 #include <mutex>
 
-#include "scope_exit.h"
+#include "scope_guard.h"
 
 namespace dhorn
 {
@@ -192,7 +192,7 @@ namespace dhorn
                     }// Release _backMutex
                 } // Release _frontMutex
 
-                auto destroy = make_scope_exit([&]()
+                auto destroy = make_scope_guard([&]()
                 {
                     pNode->next = nullptr;
                     delete pNode;

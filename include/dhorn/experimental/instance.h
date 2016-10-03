@@ -40,7 +40,7 @@
 #include <memory>
 #include <mutex>
 
-#include "scope_exit.h"
+#include "scope_guard.h"
 
 namespace dhorn
 {
@@ -103,7 +103,7 @@ namespace dhorn
                 void destroy(Ty *ptr)
                 {
                     // Deallocate even if an exception is thrown in the destructor
-                    auto deallocateOnExit = make_scope_exit([&]
+                    auto deallocateOnExit = make_scope_guard([&]
                     {
                         this->_alloc.deallocate(ptr, 1);
                     });

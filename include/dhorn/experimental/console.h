@@ -12,7 +12,7 @@
 
 #include "../bitmask.h"
 #include "math.h"
-#include "scope_exit.h"
+#include "scope_guard.h"
 #include "windows_exception.h"
 
 namespace dhorn
@@ -186,7 +186,7 @@ namespace dhorn
             {
                 auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
                 auto info = details::console_info(handle);
-                auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+                auto result = make_scope_guard([attr = info.wAttributes, handle]() noexcept
                 {
                     ::SetConsoleTextAttribute(handle, attr);
                 });
@@ -239,7 +239,7 @@ namespace dhorn
             {
                 auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
                 auto info = details::console_info(handle);
-                auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+                auto result = make_scope_guard([attr = info.wAttributes, handle]() noexcept
                 {
                     ::SetConsoleTextAttribute(handle, attr);
                 });
@@ -264,7 +264,7 @@ namespace dhorn
             {
                 auto handle = ::GetStdHandle(static_cast<DWORD>(console_device::output));
                 auto info = details::console_info(handle);
-                auto result = make_scope_exit([attr = info.wAttributes, handle]() noexcept
+                auto result = make_scope_guard([attr = info.wAttributes, handle]() noexcept
                 {
                     ::SetConsoleTextAttribute(handle, attr);
                 });

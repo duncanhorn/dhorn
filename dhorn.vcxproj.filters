@@ -78,9 +78,6 @@
     <ClInclude Include="include\dhorn\experimental\numeric.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\scope_exit.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\service_container.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -167,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\string.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\scope_guard.h">
+      <Filter>include\experimental</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

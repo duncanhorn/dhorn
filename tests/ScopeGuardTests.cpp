@@ -1,13 +1,13 @@
 /*
  * Duncan Horn
  *
- * ScopeExitTests.cpp
+ * ScopeGuardTests.cpp
  *
- * Tests for the scope_exit.h functions
+ * Tests for the scope_guard.h functions
  */
 #include "stdafx.h"
 
-#include <dhorn/experimental/scope_exit.h>
+#include <dhorn/experimental/scope_guard.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -15,13 +15,13 @@ namespace dhorn
 {
     namespace tests
     {
-        TEST_CLASS(ScopeExitTests)
+        TEST_CLASS(ScopeGuardTests)
         {
             TEST_METHOD(RunOnExitTest)
             {
                 int x = 0;
                 {
-                    auto fn = dhorn::experimental::make_scope_exit([&]() { x = 42; });
+                    auto fn = dhorn::experimental::make_scope_guard([&]() { x = 42; });
                     Assert::AreEqual(0, x);
                 }
                 Assert::AreEqual(42, x);
@@ -32,7 +32,7 @@ namespace dhorn
                 int x = 0;
                 try
                 {
-                    auto fn = dhorn::experimental::make_scope_exit([&]() { x = 42; });
+                    auto fn = dhorn::experimental::make_scope_guard([&]() { x = 42; });
                     Assert::AreEqual(0, x);
 
                     throw std::exception();
@@ -48,27 +48,12 @@ namespace dhorn
             {
                 int x = 0;
                 {
-                    auto fn = dhorn::experimental::make_scope_exit([&]() { x = 42; });
+                    auto fn = dhorn::experimental::make_scope_guard([&]() { x = 42; });
                     Assert::AreEqual(0, x);
 
                     fn.cancel();
                 }
                 Assert::AreEqual(0, x);
-            }
-
-            TEST_METHOD(ThrowExceptionTest)
-            {
-                bool pass = false;
-                try
-                {
-                    auto fn = dhorn::experimental::make_scope_exit([]() { throw std::exception(); });
-                }
-                catch (std::exception &)
-                {
-                    pass = true;
-                }
-
-                Assert::IsTrue(pass);
             }
 
             TEST_METHOD(MoveConstructTest)
@@ -77,7 +62,7 @@ namespace dhorn
 
                 {
                     object_counter cnt;
-                    auto fn = dhorn::experimental::make_scope_exit([cnt = std::move(cnt)]() {});
+                    auto fn = dhorn::experimental::make_scope_guard([cnt = std::move(cnt)]() {});
                 }
 
                 // Only the initial constructed value should have been a non-move
@@ -92,7 +77,7 @@ namespace dhorn
                 {
                     object_counter cnt;
                     auto func = [cnt = std::move(cnt)]() {};
-                    auto fn = dhorn::experimental::make_scope_exit(func);
+                    auto fn = dhorn::experimental::make_scope_guard(func);
                 }
 
                 // Should have been at least one copy

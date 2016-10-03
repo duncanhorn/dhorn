@@ -38,7 +38,7 @@
 #include <vector>
 
 #include "../math.h"
-#include "../scope_exit.h"
+#include "../scope_guard.h"
 #include "windows.h"
 
 namespace dhorn
@@ -799,7 +799,7 @@ namespace dhorn
                 {
                     // Can only call run once
                     this->EnsureWindowUninitialized();
-                    auto cleanup = make_scope_exit([&]() { this->_running = false; });
+                    auto cleanup = make_scope_guard([&]() { this->_running = false; });
                     this->_running = true;
 
                     // Calling thread becomes the "owner"/ui thread
