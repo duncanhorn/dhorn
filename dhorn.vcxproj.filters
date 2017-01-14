@@ -22,6 +22,9 @@
     <Filter Include="include\experimental\windows">
       <UniqueIdentifier>{4bda7774-65ee-4685-bb92-1466e1b4b3ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\windows">
+      <UniqueIdentifier>{7c5aa27b-823a-4ba9-81b1-4921c2c98825}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\experimental\animation.h">
@@ -167,6 +170,12 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\scope_guard.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\windows\file_time_clock.h">
+      <Filter>include\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\windows\tick_count_clock.h">
+      <Filter>include\windows</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
