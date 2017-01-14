@@ -23,7 +23,7 @@ namespace dhorn::windows
 
         static constexpr bool is_steady = true;
 
-        static time_point now() noexcept
+        static time_point now(void) noexcept
         {
             return time_point(duration(::GetTickCount64()));
         }

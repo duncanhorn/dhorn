@@ -46,7 +46,7 @@ namespace dhorn::windows
 
         static constexpr bool is_steady = false;
 
-        static time_point now() noexcept
+        static time_point now(void) noexcept
         {
             FILETIME time;
             ::GetSystemTimePreciseAsFileTime(&time);
