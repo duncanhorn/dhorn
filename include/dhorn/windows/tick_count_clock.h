@@ -3,8 +3,8 @@
  *
  * tick_count_clock.h
  *
- * A clock that wraps the GetTickCount64 function. This clock is useful when an efficient monotonically increasing clock
- * is desired and lower resolution is acceptable.
+ * A clock that wraps the GetTickCount64 function. This clock is useful when an efficient steady clock is desired and
+ * lower resolution is acceptable.
  */
 #pragma once
 
