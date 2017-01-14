@@ -3,7 +3,8 @@
  *
  * tick_count_clock.h
  *
- * 
+ * A clock that wraps the GetTickCount64 function. This clock is useful when an efficient monotonically increasing clock
+ * is desired and lower resolution is acceptable.
  */
 #pragma once
 
@@ -20,7 +21,7 @@ namespace dhorn::windows
         using duration = std::chrono::duration<rep, period>;
         using time_point = std::chrono::time_point<tick_count_clock>;
 
-        static constexpr bool is_steady = false;
+        static constexpr bool is_steady = true;
 
         static time_point now() noexcept
         {
