@@ -24,6 +24,9 @@
     <ClInclude Include="object_counter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TestInterfaces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -117,6 +120,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScopeGuardTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComUtilityTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
