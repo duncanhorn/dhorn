@@ -28,7 +28,7 @@ namespace dhorn::com
 
     template <typename IFace, typename... IFaces>
     struct is_unknown<IFace, IFaces...> :
-        public std::bool_constant<is_unknown<IFace>::value || is_unknown<IFaces...>::value>
+        public std::disjunction<is_unknown<IFace>, is_unknown<IFaces...>>
     {
     };
 
@@ -37,4 +37,30 @@ namespace dhorn::com
 
 #pragma endregion
 
+
+
+    /*
+     * all_unknown
+     */
+#pragma region all_unknown
+
+    template <typename... IFaces>
+    struct all_unknown;
+
+    template <typename IFace>
+    struct all_unknown<IFace> :
+        public is_unknown<IFace>
+    {
+    };
+
+    template <typename IFace, typename... IFaces>
+    struct all_unknown<IFace, IFaces...> :
+        public std::conjunction<is_unknown<IFace>, all_unknown<IFaces...>>
+    {
+    };
+
+    template <typename... IFaces>
+    constexpr bool all_unknown_v = all_unknown<IFaces...>::value;
+
+#pragma endregion
 }
