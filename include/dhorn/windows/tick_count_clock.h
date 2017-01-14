@@ -13,6 +13,9 @@
 
 namespace dhorn::windows
 {
+    /*
+     * tick_count_clock
+     */
     struct tick_count_clock
     {
         using rep = uint64_t;

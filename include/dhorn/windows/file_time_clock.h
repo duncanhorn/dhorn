@@ -18,24 +18,28 @@
 
 namespace dhorn::windows
 {
-    namespace details
+    /*
+     * FILETIME <--> uint64_t conversion helpers
+     */
+    inline constexpr uint64_t filetime_to_uint(FILETIME value)
     {
-        // FILETIME <--> uint64_t
-        inline constexpr uint64_t filetime_to_uint(FILETIME value)
-        {
-            return (static_cast<uint64_t>(value.dwHighDateTime) << 32) | value.dwLowDateTime;
-        }
-
-        inline constexpr FILETIME uint_to_filetime(uint64_t value)
-        {
-            return
-            {
-                static_cast<DWORD>(value & 0x00000000FFFFFFFF),
-                static_cast<DWORD>((value >> 32) & 0x00000000FFFFFFFF)
-            };
-        }
+        return (static_cast<uint64_t>(value.dwHighDateTime) << 32) | value.dwLowDateTime;
     }
 
+    inline constexpr FILETIME uint_to_filetime(uint64_t value)
+    {
+        return
+        {
+            static_cast<DWORD>(value & 0x00000000FFFFFFFF),
+            static_cast<DWORD>((value >> 32) & 0x00000000FFFFFFFF)
+        };
+    }
+
+
+
+    /*
+     * file_time_clock
+     */
     struct file_time_clock
     {
         using rep = uint64_t;
@@ -50,17 +54,7 @@ namespace dhorn::windows
         {
             FILETIME time;
             ::GetSystemTimePreciseAsFileTime(&time);
-            return time_point(duration(details::filetime_to_uint(time)));
+            return time_point(duration(filetime_to_uint(time)));
         }
     };
-
-    inline constexpr FILETIME as_filetime(file_time_clock::time_point value)
-    {
-        return details::uint_to_filetime(value.time_since_epoch().count());
-    }
-
-    inline constexpr file_time_clock::time_point as_time_point(FILETIME value)
-    {
-        return file_time_clock::time_point(file_time_clock::duration(details::filetime_to_uint(value)));
-    }
 }
