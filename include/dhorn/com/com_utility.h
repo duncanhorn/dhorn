@@ -3,7 +3,7 @@
  *
  * com_utility.h
  *
- *
+ * Helpers and type traits for dealing with COM types and objects.
  */
 #pragma once
 
