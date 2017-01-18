@@ -28,6 +28,9 @@
     <Filter Include="include\com">
       <UniqueIdentifier>{ca0289a9-9194-4a94-bacf-6d2593910c06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\wrl">
+      <UniqueIdentifier>{e7262882-6e7a-4601-97bd-6e6ac3cb5446}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\experimental\animation.h">
@@ -182,6 +185,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\com\com_utility.h">
       <Filter>include\com</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\wrl\wrl_utility.h">
+      <Filter>include\wrl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

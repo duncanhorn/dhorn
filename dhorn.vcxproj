@@ -196,6 +196,7 @@
     <ClInclude Include="include\dhorn\type_traits.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
+    <ClInclude Include="include\dhorn\wrl\wrl_utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

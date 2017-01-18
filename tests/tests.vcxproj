@@ -154,6 +154,7 @@
     <ClCompile Include="UtfStringTests.cpp" />
     <ClCompile Include="UUIDTests.cpp" />
     <ClCompile Include="WindowsTests.cpp" />
+    <ClCompile Include="WrlHelpersTests.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
