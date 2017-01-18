@@ -14,15 +14,15 @@
 namespace dhorn::com
 {
     /*
-     * is_unknown
+     * any_unknown
      */
-#pragma region is_unknown
+#pragma region any_unknown
 
     template <typename... IFaces>
-    using is_unknown = any_base_of<IUnknown, IFaces...>;
+    using any_unknown = any_base_of<IUnknown, IFaces...>;
 
     template <typename... IFaces>
-    constexpr bool is_unknown_v = is_unknown<IFaces...>::value;
+    constexpr bool any_unknown_v = any_unknown<IFaces...>::value;
 
 #pragma endregion
 
