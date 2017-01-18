@@ -97,6 +97,66 @@ namespace dhorn
 
 
     /*
+     * any_base_of
+     *
+     * An extension of `std::is_base_of` that applies to a variadic set of types where `value` is true if there exists
+     * any type `T` in the template parameter pack such that `std::is_base_of<Base, T>::value` is true.
+     */
+#pragma region any_base_of
+
+    template <typename Base, typename... Derived>
+    struct any_base_of;
+
+    template <typename Base, typename Ty>
+    struct any_base_of<Base, Ty> :
+        public std::is_base_of<Base, Ty>
+    {
+    };
+
+    template <typename Base, typename Ty, typename... Derived>
+    struct any_base_of<Base, Ty, Derived...> :
+        public std::disjunction<std::is_base_of<Base, Ty>, any_base_of<Base, Derived...>>
+    {
+    };
+
+    template <typename Base, typename... Derived>
+    constexpr bool any_base_of_v = any_base_of<Base, Derived...>::value;
+
+#pragma endregion
+
+
+
+    /*
+     * all_base_of
+     *
+     * An extension of `std::is_base_of` that applies to a variadic set of types where `value` is true if, for every
+     * type `T` in the template parameter pack, `std::is_base_of<Base, T>::value` is true.
+     */
+#pragma region all_base_of
+
+    template <typename Base, typename... Derived>
+    struct all_base_of;
+
+    template <typename Base, typename Ty>
+    struct all_base_of<Base, Ty> :
+        public std::is_base_of<Base, Ty>
+    {
+    };
+
+    template <typename Base, typename Ty, typename... Derived>
+    struct all_base_of<Base, Ty, Derived...> :
+        public std::conjunction<std::is_base_of<Base, Ty>, all_base_of<Base, Derived...>>
+    {
+    };
+
+    template <typename Base, typename... Derived>
+    constexpr bool all_base_of_v = all_base_of<Base, Derived...>::value;
+
+#pragma endregion
+
+
+
+    /*
      * array_size
      *
      * An easy, safe alternative to get the size of an array (in terms of number of elements, not byte size) as a

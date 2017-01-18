@@ -71,6 +71,72 @@ namespace dhorn
             }
         };
 
+        TEST_CLASS(AnyBaseOfTests)
+        {
+            struct foo {};
+            struct bar {};
+            struct foobar : public foo, public bar {};
+
+            TEST_METHOD(SingleTypeTest)
+            {
+                Assert::IsTrue(any_base_of<foo, foo>::value);
+                Assert::IsFalse(any_base_of<foo, bar>::value);
+                Assert::IsFalse(any_base_of<bar, foo>::value);
+
+                Assert::IsTrue(any_base_of<foo, foobar>::value);
+                Assert::IsTrue(any_base_of<bar, foobar>::value);
+                Assert::IsFalse(any_base_of<foobar, foo>::value);
+                Assert::IsFalse(any_base_of<foobar, bar>::value);
+            }
+
+            TEST_METHOD(MultipleTypeTest)
+            {
+                Assert::IsTrue(any_base_of<foo, bar, foobar>::value);
+                Assert::IsTrue(any_base_of<foo, foobar, bar>::value);
+                Assert::IsTrue(any_base_of<bar, foo, foobar>::value);
+                Assert::IsTrue(any_base_of<bar, foobar, foo>::value);
+
+                Assert::IsFalse(any_base_of<foobar, foo, bar>::value);
+
+                Assert::IsFalse(any_base_of<int, foo, bar, foobar>::value);
+                Assert::IsFalse(any_base_of<void, int, float, double, foo, bar, foobar>::value);
+            }
+        };
+
+        TEST_CLASS(AllBaseOfTests)
+        {
+            struct foo {};
+            struct bar {};
+            struct foobar : public foo, public bar {};
+
+            TEST_METHOD(SingleTypeTest)
+            {
+                Assert::IsTrue(all_base_of<foo, foo>::value);
+                Assert::IsFalse(all_base_of<foo, bar>::value);
+                Assert::IsFalse(all_base_of<bar, foo>::value);
+
+                Assert::IsTrue(all_base_of<foo, foobar>::value);
+                Assert::IsTrue(all_base_of<bar, foobar>::value);
+                Assert::IsFalse(all_base_of<foobar, foo>::value);
+                Assert::IsFalse(all_base_of<foobar, bar>::value);
+            }
+
+            TEST_METHOD(MultipleTypeTest)
+            {
+                Assert::IsFalse(all_base_of<foo, bar, foobar>::value);
+                Assert::IsFalse(all_base_of<foo, foobar, bar>::value);
+                Assert::IsFalse(all_base_of<bar, foo, foobar>::value);
+                Assert::IsFalse(all_base_of<bar, foobar, foo>::value);
+
+                Assert::IsTrue(all_base_of<foo, foo, foobar>::value);
+                Assert::IsTrue(all_base_of<foo, foobar, foo>::value);
+                Assert::IsTrue(all_base_of<bar, bar, foobar>::value);
+                Assert::IsTrue(all_base_of<bar, foobar, bar>::value);
+
+                Assert::IsFalse(all_base_of<foobar, foo, bar>::value);
+            }
+        };
+
         TEST_CLASS(IsCStringTests)
         {
             template <typename Ty>
