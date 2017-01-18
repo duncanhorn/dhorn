@@ -48,12 +48,6 @@ namespace dhorn
                 Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp1>);
             }
 
-            TEST_METHOD(ArraySizeTest)
-            {
-                char arr[100];
-                Assert::AreEqual(dhorn::array_size(arr), 100u);
-            }
-
             TEST_METHOD(ByteOffsetTest)
             {
                 struct foo

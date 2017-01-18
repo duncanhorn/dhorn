@@ -59,7 +59,7 @@ static void load_shaders(void)
         dhorn::experimental::d3d11::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
     };
     dhorn::experimental::throw_if_failed(globals::window.device()->CreateInputLayout(
-        inputDesc, dhorn::array_size(inputDesc),
+        inputDesc, std::size(inputDesc),
         vertexShaderBytecode.data(), vertexShaderBytecode.size(),
         &globals::input_layout));
 

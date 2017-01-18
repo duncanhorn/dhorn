@@ -157,20 +157,6 @@ namespace dhorn
 
 
     /*
-     * array_size
-     *
-     * An easy, safe alternative to get the size of an array (in terms of number of elements, not byte size) as a
-     * constexpr function.
-     */
-    template <typename Ty, size_t size>
-    inline constexpr size_t array_size(const Ty(&)[size])
-    {
-        return size;
-    }
-
-
-
-    /*
      * byte_offset
      *
      * An easy way to get the byte offset of a member within a struct. This works similar to the macro offsetof, but

@@ -370,7 +370,7 @@ namespace dhorn
             {
                 string_type str = test_string;
                 string_type s1(str.begin(), str.end());
-                Assert::AreEqual(dhorn::array_size(test_array), s1.length());
+                Assert::AreEqual(std::size(test_array), s1.length());
                 Assert::AreEqual(str.size(), s1.size());
                 Assert::IsTrue(std::equal(std::begin(test_array), std::end(test_array), s1.begin()));
             }
@@ -395,8 +395,8 @@ namespace dhorn
 
                 Assert::AreEqual(0u, str1.length());
                 Assert::AreEqual(0u, str1.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str2.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.size());
+                Assert::AreEqual(std::size(test_string) - 9, str2.length());
+                Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -410,14 +410,14 @@ namespace dhorn
                 dhorn::experimental::utf16_string str16 = buffer_utf16;
                 string_type str = str16;
                 Assert::AreEqual(str16.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf8) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf8) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf8), std::end(buffer_utf8), str.c_str()));
                 EnsureCorrectString(str);
 
                 dhorn::experimental::utf32_string str32 = buffer_utf32;
                 string_type str2 = str32;
                 Assert::AreEqual(str32.length(), str2.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf8) - 1, str2.size());
+                Assert::AreEqual(std::size(buffer_utf8) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf8), std::end(buffer_utf8), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -447,8 +447,8 @@ namespace dhorn
                 string_type str = test_string;
 
                 str = str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -463,8 +463,8 @@ namespace dhorn
                     str2 = std::move(str1);
                 }
 
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str2.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.size());
+                Assert::AreEqual(std::size(test_string) - 9, str2.length());
+                Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -481,14 +481,14 @@ namespace dhorn
                 dhorn::experimental::utf16_string str16 = buffer_utf16;
                 str = str16;
                 Assert::AreEqual(str16.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf8) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf8) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf8), std::end(buffer_utf8), str.c_str()));
                 EnsureCorrectString(str);
 
                 dhorn::experimental::utf32_string str32 = buffer_utf32;
                 str = str32;
                 Assert::AreEqual(str32.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf8) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf8) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf8), std::end(buffer_utf8), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -600,7 +600,7 @@ namespace dhorn
                 char expected[] = u8"\u1FE7\u09EA\U0010FE2B\u0080";
                 str = str.c_str() + 7;
                 Assert::AreEqual(4u, str.length());
-                Assert::AreEqual(dhorn::array_size(expected) - 1, str.size());
+                Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -619,8 +619,8 @@ namespace dhorn
                 }
 
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
-                Assert::AreEqual(dhorn::array_size(test_array), str.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_array), str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
                 EnsureCorrectString(str);
             }
 
@@ -630,15 +630,15 @@ namespace dhorn
                 dhorn::experimental::utf8_string other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = u8"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -649,8 +649,8 @@ namespace dhorn
                 dhorn::experimental::utf16_string other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -661,8 +661,8 @@ namespace dhorn
                 dhorn::experimental::utf32_string other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -691,23 +691,23 @@ namespace dhorn
                 char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = u8"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = other;
                 other = u8"test - ";
                 str = other + str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -718,8 +718,8 @@ namespace dhorn
                 char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -730,8 +730,8 @@ namespace dhorn
                 char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -759,7 +759,7 @@ namespace dhorn
 
                 str += str.c_str() + 7;
                 Assert::AreEqual(len + 4, str.length());
-                Assert::AreEqual(dhorn::array_size(expected) - 1, str.size());
+                Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -770,23 +770,23 @@ namespace dhorn
                 std::basic_string<char> other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = u8"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = other;
                 other = u8"test - ";
                 str = other + str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 9, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 9, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -800,7 +800,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 0; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 0; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *itr);
                     ++itr;
@@ -812,7 +812,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 1; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 1; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *++itr);
                 }
@@ -823,7 +823,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 0; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 0; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *itr++);
                 }
@@ -834,7 +834,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.end();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     --itr;
                     Assert::IsTrue(test_array[i - 1] == *itr);
@@ -846,7 +846,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.end();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *--itr);
                 }
@@ -858,7 +858,7 @@ namespace dhorn
 
                 auto itr = str.end();
                 --itr;
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *itr--);
                 }
@@ -879,7 +879,7 @@ namespace dhorn
                 }
 
                 Assert::IsTrue(itr == end);
-                Assert::AreEqual(dhorn::array_size(test_array), size);
+                Assert::AreEqual(std::size(test_array), size);
             }
 
             TEST_METHOD(ReverseIteratorTest)
@@ -887,7 +887,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.rbegin();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *itr);
                     ++itr;
@@ -1409,16 +1409,16 @@ namespace dhorn
                 char buff1[] = u8"This is a test";
                 char16_t buff1_utf16[] = u"This is a test";
                 string_type str1 = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.size());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str1.length());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str1.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf16), std::end(buff1_utf16), str1.c_str()));
                 EnsureCorrectString(str1);
 
                 char buff2[] = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 char16_t buff2_utf16[] = u"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 string_type str2 = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 2, str2.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 1, str2.size());
+                Assert::AreEqual(std::size(buff2_utf16) - 2, str2.length());
+                Assert::AreEqual(std::size(buff2_utf16) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf16), std::end(buff2_utf16), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -1427,15 +1427,15 @@ namespace dhorn
             {
                 char16_t buff1[] = u"This is a test";
                 string_type str1 = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.length());
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.size());
+                Assert::AreEqual(std::size(buff1) - 1, str1.length());
+                Assert::AreEqual(std::size(buff1) - 1, str1.size());
                 Assert::IsTrue(std::equal(std::begin(buff1), std::begin(buff1), str1.c_str()));
                 EnsureCorrectString(str1);
 
                 char16_t buff2[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 string_type str2 = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2) - 2, str2.length());
-                Assert::AreEqual(dhorn::array_size(buff2) - 1, str2.size());
+                Assert::AreEqual(std::size(buff2) - 2, str2.length());
+                Assert::AreEqual(std::size(buff2) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buff2), std::begin(buff2), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -1445,16 +1445,16 @@ namespace dhorn
                 char32_t buff1[] = U"This is a test";
                 char16_t buff1_utf16[] = u"This is a test";
                 string_type str1 = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str1.size());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str1.length());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str1.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf16), std::begin(buff1_utf16), str1.c_str()));
                 EnsureCorrectString(str1);
 
                 char32_t buff2[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 char16_t buff2_utf16[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 string_type str2 = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 2, str2.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 1, str2.size());
+                Assert::AreEqual(std::size(buff2_utf16) - 2, str2.length());
+                Assert::AreEqual(std::size(buff2_utf16) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf16), std::begin(buff2_utf16), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -1492,7 +1492,7 @@ namespace dhorn
             {
                 string_type str = test_string;
                 string_type s1(str.begin(), str.end());
-                Assert::AreEqual(dhorn::array_size(test_array), s1.length());
+                Assert::AreEqual(std::size(test_array), s1.length());
                 Assert::AreEqual(str.size(), s1.size());
                 Assert::IsTrue(std::equal(std::begin(test_array), std::end(test_array), s1.begin()));
             }
@@ -1517,8 +1517,8 @@ namespace dhorn
 
                 Assert::AreEqual(0u, str1.length());
                 Assert::AreEqual(0u, str1.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str2.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.size());
+                Assert::AreEqual(std::size(test_string) - 2, str2.length());
+                Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -1532,14 +1532,14 @@ namespace dhorn
                 dhorn::experimental::utf8_string str8 = buffer_utf8;
                 string_type str = str8;
                 Assert::AreEqual(str8.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf16) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf16) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf16), std::end(buffer_utf16), str.c_str()));
                 EnsureCorrectString(str);
 
                 dhorn::experimental::utf32_string str32 = buffer_utf32;
                 string_type str2 = str32;
                 Assert::AreEqual(str32.length(), str2.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf16) - 1, str2.size());
+                Assert::AreEqual(std::size(buffer_utf16) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf16), std::end(buffer_utf16), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -1569,8 +1569,8 @@ namespace dhorn
                 string_type str = test_string;
 
                 str = str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1585,8 +1585,8 @@ namespace dhorn
                     str2 = std::move(str1);
                 }
 
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str2.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.size());
+                Assert::AreEqual(std::size(test_string) - 2, str2.length());
+                Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -1603,14 +1603,14 @@ namespace dhorn
                 dhorn::experimental::utf8_string str8 = buffer_utf8;
                 str = str8;
                 Assert::AreEqual(str8.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf16) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf16) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf16), std::end(buffer_utf16), str.c_str()));
                 EnsureCorrectString(str);
 
                 dhorn::experimental::utf32_string str32 = buffer_utf32;
                 str = str32;
                 Assert::AreEqual(str32.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf16) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf16) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf16), std::end(buffer_utf16), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1623,16 +1623,16 @@ namespace dhorn
                 char buff1[] = u8"This is a test";
                 char16_t buff1_utf16[] = u"This is a test";
                 str = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str.size());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str.length());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf16), std::end(buff1_utf16), str.c_str()));
                 EnsureCorrectString(str);
 
                 char buff2[] = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 char16_t buff2_utf16[] = u"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 str = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 2, str.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 1, str.size());
+                Assert::AreEqual(std::size(buff2_utf16) - 2, str.length());
+                Assert::AreEqual(std::size(buff2_utf16) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf16), std::end(buff2_utf16), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1644,15 +1644,15 @@ namespace dhorn
 
                 char16_t buff1[] = u"This is a test";
                 str = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str.size());
+                Assert::AreEqual(std::size(buff1) - 1, str.length());
+                Assert::AreEqual(std::size(buff1) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff1), std::begin(buff1), str.c_str()));
                 EnsureCorrectString(str);
 
                 char16_t buff2[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 str = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2) - 2, str.length());
-                Assert::AreEqual(dhorn::array_size(buff2) - 1, str.size());
+                Assert::AreEqual(std::size(buff2) - 2, str.length());
+                Assert::AreEqual(std::size(buff2) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff2), std::begin(buff2), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1665,16 +1665,16 @@ namespace dhorn
                 char32_t buff1[] = U"This is a test";
                 char16_t buff1_utf16[] = u"This is a test";
                 str = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf16) - 1, str.size());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str.length());
+                Assert::AreEqual(std::size(buff1_utf16) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf16), std::begin(buff1_utf16), str.c_str()));
                 EnsureCorrectString(str);
 
                 char32_t buff2[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 char16_t buff2_utf16[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 str = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 2, str.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf16) - 1, str.size());
+                Assert::AreEqual(std::size(buff2_utf16) - 2, str.length());
+                Assert::AreEqual(std::size(buff2_utf16) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf16), std::begin(buff2_utf16), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1713,7 +1713,7 @@ namespace dhorn
                 char16_t expected[] = u"\u1FE7\u09EA\U0010FE2B\u0080";
                 str = str.c_str() + 7;
                 Assert::AreEqual(4u, str.length());
-                Assert::AreEqual(dhorn::array_size(expected) - 1, str.size());
+                Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1732,8 +1732,8 @@ namespace dhorn
                 }
 
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
-                Assert::AreEqual(dhorn::array_size(test_array), str.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_array), str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
                 EnsureCorrectString(str);
             }
 
@@ -1743,8 +1743,8 @@ namespace dhorn
                 dhorn::experimental::utf8_string other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1755,15 +1755,15 @@ namespace dhorn
                 dhorn::experimental::utf16_string other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = u"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1774,8 +1774,8 @@ namespace dhorn
                 dhorn::experimental::utf32_string other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1804,8 +1804,8 @@ namespace dhorn
                 char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1816,23 +1816,23 @@ namespace dhorn
                 char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = u"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = other;
                 other = u"test - ";
                 str = other + str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1843,8 +1843,8 @@ namespace dhorn
                 char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1872,7 +1872,7 @@ namespace dhorn
 
                 str += str.c_str() + 7;
                 Assert::AreEqual(len + 4, str.length());
-                Assert::AreEqual(dhorn::array_size(expected) - 1, str.size());
+                Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1883,23 +1883,23 @@ namespace dhorn
                 std::basic_string<char16_t> other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = u"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = other;
                 other = u"test - ";
                 str = other + str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 2, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 2, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -1913,7 +1913,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 0; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 0; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *itr);
                     ++itr;
@@ -1925,7 +1925,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 1; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 1; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *++itr);
                 }
@@ -1936,7 +1936,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 0; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 0; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *itr++);
                 }
@@ -1947,7 +1947,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.end();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     --itr;
                     Assert::IsTrue(test_array[i - 1] == *itr);
@@ -1959,7 +1959,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.end();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *--itr);
                 }
@@ -1971,7 +1971,7 @@ namespace dhorn
 
                 auto itr = str.end();
                 --itr;
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *itr--);
                 }
@@ -1992,7 +1992,7 @@ namespace dhorn
                 }
 
                 Assert::IsTrue(itr == end);
-                Assert::AreEqual(dhorn::array_size(test_array), size);
+                Assert::AreEqual(std::size(test_array), size);
             }
 
             TEST_METHOD(ReverseIteratorTest)
@@ -2000,7 +2000,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.rbegin();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *itr);
                     ++itr;
@@ -2522,16 +2522,16 @@ namespace dhorn
                 char buff1[] = u8"This is a test";
                 char32_t buff1_utf32[] = U"This is a test";
                 string_type str1 = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.size());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str1.length());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str1.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf32), std::end(buff1_utf32), str1.c_str()));
                 EnsureCorrectString(str1);
 
                 char buff2[] = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 char32_t buff2_utf32[] = U"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 string_type str2 = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.size());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str2.length());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf32), std::end(buff2_utf32), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -2541,16 +2541,16 @@ namespace dhorn
                 char16_t buff1[] = u"This is a test";
                 char32_t buff1_utf32[] = U"This is a test";
                 string_type str1 = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str1.size());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str1.length());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str1.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf32), std::begin(buff1_utf32), str1.c_str()));
                 EnsureCorrectString(str1);
 
                 char16_t buff2[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 char32_t buff2_utf32[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 string_type str2 = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str2.size());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str2.length());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf32), std::begin(buff2_utf32), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -2559,15 +2559,15 @@ namespace dhorn
             {
                 char32_t buff1[] = U"This is a test";
                 string_type str1 = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.length());
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str1.size());
+                Assert::AreEqual(std::size(buff1) - 1, str1.length());
+                Assert::AreEqual(std::size(buff1) - 1, str1.size());
                 Assert::IsTrue(std::equal(std::begin(buff1), std::begin(buff1), str1.c_str()));
                 EnsureCorrectString(str1);
 
                 char32_t buff2[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 string_type str2 = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2) - 1, str2.length());
-                Assert::AreEqual(dhorn::array_size(buff2) - 1, str2.size());
+                Assert::AreEqual(std::size(buff2) - 1, str2.length());
+                Assert::AreEqual(std::size(buff2) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buff2), std::begin(buff2), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -2605,7 +2605,7 @@ namespace dhorn
             {
                 string_type str = test_string;
                 string_type s1(str.begin(), str.end());
-                Assert::AreEqual(dhorn::array_size(test_array), s1.length());
+                Assert::AreEqual(std::size(test_array), s1.length());
                 Assert::AreEqual(str.size(), s1.size());
                 Assert::IsTrue(std::equal(std::begin(test_array), std::end(test_array), s1.begin()));
             }
@@ -2630,8 +2630,8 @@ namespace dhorn
 
                 Assert::AreEqual(0u, str1.length());
                 Assert::AreEqual(0u, str1.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.size());
+                Assert::AreEqual(std::size(test_string) - 1, str2.length());
+                Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -2645,14 +2645,14 @@ namespace dhorn
                 dhorn::experimental::utf8_string str8 = buffer_utf8;
                 string_type str = str8;
                 Assert::AreEqual(str8.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf32) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf32) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf32), std::end(buffer_utf32), str.c_str()));
                 EnsureCorrectString(str);
 
                 dhorn::experimental::utf16_string str16 = buffer_utf16;
                 string_type str2 = str16;
                 Assert::AreEqual(str16.length(), str2.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf32) - 1, str2.size());
+                Assert::AreEqual(std::size(buffer_utf32) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf32), std::end(buffer_utf32), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -2682,8 +2682,8 @@ namespace dhorn
                 string_type str = test_string;
 
                 str = str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2698,8 +2698,8 @@ namespace dhorn
                     str2 = std::move(str1);
                 }
 
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str2.size());
+                Assert::AreEqual(std::size(test_string) - 1, str2.length());
+                Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
                 EnsureCorrectString(str2);
             }
@@ -2716,14 +2716,14 @@ namespace dhorn
                 dhorn::experimental::utf8_string str8 = buffer_utf8;
                 str = str8;
                 Assert::AreEqual(str8.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf32) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf32) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf32), std::end(buffer_utf32), str.c_str()));
                 EnsureCorrectString(str);
 
                 dhorn::experimental::utf16_string str16 = buffer_utf16;
                 str = str16;
                 Assert::AreEqual(str16.length(), str.length());
-                Assert::AreEqual(dhorn::array_size(buffer_utf32) - 1, str.size());
+                Assert::AreEqual(std::size(buffer_utf32) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buffer_utf32), std::end(buffer_utf32), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2736,16 +2736,16 @@ namespace dhorn
                 char buff1[] = u8"This is a test";
                 char32_t buff1_utf32[] = U"This is a test";
                 str = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str.size());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str.length());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf32), std::end(buff1_utf32), str.c_str()));
                 EnsureCorrectString(str);
 
                 char buff2[] = u8"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 char32_t buff2_utf32[] = U"Gimme some utf-8 characters! \u1FE7\U0010C55A\u0080";
                 str = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str.size());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str.length());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf32), std::end(buff2_utf32), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2758,16 +2758,16 @@ namespace dhorn
                 char16_t buff1[] = u"This is a test";
                 char32_t buff1_utf32[] = U"This is a test";
                 str = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff1_utf32) - 1, str.size());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str.length());
+                Assert::AreEqual(std::size(buff1_utf32) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff1_utf32), std::begin(buff1_utf32), str.c_str()));
                 EnsureCorrectString(str);
 
                 char16_t buff2[] = u"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 char32_t buff2_utf32[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 str = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff2_utf32) - 1, str.size());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str.length());
+                Assert::AreEqual(std::size(buff2_utf32) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff2_utf32), std::begin(buff2_utf32), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2779,15 +2779,15 @@ namespace dhorn
 
                 char32_t buff1[] = U"This is a test";
                 str = buff1;
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff1) - 1, str.size());
+                Assert::AreEqual(std::size(buff1) - 1, str.length());
+                Assert::AreEqual(std::size(buff1) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff1), std::begin(buff1), str.c_str()));
                 EnsureCorrectString(str);
 
                 char32_t buff2[] = U"Gimme some utf-16 characters! \u1FE7\U0010C55A\u0080";
                 str = buff2;
-                Assert::AreEqual(dhorn::array_size(buff2) - 1, str.length());
-                Assert::AreEqual(dhorn::array_size(buff2) - 1, str.size());
+                Assert::AreEqual(std::size(buff2) - 1, str.length());
+                Assert::AreEqual(std::size(buff2) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(buff2), std::begin(buff2), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2826,7 +2826,7 @@ namespace dhorn
                 char32_t expected[] = U"\u1FE7\u09EA\U0010FE2B\u0080";
                 str = str.c_str() + 7;
                 Assert::AreEqual(4u, str.length());
-                Assert::AreEqual(dhorn::array_size(expected) - 1, str.size());
+                Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2845,8 +2845,8 @@ namespace dhorn
                 }
 
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
-                Assert::AreEqual(dhorn::array_size(test_array), str.length());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_array), str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
                 EnsureCorrectString(str);
             }
 
@@ -2856,8 +2856,8 @@ namespace dhorn
                 dhorn::experimental::utf8_string other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2868,8 +2868,8 @@ namespace dhorn
                 dhorn::experimental::utf16_string other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2880,15 +2880,15 @@ namespace dhorn
                 dhorn::experimental::utf32_string other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = U"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2917,8 +2917,8 @@ namespace dhorn
                 char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2929,8 +2929,8 @@ namespace dhorn
                 char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2941,23 +2941,23 @@ namespace dhorn
                 char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = U"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = other;
                 other = U"test - ";
                 str = other + str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2985,7 +2985,7 @@ namespace dhorn
 
                 str += str.c_str() + 7;
                 Assert::AreEqual(len + 4, str.length());
-                Assert::AreEqual(dhorn::array_size(expected) - 1, str.size());
+                Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -2996,23 +2996,23 @@ namespace dhorn
                 std::basic_string<char32_t> other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = U"test - ";
                 str = str + other;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
 
                 str = other;
                 other = U"test - ";
                 str = other + str;
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.size());
-                Assert::AreEqual(dhorn::array_size(test_string) - 1, str.length());
+                Assert::AreEqual(std::size(test_string) - 1, str.size());
+                Assert::AreEqual(std::size(test_string) - 1, str.length());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str.c_str()));
                 EnsureCorrectString(str);
             }
@@ -3026,7 +3026,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 0; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 0; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *itr);
                     ++itr;
@@ -3038,7 +3038,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 1; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 1; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *++itr);
                 }
@@ -3049,7 +3049,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.begin();
-                for (size_t i = 0; i < dhorn::array_size(test_array); ++i)
+                for (size_t i = 0; i < std::size(test_array); ++i)
                 {
                     Assert::IsTrue(test_array[i] == *itr++);
                 }
@@ -3060,7 +3060,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.end();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     --itr;
                     Assert::IsTrue(test_array[i - 1] == *itr);
@@ -3072,7 +3072,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.end();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *--itr);
                 }
@@ -3084,7 +3084,7 @@ namespace dhorn
 
                 auto itr = str.end();
                 --itr;
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *itr--);
                 }
@@ -3105,7 +3105,7 @@ namespace dhorn
                 }
 
                 Assert::IsTrue(itr == end);
-                Assert::AreEqual(dhorn::array_size(test_array), size);
+                Assert::AreEqual(std::size(test_array), size);
             }
 
             TEST_METHOD(ReverseIteratorTest)
@@ -3113,7 +3113,7 @@ namespace dhorn
                 string_type str = test_string;
 
                 auto itr = str.rbegin();
-                for (size_t i = dhorn::array_size(test_array); i > 0; --i)
+                for (size_t i = std::size(test_array); i > 0; --i)
                 {
                     Assert::IsTrue(test_array[i - 1] == *itr);
                     ++itr;
@@ -3634,10 +3634,10 @@ namespace dhorn
 
                 char16_t buff[] = u"This is a string much greater than 10 characters";
                 str = buff;
-                Assert::IsTrue(str.capacity() >= (dhorn::array_size(buff) - 1));
+                Assert::IsTrue(str.capacity() >= (std::size(buff) - 1));
 
-                str.reserve(dhorn::array_size(buff) + 10);
-                Assert::IsTrue(str.capacity() >= (dhorn::array_size(buff) + 10));
+                str.reserve(std::size(buff) + 10);
+                Assert::IsTrue(str.capacity() >= (std::size(buff) + 10));
             }
 
             TEST_METHOD(SwapTest)
