@@ -7,8 +7,9 @@
  */
 #pragma once
 
-#include <type_traits>
 #include <Unknwn.h>
+
+#include "../type_traits.h"
 
 namespace dhorn::com
 {
@@ -18,19 +19,7 @@ namespace dhorn::com
 #pragma region is_unknown
 
     template <typename... IFaces>
-    struct is_unknown;
-
-    template <typename IFace>
-    struct is_unknown<IFace> :
-        public std::is_base_of<IUnknown, IFace>
-    {
-    };
-
-    template <typename IFace, typename... IFaces>
-    struct is_unknown<IFace, IFaces...> :
-        public std::disjunction<is_unknown<IFace>, is_unknown<IFaces...>>
-    {
-    };
+    using is_unknown = any_base_of<IUnknown, IFaces...>;
 
     template <typename... IFaces>
     constexpr bool is_unknown_v = is_unknown<IFaces...>::value;
@@ -45,19 +34,7 @@ namespace dhorn::com
 #pragma region all_unknown
 
     template <typename... IFaces>
-    struct all_unknown;
-
-    template <typename IFace>
-    struct all_unknown<IFace> :
-        public is_unknown<IFace>
-    {
-    };
-
-    template <typename IFace, typename... IFaces>
-    struct all_unknown<IFace, IFaces...> :
-        public std::conjunction<is_unknown<IFace>, all_unknown<IFaces...>>
-    {
-    };
+    using all_unknown = all_base_of<IUnknown, IFaces...>;
 
     template <typename... IFaces>
     constexpr bool all_unknown_v = all_unknown<IFaces...>::value;
