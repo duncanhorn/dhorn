@@ -28,6 +28,9 @@
     <Filter Include="include\com">
       <UniqueIdentifier>{ca0289a9-9194-4a94-bacf-6d2593910c06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\winrt">
+      <UniqueIdentifier>{760e045b-0536-4ada-8fe5-a3aefc9829da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\experimental\animation.h">
@@ -182,6 +185,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\com\com_utility.h">
       <Filter>include\com</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\winrt\winrt_utility.h">
+      <Filter>include\winrt</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
