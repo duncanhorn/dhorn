@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="include\dhorn\bitmask.h" />
     <ClInclude Include="include\dhorn\com\com_utility.h" />
+    <ClInclude Include="include\dhorn\crtp_base.h" />
     <ClInclude Include="include\dhorn\experimental\algorithm.h" />
     <ClInclude Include="include\dhorn\experimental\animation.h" />
     <ClInclude Include="include\dhorn\experimental\animation_manager.h" />

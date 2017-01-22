@@ -189,5 +189,8 @@
     <ClInclude Include="include\dhorn\winrt\winrt_utility.h">
       <Filter>include\winrt</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\crtp_base.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
