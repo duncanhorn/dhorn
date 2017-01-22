@@ -127,6 +127,7 @@
     <ClCompile Include="CommandLineTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ComUtilityTests.cpp" />
+    <ClCompile Include="CRTPBaseTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
     <ClCompile Include="HStringTests.cpp" />
