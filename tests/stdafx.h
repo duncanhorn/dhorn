@@ -14,6 +14,7 @@
 // Headers for CppUnitTest
 #pragma warning(push)
 #pragma warning(disable:4499)
+#pragma warning(disable:4389) // Signed unsigned mismatch due to char16_t/char32_t being unsigned, but char is signed
 #include "CppUnitTest.h"
 #pragma warning(pop)
 

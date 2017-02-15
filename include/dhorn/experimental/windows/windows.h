@@ -458,7 +458,8 @@ namespace dhorn
             {
                 // maximum class name is 256 characters (as per MSDN)
                 TCHAR buffer[257];
-                details::make_call_fail_on_value<int>(GetClassName, window, buffer, 257);
+                auto pos = details::make_call_fail_on_value<int>(GetClassName, window, buffer, 257);
+                buffer[pos] = '\0';
 
                 return buffer;
             }

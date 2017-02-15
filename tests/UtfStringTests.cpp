@@ -7,6 +7,9 @@
  */
 #include "stdafx.h"
 
+#pragma warning(push)
+#pragma warning(disable:4389) // Signed unsigned mismatch due to char16_t/char32_t being unsigned, but char is signed
+
 #include <dhorn/type_traits.h>
 #include <dhorn/experimental/utf_string.h>
 
@@ -3652,3 +3655,5 @@ namespace dhorn
         };
     }
 }
+
+#pragma warning(pop)
