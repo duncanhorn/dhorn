@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="include\dhorn\bitmask.h" />
     <ClInclude Include="include\dhorn\com\com_utility.h" />
+    <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\experimental\algorithm.h" />
     <ClInclude Include="include\dhorn\experimental\animation.h" />
     <ClInclude Include="include\dhorn\experimental\animation_manager.h" />
@@ -154,7 +155,6 @@
     <ClInclude Include="include\dhorn\experimental\command_line.h" />
     <ClInclude Include="include\dhorn\experimental\com_ptr.h" />
     <ClInclude Include="include\dhorn\experimental\com_utility.h" />
-    <ClInclude Include="include\dhorn\experimental\console.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_window.h" />
     <ClInclude Include="include\dhorn\experimental\d3d\camera.h" />

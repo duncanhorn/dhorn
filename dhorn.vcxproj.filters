@@ -51,9 +51,6 @@
     <ClInclude Include="include\dhorn\experimental\command_line.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\console.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\discrete_animation.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -188,6 +185,9 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\winrt\winrt_utility.h">
       <Filter>include\winrt</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\console.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -21,11 +21,11 @@
 #include <iostream>
 #include <string>
 
-#include "../bitmask.h"
-#include "math.h"
-#include "../scope_guard.h"
+#include "bitmask.h"
+#include "experimental/math.h"
+#include "scope_guard.h"
 
-namespace dhorn::experimental
+namespace dhorn
 {
     /*
      * console_device
@@ -111,7 +111,7 @@ namespace dhorn::experimental
          * Returns the size of the console buffer that is visible in units of rows x columns as well as the
          * position of the console buffer that is visible in the top left corner as a (row, column) pair.
          */
-        static rect<int16_t> bounds(void)
+        static experimental::rect<int16_t> bounds(void)
         {
             auto info = details::console_info(console_device::output);
             return
@@ -129,7 +129,7 @@ namespace dhorn::experimental
          * Returns the size of the console buffer in units of rows x columns. Note how this differs from the
          * bounds, which only includes the size of the console buffer that is visible to the user.
          */
-        static size<int16_t> buffer_size(void)
+        static experimental::size<int16_t> buffer_size(void)
         {
             auto info = details::console_info(console_device::output);
             return{ info.dwSize.X, info.dwSize.Y };
@@ -141,7 +141,7 @@ namespace dhorn::experimental
          * Returns the position of the cursor within the console buffer. Note that this is the position relative to
          * the console buffer, and *not* the visible window (i.e. not relative to the bounds).
          */
-        static point<int16_t> cursor_position(void)
+        static experimental::point<int16_t> cursor_position(void)
         {
             auto info = details::console_info(console_device::output);
             return{ info.dwCursorPosition.X, info.dwCursorPosition.Y };

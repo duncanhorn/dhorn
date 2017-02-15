@@ -10,7 +10,7 @@
 
 int main(int argc, char **argv)
 {
-    dhorn::experimental::console::set_title(L"dhorn functional tests");
+    dhorn::console::set_title(L"dhorn functional tests");
     dhorn::experimental::array_reference<char *> args(argv + 1, argc - 1);
 
     for (auto arg : args)
@@ -21,7 +21,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            auto redErrors = dhorn::experimental::console::set_foreground(dhorn::experimental::console_color::red);
+            auto redErrors = dhorn::console::set_foreground(dhorn::console_color::red);
             std::cerr << "ERROR: Unknown argument \"" << arg << "\"" << std::endl;
         }
     }
