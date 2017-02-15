@@ -23,6 +23,11 @@ namespace dhorn::tests
             {
                 derived()->impl();
             }
+
+            void invoke() const
+            {
+                derived()->impl();
+            }
         };
 
         struct derived : public base<derived>
@@ -36,20 +41,37 @@ namespace dhorn::tests
 
             void impl()
             {
-                this->_func();
+                this->_func(false);
+            }
+
+            void impl() const
+            {
+                this->_func(true);
             }
 
         private:
 
-            std::function<void(void)> _func;
+            std::function<void(bool)> _func;
         };
 
         TEST_METHOD(InvokeTest)
         {
             int x = 0;
-            derived value([&]()
+            derived value([&](bool isConst)
             {
-                x = 42;
+                x = isConst ? 42 : 8;
+            });
+
+            value.invoke();
+            Assert::AreEqual(x, 8);
+        }
+
+        TEST_METHOD(InvokeConstTest)
+        {
+            int x = 0;
+            const derived value([&](bool isConst)
+            {
+                x = isConst ? 42 : 8;
             });
 
             value.invoke();
