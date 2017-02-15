@@ -7,13 +7,23 @@
  */
 #pragma once
 
+#if !(defined WIN32_LEAN_AND_MEAN) && !(defined DHORN_NO_WIN32_LEAN_AND_MEAN)
+#define WIN32_LEAN_AND_MEAN 1
+#endif
+
+#if !(defined NOMINMAX) && !(defined DHORN_NO_NOMINMAX)
+#define NOMINMAX 1
+#endif
+
+#include <Windows.h>
+
 #include <cstdint>
 #include <iostream>
+#include <string>
 
 #include "../bitmask.h"
 #include "math.h"
 #include "../scope_guard.h"
-#include "windows_exception.h"
 
 namespace dhorn::experimental
 {
@@ -74,7 +84,7 @@ namespace dhorn::experimental
             CONSOLE_SCREEN_BUFFER_INFO bufferInfo;
             if (!::GetConsoleScreenBufferInfo(device, &bufferInfo))
             {
-                throw_last_error();
+                throw std::system_error(::GetLastError(), std::system_category());
             }
 
             return bufferInfo;
@@ -144,7 +154,10 @@ namespace dhorn::experimental
          */
         static void set_title(const wchar_t *title)
         {
-            throw_last_error_if_false(!!::SetConsoleTitle(title));
+            if (!::SetConsoleTitle(title))
+            {
+                throw std::system_error(::GetLastError(), std::system_category());
+            }
         }
 
         /*
@@ -194,7 +207,7 @@ namespace dhorn::experimental
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();
-                throw_last_error();
+                throw std::system_error(::GetLastError(), std::system_category());
             }
 
             return result;
@@ -247,7 +260,7 @@ namespace dhorn::experimental
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();
-                throw_last_error();
+                throw std::system_error(::GetLastError(), std::system_category());
             }
 
             return result;
@@ -273,7 +286,7 @@ namespace dhorn::experimental
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();
-                throw_last_error();
+                throw std::system_error(::GetLastError(), std::system_category());
             }
 
             return result;
