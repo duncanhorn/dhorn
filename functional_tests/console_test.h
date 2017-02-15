@@ -227,5 +227,8 @@ private:
 
         std::cout << "Console foreground color: " << dhorn::console::foreground() << std::endl;
         std::cout << "Console background color: " << dhorn::console::background() << std::endl;
+
+        std::cout << "Setting console title to \"foobar\"" << std::endl;
+        dhorn::console::set_title(L"foobar");
     }
 };

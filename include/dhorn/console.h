@@ -22,7 +22,6 @@
 #include <string>
 
 #include "bitmask.h"
-#include "experimental/math.h"
 #include "scope_guard.h"
 
 namespace dhorn
@@ -75,6 +74,41 @@ namespace dhorn
 
 
 
+    /*
+     * console_bounds
+     */
+    struct console_bounds
+    {
+        int16_t x;
+        int16_t y;
+        int16_t width;
+        int16_t height;
+    };
+
+
+
+    /*
+     * console_buffer_size
+     */
+    struct console_buffer_size
+    {
+        int16_t width;
+        int16_t height;
+    };
+
+
+
+    /*
+     * console_cursor_position
+     */
+    struct console_cursor_position
+    {
+        int16_t x;
+        int16_t y;
+    };
+
+
+
 #pragma region Helpers
 
     namespace details
@@ -111,7 +145,7 @@ namespace dhorn
          * Returns the size of the console buffer that is visible in units of rows x columns as well as the
          * position of the console buffer that is visible in the top left corner as a (row, column) pair.
          */
-        static experimental::rect<int16_t> bounds(void)
+        static console_bounds bounds(void)
         {
             auto info = details::console_info(console_device::output);
             return
@@ -129,7 +163,7 @@ namespace dhorn
          * Returns the size of the console buffer in units of rows x columns. Note how this differs from the
          * bounds, which only includes the size of the console buffer that is visible to the user.
          */
-        static experimental::size<int16_t> buffer_size(void)
+        static console_buffer_size buffer_size(void)
         {
             auto info = details::console_info(console_device::output);
             return{ info.dwSize.X, info.dwSize.Y };
@@ -141,7 +175,7 @@ namespace dhorn
          * Returns the position of the cursor within the console buffer. Note that this is the position relative to
          * the console buffer, and *not* the visible window (i.e. not relative to the bounds).
          */
-        static experimental::point<int16_t> cursor_position(void)
+        static console_cursor_position cursor_position(void)
         {
             auto info = details::console_info(console_device::output);
             return{ info.dwCursorPosition.X, info.dwCursorPosition.Y };
