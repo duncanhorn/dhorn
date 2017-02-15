@@ -3,7 +3,7 @@
  *
  * console.h
  *
- * Utility functions for dealing with console output. The primary 
+ * Utility functions for dealing with console output.
  */
 #pragma once
 
@@ -290,7 +290,7 @@ namespace dhorn
             });
 
             info.wAttributes = clear_flag(info.wAttributes, 0x00F0);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(color) << 4);
+            info.wAttributes = set_flag(info.wAttributes, static_cast<uint16_t>(static_cast<uint16_t>(color) << 4));
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();
@@ -315,8 +315,8 @@ namespace dhorn
             });
 
             info.wAttributes = clear_flag(info.wAttributes, 0x00FF);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(foregroundColor));
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(backgroundColor) << 4);
+            info.wAttributes = set_flag(info.wAttributes, static_cast<uint16_t>(foregroundColor));
+            info.wAttributes = set_flag(info.wAttributes, static_cast<uint16_t>(static_cast<uint16_t>(backgroundColor) << 4));
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();
