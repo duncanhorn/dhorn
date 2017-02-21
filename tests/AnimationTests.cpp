@@ -30,7 +30,7 @@ namespace dhorn
                     value = val;
                 });
 
-                auto state = anim.on_update(duration(0));
+                const auto state = anim.on_update(duration(0));
                 Assert::IsTrue(state == dhorn::experimental::animation_state::completed);
                 Assert::AreEqual(42.0f, value);
             }

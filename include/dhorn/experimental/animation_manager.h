@@ -190,7 +190,7 @@ namespace dhorn
 
             ~animation_manager(void)
             {
-                for (auto &pair : this->_animationInfo)
+                for (const auto &pair : this->_animationInfo)
                 {
                     pair.second.notify_destroyed();
                 }
@@ -353,7 +353,7 @@ namespace dhorn
 
             bool TryRemove(const AnimationMap::iterator &pos)
             {
-                auto &info = pos->second;
+                const auto &info = pos->second;
                 if (!info.has_references && details::is_complete(info.state))
                 {
                     this->_animationInfo.erase(pos);
