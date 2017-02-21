@@ -330,7 +330,7 @@ namespace dhorn::experimental
 
                 emplace_task(priority, std::move(func));
 
-                if ((this->_waitingThreads == 0) && (this->_threads.size() < this->_maxThreads))
+                if ((this->_waitingThreads < this->_taskList.size()) && (this->_threads.size() < this->_maxThreads))
                 {
                     create_thread();
                 }
@@ -343,6 +343,12 @@ namespace dhorn::experimental
              */
 #pragma region Thread Pool Configuration
 
+            size_t get_max_waiting_threads() const
+            {
+                std::lock_guard<std::mutex> guard(this->_mutex);
+                return this->_maxWaitingThreads;
+            }
+
             void change_max_waiting_threads(size_t value)
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
@@ -350,6 +356,12 @@ namespace dhorn::experimental
 
                 this->_maxWaitingThreads = value;
                 ensure_thread_count();
+            }
+
+            size_t get_max_threads() const
+            {
+                std::lock_guard<std::mutex> guard(this->_mutex);
+                return this->_maxThreads;
             }
 
             void change_max_threads(size_t value)
@@ -364,6 +376,12 @@ namespace dhorn::experimental
 
                 this->_maxThreads = value;
                 ensure_thread_count();
+            }
+
+            size_t get_min_threads() const
+            {
+                std::lock_guard<std::mutex> guard(this->_mutex);
+                return this->_minThreads;
             }
 
             void change_min_threads(size_t value)
@@ -406,9 +424,19 @@ namespace dhorn::experimental
                     {
                         std::lock_guard<std::mutex> guard(sharedThis->_mutex);
 
-                        // NOTE: If there's an ongoing call to join, _threads will be empty, in which case the call to
-                        // erase will no-op, so don't assert/fail if this does nothing
-                        sharedThis->_threads.erase(std::this_thread::get_id());
+                        auto itr = sharedThis->_threads.find(std::this_thread::get_id());
+                        if (itr != std::end(sharedThis->_threads))
+                        {
+                            // We won't be calling join, so we need to let the std::thread destruct nicely
+                            itr->second.detach();
+                            sharedThis->_threads.erase(itr);
+                        }
+                        else
+                        {
+                            // It must be the case that we are shutting down
+                            assert(!sharedThis->_running);
+                            assert(sharedThis->_threads.empty());
+                        }
                     });
 
                     // If the creation behavior throws, std::terminate gets called (via standard), so it's not necessary
@@ -536,8 +564,15 @@ namespace dhorn::experimental
             {
                 assert_locked();
 
-                // If the entire thread pool has been shut down, notify all threads to shut down
-                if (!this->_running)
+                // If the thread pool has been force terminated, shutdown all threads
+                if (this->_terminate)
+                {
+                    return true;
+                }
+
+                // If the thread pool has been shut down, but not forcefully terminated, we let all queued up tasks
+                // complete, so only shut down if there are no more tasks to execute
+                if (!this->_running && this->_taskList.empty())
                 {
                     return true;
                 }
@@ -586,6 +621,7 @@ namespace dhorn::experimental
             void emplace_task(thread_pool_priority priority, std::function<void(void)> func)
             {
                 assert_locked();
+                assert(this->_running);
 
                 // First do the insertion. This will be used to update end iterators if necessary
                 task_list::iterator insertPos;
@@ -643,7 +679,10 @@ namespace dhorn::experimental
             mutable std::mutex _mutex;
             std::condition_variable _taskAvailable;
 
+            // 
             bool _running = true;
+            bool _terminate = false;
+
             std::unordered_map<std::thread::id, std::thread> _threads;
 
             // Min/max number of threads allowed
@@ -685,7 +724,10 @@ namespace dhorn::experimental
          * Constructor(s)/Destructor
          */
         basic_thread_pool() :
-            _impl(std::make_shared<impl>(this->_minThreads, this->_maxThreads, this->_maxAvailableThreads))
+            _impl(std::make_shared<impl>(
+                Traits::initial_min_threads(),
+                Traits::initial_max_threads(),
+                Traits::initial_max_available_threads()))
         {
         }
 
@@ -714,11 +756,15 @@ namespace dhorn::experimental
          */
         void join()
         {
+            // Shuts down the thread pool, but allows all running and queued tasks to complete, blocking execution until
+            // all tasks are complete and all threads termiante
             this->_impl->join();
         }
 
         void detach()
         {
+            // Shuts down the thread pool, but allows all running and queued tasks to complete in the background. I.e.
+            // does _not_ block execution.
             this->_impl->detach();
         }
 
@@ -727,6 +773,8 @@ namespace dhorn::experimental
         /*
          * Task Submission
          */
+#pragma region Task Submission
+
         template <typename Func>
         void submit(Func&& func)
         {
@@ -777,6 +825,8 @@ namespace dhorn::experimental
             return future;
         }
 
+#pragma endregion
+
 
 
         /*
@@ -786,41 +836,32 @@ namespace dhorn::experimental
 
         size_t max_available_threads() const
         {
-            std::shared_lock<std::shared_mutex> lock(this->_mutex);
-            return this->_maxAvailableThreads;
+            return this->_impl->get_max_waiting_threads();
         }
 
-        void set_max_available_threads(size_t value) const
+        void set_max_available_threads(size_t value)
         {
-            std::lock_guard<std::shared_mutex> guard(this->_mutex);
             this->_impl->change_max_waiting_threads(value);
-            this->_maxAvailableThreads = value;
         }
 
         size_t max_threads() const
         {
-            std::shared_lock<std::shared_mutex> lock(this->_mutex);
-            return this->_maxThreads;
+            return this->_impl->get_max_threads();
         }
 
         void set_max_threads(size_t value)
         {
-            std::lock_guard<std::shared_mutex> guard(this->_mutex);
             this->_impl->change_max_threads(value);
-            this->_maxThreads = value;
         }
 
         size_t min_threads() const
         {
-            std::shared_lock<std::shared_mutex> lock(this->_mutex);
-            return this->_minThreads;
+            return this->_impl->get_min_threads();
         }
 
         void set_min_threads(size_t value)
         {
-            std::lock_guard<std::shared_mutex> guard(this->_mutex);
             this->_impl->change_min_threads(value);
-            this->_minThreads = value;
         }
 
 #pragma endregion
@@ -828,12 +869,6 @@ namespace dhorn::experimental
 
 
     private:
-
-        mutable std::shared_mutex _mutex;
-
-        size_t _minThreads = Traits::initial_min_threads();
-        size_t _maxThreads = Traits::initial_max_threads();
-        size_t _maxAvailableThreads = Traits::initial_max_available_threads();
 
         std::shared_ptr<impl> _impl;
     };
