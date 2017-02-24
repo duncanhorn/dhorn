@@ -56,9 +56,6 @@
     <ClCompile Include="MessageQueueTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TaskPoolTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="UniqueAnyTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -157,7 +157,6 @@
     </ClCompile>
     <ClCompile Include="StringTests.cpp" />
     <ClCompile Include="SynchronizedObjectTests.cpp" />
-    <ClCompile Include="TaskPoolTests.cpp" />
     <ClCompile Include="ThreadPoolTests.cpp" />
     <ClCompile Include="TreeTests.cpp" />
     <ClCompile Include="TypeTraitsTests.cpp" />
