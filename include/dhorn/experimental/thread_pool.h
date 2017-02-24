@@ -43,6 +43,7 @@
 #include <unordered_map>
 
 #include "../debug.h"
+#include "../functional.h"
 #include "../scope_guard.h"
 
 namespace dhorn::experimental
@@ -246,13 +247,17 @@ namespace dhorn::experimental
                 _maxThreads(maxThreads),
                 _maxWaitingThreads(maxWaiting)
             {
-                std::lock_guard<std::mutex> guard(this->_mutex); // Since we assert
-                ensure_thread_count();
             }
 
             // No copies allowed
             thread_pool_impl(const thread_pool_impl&) = delete;
             thread_pool_impl& operator=(const thread_pool_impl&) = delete;
+
+            void start()
+            {
+                std::lock_guard<std::mutex> guard(this->_mutex); // Since we assert
+                ensure_thread_count();
+            }
 
 
 
@@ -262,7 +267,7 @@ namespace dhorn::experimental
             size_t count() const
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
-                return this->_threads.size();
+                return this->_threadCount;
             }
 
 
@@ -330,7 +335,7 @@ namespace dhorn::experimental
 
                 emplace_task(priority, std::move(func));
 
-                if ((this->_waitingThreads < this->_taskList.size()) && (this->_threads.size() < this->_maxThreads))
+                if ((this->_waitingThreads < this->_taskList.size()) && (this->_threadCount < this->_maxThreads))
                 {
                     create_thread();
                 }
@@ -463,6 +468,7 @@ namespace dhorn::experimental
 
                 // Threads start out as waiting
                 ++this->_waitingThreads;
+                ++this->_threadCount;
 
                 this->_threads.emplace(thread.get_id(), std::move(thread));
             }
@@ -474,10 +480,10 @@ namespace dhorn::experimental
 
                 // We can be in one of three scenarios: either we have too few threads, too many threads, or an
                 // acceptable number of threads executing.
-                if (this->_threads.size() < this->_minThreads)
+                if (this->_threadCount < this->_minThreads)
                 {
                     // This is the first case from above
-                    while (this->_threads.size() < this->_minThreads)
+                    while (this->_threadCount < this->_minThreads)
                     {
                         // We're eagerly creating threads, meaning we have no work for them to perform when they start
                         create_thread();
@@ -493,13 +499,13 @@ namespace dhorn::experimental
                     // shut down five threads. The opposite is of course also possible where we are five over the max
                     // total allowance, but only one over the max waiting allowance, in which case we'll still want to
                     // shut down five threads.
-                    auto excessThreads = (this->_threads.size() > this->_maxThreads) ?
-                        (this->_threads.size() - this->_maxThreads) : 0;
+                    auto excessThreads = (this->_threadCount > this->_maxThreads) ?
+                        (this->_threadCount - this->_maxThreads) : 0;
                     auto excessWaiting = (this->_waitingThreads > this->_maxWaitingThreads) ?
                         (this->_waitingThreads - this->_maxWaitingThreads) : 0;
 
                     // We can't shut down more than the min number of threads
-                    excessWaiting = std::min(excessWaiting, this->_threads.size() - this->_minThreads);
+                    excessWaiting = std::min(excessWaiting, this->_threadCount - this->_minThreads);
 
                     // We want to shut down whatever the maximum is. That said, we can't just shut down in-progress
                     // threads. Instead, we have to wait for them to stop processing their current task, at which point
@@ -549,6 +555,11 @@ namespace dhorn::experimental
                 {
                     if (shutdown_thread())
                     {
+                        // Assume that the thread is going to shut down. We want to know this now rather than later so
+                        // that we don't accidentally shut down a different thread, or worse, not create a new thread
+                        // because we think that an existing thread will be able to service the task only for it to be
+                        // in the process of shutting down
+                        --this->_threadCount;
                         return thread_pool_task{ thread_pool_task_type::shutdown };
                     }
                     else if (!this->_taskList.empty())
@@ -578,7 +589,7 @@ namespace dhorn::experimental
                 }
 
                 // If we're over our thread quota, then we need to shut the caller down
-                if (this->_threads.size() > this->_maxThreads)
+                if (this->_threadCount > this->_maxThreads)
                 {
                     return true;
                 }
@@ -588,7 +599,7 @@ namespace dhorn::experimental
                 // this if either (1) we are at our minimum allowed number of threads, or (2) have available tasks to
                 // execute, since that will cause the thread to no longer be waiting
                 if (this->_taskList.empty() &&
-                    (this->_threads.size() > this->_minThreads) &&
+                    (this->_threadCount > this->_minThreads) &&
                     (this->_waitingThreads > this->_maxWaitingThreads))
                 {
                     return true;
@@ -684,6 +695,7 @@ namespace dhorn::experimental
             bool _terminate = false;
 
             std::unordered_map<std::thread::id, std::thread> _threads;
+            size_t _threadCount = 0;
 
             // Min/max number of threads allowed
             size_t _minThreads;
@@ -704,9 +716,34 @@ namespace dhorn::experimental
             task_list::iterator _highPriorityEnd = std::end(_taskList);
             task_list::iterator _normalPriorityEnd = std::end(_taskList);
 
-            // Default constructed...
             CreationBehavior _creationBehavior;
         };
+
+
+
+        /*
+         * apply_set_value
+         *
+         * We can't invoke `std::promise<Ty>::set_value` with the result of a void-returning function, so we use this
+         * helper to handle such cases and either call the function first and then call the no-argument
+         * `std::promise<Ty>set_value` function (for the void case), or call `std::promise<Ty>set_value` with the result
+         * of the function (for all other cases).
+         *
+         * This variant of the function accepts a `std::tuple` and invokes the function via `std::apply`.
+         */
+        template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<std::is_void_v<Ty>, int> = 0>
+        void apply_set_value(std::promise<Ty>& promise, Func&& func, TupleTy&& tuple)
+        {
+            // TODO: Consier a static_assert ensuring that the result of func is void
+            std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple));
+            promise.set_value();
+        }
+
+        template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<!std::is_void_v<Ty>, int> = 0>
+        void apply_set_value(std::promise<Ty>& promise, Func&& func, TupleTy&& tuple)
+        {
+            promise.set_value(std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple)));
+        }
     }
 
 
@@ -729,6 +766,7 @@ namespace dhorn::experimental
                 Traits::initial_max_threads(),
                 Traits::initial_max_available_threads()))
         {
+            this->_impl->start();
         }
 
         // Can't copy of course
@@ -781,6 +819,12 @@ namespace dhorn::experimental
             submit(thread_pool_priority::normal, std::forward<Func>(func));
         }
 
+        template <typename Func, typename... Args>
+        void submit(Func&& func, Args&&... args)
+        {
+            submit(thread_pool_priority::normal, std::forward<Func>(func), std::forward<Args>(args)...);
+        }
+
         template <typename Func>
         void submit(thread_pool_priority priority, Func&& func)
         {
@@ -788,7 +832,21 @@ namespace dhorn::experimental
         }
 
         template <typename Func, typename... Args>
-        auto submit_for_result(Func&& func, Args&&... args)
+        void submit(thread_pool_priority priority, Func&& func, Args&&... args)
+        {
+            submit(priority,
+                [
+                    func = std::forward<Func>(func),
+                    args = std::make_tuple(std::forward<Args>(args)...)
+                ]() mutable
+            {
+                std::apply(std::move(func), std::move(args));
+            });
+        }
+
+        template <typename Func, typename... Args>
+        auto submit_for_result(Func&& func, Args&&... args) ->
+            std::future<std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>>
         {
             return submit_for_result(
                 thread_pool_priority::normal,
@@ -797,30 +855,32 @@ namespace dhorn::experimental
         }
 
         template <typename Func, typename... Args>
-        auto submit_for_result(thread_pool_priority priority, Func&& func, Args&&... args)
+        auto submit_for_result(thread_pool_priority priority, Func&& func, Args&&... args) ->
+            std::future<std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>>
         {
             using result_type = std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>;
             std::promise<result_type> promise;
             auto future = promise.get_future();
 
-            submit(priority,
+            submit(priority, make_lambda_shared(
                 [
                     promise = std::move(promise),
                     func = std::forward<Func>(func),
-                    args = std::forward<Args>(args)...
-                ]()
+                    //args = std::forward<Args>(args)
+                    args = std::make_tuple(std::forward<Args>(args)...)
+                ]() mutable
             {
                 // Let the caller be the one to handle any exceptions
                 try
                 {
-                    promise.set_value(func(std::move(args)...));
+                    details::apply_set_value(promise, std::move(func), std::move(args));
                 }
                 catch (...)
                 {
                     // If set_exception throws, let it propagate down
                     promise.set_exception(std::current_exception());
                 }
-            });
+            }));
 
             return future;
         }

@@ -211,6 +211,7 @@
     <ClInclude Include="include\dhorn\experimental\windows\windows.h" />
     <ClInclude Include="include\dhorn\experimental\windows_exception.h" />
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h" />
+    <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="include\dhorn\scope_guard.h" />
     <ClInclude Include="include\dhorn\string.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />

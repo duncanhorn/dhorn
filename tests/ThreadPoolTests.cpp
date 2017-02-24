@@ -293,25 +293,26 @@ namespace dhorn::tests
                 });
 
                 // Submit in this order: NLLHNH
-                pool.submit(thread_pool_priority::normal, [&]()
-                {
-                    array[index++] = 2;
-                });
+                // Submit in this order: LNNHLH
                 pool.submit(thread_pool_priority::low, [&]()
                 {
                     array[index++] = 4;
                 });
-                pool.submit(thread_pool_priority::low, [&]()
+                pool.submit(thread_pool_priority::normal, [&]()
                 {
-                    array[index++] = 5;
+                    array[index++] = 2;
+                });
+                pool.submit(thread_pool_priority::normal, [&]()
+                {
+                    array[index++] = 3;
                 });
                 pool.submit(thread_pool_priority::high, [&]()
                 {
                     array[index++] = 0;
                 });
-                pool.submit(thread_pool_priority::normal, [&]()
+                pool.submit(thread_pool_priority::low, [&]()
                 {
-                    array[index++] = 3;
+                    array[index++] = 5;
                 });
                 pool.submit(thread_pool_priority::high, [&]()
                 {
@@ -336,6 +337,129 @@ namespace dhorn::tests
             Assert::AreEqual(5u, array[5]);
 
             pool.join();
+        }
+
+        TEST_METHOD(SingleThreadThreadPoolConstructionTest)
+        {
+            single_thread_thread_pool pool;
+            Assert::AreEqual(1u, pool.count());
+            pool.join();
+        }
+
+        TEST_METHOD(JoinTest)
+        {
+            single_thread_thread_pool pool;
+            size_t count = 0;
+            std::mutex mutex;
+
+            const size_t loop_count = 100;
+            {
+                std::lock_guard<std::mutex> guard(mutex);
+                for (size_t i = 0; i < loop_count; ++i)
+                {
+                    pool.submit([&]()
+                    {
+                        std::lock_guard<std::mutex> guard(mutex);
+                        ++count;
+                    });
+                }
+            }
+
+            pool.join();
+
+            // Should have had the chance to complete
+            Assert::AreEqual(loop_count, count);
+        }
+
+        TEST_METHOD(SubmitForResultTest)
+        {
+            thread_pool pool;
+
+            auto future = pool.submit_for_result([]()
+            {
+                // Simulate a long-ish running task
+                std::this_thread::sleep_for(10ms);
+                return 42;
+            });
+
+            Assert::AreEqual(42, future.get());
+
+            // If we throw an exception, the caller should be the one to handle it
+            future = pool.submit_for_result([]() -> int
+            {
+                throw std::exception();
+            });
+
+            try
+            {
+                future.get();
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::exception&)
+            {
+            }
+
+            pool.join();
+        }
+
+        TEST_METHOD(DontCopyTest)
+        {
+            object_counter::reset();
+
+            thread_pool pool;
+
+            // Any of the submit functions should not cause a copy to occur
+            pool.submit([obj = object_counter{}](){});
+            pool.submit(thread_pool_priority::high, [obj = object_counter{}](){});
+            pool.submit_for_result([obj = object_counter{}](){});
+            pool.submit_for_result(thread_pool_priority::high, [obj = object_counter{}](){});
+
+            // Now test the variants that accept args
+            pool.submit([obj = object_counter{}](const object_counter&){}, object_counter{});
+            pool.submit(thread_pool_priority::low, [obj = object_counter{}](const object_counter&){}, object_counter{});
+            pool.submit_for_result([obj = object_counter{}](const object_counter&){}, object_counter{});
+            pool.submit_for_result(thread_pool_priority::low, [obj = object_counter{}](const object_counter&){}, object_counter{});
+
+            pool.join();
+
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            // All instances should be destroyed, too
+            Assert::AreEqual(0u, object_counter::instance_count);
+        }
+
+        TEST_METHOD(InvokeWithArgsTest)
+        {
+            thread_pool pool;
+            std::mutex mutex;
+
+            int value = 0;
+            std::future<size_t> future;
+            {
+                std::lock_guard<std::mutex> guard(mutex);
+
+                // Create a string and make sure its destructor is run before the task can make progress so that we can
+                // validate that we are passing a copy of the string, not a reference
+                auto str = "foobar"s;
+                pool.submit([&mutex, &value](const std::string& str)
+                {
+                    std::lock_guard<std::mutex> guard(mutex);
+                    value = str.length();
+                }, str);
+
+                future = pool.submit_for_result([&mutex](const std::string& str)
+                {
+                    std::lock_guard<std::mutex> guard(mutex);
+                    return str.length();
+                }, str);
+
+                str.clear();
+            }
+
+            pool.join();
+
+            Assert::AreEqual(6, value);
+            Assert::AreEqual(6u, future.get());
         }
     };
 }
