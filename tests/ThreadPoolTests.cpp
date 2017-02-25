@@ -371,6 +371,29 @@ namespace dhorn::tests
             Assert::AreEqual(loop_count, count);
         }
 
+        TEST_METHOD(DetachTest)
+        {
+            // Testing framework becomes unhappy if we end with threads running, so make sure we can wait
+            std::future<void> future;
+
+            {
+                thread_pool pool;
+
+                std::mutex mutex;
+                std::lock_guard<std::mutex> guard(mutex);
+
+                future = pool.submit_for_result([&]()
+                {
+                    // Can't complete until test is over
+                    std::lock_guard<std::mutex> guard(mutex);
+                });
+
+                pool.detach();
+            }
+
+            future.wait();
+        }
+
         TEST_METHOD(SubmitForResultTest)
         {
             thread_pool pool;
@@ -460,6 +483,61 @@ namespace dhorn::tests
 
             Assert::AreEqual(6, value);
             Assert::AreEqual(6u, future.get());
+        }
+
+        TEST_METHOD(ManyThreadsTest)
+        {
+            thread_pool pool;
+            std::mutex mutex;
+
+            {
+                std::lock_guard<std::mutex> guard(mutex);
+
+                // Queue up a bunch of work while we hold the lock to guarantee that they won't complete
+                for (size_t i = 0; i < 1000; ++i)
+                {
+                    pool.submit([&]()
+                    {
+                        std::lock_guard<std::mutex> guard(mutex);
+                    });
+                }
+
+                auto value = pool.submit_for_result([]() {return 42; }).get();
+                Assert::AreEqual(42, value);
+            }
+
+            pool.join();
+        }
+
+        TEST_METHOD(CreationBehaviorTest)
+        {
+            static int value = 0;
+            struct test_behavior
+            {
+                inline auto operator()()
+                {
+                    value = 8;
+                    return make_scope_guard([&]()
+                    {
+                        value = 42;
+                    });
+                }
+            };
+            struct test_traits : public default_thread_pool_traits
+            {
+                using creation_behavior = test_behavior;
+            };
+
+            basic_thread_pool<test_traits> pool;
+
+            // Construction should not have created any threads
+            Assert::AreEqual(0, value);
+
+            pool.submit_for_result([](){}).wait();
+            Assert::AreEqual(8, value);
+
+            pool.join();
+            Assert::AreEqual(42, value);
         }
     };
 }

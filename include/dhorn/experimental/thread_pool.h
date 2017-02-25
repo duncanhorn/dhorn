@@ -9,7 +9,7 @@
  * schedule five units of work, then all five tasks are guaranteed to begin execution without the possiblity of needing
  * to wait on a previous unit of work to complete. Note, however, that this does _not_ imply that tasks scheduled when
  * there are no available threads are guaranteed to wait for a running task to complete. Instead, the number of running
- * threads is compared to the maximum nuber of allowed threads. If there are fewer running threads than maximally
+ * threads is compared to the maximum number of allowed threads. If there are fewer running threads than maximally
  * allowed, a new thread is created for the task and added to the set of running threads. By default, there is no max
  * number of threads that a thread_pool can create, so any work that is scheduled is guaranteed to not have to wait on
  * any prior work to complete before starting (though, of course, it may have to wait for a thread to spin up). If the
@@ -22,9 +22,9 @@
  *
  *      min_threads             The minimum number of threads allowed in the thread pool at any given time. Note that if
  *                              this value starts out as non-zero, then this number of threads will get created on
- *                              construction of the thread_pool
- *      max_threads             Already discussed. This is the maximum nuber of threads that the thread_pool will ever
- *                              have running at any one time
+ *                              construction of the thread_pool.
+ *      max_threads             Already discussed. This is the maximum nuber of threads that the thread_pool will create
+ *                              to service tasks.
  *      max_available_threads   The maximum number of threads that the thread_pool will allow at any given time that are
  *                              _not_ actively processing any work. I.e. this allows the thread_pool to start releasing
  *                              resources that are no longer actively being used.
@@ -173,7 +173,7 @@ namespace dhorn::experimental
 
                 // Compiler warns if we assign a value such as int to an otherwise unused variable, so make sure that we
                 // return a struct instead
-                struct nil {};
+                struct nil{};
                 return nil{};
             }
 
@@ -195,9 +195,6 @@ namespace dhorn::experimental
          */
         enum class thread_pool_task_type
         {
-            // Used for initialization of a thread without an initial task
-            no_op,
-
             // Lets the thread know that the task has valid work for it to execute
             execute,
 
@@ -253,6 +250,7 @@ namespace dhorn::experimental
             thread_pool_impl(const thread_pool_impl&) = delete;
             thread_pool_impl& operator=(const thread_pool_impl&) = delete;
 
+            // shared_from_this doesn't work during construction, so we need a separate 'start' function
             void start()
             {
                 std::lock_guard<std::mutex> guard(this->_mutex); // Since we assert
@@ -280,11 +278,7 @@ namespace dhorn::experimental
                 std::unordered_map<std::thread::id, std::thread> threads;
                 {
                     std::lock_guard<std::mutex> guard(this->_mutex);
-
-                    if (!this->_running)
-                    {
-                        throw std::invalid_argument("Thread pool has already been shut down");
-                    }
+                    validate_running();
 
                     this->_running = false;
                     this->_threads.swap(threads);
@@ -304,11 +298,7 @@ namespace dhorn::experimental
                 std::unordered_map<std::thread::id, std::thread> threads;
                 {
                     std::lock_guard<std::mutex> guard(this->_mutex);
-
-                    if (!this->_running)
-                    {
-                        throw std::invalid_argument("Thread pool has already been shut down");
-                    }
+                    validate_running();
 
                     this->_running = false;
                     this->_threads.swap(threads);
@@ -328,7 +318,7 @@ namespace dhorn::experimental
             /*
              * Task Submission
              */
-            void submit(thread_pool_priority priority, std::function<void(void)> func)
+            void submit(thread_pool_priority priority, std::function<void(void)>&& func)
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 validate_running();
@@ -459,7 +449,7 @@ namespace dhorn::experimental
                             task.operation();
                             break;
 
-                            // Ignore if the type is something else (e.g. no_op)
+                            // Ignore if the type is something else
                         default:
                             break;
                         }
@@ -575,14 +565,8 @@ namespace dhorn::experimental
             {
                 assert_locked();
 
-                // If the thread pool has been force terminated, shutdown all threads
-                if (this->_terminate)
-                {
-                    return true;
-                }
-
-                // If the thread pool has been shut down, but not forcefully terminated, we let all queued up tasks
-                // complete, so only shut down if there are no more tasks to execute
+                // Even if the thread pool has been shut down, we let all queued up tasks complete, so only shut down if
+                // there are no more tasks to execute
                 if (!this->_running && this->_taskList.empty())
                 {
                     return true;
@@ -595,7 +579,7 @@ namespace dhorn::experimental
                 }
 
                 // Otherwise, we need to be careful. The only other condition that would cause us to shut down the
-                // caller is if the number of waiting threads is over the allowed limit, however we want to avoid doing
+                // caller is if the number of waiting threads is over the allowed limit. However, we want to avoid doing
                 // this if either (1) we are at our minimum allowed number of threads, or (2) have available tasks to
                 // execute, since that will cause the thread to no longer be waiting
                 if (this->_taskList.empty() &&
@@ -614,7 +598,7 @@ namespace dhorn::experimental
                 assert(!this->_taskList.empty());
 
                 // If there are no high or normal priority tasks in the queue, make sure that their end iterators remain
-                // valid
+                // valid since we are about to remove the first element
                 if (this->_highPriorityEnd == std::begin(this->_taskList))
                 {
                     ++this->_highPriorityEnd;
@@ -629,7 +613,7 @@ namespace dhorn::experimental
                 return value;
             }
 
-            void emplace_task(thread_pool_priority priority, std::function<void(void)> func)
+            void emplace_task(thread_pool_priority priority, std::function<void(void)>&& func)
             {
                 assert_locked();
                 assert(this->_running);
@@ -689,10 +673,7 @@ namespace dhorn::experimental
 
             mutable std::mutex _mutex;
             std::condition_variable _taskAvailable;
-
-            // 
             bool _running = true;
-            bool _terminate = false;
 
             std::unordered_map<std::thread::id, std::thread> _threads;
             size_t _threadCount = 0;
@@ -734,7 +715,9 @@ namespace dhorn::experimental
         template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<std::is_void_v<Ty>, int> = 0>
         void apply_set_value(std::promise<Ty>& promise, Func&& func, TupleTy&& tuple)
         {
-            // TODO: Consier a static_assert ensuring that the result of func is void
+            static_assert(std::is_void_v<decltype(std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple)))>,
+                "Function return type expected to be void");
+
             std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple));
             promise.set_value();
         }

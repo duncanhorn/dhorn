@@ -14,11 +14,11 @@ namespace dhorn
     /*
      * make_lambda_shared
      *
-     * Wraps a lambda (or any function object, really) into a shared pointer so that it can be copied, or passed to a
+     * Wraps a lambda (or any function object, really) into a shared pointer so that it can be copied or passed to a
      * function/type that requires a copy-able function object (such as std::function).
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * auto foo = std::make_unique<Foo>();
-     * std::function<void(void)> = make_lambda_shared([foo = std::move(foo)]()
+     * std::function<void(void)> func = make_lambda_shared([foo = std::move(foo)]()
      * {
      *     // Use foo
      * });
