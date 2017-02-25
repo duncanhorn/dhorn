@@ -20,14 +20,14 @@ namespace dhorn
             foo(int value) : val(value) {}
             foo &operator=(int value) { this->val = value; return *this; }
 
-            bool operator==(foo &o) { return val == o.val; }
-            bool operator!=(foo &o) { return !(*this == o); }
+            bool operator==(const foo &o) { return val == o.val; }
+            bool operator!=(const foo &o) { return !(*this == o); }
 
             int val;
         };
 
-        bool operator<(foo lhs, foo rhs) { return lhs.val < rhs.val; }
-        bool operator>(foo lhs, foo rhs) { return lhs.val > rhs.val; }
+        constexpr bool operator<(const foo& lhs, const foo& rhs) { return lhs.val < rhs.val; }
+        constexpr bool operator>(const foo& lhs, const foo& rhs) { return lhs.val > rhs.val; }
 
         TEST_CLASS(MaxTests)
         {

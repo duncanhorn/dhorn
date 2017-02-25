@@ -122,7 +122,7 @@ namespace dhorn
 
             virtual void on_state_change(animation_state newState)
             {
-                auto oldState = this->_currentState;
+                const auto oldState = this->_currentState;
                 if (oldState != newState)
                 {
                     this->_currentState = newState;

@@ -121,7 +121,7 @@ namespace dhorn
 
             void invoke_all(Args ...args) const
             {
-                for (auto &pair : this->_eventTargets)
+                for (const auto &pair : this->_eventTargets)
                 {
                     pair.second(std::forward<Args>(args)...);
                 }

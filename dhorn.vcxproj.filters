@@ -96,9 +96,6 @@
     <ClInclude Include="include\dhorn\experimental\synchronized_object.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\task_pool.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\tree.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -187,6 +184,15 @@
       <Filter>include\winrt</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\console.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\debug.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\functional.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\thread_pool.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
