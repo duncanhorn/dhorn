@@ -198,7 +198,6 @@
     <ClInclude Include="include\dhorn\experimental\sockets.h" />
     <ClInclude Include="include\dhorn\experimental\socket_stream.h" />
     <ClInclude Include="include\dhorn\experimental\synchronized_object.h" />
-    <ClInclude Include="include\dhorn\experimental\thread_pool.h" />
     <ClInclude Include="include\dhorn\experimental\tree.h" />
     <ClInclude Include="include\dhorn\experimental\unique_any.h" />
     <ClInclude Include="include\dhorn\experimental\unique_event_cookie.h" />
@@ -213,6 +212,7 @@
     <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="include\dhorn\scope_guard.h" />
     <ClInclude Include="include\dhorn\string.h" />
+    <ClInclude Include="include\dhorn\thread_pool.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />

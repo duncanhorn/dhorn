@@ -42,11 +42,11 @@
 #include <thread>
 #include <unordered_map>
 
-#include "../debug.h"
-#include "../functional.h"
-#include "../scope_guard.h"
+#include "debug.h"
+#include "functional.h"
+#include "scope_guard.h"
 
-namespace dhorn::experimental
+namespace dhorn
 {
 #pragma region Creation Behaviors
 

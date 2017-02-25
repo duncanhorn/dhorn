@@ -8,11 +8,10 @@
 #include "stdafx.h"
 
 #include <array>
-#include <dhorn/experimental/thread_pool.h>
+#include <dhorn/thread_pool.h>
 
 using namespace std::literals;
 
-using namespace dhorn::experimental;
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace dhorn::tests
