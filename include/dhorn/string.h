@@ -8,6 +8,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <string>
 #include <vector>
 
@@ -149,6 +150,302 @@ namespace dhorn
             return std::any_of(begin, end, [&](CharT value) -> bool { return ch == value; });
         });
     }
+
+#pragma endregion
+
+
+
+    /*
+     * basic_null_terminated_string_iterator
+     *
+     * A forward iterator for traversing null terminated strings.
+     */
+#pragma region basic_null_terminated_string_iterator
+
+    template <typename CharT>
+    class basic_null_terminated_string_iterator
+    {
+    public:
+        /*
+         * Iterator Types
+         */
+        using value_type = CharT;
+        using reference = CharT&;
+        using pointer = CharT*;
+        using difference_type = std::ptrdiff_t;
+        using iterator_category = std::forward_iterator_tag;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        constexpr basic_null_terminated_string_iterator() :
+            _ptr(nullptr)
+        {
+        }
+
+        constexpr basic_null_terminated_string_iterator(CharT* ptr) :
+            _ptr(ptr)
+        {
+        }
+
+
+
+        /*
+         * ForwardIterator
+         */
+        basic_null_terminated_string_iterator& operator++() noexcept
+        {
+            assert(this->_ptr);
+            assert(*this->_ptr);
+            ++this->_ptr;
+            return *this;
+        }
+
+        basic_null_terminated_string_iterator operator++(int) noexcept
+        {
+            auto copy = *this;
+            ++(*this);
+            return copy;
+        }
+
+        reference operator*() noexcept
+        {
+            return *this->_ptr;
+        }
+
+        pointer operator->() noexcept
+        {
+            return this->_ptr;
+        }
+
+
+
+        /*
+         * Conversion
+         */
+        operator basic_null_terminated_string_iterator<const CharT>() const noexcept
+        {
+            return { this->_ptr };
+        }
+
+
+
+        /*
+         * Implementation Functions
+         */
+        bool end() const noexcept
+        {
+            return !this->_ptr || !*this->_ptr;
+        }
+
+        pointer data() const noexcept
+        {
+            return this->_ptr;
+        }
+
+
+
+    private:
+
+        CharT* _ptr;
+    };
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        std::enable_if_t<std::is_same_v<std::remove_const_t<LhsCharT>, std::remove_const_t<RhsCharT>>, int> = 0>
+    bool operator==(
+        basic_null_terminated_string_iterator<LhsCharT> lhs,
+        basic_null_terminated_string_iterator<RhsCharT> rhs) noexcept
+    {
+        return lhs.end() ? rhs.end() : (lhs.data() == rhs.data());
+    }
+
+    template <
+        typename LhsCharT,
+        typename RhsCharT,
+        std::enable_if_t<std::is_same_v<std::remove_const_t<LhsCharT>, std::remove_const_t<RhsCharT>>, int> = 0>
+    bool operator!=(
+        basic_null_terminated_string_iterator<LhsCharT> lhs,
+        basic_null_terminated_string_iterator<RhsCharT> rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
+
+    using null_terminated_string_iterator = basic_null_terminated_string_iterator<char>;
+    using wnull_terminated_string_iterator = basic_null_terminated_string_iterator<wchar_t>;
+    using u16null_terminated_string_iterator = basic_null_terminated_string_iterator<char16_t>;
+    using u32null_terminated_string_iterator = basic_null_terminated_string_iterator<char32_t>;
+
+#pragma endregion
+
+
+
+    /*
+     * basic_null_terminated_string
+     *
+     * Similar to std::basic_string_view, but without the length component. Intended mostly for iteration purposes with
+     * basic_null_terminated_string_iterator.
+     */
+#pragma region basic_null_terminated_string
+
+    template <typename CharT>
+    class basic_null_terminated_string
+    {
+    public:
+        /*
+         * Types
+         */
+        using value_type = CharT;
+        using size_type = size_t;
+        using difference_type = std::ptrdiff_t;
+        using reference = CharT&;
+        using const_reference = const CharT&;
+        using pointer = CharT*;
+        using const_pointer = const CharT*;
+        using iterator = basic_null_terminated_string_iterator<CharT>;
+        using const_iterator = basic_null_terminated_string_iterator<const CharT>;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        constexpr basic_null_terminated_string() :
+            _ptr(nullptr)
+        {
+        }
+
+        constexpr basic_null_terminated_string(pointer ptr) :
+            _ptr(ptr)
+        {
+        }
+
+
+
+        /*
+         * Iterators
+         */
+        constexpr iterator begin() noexcept
+        {
+            return iterator(this->_ptr);
+        }
+
+        constexpr const_iterator begin() const noexcept
+        {
+            return const_iterator(this->_ptr);
+        }
+
+        constexpr const_iterator cbegin() const noexcept
+        {
+            return const_iterator(this->_ptr);
+        }
+
+        constexpr iterator end() noexcept
+        {
+            return iterator();
+        }
+
+        constexpr const_iterator end() const noexcept
+        {
+            return const_iterator();
+        }
+
+        constexpr const_iterator cend() const noexcept
+        {
+            return const_iterator();
+        }
+
+
+
+        /*
+         * Assignment
+         */
+        constexpr basic_null_terminated_string& operator=(basic_null_terminated_string other) noexcept
+        {
+            this->_ptr = other._ptr;
+            return *this;
+        }
+
+        template <
+            typename OtherCharT,
+            std::enable_if_t<std::is_same_v<std::remove_const_t<CharT>, OtherCharT>, int> = 0>
+        constexpr basic_null_terminated_string& operator=(basic_null_terminated_string<OtherCharT> other) noexcept
+        {
+            // Allow assignment of non-const to const
+            this->_ptr = other._ptr;
+            return *this;
+        }
+
+
+
+        /*
+         * Operators
+         */
+        constexpr operator basic_null_terminated_string<const CharT>() const noexcept
+        {
+            return basic_null_terminated_string<const CharT>(this->_ptr);
+        }
+
+        constexpr reference operator[](size_type pos) noexcept
+        {
+            return this->_ptr[pos];
+        }
+
+        constexpr const_reference operator[](size_type pos) const noexcept
+        {
+            return this->_ptr[pos];
+        }
+
+
+
+        /*
+         * String Functions
+         */
+        constexpr const_pointer c_str() const noexcept
+        {
+            return this->_ptr;
+        }
+
+        constexpr pointer data() noexcept
+        {
+            return this->_ptr;
+        }
+
+        constexpr const_pointer data() const noexcept
+        {
+            return this->_ptr;
+        }
+
+        constexpr bool empty() const noexcept
+        {
+            return !this->_ptr || !*this->_ptr;
+        }
+
+
+
+    private:
+
+        friend class basic_null_terminated_string<const CharT>;
+
+        pointer _ptr;
+    };
+
+    using null_terminated_string = basic_null_terminated_string<char>;
+    using wnull_terminated_string = basic_null_terminated_string<wchar_t>;
+    using u16null_terminated_string = basic_null_terminated_string<char16_t>;
+    using u32null_terminated_string = basic_null_terminated_string<char32_t>;
+
+#pragma endregion
+
+
+
+    /*
+     * starts_with
+     */
+#pragma region starts_with
 
 #pragma endregion
 }

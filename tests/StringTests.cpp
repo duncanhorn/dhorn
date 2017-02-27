@@ -190,5 +190,107 @@ namespace dhorn
 
 #pragma endregion
         };
+
+        TEST_CLASS(NullTerminatedStringTests)
+        {
+            TEST_METHOD(AssignmentTest)
+            {
+                // NOTE: Strictly a "does it compile" test
+                null_terminated_string str1;
+                null_terminated_string str2 = "foo";
+                str1 = str2;
+
+                basic_null_terminated_string<const char> constStr;
+                constStr = str1;
+                constStr = static_cast<const null_terminated_string>(str2);
+
+                basic_null_terminated_string<const char> otherConstStr;
+                otherConstStr = constStr;
+
+                str1 = static_cast<char*>("foobar");
+                constStr = static_cast<char*>("foobar");
+                constStr = static_cast<const char*>("foobar");
+            }
+
+            TEST_METHOD(IndexOperatorTest)
+            {
+                null_terminated_string str = "foo";
+                Assert::AreEqual('f', str[0]);
+                Assert::AreEqual('o', str[1]);
+                Assert::AreEqual('o', str[2]);
+                Assert::AreEqual('\0', str[3]);
+            }
+
+            TEST_METHOD(EmptyTest)
+            {
+                null_terminated_string str;
+                Assert::IsTrue(str.empty());
+
+                str = "";
+                Assert::IsTrue(str.empty());
+
+                str = "a";
+                Assert::IsFalse(str.empty());
+            }
+
+            TEST_METHOD(IterationTest)
+            {
+                char* testString = "foobar";
+                std::string str;
+                for (auto ch : null_terminated_string(testString))
+                {
+                    str.push_back(ch);
+                }
+
+                Assert::IsTrue(str == testString);
+            }
+
+            template <typename CharT>
+            void BasicIterationTestImpl(CharT* str)
+            {
+                std::basic_string<std::remove_const_t<CharT>> result;
+                std::for_each(
+                    basic_null_terminated_string_iterator<CharT>(str),
+                    basic_null_terminated_string_iterator<CharT>(),
+                    [&](CharT value)
+                {
+                    result.push_back(value);
+                });
+
+                Assert::IsTrue(str == result);
+            }
+
+            TEST_METHOD(BasicIterationTest)
+            {
+                BasicIterationTestImpl("foo");
+                BasicIterationTestImpl(L"foo");
+                BasicIterationTestImpl(u8"foo");
+                BasicIterationTestImpl(u"foo");
+                BasicIterationTestImpl(U"foo");
+            }
+
+            TEST_METHOD(IteratorConstConversionTest)
+            {
+                // Strictly a "does it compile" test
+                basic_null_terminated_string_iterator<char> itr("foo");
+                basic_null_terminated_string_iterator<const char> constItr = itr;
+            }
+
+            TEST_METHOD(IteratorConstComparisonTest)
+            {
+                char* str = "foo";
+                basic_null_terminated_string_iterator<char> itr(str);
+                basic_null_terminated_string_iterator<const char> constItr(str);
+
+                for (; itr != null_terminated_string_iterator(); ++itr, ++constItr)
+                {
+                    Assert::IsTrue(itr == constItr);
+                    Assert::IsTrue(constItr == itr);
+
+                    Assert::IsFalse(itr != constItr);
+                    Assert::IsFalse(constItr != itr);
+                }
+            }
+        };
     }
 }
