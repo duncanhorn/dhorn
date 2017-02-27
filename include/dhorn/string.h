@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cassert>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace dhorn
@@ -446,6 +447,53 @@ namespace dhorn
      * starts_with
      */
 #pragma region starts_with
+
+    template <typename RangeItr, typename CompareItr>
+    inline bool starts_with(RangeItr rangeBegin, RangeItr rangeEnd, CompareItr compareBegin, CompareItr compareEnd)
+    {
+        return std::mismatch(compareBegin, compareEnd, rangeBegin, rangeEnd).first == compareEnd;
+    }
+
+    template <typename StringTy, typename CompareItr>
+    inline bool starts_with(const StringTy& string, CompareItr compareBegin, CompareItr compareEnd)
+    {
+        return starts_with(std::begin(string), std::end(string), compareBegin, compareEnd);
+    }
+
+    template <typename StringTy, typename CompareStringTy>
+    inline bool starts_with(const StringTy& string, const CompareStringTy& compareString)
+    {
+        return starts_with(std::begin(string), std::end(string), std::begin(compareString), std::end(compareString));
+    }
+
+    template <typename StringTy, typename CharT>
+    inline bool starts_with(const StringTy& string, CharT* compareString)
+    {
+        return starts_with(string, basic_null_terminated_string<CharT>(compareString));
+    }
+
+    template <typename CharT, typename CompareItr>
+    inline bool starts_with(CharT* string, CompareItr compareBegin, CompareItr compareEnd)
+    {
+        return starts_with(basic_null_terminated_string<CharT>(string), compareBegin, compareEnd);
+    }
+
+    template <typename CharT, typename StringTy>
+    inline bool starts_with(CharT* string, const StringTy& compareString)
+    {
+        return starts_with(basic_null_terminated_string<CharT>(string), compareString);
+    }
+
+    template <
+        typename CharT,
+        typename OtherCharT,
+        std::enable_if_t<std::is_same_v<std::remove_const_t<CharT>, std::remove_const_t<OtherCharT>>, int> = 0>
+    inline bool starts_with(CharT* string, OtherCharT* compareString)
+    {
+        return starts_with(
+            basic_null_terminated_string<CharT>(string),
+            basic_null_terminated_string<OtherCharT>(compareString));
+    }
 
 #pragma endregion
 }

@@ -189,6 +189,151 @@ namespace dhorn
             }
 
 #pragma endregion
+
+
+
+#pragma region starts_with tests
+
+            TEST_METHOD(StartsWithIteratorTest)
+            {
+                std::string str = "foobar";
+                std::string foo = "foo";
+                std::string bar = "bar";
+
+                Assert::IsTrue(starts_with(std::begin(str), std::end(str), std::begin(foo), std::end(foo)));
+                Assert::IsFalse(starts_with(std::begin(str), std::end(str), std::begin(bar), std::end(bar)));
+
+                Assert::IsTrue(starts_with(std::begin(str), std::end(str), std::begin(str), std::end(str)));
+                Assert::IsFalse(starts_with(std::begin(foo), std::end(foo), std::begin(str), std::end(str)));
+
+                std::string abc = "abc";
+                std::string abd = "abd";
+                Assert::IsFalse(starts_with(std::begin(abc), std::end(abc), std::begin(abd), std::end(abd)));
+                Assert::IsFalse(starts_with(std::begin(abd), std::end(abd), std::begin(abc), std::end(abc)));
+
+                std::string empty;
+                Assert::IsTrue(starts_with(std::begin(str), std::end(str), std::begin(empty), std::end(empty)));
+                Assert::IsFalse(starts_with(std::begin(empty), std::end(empty), std::begin(str), std::end(str)));
+                Assert::IsTrue(starts_with(std::begin(empty), std::end(empty), std::begin(empty), std::end(empty)));
+            }
+
+            TEST_METHOD(StartsWithStringIteratorTest)
+            {
+                std::string str = "foobar";
+                std::string foo = "foo";
+                std::string bar = "bar";
+
+                Assert::IsTrue(starts_with(str, std::begin(foo), std::end(foo)));
+                Assert::IsFalse(starts_with(str, std::begin(bar), std::end(bar)));
+                Assert::IsTrue(starts_with(str, std::begin(str), std::end(str)));
+                Assert::IsFalse(starts_with(foo, std::begin(str), std::end(str)));
+
+                std::string_view strView = "foobar";
+                Assert::IsTrue(starts_with(strView, std::begin(foo), std::end(foo)));
+                Assert::IsFalse(starts_with(strView, std::begin(bar), std::end(bar)));
+                Assert::IsTrue(starts_with(strView, std::begin(str), std::end(str)));
+
+                null_terminated_string nullStr = "foobar";
+                Assert::IsTrue(starts_with(nullStr, std::begin(foo), std::end(foo)));
+                Assert::IsFalse(starts_with(nullStr, std::begin(bar), std::end(bar)));
+                Assert::IsTrue(starts_with(nullStr, std::begin(str), std::end(str)));
+            }
+
+            TEST_METHOD(StartsWithStringTest)
+            {
+                std::string str = "foobar";
+                std::string foo = "foo";
+                std::string bar = "bar";
+
+                Assert::IsTrue(starts_with(str, foo));
+                Assert::IsFalse(starts_with(str, bar));
+                Assert::IsTrue(starts_with(str, str));
+                Assert::IsFalse(starts_with(foo, str));
+
+                std::string_view strView = "foobar";
+                Assert::IsTrue(starts_with(strView, foo));
+                Assert::IsFalse(starts_with(strView, bar));
+                Assert::IsTrue(starts_with(strView, str));
+                Assert::IsTrue(starts_with(str, strView));
+
+                null_terminated_string nullStr = "foobar";
+                Assert::IsTrue(starts_with(nullStr, foo));
+                Assert::IsFalse(starts_with(nullStr, bar));
+                Assert::IsTrue(starts_with(nullStr, str));
+                Assert::IsTrue(starts_with(str, nullStr));
+                Assert::IsTrue(starts_with(nullStr, strView));
+                Assert::IsTrue(starts_with(strView, nullStr));
+            }
+
+            TEST_METHOD(StartsWithStringStringLiteralTest)
+            {
+                std::string str = "foobar";
+                char* foo = "foo";
+                const char* bar = "bar";
+
+                Assert::IsTrue(starts_with(str, foo));
+                Assert::IsFalse(starts_with(str, bar));
+
+                std::string_view strView = "foobar";
+                Assert::IsTrue(starts_with(strView, foo));
+                Assert::IsFalse(starts_with(strView, bar));
+
+                null_terminated_string nullStr = "foobar";
+                Assert::IsTrue(starts_with(nullStr, foo));
+                Assert::IsFalse(starts_with(nullStr, bar));
+            }
+
+            TEST_METHOD(StartsWithStringLiteralIteratorTest)
+            {
+                char* str = "foobar";
+                const char* constStr = "foobar";
+                std::string foo = "foo";
+                std::string bar = "bar";
+                std::string foobar = "foobar";
+
+                Assert::IsTrue(starts_with(str, std::begin(foo), std::end(foo)));
+                Assert::IsFalse(starts_with(str, std::begin(bar), std::end(bar)));
+                Assert::IsTrue(starts_with(str, std::begin(foobar), std::end(foobar)));
+
+                Assert::IsTrue(starts_with(constStr, std::begin(foo), std::end(foo)));
+                Assert::IsFalse(starts_with(constStr, std::begin(bar), std::end(bar)));
+                Assert::IsTrue(starts_with(constStr, std::begin(foobar), std::end(foobar)));
+            }
+
+            TEST_METHOD(StartsWithStringLiteralStringTest)
+            {
+                char* str = "foobar";
+                const char* constStr = "foobar";
+                std::string foo = "foo";
+                std::string bar = "bar";
+                std::string foobar = "foobar";
+
+                Assert::IsTrue(starts_with(str, foo));
+                Assert::IsFalse(starts_with(str, bar));
+                Assert::IsTrue(starts_with(str, foobar));
+
+                Assert::IsTrue(starts_with(constStr, foo));
+                Assert::IsFalse(starts_with(constStr, bar));
+                Assert::IsTrue(starts_with(constStr, foobar));
+            }
+
+            TEST_METHOD(StartsWithStringLiteralTest)
+            {
+                char* str = "foobar";
+                const char* constStr = "foobar";
+                char* foo = "foo";
+                const char* bar = "bar";
+
+                Assert::IsTrue(starts_with(str, foo));
+                Assert::IsFalse(starts_with(str, bar));
+                Assert::IsTrue(starts_with(str, constStr));
+
+                Assert::IsTrue(starts_with(constStr, foo));
+                Assert::IsFalse(starts_with(constStr, bar));
+                Assert::IsTrue(starts_with(constStr, str));
+            }
+
+#pragma endregion
         };
 
         TEST_CLASS(NullTerminatedStringTests)
