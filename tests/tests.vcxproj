@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AlgorithmTests.cpp" />
+    <ClCompile Include="AllIncludeTest.cpp" />
     <ClCompile Include="AnimationManagerTests.cpp" />
     <ClCompile Include="AnimationTests.cpp" />
     <ClCompile Include="ArrayReferenceTests.cpp" />
