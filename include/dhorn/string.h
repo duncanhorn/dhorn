@@ -276,9 +276,13 @@ namespace dhorn
     }
 
     using null_terminated_string_iterator = basic_null_terminated_string_iterator<char>;
+    using const_null_terminated_string_iterator = basic_null_terminated_string_iterator<const char>;
     using wnull_terminated_string_iterator = basic_null_terminated_string_iterator<wchar_t>;
+    using const_wnull_terminated_string_iterator = basic_null_terminated_string_iterator<const wchar_t>;
     using u16null_terminated_string_iterator = basic_null_terminated_string_iterator<char16_t>;
+    using const_u16null_terminated_string_iterator = basic_null_terminated_string_iterator<const char16_t>;
     using u32null_terminated_string_iterator = basic_null_terminated_string_iterator<char32_t>;
+    using const_u32null_terminated_string_iterator = basic_null_terminated_string_iterator<const char32_t>;
 
 #pragma endregion
 
