@@ -146,8 +146,8 @@ namespace dhorn
                 Assert::IsTrue(dhorn::is_c_string<char * const>::value);
                 Assert::IsTrue(dhorn::is_c_string<const char * const>::value);
 
-                DoFunctionTest(static_cast<char *>("foo"), true);
-                DoFunctionTest(static_cast<char *>(u8"foo"), true);
+                DoFunctionTest(const_cast<char *>("foo"), true);
+                DoFunctionTest(const_cast<char *>(u8"foo"), true);
                 DoFunctionTest(static_cast<const char *>("foo"), true);
                 DoFunctionTest(static_cast<const char *>(u8"foo"), true);
             }
@@ -159,8 +159,8 @@ namespace dhorn
                 Assert::IsTrue(dhorn::is_c_string<wchar_t * const>::value);
                 Assert::IsTrue(dhorn::is_c_string<const wchar_t * const>::value);
 
-                DoFunctionTest(static_cast<wchar_t *>(L"foo"), true);
-                DoFunctionTest(static_cast<wchar_t *>(L"foo"), true);
+                DoFunctionTest(const_cast<wchar_t *>(L"foo"), true);
+                DoFunctionTest(const_cast<wchar_t *>(L"foo"), true);
                 DoFunctionTest(static_cast<const wchar_t *>(L"foo"), true);
                 DoFunctionTest(static_cast<const wchar_t *>(L"foo"), true);
             }
@@ -172,8 +172,8 @@ namespace dhorn
                 Assert::IsTrue(dhorn::is_c_string<char16_t * const>::value);
                 Assert::IsTrue(dhorn::is_c_string<const char16_t * const>::value);
 
-                DoFunctionTest(static_cast<char16_t *>(u"foo"), true);
-                DoFunctionTest(static_cast<char16_t *>(u"foo"), true);
+                DoFunctionTest(const_cast<char16_t *>(u"foo"), true);
+                DoFunctionTest(const_cast<char16_t *>(u"foo"), true);
                 DoFunctionTest(static_cast<const char16_t *>(u"foo"), true);
                 DoFunctionTest(static_cast<const char16_t *>(u"foo"), true);
             }
@@ -185,8 +185,8 @@ namespace dhorn
                 Assert::IsTrue(dhorn::is_c_string<char32_t * const>::value);
                 Assert::IsTrue(dhorn::is_c_string<const char32_t * const>::value);
 
-                DoFunctionTest(static_cast<char32_t *>(U"foo"), true);
-                DoFunctionTest(static_cast<char32_t *>(U"foo"), true);
+                DoFunctionTest(const_cast<char32_t *>(U"foo"), true);
+                DoFunctionTest(const_cast<char32_t *>(U"foo"), true);
                 DoFunctionTest(static_cast<const char32_t *>(U"foo"), true);
                 DoFunctionTest(static_cast<const char32_t *>(U"foo"), true);
             }
@@ -194,7 +194,7 @@ namespace dhorn
             TEST_METHOD(VoidPointerTest)
             {
                 Assert::IsFalse(dhorn::is_c_string<void *>::value);
-                DoFunctionTest(static_cast<void *>("foo"), false);
+                DoFunctionTest(static_cast<void *>(const_cast<char *>("foo")), false);
             }
 
             TEST_METHOD(CharArrayTest)

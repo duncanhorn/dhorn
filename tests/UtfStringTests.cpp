@@ -36,7 +36,7 @@ namespace dhorn
 
             TEST_METHOD(NextTest)
             {
-                std::pair<char *, char32_t> vals[] =
+                std::pair<const char *, char32_t> vals[] =
                 {
                     { u8"\u007F", 0x007F },
                     { u8"\u07FF", 0x07FF },
@@ -63,7 +63,7 @@ namespace dhorn
 
             TEST_METHOD(WriteTest)
             {
-                std::pair<char *, char32_t> vals[] =
+                std::pair<const char *, char32_t> vals[] =
                 {
                     { u8"\u007F\0\0\0", 0x007F },
                     { u8"\u07FF\0\0", 0x07FF },
@@ -112,7 +112,7 @@ namespace dhorn
 
             TEST_METHOD(NextTest)
             {
-                std::pair<char16_t *, char32_t> vals[] =
+                std::pair<const char16_t *, char32_t> vals[] =
                 {
                     { u"\uD7FF", 0x0000D7FF },
                     { u"\uE000", 0x0000E000 },
@@ -139,7 +139,7 @@ namespace dhorn
 
             TEST_METHOD(WriteTest)
             {
-                std::pair<char16_t *, char32_t> vals[] =
+                std::pair<const char16_t *, char32_t> vals[] =
                 {
                     { u"\uD7FF\0", 0x0000D7FF },
                     { u"\uE000\0", 0x0000E000 },
@@ -188,7 +188,7 @@ namespace dhorn
 
             TEST_METHOD(NextTest)
             {
-                std::pair<char32_t *, char32_t> vals[] =
+                std::pair<const char32_t *, char32_t> vals[] =
                 {
                     { U"\uD7FF", 0x0000D7FF },
                     { U"\uE000", 0x0000E000 },
@@ -215,7 +215,7 @@ namespace dhorn
 
             TEST_METHOD(WriteTest)
             {
-                std::pair<char32_t *, char32_t> vals[] =
+                std::pair<const char32_t *, char32_t> vals[] =
                 {
                     { U"\uD7FF\0", 0x0000D7FF },
                     { U"\uE000\0", 0x0000E000 },
@@ -691,7 +691,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf8StringLiteralTest)
             {
                 string_type str = u8"test - ";
-                char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -718,7 +718,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf16StringLiteralTest)
             {
                 string_type str = u8"test - ";
-                char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -730,7 +730,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf32StringLiteralTest)
             {
                 string_type str = u8"test - ";
-                char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -1804,7 +1804,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf8StringLiteralTest)
             {
                 string_type str = u"test - ";
-                char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -1816,7 +1816,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf16StringLiteralTest)
             {
                 string_type str = u"test - ";
-                char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -1843,7 +1843,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf32StringLiteralTest)
             {
                 string_type str = u"test - ";
-                char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -2917,7 +2917,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf8StringLiteralTest)
             {
                 string_type str = U"test - ";
-                char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char *other = u8"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -2929,7 +2929,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf16StringLiteralTest)
             {
                 string_type str = U"test - ";
-                char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char16_t *other = u"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
@@ -2941,7 +2941,7 @@ namespace dhorn
             TEST_METHOD(AppendUtf32StringLiteralTest)
             {
                 string_type str = U"test - ";
-                char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
+                const char32_t *other = U"\u1FE7\u09EA\U0010FE2B\u0080";
 
                 str += other;
                 Assert::AreEqual(std::size(test_string) - 1, str.size());
