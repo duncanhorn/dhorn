@@ -158,7 +158,6 @@
     <ClCompile Include="StringTests.cpp" />
     <ClCompile Include="SynchronizedObjectTests.cpp" />
     <ClCompile Include="ThreadPoolTests.cpp" />
-    <ClCompile Include="TreeTests.cpp" />
     <ClCompile Include="TypeTraitsTests.cpp" />
     <ClCompile Include="UniqueAnyTests.cpp" />
     <ClCompile Include="UnitsTests.cpp" />
