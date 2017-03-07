@@ -178,7 +178,7 @@ namespace dhorn
                     dhorn::experimental::socket_streambuf buf(&server);
                     std::iostream stream(&buf);
 
-                    char *pre = "";
+                    const char *pre = "";
                     for (auto &val : values)
                     {
                         stream << pre << val;
@@ -362,7 +362,7 @@ namespace dhorn
                 {
                     dhorn::experimental::socket_stream stream(&server);
 
-                    char *pre = "";
+                    const char *pre = "";
                     for (auto &val : values)
                     {
                         stream << pre << val;

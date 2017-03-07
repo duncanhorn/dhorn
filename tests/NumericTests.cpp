@@ -39,7 +39,7 @@ namespace dhorn
             }
 
             template <typename Ty>
-            void ExpectException(char *str)
+            void ExpectException(const char *str)
             {
                 try
                 {
@@ -297,25 +297,25 @@ namespace dhorn
 
             TEST_METHOD(Utf8StringLiteralTest)
             {
-                char *str = u8"123.456e1";
+                const char *str = u8"123.456e1";
                 DoTest<double>(str, 1234.56);
             }
 
             TEST_METHOD(Utf16StringLiteralTest)
             {
-                char16_t *str = u"123.456e1";
+                const char16_t *str = u"123.456e1";
                 DoTest<double>(str, 1234.56);
             }
 
             TEST_METHOD(Utf32StringLiteralTest)
             {
-                char32_t *str = U"123.456e1";
+                const char32_t *str = U"123.456e1";
                 DoTest<double>(str, 1234.56);
             }
 
             TEST_METHOD(WideCharacterStringLiteralTest)
             {
-                wchar_t *str = L"123.456e1";
+                const wchar_t *str = L"123.456e1";
                 DoTest<double>(str, 1234.56);
             }
 

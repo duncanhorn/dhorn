@@ -200,13 +200,7 @@ namespace dhorn
         namespace details
         {
             template <typename MapItr>
-            class json_object_iterator_base :
-                public std::iterator<
-                    typename MapItr::iterator_category,
-                    typename MapItr::value_type,
-                    typename MapItr::difference_type,
-                    typename MapItr::pointer,
-                    typename MapItr::reference>
+            class json_object_iterator_base
             {
             protected:
                 friend class json_object;
@@ -214,6 +208,17 @@ namespace dhorn
                 using internal_iterator = MapItr;
 
             public:
+                /*
+                 * Iterator Types
+                 */
+                using iterator_category = typename MapItr::iterator_category;
+                using value_type = typename MapItr::value_type;
+                using difference_type = typename MapItr::difference_type;
+                using pointer = typename MapItr::pointer;
+                using reference = typename MapItr::reference;
+
+
+
                 /*
                  * Constructor(s)/Destructor
                  */

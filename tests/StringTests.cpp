@@ -233,7 +233,7 @@ namespace dhorn
                 Assert::IsFalse(starts_with(strView, std::begin(bar), std::end(bar)));
                 Assert::IsTrue(starts_with(strView, std::begin(str), std::end(str)));
 
-                null_terminated_string nullStr = "foobar";
+                const_null_terminated_string nullStr = "foobar";
                 Assert::IsTrue(starts_with(nullStr, std::begin(foo), std::end(foo)));
                 Assert::IsFalse(starts_with(nullStr, std::begin(bar), std::end(bar)));
                 Assert::IsTrue(starts_with(nullStr, std::begin(str), std::end(str)));
@@ -256,7 +256,7 @@ namespace dhorn
                 Assert::IsTrue(starts_with(strView, str));
                 Assert::IsTrue(starts_with(str, strView));
 
-                null_terminated_string nullStr = "foobar";
+                const_null_terminated_string nullStr = "foobar";
                 Assert::IsTrue(starts_with(nullStr, foo));
                 Assert::IsFalse(starts_with(nullStr, bar));
                 Assert::IsTrue(starts_with(nullStr, str));
@@ -268,7 +268,7 @@ namespace dhorn
             TEST_METHOD(StartsWithStringStringLiteralTest)
             {
                 std::string str = "foobar";
-                char* foo = "foo";
+                char foo[] = "foo";
                 const char* bar = "bar";
 
                 Assert::IsTrue(starts_with(str, foo));
@@ -278,14 +278,14 @@ namespace dhorn
                 Assert::IsTrue(starts_with(strView, foo));
                 Assert::IsFalse(starts_with(strView, bar));
 
-                null_terminated_string nullStr = "foobar";
+                const_null_terminated_string nullStr = "foobar";
                 Assert::IsTrue(starts_with(nullStr, foo));
                 Assert::IsFalse(starts_with(nullStr, bar));
             }
 
             TEST_METHOD(StartsWithStringLiteralIteratorTest)
             {
-                char* str = "foobar";
+                char str[] = "foobar";
                 const char* constStr = "foobar";
                 std::string foo = "foo";
                 std::string bar = "bar";
@@ -302,7 +302,7 @@ namespace dhorn
 
             TEST_METHOD(StartsWithStringLiteralStringTest)
             {
-                char* str = "foobar";
+                char str[] = "foobar";
                 const char* constStr = "foobar";
                 std::string foo = "foo";
                 std::string bar = "bar";
@@ -319,9 +319,9 @@ namespace dhorn
 
             TEST_METHOD(StartsWithStringLiteralTest)
             {
-                char* str = "foobar";
+                char str[] = "foobar";
                 const char* constStr = "foobar";
-                char* foo = "foo";
+                char foo[] = "foo";
                 const char* bar = "bar";
 
                 Assert::IsTrue(starts_with(str, foo));
@@ -341,8 +341,9 @@ namespace dhorn
             TEST_METHOD(AssignmentTest)
             {
                 // NOTE: Strictly a "does it compile" test
+                char fooString[] = "foo";
                 null_terminated_string str1;
-                null_terminated_string str2 = "foo";
+                null_terminated_string str2 = fooString;
                 str1 = str2;
 
                 basic_null_terminated_string<const char> constStr;
@@ -352,14 +353,14 @@ namespace dhorn
                 basic_null_terminated_string<const char> otherConstStr;
                 otherConstStr = constStr;
 
-                str1 = static_cast<char*>("foobar");
-                constStr = static_cast<char*>("foobar");
+                str1 = const_cast<char*>("foobar");
+                constStr = const_cast<char*>("foobar");
                 constStr = static_cast<const char*>("foobar");
             }
 
             TEST_METHOD(IndexOperatorTest)
             {
-                null_terminated_string str = "foo";
+                const_null_terminated_string str = "foo";
                 Assert::AreEqual('f', str[0]);
                 Assert::AreEqual('o', str[1]);
                 Assert::AreEqual('o', str[2]);
@@ -368,7 +369,7 @@ namespace dhorn
 
             TEST_METHOD(EmptyTest)
             {
-                null_terminated_string str;
+                const_null_terminated_string str;
                 Assert::IsTrue(str.empty());
 
                 str = "";
@@ -380,7 +381,7 @@ namespace dhorn
 
             TEST_METHOD(IterationTest)
             {
-                char* testString = "foobar";
+                char testString[] = "foobar";
                 std::string str;
                 for (auto ch : null_terminated_string(testString))
                 {
@@ -417,13 +418,14 @@ namespace dhorn
             TEST_METHOD(IteratorConstConversionTest)
             {
                 // Strictly a "does it compile" test
-                basic_null_terminated_string_iterator<char> itr("foo");
+                char fooString[] = "foo";
+                basic_null_terminated_string_iterator<char> itr(fooString);
                 basic_null_terminated_string_iterator<const char> constItr = itr;
             }
 
             TEST_METHOD(IteratorConstComparisonTest)
             {
-                char* str = "foo";
+                char str[] = "foo";
                 basic_null_terminated_string_iterator<char> itr(str);
                 basic_null_terminated_string_iterator<const char> constItr(str);
 

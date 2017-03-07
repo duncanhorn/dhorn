@@ -435,9 +435,13 @@ namespace dhorn
     };
 
     using null_terminated_string = basic_null_terminated_string<char>;
+    using const_null_terminated_string = basic_null_terminated_string<const char>;
     using wnull_terminated_string = basic_null_terminated_string<wchar_t>;
+    using const_wnull_terminated_string = basic_null_terminated_string<const wchar_t>;
     using u16null_terminated_string = basic_null_terminated_string<char16_t>;
+    using const_u16null_terminated_string = basic_null_terminated_string<const char16_t>;
     using u32null_terminated_string = basic_null_terminated_string<char32_t>;
+    using const_u32null_terminated_string = basic_null_terminated_string<const char32_t>;
 
 #pragma endregion
 

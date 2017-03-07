@@ -33,7 +33,7 @@ namespace dhorn
             {
             }
 
-            discrete_animation(update_function func) :
+            discrete_animation(typename MyBase::update_function func) :
                 MyBase(std::move(func)),
                 _prev(this->next())
             {
@@ -44,7 +44,7 @@ namespace dhorn
             /*
              * Overloaded animation functions
              */
-            virtual animation_state on_update(duration elapsedTime)
+            virtual animation_state on_update(typename MyBase::duration elapsedTime)
             {
                 auto state = MyBase::on_update(elapsedTime);
 
@@ -70,7 +70,7 @@ namespace dhorn
         private:
 
             // NOTE: _prev will be an end iterator up until the animation begins
-            iterator_type _prev;
+            typename MyBase::iterator_type _prev;
         };
     }
 }

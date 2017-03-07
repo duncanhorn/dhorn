@@ -413,7 +413,7 @@ namespace dhorn
                 assert_locked();
                 assert(this->_running);
 
-                std::thread thread([sharedThis = shared_from_this()]() mutable
+                std::thread thread([sharedThis = this->shared_from_this()]() mutable
                 {
                     auto noifyShutdown = make_scope_guard([&]()
                     {
