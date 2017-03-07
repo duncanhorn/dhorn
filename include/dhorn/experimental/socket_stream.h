@@ -39,9 +39,11 @@ namespace dhorn
             size_t ReceiveBufferSize = 2048,
             size_t SendBufferSize = 2048,
             typename SocketStorageType = tcp_socket *>
-            class basic_socket_streambuf final :
+        class basic_socket_streambuf final :
             public std::basic_streambuf<CharT, CharTraits>
         {
+            using my_base = std::basic_streambuf<CharT, CharTraits>;
+
         public:
             basic_socket_streambuf(SocketStorageType socket) :
                 _socket(socket),
@@ -71,13 +73,13 @@ namespace dhorn
                 }
 
                 return (this->gptr() == this->egptr()) ?
-                    traits_type::eof() :
-                    traits_type::to_int_type(*this->gptr());
+                    typename my_base::traits_type::eof() :
+                    typename my_base::traits_type::to_int_type(*this->gptr());
             }
 
             virtual int overflow(int ch)
             {
-                bool isEof = (ch == traits_type::eof());
+                bool isEof = (ch == typename my_base::traits_type::eof());
 
                 if (this->pptr() == this->epptr())
                 {

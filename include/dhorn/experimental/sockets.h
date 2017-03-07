@@ -1227,7 +1227,7 @@ namespace dhorn
                 this->_addr = addr;
             }
 
-            void set_data(Ty *buffer, size_t size)
+            void set_data(const Ty *buffer, size_t size)
             {
                 this->set_data(buffer, buffer + size);
             }
@@ -1392,7 +1392,7 @@ namespace dhorn
             {
                 // TODO: Fail if we don't send all bytes? The design is that most callers shouldn't need to check this...
                 return this->_baseSocket.send_to(
-                    reinterpret_cast<void *>(packet._buffer.get()),
+                    reinterpret_cast<const void *>(packet._buffer.get()),
                     packet._dataLength,
                     flags,
                     packet._addr);

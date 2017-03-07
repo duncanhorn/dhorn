@@ -23,10 +23,20 @@ namespace dhorn
 #pragma region Iterators
 
         template <typename Ty>
-        class array_reference_iterator :
-            public std::iterator<std::random_access_iterator_tag, Ty>
+        class array_reference_iterator
         {
         public:
+            /* 
+             * Iterator Types
+             */
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type = Ty;
+            using difference_type = std::ptrdiff_t;
+            using reference = value_type&;
+            using pointer = value_type*;
+
+
+
             /*
              * Constructor(s)/Destructor
              */
