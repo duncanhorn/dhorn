@@ -198,7 +198,6 @@
     <ClInclude Include="include\dhorn\experimental\sockets.h" />
     <ClInclude Include="include\dhorn\experimental\socket_stream.h" />
     <ClInclude Include="include\dhorn\experimental\synchronized_object.h" />
-    <ClInclude Include="include\dhorn\experimental\tree.h" />
     <ClInclude Include="include\dhorn\experimental\unique_any.h" />
     <ClInclude Include="include\dhorn\experimental\unique_event_cookie.h" />
     <ClInclude Include="include\dhorn\experimental\units.h" />
