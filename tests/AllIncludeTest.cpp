@@ -19,10 +19,10 @@
 
 // COM Includes
 #include <dhorn/com/com_utility.h>
+#include <dhorn/com/hresult_error.h>
 
 // Windows Includes
 #include <dhorn/windows/file_time_clock.h>
-#include <dhorn/windows/hresult_error.h>
 #include <dhorn/windows/tick_count_clock.h>
 
 // WinRT Includes

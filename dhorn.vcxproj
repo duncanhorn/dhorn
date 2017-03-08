@@ -166,6 +166,7 @@
   <ItemGroup>
     <ClInclude Include="include\dhorn\bitmask.h" />
     <ClInclude Include="include\dhorn\com\com_utility.h" />
+    <ClInclude Include="include\dhorn\com\hresult_error.h" />
     <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\debug.h" />
     <ClInclude Include="include\dhorn\experimental\algorithm.h" />
@@ -215,7 +216,6 @@
     <ClInclude Include="include\dhorn\thread_pool.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
-    <ClInclude Include="include\dhorn\windows\hresult_error.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
     <ClInclude Include="include\dhorn\winrt\winrt_utility.h" />
   </ItemGroup>

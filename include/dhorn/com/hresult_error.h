@@ -10,7 +10,7 @@
 #include <system_error>
 #include <windows.h>
 
-namespace dhorn::windows
+namespace dhorn::com
 {
     /* 
      * hresult_category

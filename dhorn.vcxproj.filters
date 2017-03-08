@@ -192,8 +192,8 @@
     <ClInclude Include="include\dhorn\thread_pool.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\windows\hresult_error.h">
-      <Filter>include\windows</Filter>
+    <ClInclude Include="include\dhorn\com\hresult_error.h">
+      <Filter>include\com</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
