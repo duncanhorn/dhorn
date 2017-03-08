@@ -3,10 +3,12 @@
  *
  * hresult_error.h
  *
- * 
+ * Defines a std::error_category for HRESULT values.
  */
 #pragma once
 
+#include <future>
+#include <stdexcept>
 #include <system_error>
 #include <windows.h>
 
@@ -25,6 +27,8 @@ namespace dhorn::com
         class hresult_error_category :
             public std::error_category
         {
+            static_assert(sizeof(int) >= sizeof(HRESULT), "int must be large enough to hold an HRESULT");
+
         public:
 
             explicit hresult_error_category() = default;
@@ -112,6 +116,82 @@ namespace dhorn::com
     {
         static const details::hresult_error_category value;
         return value;
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * Throwing Helpers
+     */
+#pragma region Throwing Helpers
+
+    [[noreturn]]
+    inline void throw_hresult(HRESULT hr)
+    {
+        if (!FAILED(hr))
+        {
+            std::terminate();
+        }
+
+        throw std::system_error(hr, hresult_category());
+    }
+
+    inline void check_hresult(HRESULT hr)
+    {
+        if (FAILED(hr))
+        {
+            throw std::system_error(hr, hresult_category());
+        }
+    }
+
+    inline HRESULT hresult_from_error_code(const std::error_code& e)
+    {
+        if (e.category() == hresult_category())
+        {
+            return static_cast<HRESULT>(e.value());
+        }
+        else if (e.category() == std::system_category())
+        {
+            return HRESULT_FROM_WIN32(e.value());
+        }
+
+        // Generic failure
+        return E_FAIL;
+    }
+
+    inline HRESULT hresult_from_exception() noexcept
+    {
+        try
+        {
+            throw;
+        }
+        catch (std::system_error& e)
+        {
+            return hresult_from_error_code(e.code());
+        }
+        catch (std::future_error& e)
+        {
+            return hresult_from_error_code(e.code());
+        }
+        catch (std::bad_alloc&)
+        {
+            return E_OUTOFMEMORY;
+        }
+        catch (std::invalid_argument&)
+        {
+            return E_INVALIDARG;
+        }
+        catch (std::out_of_range&)
+        {
+            return E_BOUNDS;
+        }
+        catch (...)
+        {
+            // Generic failure
+            return E_FAIL;
+        }
     }
 
 #pragma endregion
