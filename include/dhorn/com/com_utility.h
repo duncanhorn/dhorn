@@ -40,4 +40,19 @@ namespace dhorn::com
     constexpr bool all_unknown_v = all_unknown<IFaces...>::value;
 
 #pragma endregion
+
+
+
+    /*
+     * is_unknown
+     */
+#pragma region is_unknown
+
+    template <typename IFace>
+    using is_unknown = std::is_base_of<IUnknown, IFace>;
+
+    template <typename IFace>
+    constexpr bool is_unknown_v = is_unknown<IFace>::value;
+
+#pragma endregion
 }

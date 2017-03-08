@@ -18,6 +18,7 @@
 #include <dhorn/type_traits.h>
 
 // COM Includes
+#include <dhorn/com/com_ptr.h>
 #include <dhorn/com/com_utility.h>
 #include <dhorn/com/hresult_error.h>
 
