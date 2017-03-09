@@ -42,9 +42,6 @@
     <ClInclude Include="include\dhorn\experimental\array_reference.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\com_ptr.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\com_utility.h">
       <Filter>include\experimental</Filter>
     </ClInclude>

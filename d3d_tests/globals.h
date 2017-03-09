@@ -16,14 +16,14 @@ namespace globals
     extern dhorn::experimental::d3d11::d3d11_window window;
 
     // Shaders
-    extern dhorn::experimental::com_ptr<ID3D11VertexShader> vertex_shader;
-    extern dhorn::experimental::com_ptr<ID3D11PixelShader> pixel_shader;
+    extern dhorn::com::com_ptr<ID3D11VertexShader> vertex_shader;
+    extern dhorn::com::com_ptr<ID3D11PixelShader> pixel_shader;
 
     // Geometry information
-    extern dhorn::experimental::com_ptr<ID3D11InputLayout> input_layout;
-    extern dhorn::experimental::com_ptr<ID3D11Buffer> cuboid_vertices;
-    extern dhorn::experimental::com_ptr<ID3D11Buffer> cuboid_indices;
-    extern dhorn::experimental::com_ptr<ID3D11Buffer> object_data;
+    extern dhorn::com::com_ptr<ID3D11InputLayout> input_layout;
+    extern dhorn::com::com_ptr<ID3D11Buffer> cuboid_vertices;
+    extern dhorn::com::com_ptr<ID3D11Buffer> cuboid_indices;
+    extern dhorn::com::com_ptr<ID3D11Buffer> object_data;
 
     // Camera controls
     extern bool forward;
