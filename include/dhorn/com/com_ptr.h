@@ -136,12 +136,6 @@ namespace dhorn::com
             return this->_ptr != nullptr;
         }
 
-        // TODO??
-        //explicit operator element_type*() const noexcept
-        //{
-        //    return this->_ptr;
-        //}
-
         element_type& operator*() const noexcept
         {
             return *this->_ptr;

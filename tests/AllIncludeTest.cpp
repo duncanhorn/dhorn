@@ -28,6 +28,3 @@
 
 // WinRT Includes
 #include <dhorn/winrt/winrt_utility.h>
-
-// REMOVE!
-dhorn::com::com_ptr<IUnknown>;
