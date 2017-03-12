@@ -16,6 +16,7 @@
 #include <dhorn/string.h>
 #include <dhorn/thread_pool.h>
 #include <dhorn/type_traits.h>
+#include <dhorn/unique_any.h>
 
 // COM Includes
 #include <dhorn/com/com_utility.h>

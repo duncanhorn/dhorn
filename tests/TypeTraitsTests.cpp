@@ -11,211 +11,237 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace dhorn
+namespace dhorn::tests
 {
-    namespace tests
+    struct comp1
     {
-        struct comp1
+        int value;
+    };
+
+    struct comp2
+    {
+        int value;
+    };
+
+    inline constexpr bool operator==(const comp1& lhs, const comp2& rhs) { return lhs.value == rhs.value; }
+    inline constexpr bool operator<(const comp1& lhs, const comp2& rhs) { return lhs.value < rhs.value; }
+
+    TEST_CLASS(TypeTraitsTests)
+    {
+        TEST_METHOD(EqualityComparableTest)
         {
-            int value;
-        };
+            Assert::IsTrue(dhorn::is_comparable_v<comp1, comp2>);
 
-        struct comp2
+            Assert::IsFalse(dhorn::is_comparable_v<comp1, comp1>);
+            Assert::IsFalse(dhorn::is_comparable_v<comp2, comp2>);
+            Assert::IsFalse(dhorn::is_comparable_v<comp2, comp1>);
+        }
+
+        TEST_METHOD(LessThanComparableTest)
         {
-            int value;
-        };
+            Assert::IsTrue(dhorn::is_less_than_comparable_v<comp1, comp2>);
 
-        inline constexpr bool operator==(const comp1& lhs, const comp2& rhs) { return lhs.value == rhs.value; }
-        inline constexpr bool operator<(const comp1& lhs, const comp2& rhs) { return lhs.value < rhs.value; }
+            Assert::IsFalse(dhorn::is_less_than_comparable_v<comp1, comp1>);
+            Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp2>);
+            Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp1>);
+        }
 
-        TEST_CLASS(TypeTraitsTests)
+        TEST_METHOD(ByteOffsetTest)
         {
-            TEST_METHOD(EqualityComparableTest)
+            struct foo
             {
-                Assert::IsTrue(dhorn::is_comparable_v<comp1, comp2>);
+                int32_t int32;
+                uint32_t uint32;
+                char ch;
+            };
 
-                Assert::IsFalse(dhorn::is_comparable_v<comp1, comp1>);
-                Assert::IsFalse(dhorn::is_comparable_v<comp2, comp2>);
-                Assert::IsFalse(dhorn::is_comparable_v<comp2, comp1>);
-            }
+            // NOTE: The compiler can arrange these how it wants and sometimes inserts extra space for alignment
+            // resons. Thus, we compare to offsetof
+            Assert::AreEqual(dhorn::byte_offset(&foo::int32), offsetof(foo, int32));
+            Assert::AreEqual(dhorn::byte_offset(&foo::uint32), offsetof(foo, uint32));
+            Assert::AreEqual(dhorn::byte_offset(&foo::ch), offsetof(foo, ch));
+        }
 
-            TEST_METHOD(LessThanComparableTest)
-            {
-                Assert::IsTrue(dhorn::is_less_than_comparable_v<comp1, comp2>);
-
-                Assert::IsFalse(dhorn::is_less_than_comparable_v<comp1, comp1>);
-                Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp2>);
-                Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp1>);
-            }
-
-            TEST_METHOD(ByteOffsetTest)
-            {
-                struct foo
-                {
-                    int32_t int32;
-                    uint32_t uint32;
-                    char ch;
-                };
-
-                // NOTE: The compiler can arrange these how it wants and sometimes inserts extra space for alignment
-                // resons. Thus, we compare to offsetof
-                Assert::AreEqual(dhorn::byte_offset(&foo::int32), offsetof(foo, int32));
-                Assert::AreEqual(dhorn::byte_offset(&foo::uint32), offsetof(foo, uint32));
-                Assert::AreEqual(dhorn::byte_offset(&foo::ch), offsetof(foo, ch));
-            }
-        };
-
-        TEST_CLASS(AnyBaseOfTests)
+        TEST_METHOD(IsImplicitlyDefaultConstructibleTest)
         {
-            struct foo {};
-            struct bar {};
-            struct foobar : public foo, public bar {};
+            struct test_1 {};
+            struct test_2 { test_2() = default; };
+            struct test_3 { test_3() {} };
+            struct test_4 { explicit test_4() {} };
+            struct test_5 { test_5(int) {} };
 
-            TEST_METHOD(SingleTypeTest)
-            {
-                Assert::IsTrue(any_base_of<foo, foo>::value);
-                Assert::IsFalse(any_base_of<foo, bar>::value);
-                Assert::IsFalse(any_base_of<bar, foo>::value);
+            Assert::IsTrue(is_implicitly_default_constructible_v<test_1>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<test_2>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<test_3>);
+            Assert::IsFalse(is_implicitly_default_constructible_v<test_4>);
+            Assert::IsFalse(is_implicitly_default_constructible_v<test_5>);
 
-                Assert::IsTrue(any_base_of<foo, foobar>::value);
-                Assert::IsTrue(any_base_of<bar, foobar>::value);
-                Assert::IsFalse(any_base_of<foobar, foo>::value);
-                Assert::IsFalse(any_base_of<foobar, bar>::value);
-            }
+            // Some common types
+            Assert::IsTrue(is_implicitly_default_constructible_v<int>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<double>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<char*>);
 
-            TEST_METHOD(MultipleTypeTest)
-            {
-                Assert::IsTrue(any_base_of<foo, bar, foobar>::value);
-                Assert::IsTrue(any_base_of<foo, foobar, bar>::value);
-                Assert::IsTrue(any_base_of<bar, foo, foobar>::value);
-                Assert::IsTrue(any_base_of<bar, foobar, foo>::value);
+            // Some STL types
+            Assert::IsTrue(is_implicitly_default_constructible_v<std::string>);
+        }
+    };
 
-                Assert::IsFalse(any_base_of<foobar, foo, bar>::value);
 
-                Assert::IsFalse(any_base_of<int, foo, bar, foobar>::value);
-                Assert::IsFalse(any_base_of<void, int, float, double, foo, bar, foobar>::value);
-            }
-        };
 
-        TEST_CLASS(AllBaseOfTests)
+    TEST_CLASS(AnyBaseOfTests)
+    {
+        struct foo {};
+        struct bar {};
+        struct foobar : public foo, public bar {};
+
+        TEST_METHOD(SingleTypeTest)
         {
-            struct foo {};
-            struct bar {};
-            struct foobar : public foo, public bar {};
+            Assert::IsTrue(any_base_of<foo, foo>::value);
+            Assert::IsFalse(any_base_of<foo, bar>::value);
+            Assert::IsFalse(any_base_of<bar, foo>::value);
 
-            TEST_METHOD(SingleTypeTest)
-            {
-                Assert::IsTrue(all_base_of<foo, foo>::value);
-                Assert::IsFalse(all_base_of<foo, bar>::value);
-                Assert::IsFalse(all_base_of<bar, foo>::value);
+            Assert::IsTrue(any_base_of<foo, foobar>::value);
+            Assert::IsTrue(any_base_of<bar, foobar>::value);
+            Assert::IsFalse(any_base_of<foobar, foo>::value);
+            Assert::IsFalse(any_base_of<foobar, bar>::value);
+        }
 
-                Assert::IsTrue(all_base_of<foo, foobar>::value);
-                Assert::IsTrue(all_base_of<bar, foobar>::value);
-                Assert::IsFalse(all_base_of<foobar, foo>::value);
-                Assert::IsFalse(all_base_of<foobar, bar>::value);
-            }
-
-            TEST_METHOD(MultipleTypeTest)
-            {
-                Assert::IsFalse(all_base_of<foo, bar, foobar>::value);
-                Assert::IsFalse(all_base_of<foo, foobar, bar>::value);
-                Assert::IsFalse(all_base_of<bar, foo, foobar>::value);
-                Assert::IsFalse(all_base_of<bar, foobar, foo>::value);
-
-                Assert::IsTrue(all_base_of<foo, foo, foobar>::value);
-                Assert::IsTrue(all_base_of<foo, foobar, foo>::value);
-                Assert::IsTrue(all_base_of<bar, bar, foobar>::value);
-                Assert::IsTrue(all_base_of<bar, foobar, bar>::value);
-
-                Assert::IsFalse(all_base_of<foobar, foo, bar>::value);
-            }
-        };
-
-        TEST_CLASS(IsCStringTests)
+        TEST_METHOD(MultipleTypeTest)
         {
-            template <typename Ty>
-            void DoFunctionTest(const Ty &, bool expected)
-            {
-                Assert::AreEqual(expected, dhorn::is_c_string<Ty>::value);
-            }
+            Assert::IsTrue(any_base_of<foo, bar, foobar>::value);
+            Assert::IsTrue(any_base_of<foo, foobar, bar>::value);
+            Assert::IsTrue(any_base_of<bar, foo, foobar>::value);
+            Assert::IsTrue(any_base_of<bar, foobar, foo>::value);
 
-            TEST_METHOD(CharStringLiteralTest)
-            {
-                Assert::IsTrue(dhorn::is_c_string<char *>::value);
-                Assert::IsTrue(dhorn::is_c_string<const char *>::value);
-                Assert::IsTrue(dhorn::is_c_string<char * const>::value);
-                Assert::IsTrue(dhorn::is_c_string<const char * const>::value);
+            Assert::IsFalse(any_base_of<foobar, foo, bar>::value);
 
-                DoFunctionTest(const_cast<char *>("foo"), true);
-                DoFunctionTest(const_cast<char *>(u8"foo"), true);
-                DoFunctionTest(static_cast<const char *>("foo"), true);
-                DoFunctionTest(static_cast<const char *>(u8"foo"), true);
-            }
+            Assert::IsFalse(any_base_of<int, foo, bar, foobar>::value);
+            Assert::IsFalse(any_base_of<void, int, float, double, foo, bar, foobar>::value);
+        }
+    };
 
-            TEST_METHOD(WCharStringLiteralTest)
-            {
-                Assert::IsTrue(dhorn::is_c_string<wchar_t *>::value);
-                Assert::IsTrue(dhorn::is_c_string<const wchar_t *>::value);
-                Assert::IsTrue(dhorn::is_c_string<wchar_t * const>::value);
-                Assert::IsTrue(dhorn::is_c_string<const wchar_t * const>::value);
 
-                DoFunctionTest(const_cast<wchar_t *>(L"foo"), true);
-                DoFunctionTest(const_cast<wchar_t *>(L"foo"), true);
-                DoFunctionTest(static_cast<const wchar_t *>(L"foo"), true);
-                DoFunctionTest(static_cast<const wchar_t *>(L"foo"), true);
-            }
 
-            TEST_METHOD(Char16StringLiteralTest)
-            {
-                Assert::IsTrue(dhorn::is_c_string<char16_t *>::value);
-                Assert::IsTrue(dhorn::is_c_string<const char16_t *>::value);
-                Assert::IsTrue(dhorn::is_c_string<char16_t * const>::value);
-                Assert::IsTrue(dhorn::is_c_string<const char16_t * const>::value);
+    TEST_CLASS(AllBaseOfTests)
+    {
+        struct foo {};
+        struct bar {};
+        struct foobar : public foo, public bar {};
 
-                DoFunctionTest(const_cast<char16_t *>(u"foo"), true);
-                DoFunctionTest(const_cast<char16_t *>(u"foo"), true);
-                DoFunctionTest(static_cast<const char16_t *>(u"foo"), true);
-                DoFunctionTest(static_cast<const char16_t *>(u"foo"), true);
-            }
+        TEST_METHOD(SingleTypeTest)
+        {
+            Assert::IsTrue(all_base_of<foo, foo>::value);
+            Assert::IsFalse(all_base_of<foo, bar>::value);
+            Assert::IsFalse(all_base_of<bar, foo>::value);
 
-            TEST_METHOD(Char32StringLiteralTest)
-            {
-                Assert::IsTrue(dhorn::is_c_string<char32_t *>::value);
-                Assert::IsTrue(dhorn::is_c_string<const char32_t *>::value);
-                Assert::IsTrue(dhorn::is_c_string<char32_t * const>::value);
-                Assert::IsTrue(dhorn::is_c_string<const char32_t * const>::value);
+            Assert::IsTrue(all_base_of<foo, foobar>::value);
+            Assert::IsTrue(all_base_of<bar, foobar>::value);
+            Assert::IsFalse(all_base_of<foobar, foo>::value);
+            Assert::IsFalse(all_base_of<foobar, bar>::value);
+        }
 
-                DoFunctionTest(const_cast<char32_t *>(U"foo"), true);
-                DoFunctionTest(const_cast<char32_t *>(U"foo"), true);
-                DoFunctionTest(static_cast<const char32_t *>(U"foo"), true);
-                DoFunctionTest(static_cast<const char32_t *>(U"foo"), true);
-            }
+        TEST_METHOD(MultipleTypeTest)
+        {
+            Assert::IsFalse(all_base_of<foo, bar, foobar>::value);
+            Assert::IsFalse(all_base_of<foo, foobar, bar>::value);
+            Assert::IsFalse(all_base_of<bar, foo, foobar>::value);
+            Assert::IsFalse(all_base_of<bar, foobar, foo>::value);
 
-            TEST_METHOD(VoidPointerTest)
-            {
-                Assert::IsFalse(dhorn::is_c_string<void *>::value);
-                DoFunctionTest(static_cast<void *>(const_cast<char *>("foo")), false);
-            }
+            Assert::IsTrue(all_base_of<foo, foo, foobar>::value);
+            Assert::IsTrue(all_base_of<foo, foobar, foo>::value);
+            Assert::IsTrue(all_base_of<bar, bar, foobar>::value);
+            Assert::IsTrue(all_base_of<bar, foobar, bar>::value);
 
-            TEST_METHOD(CharArrayTest)
-            {
-                char arr[] = "foo";
-                Assert::IsFalse(dhorn::is_c_string<decltype(arr)>::value);
-                DoFunctionTest(arr, false);
-            }
+            Assert::IsFalse(all_base_of<foobar, foo, bar>::value);
+        }
+    };
 
-            TEST_METHOD(ConstCharArrayTest)
-            {
-                const char arr[] = "foo";
-                Assert::IsFalse(dhorn::is_c_string<decltype(arr)>::value);
-                DoFunctionTest(arr, false);
-            }
 
-            TEST_METHOD(ValueTest)
-            {
-                Assert::IsFalse(dhorn::is_c_string<int>::value);
-                DoFunctionTest(1, false);
-            }
-        };
-    }
+
+    TEST_CLASS(IsCStringTests)
+    {
+        template <typename Ty>
+        void DoFunctionTest(const Ty &, bool expected)
+        {
+            Assert::AreEqual(expected, dhorn::is_c_string<Ty>::value);
+        }
+
+        TEST_METHOD(CharStringLiteralTest)
+        {
+            Assert::IsTrue(dhorn::is_c_string<char *>::value);
+            Assert::IsTrue(dhorn::is_c_string<const char *>::value);
+            Assert::IsTrue(dhorn::is_c_string<char * const>::value);
+            Assert::IsTrue(dhorn::is_c_string<const char * const>::value);
+
+            DoFunctionTest(const_cast<char *>("foo"), true);
+            DoFunctionTest(const_cast<char *>(u8"foo"), true);
+            DoFunctionTest(static_cast<const char *>("foo"), true);
+            DoFunctionTest(static_cast<const char *>(u8"foo"), true);
+        }
+
+        TEST_METHOD(WCharStringLiteralTest)
+        {
+            Assert::IsTrue(dhorn::is_c_string<wchar_t *>::value);
+            Assert::IsTrue(dhorn::is_c_string<const wchar_t *>::value);
+            Assert::IsTrue(dhorn::is_c_string<wchar_t * const>::value);
+            Assert::IsTrue(dhorn::is_c_string<const wchar_t * const>::value);
+
+            DoFunctionTest(const_cast<wchar_t *>(L"foo"), true);
+            DoFunctionTest(const_cast<wchar_t *>(L"foo"), true);
+            DoFunctionTest(static_cast<const wchar_t *>(L"foo"), true);
+            DoFunctionTest(static_cast<const wchar_t *>(L"foo"), true);
+        }
+
+        TEST_METHOD(Char16StringLiteralTest)
+        {
+            Assert::IsTrue(dhorn::is_c_string<char16_t *>::value);
+            Assert::IsTrue(dhorn::is_c_string<const char16_t *>::value);
+            Assert::IsTrue(dhorn::is_c_string<char16_t * const>::value);
+            Assert::IsTrue(dhorn::is_c_string<const char16_t * const>::value);
+
+            DoFunctionTest(const_cast<char16_t *>(u"foo"), true);
+            DoFunctionTest(const_cast<char16_t *>(u"foo"), true);
+            DoFunctionTest(static_cast<const char16_t *>(u"foo"), true);
+            DoFunctionTest(static_cast<const char16_t *>(u"foo"), true);
+        }
+
+        TEST_METHOD(Char32StringLiteralTest)
+        {
+            Assert::IsTrue(dhorn::is_c_string<char32_t *>::value);
+            Assert::IsTrue(dhorn::is_c_string<const char32_t *>::value);
+            Assert::IsTrue(dhorn::is_c_string<char32_t * const>::value);
+            Assert::IsTrue(dhorn::is_c_string<const char32_t * const>::value);
+
+            DoFunctionTest(const_cast<char32_t *>(U"foo"), true);
+            DoFunctionTest(const_cast<char32_t *>(U"foo"), true);
+            DoFunctionTest(static_cast<const char32_t *>(U"foo"), true);
+            DoFunctionTest(static_cast<const char32_t *>(U"foo"), true);
+        }
+
+        TEST_METHOD(VoidPointerTest)
+        {
+            Assert::IsFalse(dhorn::is_c_string<void *>::value);
+            DoFunctionTest(static_cast<void *>(const_cast<char *>("foo")), false);
+        }
+
+        TEST_METHOD(CharArrayTest)
+        {
+            char arr[] = "foo";
+            Assert::IsFalse(dhorn::is_c_string<decltype(arr)>::value);
+            DoFunctionTest(arr, false);
+        }
+
+        TEST_METHOD(ConstCharArrayTest)
+        {
+            const char arr[] = "foo";
+            Assert::IsFalse(dhorn::is_c_string<decltype(arr)>::value);
+            DoFunctionTest(arr, false);
+        }
+
+        TEST_METHOD(ValueTest)
+        {
+            Assert::IsFalse(dhorn::is_c_string<int>::value);
+            DoFunctionTest(1, false);
+        }
+    };
 }

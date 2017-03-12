@@ -195,5 +195,8 @@
     <ClInclude Include="include\dhorn\com\hresult_error.h">
       <Filter>include\com</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\unique_any.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
