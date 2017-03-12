@@ -236,7 +236,7 @@ namespace dhorn::tests
 
         // Helper Method For Setup, etc.
         template <typename Func>
-        void DoTest(Func&& func)
+        static void DoTest(Func&& func)
         {
             auto foo = new Foo();
             auto bar = new Bar();
@@ -1282,49 +1282,407 @@ namespace dhorn::tests
          */
 #pragma region Conversion Tests
 
-        template <bool ShouldSucceed, typename Ty, typename FromTy, typename PtrTy>
-        static void UpCastTest_Impl(PtrTy* ptr)
+        template <typename TestTy>
+        static void DoConversionTest(const TestTy& test)
         {
-            dhorn::com::com_ptr<FromTy> fromPtr(ptr);
-            try
+            DoTest([&](Foo* foo, Bar* bar, FooBar* foobar)
             {
-                auto comPtr = fromPtr.as<Ty>();
-                if (!ShouldSucceed)
-                {
-                    Assert::Fail(L"Expected an exception");
-                }
+                // FooBar: IUnknown -> IFace
+                test.template run<true, IUnknown, IUnknown, IFoo>(foobar);
+                test.template run<true, IBase, IUnknown, IFoo>(foobar);
+                test.template run<true, IFoo, IUnknown, IFoo>(foobar);
+                test.template run<true, IBar, IUnknown, IFoo>(foobar);
 
-                Assert::AreEqual(3u, ptr->RefCount());
-            }
-            catch (std::system_error& e)
-            {
-                if (ShouldSucceed)
-                {
-                    Assert::Fail(L"QueryInterface expected to succeed");
-                }
-                else if (e.code().category() != dhorn::com::hresult_category())
-                {
-                    Assert::Fail(L"Expected an HRESULT failure");
-                }
-                else
-                {
-                    Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
-                }
-            }
+                // FooBar: IBase -> IFace
+                test.template run<true, IUnknown, IBase, IFoo>(foobar);
+                test.template run<true, IBase, IBase, IFoo>(foobar);
+                test.template run<true, IFoo, IBase, IFoo>(foobar);
+                test.template run<true, IBar, IBase, IFoo>(foobar);
 
-            Assert::AreEqual(2u, ptr->RefCount());
+                // FooBar: IFoo -> IFace
+                test.template run<true, IUnknown, IFoo>(foobar);
+                test.template run<true, IBase, IFoo>(foobar);
+                test.template run<true, IFoo, IFoo>(foobar);
+                test.template run<true, IBar, IFoo>(foobar);
+
+                // FooBar: IBar -> IFace
+                test.template run<true, IUnknown, IBar>(foobar);
+                test.template run<true, IBase, IBar>(foobar);
+                test.template run<true, IFoo, IBar>(foobar);
+                test.template run<true, IBar, IBar>(foobar);
+
+
+
+                // Foo: IUnknown -> IFace
+                test.template run<true, IUnknown, IUnknown, IFoo>(foo);
+                test.template run<true, IBase, IUnknown, IFoo>(foo);
+                test.template run<true, IFoo, IUnknown, IFoo>(foo);
+                test.template run<false, IBar, IUnknown, IFoo>(foo);
+
+                // Foo: IBase -> IFace
+                test.template run<true, IUnknown, IBase, IFoo>(foo);
+                test.template run<true, IBase, IBase, IFoo>(foo);
+                test.template run<true, IFoo, IBase, IFoo>(foo);
+                test.template run<false, IBar, IBase, IFoo>(foo);
+
+                // Foo: IFoo -> IFace
+                test.template run<true, IUnknown, IFoo>(foo);
+                test.template run<true, IBase, IFoo>(foo);
+                test.template run<true, IFoo, IFoo>(foo);
+                test.template run<false, IBar, IFoo>(foo);
+
+
+
+                // Bar: IUnknown -> IFace
+                test.template run<true, IUnknown, IUnknown, IBar>(bar);
+                test.template run<true, IBase, IUnknown, IBar>(bar);
+                test.template run<false, IFoo, IUnknown, IBar>(bar);
+                test.template run<true, IBar, IUnknown, IBar>(bar);
+
+                // Bar: IBase -> IFace
+                test.template run<true, IUnknown, IBase, IBar>(bar);
+                test.template run<true, IBase, IBase, IBar>(bar);
+                test.template run<false, IFoo, IBase, IBar>(bar);
+                test.template run<true, IBar, IBase, IBar>(bar);
+
+                // Bar: IBar -> IFace
+                test.template run<true, IUnknown, IBar>(bar);
+                test.template run<true, IBase, IBar>(bar);
+                test.template run<false, IFoo, IBar>(bar);
+                test.template run<true, IBar, IBar>(bar);
+            });
         }
 
-        TEST_METHOD(UpCastTest)
+        template <typename TestTy>
+        static void DoNoExceptTest(const TestTy& test)
         {
-            DoTest([](Foo* foo, Bar* bar, FooBar* foobar)
-            {
-                // FooBar should QI to anything
-                UpCastTest_Impl<true, IUnknown, IUnknown>(foobar);
+            // FooBar -> IFace
+            test.template run<true, foobar_ptr, IFoo>();
+            test.template run<true, foobar_ptr, IBar>();
+            test.template run<false, foobar_ptr, IBase>();
+            test.template run<false, foobar_ptr, IUnknown>();
 
-                foo;
-                bar;
-            });
+            // Foo -> IFace
+            test.template run<true, foo_ptr, IFoo>();
+            test.template run<false, foo_ptr, IBar>();
+            test.template run<false, foo_ptr, IBase>();
+            test.template run<false, foo_ptr, IUnknown>();
+
+            // Bar -> IFace
+            test.template run<false, bar_ptr, IFoo>();
+            test.template run<true, bar_ptr, IBar>();
+            test.template run<false, bar_ptr, IBase>();
+            test.template run<false, bar_ptr, IUnknown>();
+
+
+
+            // IFoo -> IFace
+            test.template run<true, foo_interface_ptr, IFoo>();
+            test.template run<false, foo_interface_ptr, IBar>();
+            test.template run<true, foo_interface_ptr, IBase>();
+            test.template run<true, foo_interface_ptr, IUnknown>();
+
+            // IBar -> IFace
+            test.template run<false, bar_interface_ptr, IFoo>();
+            test.template run<true, bar_interface_ptr, IBar>();
+            test.template run<true, bar_interface_ptr, IBase>();
+            test.template run<true, bar_interface_ptr, IUnknown>();
+
+            // IBase -> IFace
+            test.template run<false, base_interface_ptr, IFoo>();
+            test.template run<false, base_interface_ptr, IBar>();
+            test.template run<true, base_interface_ptr, IBase>();
+            test.template run<true, base_interface_ptr, IUnknown>();
+
+            // IUnknown -> IFace
+            test.template run<false, unknown_interface_ptr, IFoo>();
+            test.template run<false, unknown_interface_ptr, IBar>();
+            test.template run<false, unknown_interface_ptr, IBase>();
+            test.template run<true, unknown_interface_ptr, IUnknown>();
+        }
+
+
+
+        struct AsTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                try
+                {
+                    auto comPtr = fromPtr.as<Ty>();
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(3u, ptr->RefCount());
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(AsTest)
+        {
+            DoConversionTest(AsTester{});
+        }
+
+        struct AsNoExceptTester
+        {
+            template <bool NoExcept, typename FromTy, typename ToTy>
+            void run() const
+            {
+                Assert::AreEqual(NoExcept, noexcept(std::declval<FromTy>().as<ToTy>()));
+            }
+        };
+
+        TEST_METHOD(AsNoExceptTest)
+        {
+            DoNoExceptTest(AsNoExceptTester{});
+        }
+
+
+
+        struct TryAsTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                {
+                    auto comPtr = fromPtr.try_as<Ty>();
+
+                    if (ShouldSucceed)
+                    {
+                        Assert::AreEqual(3u, ptr->RefCount());
+                        Assert::IsTrue(comPtr);
+                    }
+                    else
+                    {
+                        Assert::AreEqual(2u, ptr->RefCount());
+                        Assert::IsFalse(comPtr);
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(TryAsTest)
+        {
+            DoConversionTest(TryAsTester{});
+        }
+
+
+
+        struct CopyToTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                try
+                {
+                    Ty* rawPtr;
+                    fromPtr.copy_to(&rawPtr);
+
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(3u, ptr->RefCount());
+                    rawPtr->Release();
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(CopyToTest)
+        {
+            DoConversionTest(CopyToTester{});
+        }
+
+        struct CopyToNoExceptTester
+        {
+            template <bool NoExcept, typename FromTy, typename ToTy>
+            void run() const
+            {
+                Assert::AreEqual(NoExcept, noexcept(std::declval<FromTy>().copy_to(std::declval<ToTy**>())));
+            }
+        };
+
+        TEST_METHOD(CopyToNoExceptTest)
+        {
+            DoNoExceptTest(CopyToNoExceptTester{});
+        }
+
+
+
+        struct CopyToIIDTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                try
+                {
+                    Ty* rawPtr;
+                    fromPtr.copy_to(IID_PPV_ARGS(&rawPtr));
+
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(3u, ptr->RefCount());
+                    rawPtr->Release();
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(CopyToIIDTest)
+        {
+            DoConversionTest(CopyToIIDTester{});
+        }
+
+
+
+        struct QueryTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                try
+                {
+                    FromTy* rawPtr = static_cast<CastTy*>(ptr);
+                    auto comPtr = dhorn::com::query<Ty>(rawPtr);
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(2u, ptr->RefCount());
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+                    }
+                }
+
+                Assert::AreEqual(1u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(QueryTest)
+        {
+            DoConversionTest(QueryTester{});
+        }
+
+        struct QueryNoExceptTester
+        {
+            template <bool NoExcept, typename FromTy, typename ToTy>
+            void run() const
+            {
+                Assert::AreEqual(NoExcept, noexcept(dhorn::com::query<ToTy>(std::declval<typename FromTy::element_type*>())));
+            }
+        };
+
+        TEST_METHOD(QueryNoExceptTest)
+        {
+            DoNoExceptTest(QueryNoExceptTester{});
+        }
+
+
+
+        struct TryQueryTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                {
+                    FromTy* rawPtr = static_cast<CastTy*>(ptr);
+                    auto comPtr = dhorn::com::try_query<Ty>(rawPtr);
+
+                    if (ShouldSucceed)
+                    {
+                        Assert::AreEqual(2u, ptr->RefCount());
+                        Assert::IsTrue(comPtr);
+                    }
+                    else
+                    {
+                        Assert::AreEqual(1u, ptr->RefCount());
+                        Assert::IsFalse(comPtr);
+                    }
+                }
+
+                Assert::AreEqual(1u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(TryQueryTest)
+        {
+            DoConversionTest(TryQueryTester{});
         }
 
 #pragma endregion

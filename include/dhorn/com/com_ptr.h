@@ -14,6 +14,9 @@
 
 namespace dhorn::com
 {
+    /*
+     * com_ptr
+     */
     template <typename IFace>
     class com_ptr
     {
@@ -43,14 +46,8 @@ namespace dhorn::com
         {
         }
 
-        // TODO: Would it be good to have a non-explicit version?
-        //com_ptr(element_type* ptr) noexcept
-        //{
-        //    Assign(ptr);
-        //}
-
-        template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
-        explicit com_ptr(Ty* ptr) noexcept(std::is_convertible_v<Ty*, IFace*>)
+        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        com_ptr(Ty* ptr) noexcept
         {
             Assign(ptr);
         }
@@ -61,8 +58,8 @@ namespace dhorn::com
             Assign(other._ptr);
         }
 
-        template <typename Ty>
-        explicit com_ptr(const com_ptr<Ty>& other) noexcept(std::is_convertible_v<Ty*, IFace*>)
+        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        com_ptr(const com_ptr<Ty>& other) noexcept
         {
             Assign(other._ptr);
         }
@@ -171,8 +168,8 @@ namespace dhorn::com
             Release();
         }
 
-        template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
-        void reset(Ty* ptr) noexcept(std::is_convertible_v<Ty*, IFace*>)
+        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        void reset(Ty* ptr) noexcept
         {
             Release();
             Assign(ptr);
@@ -234,14 +231,24 @@ namespace dhorn::com
         template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
         com_ptr<Ty> as() noexcept(std::is_convertible_v<IFace*, Ty*>)
         {
-            return com_ptr<Ty>(this->_ptr);
+            com_ptr<Ty> result;
+            result.Assign(this->_ptr);
+            return result;
+        }
+
+        template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
+        com_ptr<Ty> try_as() noexcept
+        {
+            com_ptr<Ty> result;
+            result.TryAssign(this->_ptr);
+            return result;
         }
 
         template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
         void copy_to(Ty** ptr) noexcept(std::is_convertible_v<IFace*, Ty*>)
         {
             *ptr = nullptr;
-            *ptr = com_ptr<Ty>(this->_ptr).detach();
+            *ptr = as<Ty>().detach();
         }
 
         void copy_to(REFIID iid, void** ptr)
@@ -286,10 +293,97 @@ namespace dhorn::com
             }
         }
 
+        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        void TryAssign(Ty* ptr) noexcept
+        {
+            assert(!this->_ptr);
+            if (ptr)
+            {
+                ptr->AddRef();
+                this->_ptr = ptr;
+            }
+        }
+
+        template <typename Ty, std::enable_if_t<!std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        void TryAssign(Ty* ptr) noexcept
+        {
+            assert(!this->_ptr);
+            if (ptr)
+            {
+                if (FAILED(ptr->QueryInterface(IID_PPV_ARGS(&this->_ptr))))
+                {
+                    this->_ptr = nullptr;
+                }
+            }
+        }
+
 
 
         element_type* _ptr = nullptr;
     };
+
+
+
+    /*
+     * COM Pointer Casting
+     */
+#pragma region COM Pointer Casting
+
+    template <
+        typename Ty,
+        typename FromTy,
+        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
+        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
+        std::enable_if_t<std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+    inline com_ptr<Ty> query(FromTy* ptr) noexcept
+    {
+        // Pointer is cast-able; no need to QI
+        return com_ptr<Ty>(ptr);
+    }
+
+    template <
+        typename Ty,
+        typename FromTy,
+        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
+        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
+        std::enable_if_t<!std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+    inline com_ptr<Ty> query(FromTy* ptr)
+    {
+        com_ptr<Ty> result;
+        check_hresult(ptr->QueryInterface(IID_PPV_ARGS(&result)));
+        return result;
+    }
+
+    template <
+        typename Ty,
+        typename FromTy,
+        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
+        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
+        std::enable_if_t<std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+    inline com_ptr<Ty> try_query(FromTy* ptr) noexcept
+    {
+        // Pointer is cast-able; no need to QI
+        return com_ptr<Ty>(ptr);
+    }
+    
+    template <
+        typename Ty,
+        typename FromTy,
+        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
+        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
+        std::enable_if_t<!std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+    inline com_ptr<Ty> try_query(FromTy* ptr) noexcept
+    {
+        com_ptr<Ty> result;
+        if (SUCCEEDED(ptr->QueryInterface(IID_PPV_ARGS(&result))))
+        {
+            return result;
+        }
+
+        return nullptr;
+    }
+
+#pragma endregion
 }
 
 
