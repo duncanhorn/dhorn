@@ -3,1749 +3,1664 @@
  *
  * ComPtrTests.cpp
  *
- * Tests for the throwing dhorn::experimental::com_ptr
+ * Tests for the throwing dhorn::com::com_ptr
  */
 #include "stdafx.h"
 
-#include <dhorn/experimental/com_ptr.h>
+#include <dhorn/com/com_ptr.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
-namespace dhorn
+namespace dhorn::tests
 {
-    namespace tests
+    __interface __declspec(uuid("{56C9CB0F-534C-42D5-B297-9D77E71D908C}"))
+    IBase : public IUnknown
     {
-        __interface __declspec(uuid("{56C9CB0F-534C-42D5-B297-9D77E71D908C}"))
-        IBase : public IUnknown
+        STDMETHOD_(size_t, RefCount)();
+        STDMETHOD_(size_t, AddRefCount)();
+        STDMETHOD_(size_t, QueryCount)();
+    };
+
+    __interface __declspec(uuid("{FAB826E0-BB52-4CD5-83B1-C401D5386568}"))
+    IFoo : public IBase
+    {
+    };
+
+    __interface __declspec(uuid("{D8C6769D-72E5-4CF0-B65F-348C40044EAA}"))
+    IBar : public IBase
+    {
+    };
+
+    class Base :
+        public IBase
+    {
+    public:
+        Base()
         {
-            STDMETHOD_(size_t, RefCount)(void);
-        };
-
-        __interface __declspec(uuid("{FAB826E0-BB52-4CD5-83B1-C401D5386568}"))
-        IFoo : public IBase
-        {
-        };
-
-        __interface __declspec(uuid("{D8C6769D-72E5-4CF0-B65F-348C40044EAA}"))
-        IBar : public IBase
-        {
-        };
-
-        class Base :
-            public IBase
-        {
-        public:
-            Base(void) :
-                count(1)
-            {
-            }
-
-            ~Base(void)
-            {
-                Assert::IsTrue(count == 0);
-            }
-
-            // IUnknown
-            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
-            {
-                if (riid == __uuidof(IUnknown))
-                {
-                    *ppvObject = static_cast<IUnknown *>(this);
-                    this->AddRef();
-                    return S_OK;
-                }
-                else if (riid == __uuidof(IBase))
-                {
-                    *ppvObject = static_cast<IBase *>(this);
-                    this->AddRef();
-                    return S_OK;
-                }
-
-                *ppvObject = nullptr;
-                return E_NOINTERFACE;
-            }
-
-            STDMETHOD_(ULONG, AddRef)(void)
-            {
-                Assert::IsTrue(count > 0);
-                return ++count;
-            }
-
-            STDMETHOD_(ULONG, Release)(void)
-            {
-                auto val = --count;
-
-                if (val == 0)
-                {
-                    delete this;
-                }
-
-                return val;
-            }
-
-            // IBase
-            STDMETHOD_(size_t, RefCount)(void)
-            {
-                return count;
-            }
-
-            // Tests run on single thread, so no need to synchronize
-            size_t count;
-        };
-
-        class Foo :
-            public Base,
-            public IFoo
-        {
-        public:
-            // IUnknown
-            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
-            {
-                if (riid == __uuidof(IFoo))
-                {
-                    *ppvObject = static_cast<IFoo *>(this);
-                    this->AddRef();
-                    return S_OK;
-                }
-
-                return Base::QueryInterface(riid, ppvObject);
-            }
-
-            STDMETHOD_(ULONG, AddRef)(void)
-            {
-                Assert::IsFalse(this->_moveOnly);
-                return Base::AddRef();
-            }
-
-            STDMETHOD_(ULONG, Release)(void)
-            {
-                Assert::IsFalse(this->_moveOnly);
-                return Base::Release();
-            }
-
-            // IBase
-            STDMETHOD_(size_t, RefCount)(void)
-            {
-                return Base::RefCount();
-            }
-
-            // Other
-            void StartMoveOnly() { this->_moveOnly = true; }
-            void StopMoveOnly() { this->_moveOnly = false; }
-
-        private:
-            bool _moveOnly = false;
-        };
-
-        class Bar :
-            public Base,
-            public IBar
-        {
-        public:
-
-            // IUnknown
-            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
-            {
-                if (riid == __uuidof(IBar))
-                {
-                    *ppvObject = static_cast<IBar *>(this);
-                    this->AddRef();
-                    return S_OK;
-                }
-
-                return Base::QueryInterface(riid, ppvObject);
-            }
-
-            STDMETHOD_(ULONG, AddRef)(void)
-            {
-                return Base::AddRef();
-            }
-
-            STDMETHOD_(ULONG, Release)(void)
-            {
-                return Base::Release();
-            }
-
-            // IBase
-            STDMETHOD_(size_t, RefCount)(void)
-            {
-                return Base::RefCount();
-            }
-        };
-
-        void GetFoo(REFIID iid, void **ppOut)
-        {
-            static IFoo *pFoo = new Foo();
-            dhorn::experimental::com_ptr<IFoo>(pFoo).copy_to(iid, ppOut);
         }
 
-        class FooBar :
-            public Base,
-            public IFoo,
-            public IBar
+        ~Base()
         {
-        public:
+            Assert::IsTrue(count == 0);
+        }
 
-            // IUnknown
-            STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
-            {
-                if (riid == __uuidof(IFoo))
-                {
-                    *ppvObject = static_cast<IFoo *>(this);
-                    this->AddRef();
-                    return S_OK;
-                }
-                else if (riid == __uuidof(IBar))
-                {
-                    *ppvObject = static_cast<IBar *>(this);
-                    this->AddRef();
-                    return S_OK;
-                }
-
-                return Base::QueryInterface(riid, ppvObject);
-            }
-
-            STDMETHOD_(ULONG, AddRef)(void)
-            {
-                return Base::AddRef();
-            }
-
-            STDMETHOD_(ULONG, Release)(void)
-            {
-                return Base::Release();
-            }
-
-            // IBase
-            STDMETHOD_(size_t, RefCount)(void)
-            {
-                return Base::RefCount();
-            }
-        };
-
-        TEST_CLASS(ComPtrTests)
+        // IUnknown
+        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
         {
-            /*
-             * Constructor(s)/Destructor Tests
-             */
+            if (riid == __uuidof(IUnknown))
+            {
+                *ppvObject = static_cast<IUnknown *>(this);
+                this->AddRef();
+                return S_OK;
+            }
+            else if (riid == __uuidof(IBase))
+            {
+                *ppvObject = static_cast<IBase *>(this);
+                this->AddRef();
+                return S_OK;
+            }
+
+            *ppvObject = nullptr;
+            return E_NOINTERFACE;
+        }
+
+        STDMETHOD_(ULONG, AddRef)()
+        {
+            Assert::IsTrue(count > 0);
+            ++addRefCount;
+            return ++count;
+        }
+
+        STDMETHOD_(ULONG, Release)()
+        {
+            auto val = --count;
+
+            if (val == 0)
+            {
+                delete this;
+            }
+
+            return val;
+        }
+
+        // IBase
+        STDMETHOD_(size_t, RefCount)()
+        {
+            return count;
+        }
+
+        STDMETHOD_(size_t, AddRefCount)()
+        {
+            return addRefCount;
+        }
+
+        // Tests run on single thread, so no need to synchronize
+        size_t count = 1;
+        size_t addRefCount = 0;
+    };
+
+    class Foo :
+        public Base,
+        public IFoo
+    {
+    public:
+        // IUnknown
+        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
+        {
+            ++this->_queryCount;
+
+            if (riid == __uuidof(IFoo))
+            {
+                *ppvObject = static_cast<IFoo *>(this);
+                this->AddRef();
+                return S_OK;
+            }
+
+            return Base::QueryInterface(riid, ppvObject);
+        }
+
+        STDMETHOD_(ULONG, AddRef)()
+        {
+            return Base::AddRef();
+        }
+
+        STDMETHOD_(ULONG, Release)()
+        {
+            return Base::Release();
+        }
+
+        // IBase
+        STDMETHOD_(size_t, RefCount)()
+        {
+            return Base::RefCount();
+        }
+
+        STDMETHOD_(size_t, AddRefCount)()
+        {
+            return Base::AddRefCount();
+        }
+
+        STDMETHOD_(size_t, QueryCount)()
+        {
+            return this->_queryCount;
+        }
+
+    private:
+
+        size_t _queryCount = 0;
+    };
+
+    class Bar :
+        public Base,
+        public IBar
+    {
+    public:
+
+        // IUnknown
+        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
+        {
+            ++this->_queryCount;
+
+            if (riid == __uuidof(IBar))
+            {
+                *ppvObject = static_cast<IBar *>(this);
+                this->AddRef();
+                return S_OK;
+            }
+
+            return Base::QueryInterface(riid, ppvObject);
+        }
+
+        STDMETHOD_(ULONG, AddRef)()
+        {
+            return Base::AddRef();
+        }
+
+        STDMETHOD_(ULONG, Release)()
+        {
+            return Base::Release();
+        }
+
+        // IBase
+        STDMETHOD_(size_t, RefCount)()
+        {
+            return Base::RefCount();
+        }
+
+        STDMETHOD_(size_t, AddRefCount)()
+        {
+            return Base::AddRefCount();
+        }
+
+        STDMETHOD_(size_t, QueryCount)()
+        {
+            return this->_queryCount;
+        }
+
+    private:
+
+        size_t _queryCount = 0;
+    };
+
+    class FooBar :
+        public Base,
+        public IFoo,
+        public IBar
+    {
+    public:
+
+        // IUnknown
+        STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject)
+        {
+            ++this->_queryCount;
+
+            if (riid == __uuidof(IFoo))
+            {
+                *ppvObject = static_cast<IFoo *>(this);
+                this->AddRef();
+                return S_OK;
+            }
+            else if (riid == __uuidof(IBar))
+            {
+                *ppvObject = static_cast<IBar *>(this);
+                this->AddRef();
+                return S_OK;
+            }
+
+            return Base::QueryInterface(riid, ppvObject);
+        }
+
+        STDMETHOD_(ULONG, AddRef)()
+        {
+            return Base::AddRef();
+        }
+
+        STDMETHOD_(ULONG, Release)()
+        {
+            return Base::Release();
+        }
+
+        // IBase
+        STDMETHOD_(size_t, RefCount)()
+        {
+            return Base::RefCount();
+        }
+
+        STDMETHOD_(size_t, AddRefCount)()
+        {
+            return Base::AddRefCount();
+        }
+
+        STDMETHOD_(size_t, QueryCount)()
+        {
+            return this->_queryCount;
+        }
+
+    private:
+
+        size_t _queryCount = 0;
+    };
+
+    TEST_CLASS(ComPtrTests)
+    {
+        // Useful aliases for tests
+        using foo_ptr = dhorn::com::com_ptr<Foo>;
+        using bar_ptr = dhorn::com::com_ptr<Bar>;
+        using foobar_ptr = dhorn::com::com_ptr<FooBar>;
+
+        using foo_interface_ptr = dhorn::com::com_ptr<IFoo>;
+        using bar_interface_ptr = dhorn::com::com_ptr<IBar>;
+        using base_interface_ptr = dhorn::com::com_ptr<IBase>;
+        using unknown_interface_ptr = dhorn::com::com_ptr<IUnknown>;
+
+
+
+        // Helper Method For Setup, etc.
+        template <typename Func>
+        static void DoTest(Func&& func)
+        {
+            auto foo = new Foo();
+            auto bar = new Bar();
+            auto foobar = new FooBar();
+
+            func(foo, bar, foobar);
+
+            Assert::AreEqual(1u, foo->RefCount());
+            Assert::AreEqual(1u, bar->RefCount());
+            Assert::AreEqual(1u, foobar->RefCount());
+
+            foo->Release();
+            bar->Release();
+            foobar->Release();
+        }
+
+        template <typename TestTy>
+        static void DoPointerTest(const TestTy& test)
+        {
+            DoTest([&](Foo* foo, Bar* bar, FooBar* foobar)
+            {
+                // Template arguments: To, From, InputPointer
+                test.template run<Foo>(foo);
+                test.template run<Bar>(bar);
+                test.template run<FooBar>(foobar);
+
+                test.template run<IFoo>(foo);
+                test.template run<IBar>(bar);
+                test.template run<IBase, IBase, IFoo>(foobar);
+                test.template run<IUnknown, IUnknown, IBar>(foobar);
+            });
+        }
+
+        template <typename TestTy>
+        static void DoDownCastPointerTest(const TestTy& test)
+        {
+            DoTest([&](Foo* foo, Bar* bar, FooBar* foobar)
+            {
+                // Template arguments: To, From, InputPointer
+                test.template run<IFoo, Foo>(foo);
+                test.template run<IBar, Bar>(bar);
+                test.template run<IFoo, FooBar>(foobar);
+                test.template run<IBar, FooBar>(foobar);
+
+                test.template run<IBase, IFoo>(foo);
+                test.template run<IBase, IBar>(bar);
+                test.template run<IUnknown, IFoo, IFoo>(foobar);
+                test.template run<IUnknown, IBar, IBar>(foobar);
+                test.template run<IUnknown, IBase, IFoo>(foobar);
+            });
+        }
+
+        template <typename TestTy>
+        static void DoPointerTraitsTest(const TestTy& test)
+        {
+            // Template arguments: To, From
+            test.template run<Foo>();
+            test.template run<Bar>();
+            test.template run<FooBar>();
+
+            test.template run<IFoo>();
+            test.template run<IBar>();
+            test.template run<IBase>();
+            test.template run<IUnknown>();
+        }
+
+        template <typename TestTy>
+        static void DoDownCastPointerTraitsTest(const TestTy& test)
+        {
+            // Template arguments: To, From
+            test.template run<IFoo, Foo>();
+            test.template run<IBar, Bar>();
+            test.template run<IFoo, FooBar>();
+            test.template run<IBar, FooBar>();
+
+            test.template run<IBase, IFoo>();
+            test.template run<IBase, IBar>();
+            test.template run<IUnknown, IFoo>();
+            test.template run<IUnknown, IBar>();
+            test.template run<IUnknown, IBase>();
+        }
+
+
+
+        /*
+         * Constructor(s)/Destructor Tests
+         */
 #pragma region Constructor(s)/Destructors
 
-            TEST_METHOD(DefaultAndNullConstructorTest)
+        // Null/Default Construction
+        TEST_METHOD(DefaultAndNullConstructionTest)
+        {
+            dhorn::com::com_ptr<IUnknown> unk;
+            dhorn::com::com_ptr<IBase> base;
+            dhorn::com::com_ptr<IFoo> foo(nullptr);
+            dhorn::com::com_ptr<IBar> bar(nullptr);
+            dhorn::com::com_ptr<FooBar> foobar(nullptr);
+
+            Assert::IsFalse(unk);
+            Assert::IsFalse(base);
+            Assert::IsFalse(foo);
+            Assert::IsFalse(bar);
+            Assert::IsFalse(foobar);
+        }
+
+        TEST_METHOD(DefaultAndNullConstructionNoExceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_default_constructible_v<foo_ptr>);
+            Assert::IsTrue(std::is_nothrow_constructible_v<foo_ptr, std::nullptr_t>);
+        }
+
+
+
+        // Pointer Construction
+        struct PointerConstructionTester
+        {
+            template <typename Ty, typename CastTy = Ty, typename PtrTy>
+            void run(PtrTy* ptr) const
             {
-                dhorn::experimental::com_ptr<IUnknown> unk;
-                dhorn::experimental::com_ptr<IBase> base;
-                dhorn::experimental::com_ptr<IFoo> foo(nullptr);
-                dhorn::experimental::com_ptr<IBar> bar(nullptr);
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
 
-                Assert::IsFalse(unk);
-                Assert::IsFalse(base);
-                Assert::IsFalse(foo);
-                Assert::IsFalse(bar);
+                dhorn::com::com_ptr<Ty> comPtr(static_cast<CastTy*>(ptr));
+                Assert::AreEqual(2u, ptr->RefCount());
+
+                // Construction should add ref with no QIs
+                Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                Assert::AreEqual(qiCount, ptr->QueryCount());
             }
+        };
 
-            TEST_METHOD(ValidPointerConstructionTest)
+        TEST_METHOD(PointerConstructionTest)
+        {
+            DoPointerTest(PointerConstructionTester{});
+        }
+
+        TEST_METHOD(DownCastPointerConstructionTest)
+        {
+            DoDownCastPointerTest(PointerConstructionTester{});
+        }
+
+        struct NullPointerConstructionTester
+        {
+            template <typename ComPtrTy, typename PtrTy = ComPtrTy>
+            void run() const
             {
-                auto foo = new Foo();
-                auto bar = new Bar();
-                auto foobar = new FooBar();
-
-                IFoo *pFoo = foobar;
-                IBar *pBar = foobar;
-                IBase *pBase = pFoo;
-                IUnknown *pUnk = pBase;
-
-                {
-                    // Down-casting
-                    dhorn::experimental::com_ptr<IFoo> f(foo);
-                    Assert::IsTrue(f->RefCount() == 2);
-
-                    dhorn::experimental::com_ptr<IBar> b(bar);
-                    Assert::IsTrue(b->RefCount() == 2);
-
-                    dhorn::experimental::com_ptr<IFoo> f2(foobar);
-                    Assert::IsTrue(f2->RefCount() == 2);
-
-                    dhorn::experimental::com_ptr<IBar> b2(foobar);
-                    Assert::IsTrue(b2->RefCount() == 3);
-
-                    dhorn::experimental::com_ptr<IUnknown> unk(pFoo);
-                    Assert::IsTrue(foobar->RefCount() == 4);
-
-                    dhorn::experimental::com_ptr<IBase> base(pBar);
-                    Assert::IsTrue(base->RefCount() == 5);
-
-                    // Up-casting
-                    dhorn::experimental::com_ptr<IBase> base2(pUnk);
-                    Assert::IsTrue(foobar->RefCount() == 6);
-
-                    dhorn::experimental::com_ptr<IBar> b3(pUnk);
-                    Assert::IsTrue(foobar->RefCount() == 7);
-
-                    dhorn::experimental::com_ptr<IFoo> f3(pBase);
-                    Assert::IsTrue(foobar->RefCount() == 8);
-
-                    // Cross-casting
-                    dhorn::experimental::com_ptr<IFoo> f4(pBar);
-                    Assert::IsTrue(foobar->RefCount() == 9);
-
-                    dhorn::experimental::com_ptr<IBar> b4(pFoo);
-                    Assert::IsTrue(foobar->RefCount() == 10);
-                }
-
-                Assert::IsTrue(foo->RefCount() == 1);
-                Assert::IsTrue(bar->RefCount() == 1);
-                Assert::IsTrue(foobar->RefCount() == 1);
-
-                foo->Release();
-                bar->Release();
-                foobar->Release();
+                PtrTy* ptr = nullptr;
+                dhorn::com::com_ptr<ComPtrTy> comPtr(ptr);
+                Assert::IsFalse(comPtr);
             }
+        };
 
-            TEST_METHOD(InvalidPointerConstructionTest)
+        TEST_METHOD(NullPointerConstructionTest)
+        {
+            DoPointerTraitsTest(NullPointerConstructionTester{});
+        }
+
+        TEST_METHOD(NullDownCastPointerConstructionTest)
+        {
+            DoDownCastPointerTraitsTest(NullPointerConstructionTester{});
+        }
+
+        struct PointerConstructionNoExceptTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
             {
-                IFoo *foo = new Foo();
-                IBar *bar = new Bar();
-                IBase *base = foo;
-
-                {
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IFoo> f(bar);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> b(foo);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-
-                    try
-                    {
-                        // base is type Foo
-                        dhorn::experimental::com_ptr<IBar> b(base);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                }
-
-                Assert::IsTrue(foo->RefCount() == 1);
-                Assert::IsTrue(bar->RefCount() == 1);
-
-                foo->Release();
-                bar->Release();
+                Assert::IsTrue(std::is_nothrow_constructible_v<dhorn::com::com_ptr<Ty>, FromTy*>);
             }
+        };
 
-            TEST_METHOD(NullPointerConstructionTest)
+        TEST_METHOD(PointerConstructionNoExceptTest)
+        {
+            DoPointerTraitsTest(PointerConstructionNoExceptTester{});
+        }
+
+        TEST_METHOD(DownCastPointerConstructionNoExceptTest)
+        {
+            DoDownCastPointerTraitsTest(PointerConstructionNoExceptTester{});
+        }
+
+
+
+        // Copy Construction
+        struct CopyConstructionTester
+        {
+            template <typename Ty, typename OtherTy = Ty, typename PtrTy>
+            void run(PtrTy* ptr) const
             {
-                IFoo *pFoo = nullptr;
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
 
-                // Any type should be constructable from a null pointer, regardless of the type
-                dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                Assert::IsFalse(foo);
-                dhorn::experimental::com_ptr<IBar> bar(pFoo);
-                Assert::IsFalse(bar);
-                dhorn::experimental::com_ptr<IBase> base(pFoo);
-                Assert::IsFalse(base);
-                dhorn::experimental::com_ptr<IUnknown> unk(pFoo);
-                Assert::IsFalse(unk);
+                dhorn::com::com_ptr<OtherTy> comPtr(ptr);
+                dhorn::com::com_ptr<Ty> copyPtr(comPtr);
+                Assert::AreEqual(3u, ptr->RefCount());
 
-                IUnknown *pUnk = nullptr;
-
-                dhorn::experimental::com_ptr<IFoo> foo2(pUnk);
-                Assert::IsFalse(foo2);
-                dhorn::experimental::com_ptr<IBar> bar2(pUnk);
-                Assert::IsFalse(bar2);
-                dhorn::experimental::com_ptr<IBase> base2(pUnk);
-                Assert::IsFalse(base2);
-                dhorn::experimental::com_ptr<IUnknown> unk2(pUnk);
-                Assert::IsFalse(unk2);
+                // Construction should add ref with no QIs
+                Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
+                Assert::AreEqual(qiCount, ptr->QueryCount());
             }
+        };
 
-            /*
-            TEST_METHOD(PointerMoveConstructionTest)
+        TEST_METHOD(CopyConstructionTest)
+        {
+            DoPointerTest(CopyConstructionTester{});
+        }
+
+        TEST_METHOD(DownCastCopyConstructionTest)
+        {
+            DoDownCastPointerTest(CopyConstructionTester{});
+        }
+
+        struct NullCopyConstructionTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
             {
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(new Foo());
-                    Assert::IsTrue(foo->RefCount() == 1);
-
-                    dhorn::experimental::com_ptr<IBar> bar(new Bar());
-                    Assert::IsTrue(bar->RefCount() == 1);
-
-                    dhorn::experimental::com_ptr<IBase> base(new Base());
-                    Assert::IsTrue(base->RefCount() == 1);
-
-                    dhorn::experimental::com_ptr<IBase> base2(static_cast<IFoo *>(new Foo()));
-                    Assert::IsTrue(base2->RefCount() == 1);
-
-                    // If we throw an exception while move-constructing, then we expect the
-                    // reference count to be decremented
-                    IFoo *pFoo = new Foo();
-                    IFoo *pFoo2 = pFoo;
-                    pFoo2->AddRef();
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> bar2(std::move(pFoo));
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-
-                    Assert::IsTrue(pFoo == nullptr);
-                    Assert::IsTrue(pFoo2->RefCount() == 1);
-                    pFoo2->Release();
-                }
+                dhorn::com::com_ptr<FromTy> ptr;
+                dhorn::com::com_ptr<Ty> ptrCopy(ptr);
+                Assert::IsFalse(ptrCopy);
             }
-            */
+        };
 
-            TEST_METHOD(ValidCopyConstructorTest)
+        TEST_METHOD(NullCopyConstructionTest)
+        {
+            DoPointerTraitsTest(NullCopyConstructionTester{});
+        }
+
+        TEST_METHOD(NullDownCastCopyConstructionTest)
+        {
+            DoDownCastPointerTraitsTest(NullCopyConstructionTester{});
+        }
+
+        struct CopyConstructionNoExceptTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
             {
-                auto pFoo = new FooBar();
-
-                {
-                    size_t expect = 1;
-
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    Assert::IsTrue(foo->RefCount() == ++expect);
-
-                    // Cross-cast
-                    dhorn::experimental::com_ptr<IBar> bar(foo);
-                    Assert::IsTrue(bar->RefCount() == ++expect);
-
-                    // Down-cast/same-cast
-                    dhorn::experimental::com_ptr<IFoo> foo2(foo);
-                    Assert::IsTrue(foo2->RefCount() == ++expect);
-
-                    dhorn::experimental::com_ptr<IBase> base(foo);
-                    Assert::IsTrue(base->RefCount() == ++expect);
-
-                    dhorn::experimental::com_ptr<IUnknown> unk(foo);
-                    Assert::IsTrue(foo->RefCount() == ++expect);
-
-                    // Up-cast
-                    dhorn::experimental::com_ptr<IFoo> foo3(unk);
-                    Assert::IsTrue(foo3->RefCount() == ++expect);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
+                Assert::IsTrue(std::is_nothrow_constructible_v<dhorn::com::com_ptr<Ty>, dhorn::com::com_ptr<FromTy>>);
             }
+        };
 
-            TEST_METHOD(InvalidCopyConstructorTest)
+        TEST_METHOD(CopyConstructionNoExceptTest)
+        {
+            DoPointerTraitsTest(CopyConstructionNoExceptTester{});
+        }
+
+        TEST_METHOD(DownCastCopyConstructionNoExceptTest)
+        {
+            DoDownCastPointerTraitsTest(CopyConstructionNoExceptTester{});
+        }
+
+
+
+        // Move Construction
+        struct MoveConstructionTester
+        {
+            template <typename Ty, typename OtherTy = Ty, typename PtrTy>
+            void run(PtrTy* ptr) const
             {
-                auto pBase = new Base();
-                auto pFoo = new Foo();
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
 
-                {
-                    dhorn::experimental::com_ptr<IBase> base(pBase);
-                    Assert::IsTrue(base->RefCount() == 2);
+                dhorn::com::com_ptr<OtherTy> comPtr(ptr);
+                dhorn::com::com_ptr<Ty> movedPtr(std::move(comPtr));
 
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    Assert::IsTrue(foo->RefCount() == 2);
+                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::IsFalse(comPtr);
+                Assert::IsTrue(movedPtr);
 
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IFoo> foo2(base);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(base->RefCount() == 2);
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> bar(base);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(base->RefCount() == 2);
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> bar(foo);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(foo->RefCount() == 2);
-                }
-
-                Assert::IsTrue(pBase->RefCount() == 1);
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                pBase->Release();
-                pFoo->Release();
+                // One AddRef for the moved-from, but not for the moved-to. No QIs
+                Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                Assert::AreEqual(qiCount, ptr->QueryCount());
             }
+        };
 
-            TEST_METHOD(NullCopyConstructorTest)
+        TEST_METHOD(MoveConstructionTest)
+        {
+            DoPointerTest(MoveConstructionTester{});
+        }
+
+        TEST_METHOD(MoveDownCastConstructionTest)
+        {
+            DoDownCastPointerTest(MoveConstructionTester{});
+        }
+
+        struct NullMoveConstructionTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
             {
-                dhorn::experimental::com_ptr<IFoo> spFoo;
-
-                // Any type should be constructable from a null pointer, regardless of the type
-                dhorn::experimental::com_ptr<IFoo> foo(spFoo);
-                Assert::IsFalse(foo);
-                dhorn::experimental::com_ptr<IBar> bar(spFoo);
-                Assert::IsFalse(bar);
-                dhorn::experimental::com_ptr<IBase> base(spFoo);
-                Assert::IsFalse(base);
-                dhorn::experimental::com_ptr<IUnknown> unk(spFoo);
-                Assert::IsFalse(unk);
-
-                dhorn::experimental::com_ptr<IUnknown> spUnk;
-
-                dhorn::experimental::com_ptr<IFoo> foo2(spUnk);
-                Assert::IsFalse(foo2);
-                dhorn::experimental::com_ptr<IBar> bar2(spUnk);
-                Assert::IsFalse(bar2);
-                dhorn::experimental::com_ptr<IBase> base2(spUnk);
-                Assert::IsFalse(base2);
-                dhorn::experimental::com_ptr<IUnknown> unk2(spUnk);
-                Assert::IsFalse(unk2);
+                dhorn::com::com_ptr<FromTy> ptr;
+                dhorn::com::com_ptr<Ty> ptrMove(std::move(ptr));
+                Assert::IsFalse(ptrMove);
             }
+        };
 
-            TEST_METHOD(ValidMoveConstructorTest)
+        TEST_METHOD(NullMoveConstructionTest)
+        {
+            DoPointerTraitsTest(NullMoveConstructionTester{});
+        }
+
+        TEST_METHOD(NullDownCastMoveConstructionTest)
+        {
+            DoDownCastPointerTraitsTest(NullMoveConstructionTester{});
+        }
+
+        struct MoveConstructionNoExceptTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
             {
-                auto pFooBar = new FooBar();
-
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFooBar);
-                    Assert::IsTrue(pFooBar->RefCount() == 2);
-
-                    // Down/same-cast - move allowed
-                    dhorn::experimental::com_ptr<IFoo> foo2(std::move(foo));
-                    Assert::IsTrue(foo2);
-                    Assert::IsFalse(foo);
-
-                    dhorn::experimental::com_ptr<IBase> base(std::move(foo2));
-                    Assert::IsTrue(pFooBar->RefCount() == 2);
-                    Assert::IsTrue(base);
-                    Assert::IsFalse(foo2);
-
-                    dhorn::experimental::com_ptr<IUnknown> unk(std::move(base));
-                    Assert::IsTrue(pFooBar->RefCount() == 2);
-                    Assert::IsTrue(unk);
-                    Assert::IsFalse(base);
-
-                    // Up-cast - cannot move
-                    dhorn::experimental::com_ptr<IBase> base2(std::move(unk));
-                    Assert::IsTrue(pFooBar->RefCount() == 3);
-                    Assert::IsTrue(base2);
-                    Assert::IsTrue(unk);
-
-                    dhorn::experimental::com_ptr<IBar> bar(std::move(base2));
-                    Assert::IsTrue(pFooBar->RefCount() == 4);
-                    Assert::IsTrue(bar);
-                    Assert::IsTrue(base2);
-
-                    dhorn::experimental::com_ptr<IFoo> foo3(std::move(bar));
-                    Assert::IsTrue(pFooBar->RefCount() == 5);
-                    Assert::IsTrue(foo3);
-                    Assert::IsTrue(bar);
-                }
-
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-                pFooBar->Release();
+                Assert::IsTrue(std::is_nothrow_constructible_v<dhorn::com::com_ptr<Ty>, dhorn::com::com_ptr<FromTy>&&>);
             }
+        };
 
-            TEST_METHOD(InvalidMoveConstructorTest)
-            {
-                IFoo *pFoo = new Foo();
+        TEST_METHOD(MoveConstructionNoExceptTest)
+        {
+            DoPointerTraitsTest(MoveConstructionNoExceptTester{});
+        }
 
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    dhorn::experimental::com_ptr<IBase> base(pFoo);
-                    dhorn::experimental::com_ptr<IUnknown> unk(pFoo);
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-
-                    // The compiler should select the non-r-value constructor when we pass an
-                    // r-value reference to a dhorn::experimental::com_ptr that cannot be implicitly casted, so there's
-                    // not really much to test here. Just verify that it works
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> bar(std::move(foo));
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-                    Assert::IsTrue(foo);
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> bar(std::move(base));
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-                    Assert::IsTrue(base);
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> bar(std::move(unk));
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-                    Assert::IsTrue(unk);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
-
-            TEST_METHOD(NullMoveConstructorTest)
-            {
-                dhorn::experimental::com_ptr<IFoo> spFoo;
-
-                dhorn::experimental::com_ptr<IFoo> foo(std::move(spFoo));
-                Assert::IsFalse(foo);
-                dhorn::experimental::com_ptr<IBar> bar(std::move(spFoo));
-                Assert::IsFalse(bar);
-                dhorn::experimental::com_ptr<IBase> base(std::move(spFoo));
-                Assert::IsFalse(base);
-                dhorn::experimental::com_ptr<IUnknown> unk(std::move(spFoo));
-                Assert::IsFalse(unk);
-
-                dhorn::experimental::com_ptr<IUnknown> spUnk;
-
-                dhorn::experimental::com_ptr<IFoo> foo2(std::move(spUnk));
-                Assert::IsFalse(foo2);
-                dhorn::experimental::com_ptr<IBar> bar2(std::move(spUnk));
-                Assert::IsFalse(bar2);
-                dhorn::experimental::com_ptr<IBase> base2(std::move(spUnk));
-                Assert::IsFalse(base2);
-                dhorn::experimental::com_ptr<IUnknown> unk2(std::move(spUnk));
-                Assert::IsFalse(unk2);
-            }
-
-            TEST_METHOD(DestructorTest)
-            {
-                // We've been testing the destructor this whole time... just make it explicit
-                IFoo *pFoo = new Foo();
-                IBase *pBase = pFoo;
-                IUnknown *pUnk = pFoo;
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    Assert::IsTrue(pFoo->RefCount() == 2);
-                    {
-                        dhorn::experimental::com_ptr<IBase> base(pBase);
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                        {
-                            dhorn::experimental::com_ptr<IUnknown> unk(pUnk);
-                            Assert::IsTrue(pFoo->RefCount() == 4);
-                        }
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                    }
-                    Assert::IsTrue(pFoo->RefCount() == 2);
-                }
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                // Now do the same, but cause an exception
-                try
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    Assert::IsTrue(pFoo->RefCount() == 2);
-                    {
-                        dhorn::experimental::com_ptr<IBase> base(pBase);
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                        {
-                            dhorn::experimental::com_ptr<IUnknown> unk(pUnk);
-                            Assert::IsTrue(pFoo->RefCount() == 4);
-                            {
-                                dhorn::experimental::com_ptr<IBar> bar(pUnk);
-                                Assert::Fail(L"Expected an exception");
-                            }
-                        }
-                    }
-                }
-                catch ( dhorn::experimental::hresult_exception &e)
-                {
-                    Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                }
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                // Now do it with assignment
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo;
-                    Assert::IsFalse(foo);
-                    foo = pFoo;
-                    Assert::IsTrue(pFoo->RefCount() == 2);
-                    {
-                        dhorn::experimental::com_ptr<IBase> base;
-                        Assert::IsFalse(base);
-                        base = pBase;
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                        {
-                            dhorn::experimental::com_ptr<IUnknown> unk;
-                            Assert::IsFalse(unk);
-                            unk = pUnk;
-                            Assert::IsTrue(pFoo->RefCount() == 4);
-                        }
-                    }
-                }
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                // And again with the assigment, but with an exception
-                try
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo;
-                    Assert::IsFalse(foo);
-                    foo = pFoo;
-                    Assert::IsTrue(pFoo->RefCount() == 2);
-                    {
-                        dhorn::experimental::com_ptr<IBase> base;
-                        Assert::IsFalse(base);
-                        base = pBase;
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                        {
-                            dhorn::experimental::com_ptr<IUnknown> unk;
-                            Assert::IsFalse(unk);
-                            unk = pUnk;
-                            Assert::IsTrue(pFoo->RefCount() == 4);
-                            {
-                                dhorn::experimental::com_ptr<IBar> bar;
-                                Assert::IsFalse(bar);
-                                bar = pUnk;
-                                Assert::Fail(L"Expected an exception");
-                            }
-                        }
-                    }
-                }
-                catch ( dhorn::experimental::hresult_exception &e)
-                {
-                    Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                }
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                pFoo->Release();
-            }
+        TEST_METHOD(MoveDownCastConstructionNoExceptTest)
+        {
+            DoDownCastPointerTraitsTest(MoveConstructionNoExceptTester{});
+        }
 
 #pragma endregion
 
 
 
-            /*
-             * Assignment Tests
-             */
+        /*
+         * Assignment Tests
+         */
 #pragma region Assignment
 
-            TEST_METHOD(ValidPointerAssignmentTest)
+        // Null Assignment
+        template <typename Ty, typename PtrTy>
+        static void NullAssignmentTest_Impl(PtrTy* ptr)
+        {
+            dhorn::com::com_ptr<Ty> comPtr(ptr);
+            comPtr = nullptr;
+            Assert::IsFalse(comPtr);
+        }
+
+        TEST_METHOD(NullAssignmentTest)
+        {
+            DoTest([](Foo* foo, Bar* bar, FooBar* foobar)
             {
-                IFoo *foo = new Foo();
-                IBar *bar = new Bar();
-                auto foobar = new FooBar();
+                NullAssignmentTest_Impl<Foo>(foo);
+                NullAssignmentTest_Impl<Bar>(bar);
+                NullAssignmentTest_Impl<FooBar>(foobar);
 
-                IFoo *pFoo = foobar;
-                IBar *pBar = foobar;
+                NullAssignmentTest_Impl<IFoo>(foo);
+                NullAssignmentTest_Impl<IBar>(bar);
+                NullAssignmentTest_Impl<IBase, IFoo>(foobar);
+                NullAssignmentTest_Impl<IUnknown, IBar>(foobar);
+            });
+        }
 
-                {
-                    dhorn::experimental::com_ptr<IFoo> f;
-                    Assert::IsFalse(f);
-                    f = foo;
-                    Assert::IsTrue(f->RefCount() == 2);
+        TEST_METHOD(NullAssignmentNoExceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_assignable_v<foo_ptr, std::nullptr_t>);
+        }
 
-                    dhorn::experimental::com_ptr<IBar> b;
-                    Assert::IsFalse(b);
-                    b = bar;
-                    Assert::IsTrue(b->RefCount() == 2);
 
-                    dhorn::experimental::com_ptr<IFoo> f2;
-                    Assert::IsFalse(f2);
-                    f2 = foobar;
-                    Assert::IsTrue(f2->RefCount() == 2);
 
-                    dhorn::experimental::com_ptr<IBar> b2;
-                    Assert::IsFalse(b2);
-                    b2 = foobar;
-                    Assert::IsTrue(b2->RefCount() == 3);
+        // Pointer Assignment
+        struct PointerAssignmentTester
+        {
+            template <typename Ty, typename CastTy = Ty, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
 
-                    dhorn::experimental::com_ptr<IUnknown> unk;
-                    Assert::IsFalse(unk);
+                dhorn::com::com_ptr<Ty> comPtr;
+                Assert::IsFalse(comPtr);
 
-                    // Assign to many things
-                    unk = foo;
-                    Assert::IsTrue(foo->RefCount() == 3);
-                    unk = bar;
-                    unk = bar;
-                    unk = bar;
-                    Assert::IsTrue(foo->RefCount() == 2);
-                    Assert::IsTrue(bar->RefCount() == 3);
-                    unk = pFoo;
-                    Assert::IsTrue(bar->RefCount() == 2);
-                    Assert::IsTrue(foobar->RefCount() == 4);
-                    unk = pBar;
-                    Assert::IsTrue(foobar->RefCount() == 4);
+                comPtr = static_cast<CastTy*>(ptr);
+                Assert::IsTrue(comPtr);
+                Assert::AreEqual(2u, ptr->RefCount());
 
-                    dhorn::experimental::com_ptr<IBase> base;
-                    Assert::IsFalse(base);
-                    base = pBar;
-                    Assert::IsTrue(base->RefCount() == 5);
+                // Construction should add ref with no QIs
+                Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                Assert::AreEqual(qiCount, ptr->QueryCount());
+            }
+        };
 
-                    // Make sure we can assign to nullptr
-                    base = nullptr;
-                    Assert::IsTrue(pBar->RefCount() == 4);
-                }
+        TEST_METHOD(PointerAssignmentTest)
+        {
+            DoPointerTest(PointerAssignmentTester{});
+        }
 
-                Assert::IsTrue(foo->RefCount() == 1);
-                Assert::IsTrue(bar->RefCount() == 1);
-                Assert::IsTrue(foobar->RefCount() == 1);
+        TEST_METHOD(DownCastPointerAssignmentTest)
+        {
+            DoDownCastPointerTest(PointerAssignmentTester{});
+        }
 
-                foo->Release();
-                bar->Release();
+        struct NullPointerAssignmentTester
+        {
+            template <typename ComPtrTy, typename PtrTy = ComPtrTy>
+            void run() const
+            {
+                dhorn::com::com_ptr<ComPtrTy> comPtr;
+                Assert::IsFalse(comPtr);
+
+                PtrTy* ptr = nullptr;
+                comPtr = ptr;
+                Assert::IsFalse(comPtr);
+            }
+        };
+
+        TEST_METHOD(NullPointerAssignmentTest)
+        {
+            DoPointerTraitsTest(NullPointerAssignmentTester{});
+        }
+
+        TEST_METHOD(NullDownCastPointerAssignmentTest)
+        {
+            DoDownCastPointerTraitsTest(NullPointerAssignmentTester{});
+        }
+
+        struct PointerAssignmentNoExceptTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
+            {
+                Assert::IsTrue(std::is_nothrow_assignable_v<dhorn::com::com_ptr<Ty>, FromTy*>);
+            }
+        };
+
+        TEST_METHOD(PointerAssignmentNoExceptTest)
+        {
+            DoPointerTraitsTest(PointerAssignmentNoExceptTester{});
+        }
+
+        TEST_METHOD(DownCastPointerAssignmentNoExceptTest)
+        {
+            DoDownCastPointerTraitsTest(PointerAssignmentNoExceptTester{});
+        }
+
+
+
+        // Copy Assignment
+        struct CopyAssignmentTester
+        {
+            template <typename Ty, typename OtherTy = Ty, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+
+                dhorn::com::com_ptr<OtherTy> comPtr(ptr);
+                dhorn::com::com_ptr<Ty> copyPtr;
+                Assert::IsFalse(copyPtr);
+
+                copyPtr = comPtr;
+                Assert::IsTrue(comPtr);
+                Assert::AreEqual(3u, ptr->RefCount());
+
+                // Construction should add ref with no QIs
+                Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
+                Assert::AreEqual(qiCount, ptr->QueryCount());
+            }
+        };
+
+        TEST_METHOD(CopyAssignmentTest)
+        {
+            DoPointerTest(CopyAssignmentTester{});
+        }
+
+        TEST_METHOD(DownCastCopyAssignmentTest)
+        {
+            DoDownCastPointerTest(CopyAssignmentTester{});
+        }
+
+        struct NullCopyAssignmentTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
+            {
+                dhorn::com::com_ptr<FromTy> ptr;
+                dhorn::com::com_ptr<Ty> comPtr;
+                Assert::IsFalse(comPtr);
+
+                comPtr = ptr;
+                Assert::IsFalse(comPtr);
+            }
+        };
+
+        TEST_METHOD(NullCopyAssignmentTest)
+        {
+            DoPointerTraitsTest(NullCopyAssignmentTester{});
+        }
+
+        TEST_METHOD(NullDownCastCopyAssignmentTest)
+        {
+            DoDownCastPointerTraitsTest(NullCopyAssignmentTester{});
+        }
+
+        struct CopyAssignmentNoExceptTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
+            {
+                Assert::IsTrue(std::is_nothrow_assignable_v<dhorn::com::com_ptr<Ty>, dhorn::com::com_ptr<FromTy>>);
+            }
+        };
+
+        TEST_METHOD(CopyAssignmentNoExceptTest)
+        {
+            DoPointerTraitsTest(CopyAssignmentNoExceptTester{});
+        }
+
+        TEST_METHOD(DownCastCopyAssignmentNoExceptTest)
+        {
+            DoDownCastPointerTraitsTest(CopyAssignmentNoExceptTester{});
+        }
+
+
+
+        // Move Assignment
+        struct MoveAssignmentTester
+        {
+            template <typename Ty, typename OtherTy = Ty, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+
+                dhorn::com::com_ptr<OtherTy> comPtr(ptr);
+                dhorn::com::com_ptr<Ty> movedPtr;
+                Assert::IsFalse(movedPtr);
+
+                movedPtr = std::move(comPtr);
+                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::IsFalse(comPtr);
+                Assert::IsTrue(movedPtr);
+
+                // AddRef for the moved-from, but not the moved-to; no QIs
+                Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                Assert::AreEqual(qiCount, ptr->QueryCount());
+            }
+        };
+
+        TEST_METHOD(MoveAssignmentTest)
+        {
+            DoPointerTest(MoveAssignmentTester{});
+        }
+
+        TEST_METHOD(DownCastMoveAssignmentTest)
+        {
+            DoDownCastPointerTest(MoveAssignmentTester{});
+        }
+
+        struct NullMoveAssignmentTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
+            {
+                dhorn::com::com_ptr<FromTy> ptr;
+                dhorn::com::com_ptr<Ty> ptrMove;
+                Assert::IsFalse(ptrMove);
+
+                ptrMove = std::move(ptr);
+                Assert::IsFalse(ptrMove);
+            }
+        };
+
+        TEST_METHOD(NullMoveAssignmentTest)
+        {
+            DoPointerTraitsTest(NullMoveAssignmentTester{});
+        }
+
+        TEST_METHOD(NullDownCastMoveAssignmentTest)
+        {
+            DoDownCastPointerTraitsTest(NullMoveAssignmentTester{});
+        }
+
+        struct MoveAssignmentNoExceptTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
+            {
+                Assert::IsTrue(std::is_nothrow_assignable_v<dhorn::com::com_ptr<Ty>, dhorn::com::com_ptr<FromTy>&&>);
+            }
+        };
+
+        TEST_METHOD(MoveAssignmentNoExceptTest)
+        {
+            DoPointerTraitsTest(MoveAssignmentNoExceptTester{});
+        }
+
+        TEST_METHOD(DownCastMoveAssignmentNoExceptTest)
+        {
+            DoDownCastPointerTraitsTest(MoveAssignmentNoExceptTester{});
+        }
+
+
+
+        // Self Assignment
+        TEST_METHOD(SelfAssignmentTest)
+        {
+            auto foobar = new FooBar();
+            {
+                // Easier to spot errors if the ref count is 1
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
                 foobar->Release();
+                Assert::AreEqual(1u, foobar->RefCount());
+
+                comPtr = comPtr;
+                Assert::AreEqual(1u, foobar->RefCount());
+
+                foobar->AddRef();
             }
 
-            TEST_METHOD(InvalidPointerAssignmentTest)
-            {
-                IFoo *foo = new Foo();
-                IBar *bar = new Bar();
-                IBase *base = foo;
-
-                {
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IFoo> f;
-                        Assert::IsFalse(f);
-                        f = bar;
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> b;
-                        Assert::IsFalse(b);
-                        b = foo;
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-
-                    try
-                    {
-                        // base is type Foo
-                        dhorn::experimental::com_ptr<IBar> b;
-                        Assert::IsFalse(b);
-                        b = base;
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                }
-
-                Assert::IsTrue(foo->RefCount() == 1);
-                Assert::IsTrue(bar->RefCount() == 1);
-
-                foo->Release();
-                bar->Release();
-            }
-
-            TEST_METHOD(PointerAssignmentFailureTest)
-            {
-                IFoo *pFoo = new Foo();
-                IBar *pBar = new Bar();
-
-                dhorn::experimental::com_ptr<IBar> bar(pBar);
-                try
-                {
-                    bar = pFoo;
-                    Assert::Fail(L"Expected an exception");
-                }
-                catch ( dhorn::experimental::hresult_exception &e)
-                {
-                    Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                Assert::IsTrue(pBar->RefCount() == 1);
-
-                pFoo->Release();
-                pBar->Release();
-            }
-
-            TEST_METHOD(NullPointerAssignmentTest)
-            {
-                FooBar *pFooBar = new FooBar();
-                IFoo *pFoo = pFooBar;
-                IBar *pBar = pFooBar;
-
-                // Declare all dhorn::experimental::com_ptr's. Since we can actually test that assigning from valid
-                // pointers works, go ahead and do that now
-                dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                dhorn::experimental::com_ptr<IBar> bar(pBar);
-                dhorn::experimental::com_ptr<IBase> base(pFoo);
-                dhorn::experimental::com_ptr<IUnknown> unk(pBar);
-                Assert::IsTrue(pFooBar->RefCount() == 5);
-
-                IFoo *pNullFoo = nullptr;
-
-                // Any type should be assignable from a null pointer, regardless of the type
-                foo = pNullFoo;
-                bar = pNullFoo;
-                base = pNullFoo;
-                unk = pNullFoo;
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-
-                // Restore
-                foo = pFoo;
-                bar = pBar;
-                base = pFoo;
-                unk = pBar;
-                Assert::IsTrue(pFooBar->RefCount() == 5);
-
-                IUnknown *pNullUnk = nullptr;
-
-                foo = pNullUnk;
-                bar = pNullUnk;
-                base = pNullUnk;
-                unk = pNullUnk;
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-
-                pFooBar->Release();
-            }
-
-            TEST_METHOD(ValidCopyAssignmentTest)
-            {
-                auto pFoo = new FooBar();
-                auto pBase = new Base();
-
-                {
-                    size_t expect = 1;
-
-                    dhorn::experimental::com_ptr<IFoo> foo;
-                    Assert::IsFalse(foo);
-                    foo = pFoo;
-                    Assert::IsTrue(foo->RefCount() == ++expect);
-
-                    dhorn::experimental::com_ptr<IBar> bar;
-                    Assert::IsFalse(bar);
-                    bar = foo;
-                    Assert::IsTrue(bar->RefCount() == ++expect);
-
-                    dhorn::experimental::com_ptr<IFoo> foo2;
-                    Assert::IsFalse(foo2);
-                    foo2 = foo;
-                    Assert::IsTrue(foo2->RefCount() == ++expect);
-
-                    dhorn::experimental::com_ptr<IBase> base;
-                    Assert::IsFalse(base);
-                    base = foo;
-                    Assert::IsTrue(base->RefCount() == ++expect);
-
-                    dhorn::experimental::com_ptr<IUnknown> unk;
-                    Assert::IsFalse(unk);
-                    unk = foo;
-                    Assert::IsTrue(foo->RefCount() == ++expect);
-
-                    dhorn::experimental::com_ptr<IFoo> foo3;
-                    Assert::IsFalse(foo3);
-                    foo3 = unk;
-                    Assert::IsTrue(foo3->RefCount() == ++expect);
-
-                    // Assigning to the same object shouldn't give any problems
-                    dhorn::experimental::com_ptr<IBase> base2(pBase);
-                    Assert::IsTrue(pBase->RefCount() == 2);
-                    base2 = base2;
-                    Assert::IsTrue(pBase->RefCount() == 2);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                Assert::IsTrue(pBase->RefCount() == 1);
-
-                pFoo->Release();
-                pBase->Release();
-            }
-
-            TEST_METHOD(InvalidCopyAssignmentTest)
-            {
-                auto pBase = new Base();
-
-                {
-                    dhorn::experimental::com_ptr<IBase> base;
-                    Assert::IsFalse(base);
-                    base = pBase;
-                    Assert::IsTrue(base->RefCount() == 2);
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IFoo> foo;
-                        Assert::IsFalse(foo);
-                        foo = base;
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(base->RefCount() == 2);
-
-                    try
-                    {
-                        dhorn::experimental::com_ptr<IBar> bar;
-                        Assert::IsFalse(bar);
-                        bar = base;
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(base->RefCount() == 2);
-                }
-
-                Assert::IsTrue(pBase->RefCount() == 1);
-                pBase->Release();
-            }
-
-            TEST_METHOD(CopyAssignmentFailureTest)
-            {
-                IFoo *pFoo = new Foo();
-                IBar *pBar = new Bar();
-
-                dhorn::experimental::com_ptr<IBar> bar(pBar);
-                try
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    bar = foo;
-                    Assert::Fail(L"Expected an exception");
-                }
-                catch ( dhorn::experimental::hresult_exception &e)
-                {
-                    Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                Assert::IsTrue(pBar->RefCount() == 1);
-
-                pFoo->Release();
-                pBar->Release();
-            }
-
-            TEST_METHOD(NullCopyAssignmentTest)
-            {
-                FooBar *pFooBar = new FooBar();
-                IFoo *pFoo = pFooBar;
-                IBar *pBar = pFooBar;
-
-                // Declare all dhorn::experimental::com_ptr's. Since we can actually test that assigning from valid
-                // pointers works, go ahead and do that now
-                dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                dhorn::experimental::com_ptr<IBar> bar(pBar);
-                dhorn::experimental::com_ptr<IBase> base(pFoo);
-                dhorn::experimental::com_ptr<IUnknown> unk(pBar);
-                Assert::IsTrue(pFooBar->RefCount() == 5);
-
-                dhorn::experimental::com_ptr<IFoo> spFoo;
-
-                // Any type should be assignable from a null pointer, regardless of the type
-                foo = spFoo;
-                bar = spFoo;
-                base = spFoo;
-                unk = spFoo;
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-
-                // Restore
-                foo = pFoo;
-                bar = pBar;
-                base = pFoo;
-                unk = pBar;
-                Assert::IsTrue(pFooBar->RefCount() == 5);
-
-                dhorn::experimental::com_ptr<IUnknown> spUnk;
-
-                foo = spUnk;
-                bar = spUnk;
-                base = spUnk;
-                unk = spUnk;
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-
-                pFooBar->Release();
-            }
-
-            TEST_METHOD(ValidMoveAssignmentTest)
-            {
-                auto pFooBar = new FooBar();
-
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFooBar);
-                    Assert::IsTrue(pFooBar->RefCount() == 2);
-
-                    // Down/same-cast - move allowed
-                    dhorn::experimental::com_ptr<IFoo> foo2;
-                    Assert::IsFalse(foo2);
-                    foo2 = std::move(foo);
-                    Assert::IsTrue(foo2);
-                    Assert::IsFalse(foo);
-
-                    dhorn::experimental::com_ptr<IBase> base;
-                    Assert::IsFalse(base);
-                    base = std::move(foo2);
-                    Assert::IsTrue(pFooBar->RefCount() == 2);
-                    Assert::IsTrue(base);
-                    Assert::IsFalse(foo2);
-
-                    dhorn::experimental::com_ptr<IUnknown> unk;
-                    Assert::IsFalse(unk);
-                    unk = std::move(base);
-                    Assert::IsTrue(pFooBar->RefCount() == 2);
-                    Assert::IsTrue(unk);
-                    Assert::IsFalse(base);
-
-                    // Up-cast - cannot move
-                    dhorn::experimental::com_ptr<IBase> base2;
-                    Assert::IsFalse(base2);
-                    base2 = std::move(unk);
-                    Assert::IsTrue(pFooBar->RefCount() == 3);
-                    Assert::IsTrue(base2);
-                    Assert::IsTrue(unk);
-
-                    dhorn::experimental::com_ptr<IBar> bar;
-                    Assert::IsFalse(bar);
-                    bar = std::move(base2);
-                    Assert::IsTrue(pFooBar->RefCount() == 4);
-                    Assert::IsTrue(bar);
-                    Assert::IsTrue(base2);
-
-                    dhorn::experimental::com_ptr<IFoo> foo3;
-                    Assert::IsFalse(foo3);
-                    foo3 = std::move(bar);
-                    Assert::IsTrue(pFooBar->RefCount() == 5);
-                    Assert::IsTrue(foo3);
-                    Assert::IsTrue(bar);
-                }
-
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-                pFooBar->Release();
-            }
-
-            TEST_METHOD(InvalidMoveAssignmentTest)
-            {
-                IFoo *pFoo = new Foo();
-
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    dhorn::experimental::com_ptr<IBase> base(pFoo);
-                    dhorn::experimental::com_ptr<IUnknown> unk(pFoo);
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-
-                    dhorn::experimental::com_ptr<IBar> bar;
-
-                    // The compiler should select the non-r-value constructor when we pass an
-                    // r-value reference to a dhorn::experimental::com_ptr that cannot be implicitly casted, so there's
-                    // not really much to test here. Just verify that it works
-                    try
-                    {
-                        bar = std::move(foo);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-                    Assert::IsTrue(foo);
-                    Assert::IsFalse(bar);
-
-                    try
-                    {
-                        bar = std::move(base);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-                    Assert::IsTrue(base);
-                    Assert::IsFalse(bar);
-
-                    try
-                    {
-                        bar = std::move(unk);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(pFoo->RefCount() == 4);
-                    Assert::IsTrue(unk);
-                    Assert::IsFalse(bar);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
-
-            TEST_METHOD(MoveAssignmentFailureTest)
-            {
-                IFoo *pFoo = new Foo();
-                IBar *pBar = new Bar();
-
-                dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                dhorn::experimental::com_ptr<IBar> bar(pBar);
-                try
-                {
-                    bar = std::move(foo);
-                    Assert::Fail(L"Expected an exception");
-                }
-                catch ( dhorn::experimental::hresult_exception &e)
-                {
-                    Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                }
-
-                // Compiler should not use the move assignment operator, and should instead choose
-                // the copy constructor. Thus, foo should still hold a valid reference to pFoo
-                Assert::IsTrue(pFoo->RefCount() == 2);
-                Assert::IsTrue(pBar->RefCount() == 1);
-
-                pFoo->Release();
-                pBar->Release();
-            }
-
-            TEST_METHOD(NullMoveAssignmentTest)
-            {
-                FooBar *pFooBar = new FooBar();
-                IFoo *pFoo = pFooBar;
-                IBar *pBar = pFooBar;
-
-                // Declare all dhorn::experimental::com_ptr's. Since we can actually test that assigning from valid
-                // pointers works, go ahead and do that now
-                dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                dhorn::experimental::com_ptr<IBar> bar(pBar);
-                dhorn::experimental::com_ptr<IBase> base(pFoo);
-                dhorn::experimental::com_ptr<IUnknown> unk(pBar);
-                Assert::IsTrue(pFooBar->RefCount() == 5);
-
-                dhorn::experimental::com_ptr<IFoo> spFoo;
-
-                // Any type should be assignable from a null pointer, regardless of the type
-                foo = dhorn::experimental::com_ptr<IFoo>(spFoo);
-                bar = dhorn::experimental::com_ptr<IFoo>(spFoo);
-                base = dhorn::experimental::com_ptr<IFoo>(spFoo);
-                unk = dhorn::experimental::com_ptr<IFoo>(spFoo);
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-
-                // Restore
-                foo = pFoo;
-                bar = pBar;
-                base = pFoo;
-                unk = pBar;
-                Assert::IsTrue(pFooBar->RefCount() == 5);
-
-                dhorn::experimental::com_ptr<IUnknown> spUnk;
-
-                foo = dhorn::experimental::com_ptr<IUnknown>(spUnk);
-                bar = dhorn::experimental::com_ptr<IUnknown>(spUnk);
-                base = dhorn::experimental::com_ptr<IUnknown>(spUnk);
-                unk = dhorn::experimental::com_ptr<IUnknown>(spUnk);
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-
-                pFooBar->Release();
-            }
+            Assert::AreEqual(1u, foobar->RefCount());
+            foobar->Release();
+        }
 
 #pragma endregion
 
 
 
-            /*
-             * Other Tests
-             */
+        /*
+         * Reset Tests
+         */
+#pragma region Reset Tests
+
+        TEST_METHOD(NullResetTest)
+        {
+            auto foobar = new FooBar();
+
+            dhorn::com::com_ptr<FooBar> comPtr(foobar);
+            Assert::AreEqual(2u, foobar->RefCount());
+
+            comPtr.reset();
+            Assert::IsFalse(comPtr);
+            Assert::AreEqual(1u, foobar->RefCount());
+
+            comPtr = foobar;
+            Assert::AreEqual(2u, foobar->RefCount());
+
+            comPtr.reset(nullptr);
+            Assert::IsFalse(comPtr);
+            Assert::AreEqual(1u, foobar->RefCount());
+
+            // Calling reset when null should be fine
+            comPtr.reset();
+            Assert::IsFalse(comPtr);
+
+            // Null non-std::nullptr_t should also be fine
+            comPtr.reset(static_cast<FooBar*>(nullptr));
+            Assert::IsFalse(comPtr);
+
+            foobar->Release();
+        }
+
+        TEST_METHOD(NullResetNoExceptTest)
+        {
+            dhorn::com::com_ptr<IFoo> comPtr;
+            Assert::IsTrue(noexcept(comPtr.reset()));
+            Assert::IsTrue(noexcept(comPtr.reset(nullptr)));
+        }
+
+
+
+        struct ResetTester
+        {
+            template <typename Ty, typename CastTy = Ty, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+
+                dhorn::com::com_ptr<Ty> comPtr;
+                Assert::IsFalse(comPtr);
+
+                comPtr.reset(static_cast<CastTy*>(ptr));
+                Assert::IsTrue(comPtr);
+                Assert::AreEqual(2u, ptr->RefCount());
+
+                comPtr.reset(static_cast<CastTy*>(ptr));
+                Assert::IsTrue(comPtr);
+                Assert::AreEqual(2u, ptr->RefCount());
+
+                // One AddRef for each reset; no QIs
+                Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
+                Assert::AreEqual(qiCount, ptr->QueryCount());
+            }
+        };
+
+        TEST_METHOD(ResetTest)
+        {
+            DoPointerTest(ResetTester{});
+        }
+
+        TEST_METHOD(DownCastResetTest)
+        {
+            DoDownCastPointerTest(ResetTester{});
+        }
+
+        struct ResetNoExceptTester
+        {
+            template <typename Ty, typename FromTy = Ty>
+            void run() const
+            {
+                Assert::IsTrue(noexcept(std::declval<dhorn::com::com_ptr<Ty>>().reset(std::declval<FromTy*>())));
+            }
+        };
+
+        TEST_METHOD(ResetNoExceptTest)
+        {
+            DoPointerTraitsTest(ResetNoExceptTester{});
+        }
+
+        TEST_METHOD(DownCastResetNoExceptTest)
+        {
+            DoDownCastPointerTraitsTest(ResetNoExceptTester{});
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Other Tests
+         */
 #pragma region Other Tests
 
-            TEST_METHOD(OperatorBoolTest)
+        TEST_METHOD(DereferenceOperatorTest)
+        {
+            auto foobar = new FooBar();
             {
-                // Pretty much already tested this...
-                IFoo *pFoo = new Foo();
-                IBar *pBar = new Bar();
-                IBase *pBase = new Base();
-
-                dhorn::experimental::com_ptr<IBase> base;
-                Assert::IsFalse(base);
-
-                // Assign to all three pointers
-                base = pFoo;
-                Assert::IsTrue(base);
-                Assert::IsTrue(pFoo->RefCount() == 2);
-
-                base = pBar;
-                Assert::IsTrue(base);
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                Assert::IsTrue(pBar->RefCount() == 2);
-
-                base = pBase;
-                Assert::IsTrue(base);
-                Assert::IsTrue(pBar->RefCount() == 1);
-                Assert::IsTrue(pBase->RefCount() == 2);
-
-                // Assigning to null should cause false again
-                base = nullptr;
-                Assert::IsFalse(base);
-
-                // Cleanup
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                Assert::IsTrue(pBar->RefCount() == 1);
-                Assert::IsTrue(pBase->RefCount() == 1);
-
-                pFoo->Release();
-                pBar->Release();
-                pBase->Release();
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
+                Assert::AreEqual(2u, (*comPtr).RefCount());
             }
 
-            TEST_METHOD(OperatorInterfacePointerTest)
+            Assert::AreEqual(1u, foobar->RefCount());
+            foobar->Release();
+        }
+
+        TEST_METHOD(OperatorArrowTest)
+        {
+            auto foobar = new FooBar();
             {
-                auto pFooBar = new FooBar();
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
+                Assert::AreEqual(2u, comPtr->RefCount());
+            }
 
+            Assert::AreEqual(1u, foobar->RefCount());
+            foobar->Release();
+        }
+
+        TEST_METHOD(AddressOfOperatorTest)
+        {
+            auto foobar = new FooBar();
+
+            {
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
+                Assert::AreEqual(2u, comPtr->RefCount());
+
+                // operator& should release
+                auto ptr = &comPtr;
+                Assert::IsFalse(comPtr);
+                Assert::AreEqual(1u, foobar->RefCount());
+                Assert::IsTrue(*ptr == nullptr);
+
+                Assert::IsTrue(std::is_same_v<decltype(ptr), FooBar**>);
+            }
+
+            Assert::AreEqual(1u, foobar->RefCount());
+            foobar->Release();
+        }
+
+        TEST_METHOD(AttachTest)
+        {
+            auto foobar = new FooBar();
+
+            dhorn::com::com_ptr<FooBar> comPtr;
+
+            // Attach should not AddRef
+            comPtr.attach(foobar);
+            Assert::IsTrue(comPtr);
+            Assert::AreEqual(1u, foobar->RefCount());
+
+            foobar->AddRef();
+            Assert::AreEqual(2u, foobar->RefCount());
+
+            // Calling attach again should Release, but not AddRef the input
+            comPtr.attach(foobar);
+            Assert::AreEqual(1u, foobar->RefCount());
+        }
+
+        TEST_METHOD(DetachTest)
+        {
+            auto foobar = new FooBar();
+            {
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
+                Assert::AreEqual(2u, foobar->RefCount());
+
+                auto ptr = comPtr.detach();
+                Assert::IsTrue(ptr == foobar);
+                Assert::IsFalse(comPtr);
+            }
+
+            Assert::AreEqual(2u, foobar->RefCount());
+            foobar->Release();
+            foobar->Release();
+        }
+
+        TEST_METHOD(SwapTest)
+        {
+            IFoo* foo = new Foo();
+            IBar* bar = new Bar();
+
+            {
+                dhorn::com::com_ptr<IBase> ptr1(foo);
                 {
-                    // Should be able to assign dhorn::experimental::com_ptr<IFoo> to IFoo * or any base pointer
-                    dhorn::experimental::com_ptr<IFoo> foo = pFooBar;
-                    IFoo *pFoo = foo;
-                    IBase *pBase = foo;
-                    IUnknown *pUnk = foo;
-                    Assert::IsTrue((pFoo == pBase) && (pBase == pUnk));
-                    Assert::IsTrue(pFooBar->RefCount() == 2);
+                    dhorn::com::com_ptr<IBase> ptr2(bar);
 
-                    // Should not be able to assign to IBar * (other way around still allowed)
-                    Assert::IsFalse(std::is_assignable<IBar *, dhorn::experimental::com_ptr<IFoo>>::value);
-                    Assert::IsTrue(std::is_assignable<dhorn::experimental::com_ptr<IFoo>, IBar *>::value);
+                    ptr1.swap(ptr2);
+                    Assert::AreEqual(2u, foo->RefCount());
+                    Assert::AreEqual(2u, bar->RefCount());
 
-                    // Cannot assign dhorn::experimental::com_ptr<IUnknown> to any derived types
-                    Assert::IsFalse(std::is_assignable<IBase *, dhorn::experimental::com_ptr<IUnknown>>::value);
-                    Assert::IsFalse(std::is_assignable<IFoo *, dhorn::experimental::com_ptr<IUnknown>>::value);
-                    Assert::IsFalse(std::is_assignable<IBar *, dhorn::experimental::com_ptr<IUnknown>>::value);
+                    Assert::IsTrue(ptr1.get() == bar);
+                    Assert::IsTrue(ptr2.get() == foo);
                 }
 
-                Assert::IsTrue(pFooBar->RefCount() == 1);
-                pFooBar->Release();
+                Assert::AreEqual(1u, foo->RefCount());
+                Assert::AreEqual(2u, bar->RefCount());
             }
 
-            TEST_METHOD(AssignTest)
+            Assert::AreEqual(1u, foo->RefCount());
+            Assert::AreEqual(1u, bar->RefCount());
+            foo->Release();
+            bar->Release();
+        }
+
+        TEST_METHOD(SwapSelfTest)
+        {
+            auto foobar = new FooBar();
             {
-                IFoo *pFoo = new FooBar();
-                IBar *pBar = new FooBar();
-                IBase *pBase = new Base();
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
+                Assert::AreEqual(2u, foobar->RefCount());
 
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    Assert::IsTrue(pFoo->RefCount() == 2);
-
-                    foo.assign(pBar);
-                    Assert::IsTrue(pFoo->RefCount() == 1);
-                    Assert::IsTrue(pBar->RefCount() == 2);
-
-                    foo.assign(nullptr);
-                    Assert::IsTrue(pFoo->RefCount() == 1);
-                    Assert::IsTrue(pBar->RefCount() == 1);
-
-                    try
-                    {
-                        foo.assign(pBase);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                Assert::IsTrue(pBar->RefCount() == 1);
-                Assert::IsTrue(pBase->RefCount() == 1);
-
-                pFoo->Release();
-                pBar->Release();
-                pBase->Release();
+                comPtr.swap(comPtr);
+                Assert::AreEqual(2u, foobar->RefCount());
+                Assert::IsTrue(comPtr.get() == foobar);
             }
 
-            TEST_METHOD(AttachTest)
+            Assert::AreEqual(1u, foobar->RefCount());
+            foobar->Release();
+        }
+
+        TEST_METHOD(ReleaseAndGetAddressOfTest)
+        {
+            auto foobar = new FooBar();
             {
-                IFoo *pFoo = new FooBar();
-                IBar *pBar = new FooBar();
-                IBase *pBase = new Base();
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
+                Assert::AreEqual(2u, comPtr->RefCount());
 
-                {
-                    dhorn::experimental::com_ptr<IBase> base;
-                    Assert::IsTrue(pFoo->RefCount() == 1);
-                    Assert::IsTrue(pBar->RefCount() == 1);
+                auto ptr = comPtr.release_and_get_address_of();
+                Assert::IsFalse(comPtr);
+                Assert::AreEqual(1u, foobar->RefCount());
+                Assert::IsTrue(*ptr == nullptr);
 
-                    pFoo->AddRef();
-                    base.attach(pFoo);
-                    Assert::IsTrue(pFoo->RefCount() == 2);
-                    Assert::IsTrue(pBar->RefCount() == 1);
-
-                    pBar->AddRef();
-                    base.attach(pBar);
-                    Assert::IsTrue(pFoo->RefCount() == 1);
-                    Assert::IsTrue(pBar->RefCount() == 2);
-
-                    base.attach(nullptr);
-                    Assert::IsTrue(pFoo->RefCount() == 1);
-                    Assert::IsTrue(pBar->RefCount() == 1);
-
-                    // Safe to attach pBar to IFoo
-                    dhorn::experimental::com_ptr<IFoo> foo;
-
-                    pBar->AddRef();
-                    foo.attach(pBar);
-                    Assert::IsTrue(pFoo->RefCount() == 1);
-                    Assert::IsTrue(pBar->RefCount() == 2);
-
-                    // Attach should release, even if there's an exception
-                    try
-                    {
-                        pBase->AddRef();
-                        Assert::IsTrue(pBase->RefCount() == 2);
-
-                        foo.attach(pBase);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-                    Assert::IsTrue(pBar->RefCount() == 1);
-                    Assert::IsTrue(pBase->RefCount() == 1);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                Assert::IsTrue(pBar->RefCount() == 1);
-                Assert::IsTrue(pBase->RefCount() == 1);
-
-                pFoo->Release();
-                pBar->Release();
-                pBase->Release();
+                Assert::IsTrue(std::is_same_v<decltype(ptr), FooBar**>);
             }
 
-            TEST_METHOD(DetachTest)
+            Assert::AreEqual(1u, foobar->RefCount());
+            foobar->Release();
+        }
+
+        TEST_METHOD(AddressOfTest)
+        {
+            auto foobar = new FooBar();
             {
-                IFoo *pFoo = new FooBar();
+                dhorn::com::com_ptr<FooBar> comPtr(foobar);
+                Assert::AreEqual(2u, foobar->RefCount());
 
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                    dhorn::experimental::com_ptr<IBar> bar(pFoo);
-                    dhorn::experimental::com_ptr<IBase> base(pFoo);
-                    dhorn::experimental::com_ptr<IUnknown> unk(pFoo);
+                // address_of does _not_ release
+                auto ptr = comPtr.address_of();
+                Assert::IsTrue(comPtr);
+                Assert::AreEqual(2u, foobar->RefCount());
+                Assert::IsTrue(*ptr == foobar);
+                Assert::IsTrue(*ptr == comPtr.get());
 
-                    // Make sure we can do proper assignment
-                    IUnknown *pUnk = foo.detach();
-                    IBase *pBase = bar.detach();
-                    pBase = base.detach();
-                    pUnk = unk.detach();
-
-                    Assert::IsTrue(foo.detach() == nullptr);
-                    Assert::IsTrue(bar.detach() == nullptr);
-                    Assert::IsTrue(base.detach() == nullptr);
-                    Assert::IsTrue(unk.detach() == nullptr);
-                }
-
-                Assert::IsTrue(pFoo->RefCount() == 5);
-                pFoo->Release();
-                pFoo->Release();
-                pFoo->Release();
-                pFoo->Release();
-                pFoo->Release();
+                Assert::IsTrue(std::is_same_v<decltype(ptr), FooBar**>);
             }
 
-            TEST_METHOD(ResetTest)
-            {
-                IFoo *pFoo = new Foo();
-
-                dhorn::experimental::com_ptr<IBase> base(pFoo);
-                Assert::IsTrue(pFoo->RefCount() == 2);
-
-                base.reset();
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                base.reset();
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
-
-            TEST_METHOD(SwapTest)
-            {
-                auto pFoo1 = new Foo();
-                auto pFoo2 = new Foo();
-
-                dhorn::experimental::com_ptr<IFoo> foo1(pFoo1);
-                Assert::IsTrue(pFoo1->RefCount() == 2);
-                Assert::IsTrue(pFoo2->RefCount() == 1);
-
-                {
-                    dhorn::experimental::com_ptr<IFoo> foo2(pFoo2);
-                    Assert::IsTrue(pFoo1->RefCount() == 2);
-                    Assert::IsTrue(pFoo2->RefCount() == 2);
-
-                    pFoo1->StartMoveOnly();
-                    pFoo2->StartMoveOnly();
-
-                    foo1.swap(foo2);
-                    Assert::IsTrue(pFoo1->RefCount() == 2);
-                    Assert::IsTrue(pFoo2->RefCount() == 2);
-
-                    std::swap(foo1, foo2);
-                    std::swap(foo1, foo2);
-
-                    pFoo1->StopMoveOnly();
-                    pFoo2->StopMoveOnly();
-                }
-
-                Assert::IsTrue(pFoo1->RefCount() == 1);
-                Assert::IsTrue(pFoo2->RefCount() == 2);
-
-                pFoo1->Release();
-                pFoo2->Release();
-            }
-
-            TEST_METHOD(GetTest)
-            {
-                IFoo *pFoo = new Foo();
-                dhorn::experimental::com_ptr<IFoo> foo;
-
-                Assert::IsTrue(foo.get() == nullptr);
-
-                foo = pFoo;
-                Assert::IsTrue(pFoo == foo.get());
-
-                foo = nullptr;
-                Assert::IsTrue(foo.get() == nullptr);
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
-
-            TEST_METHOD(GetAddressOfTest)
-            {
-                IFoo *pFoo = new Foo();
-                dhorn::experimental::com_ptr<IFoo> foo;
-
-                auto addr1 = foo.get_address_of();
-                Assert::IsTrue(std::is_same<decltype(addr1), IFoo **>::value);
-
-                foo = pFoo;
-                auto addr2 = foo.get_address_of();
-                Assert::IsTrue(addr1 == addr2);
-
-                foo = nullptr;
-                auto addr3 = foo.get_address_of();
-                Assert::IsTrue(addr2 == addr3);
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
-
-            TEST_METHOD(ReleaseAndGetAddressOfTest)
-            {
-                IFoo *pFoo = new Foo();
-                dhorn::experimental::com_ptr<IFoo> foo(pFoo);
-                Assert::IsTrue(pFoo->RefCount() == 2);
-
-                auto addr1 = foo.release_and_get_address_of();
-                Assert::IsTrue(*addr1 == nullptr);
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                auto addr2 = foo.release_and_get_address_of();
-                Assert::IsTrue(*addr2 == nullptr);
-                Assert::IsTrue(addr1 == addr2);
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
-
-            TEST_METHOD(CopyToTest)
-            {
-                IFoo *pFoo = new Foo();
-
-                {
-                    dhorn::experimental::com_ptr<IBase> base(pFoo);
-
-                    {
-                        // Should be able to same cast
-                        dhorn::experimental::com_ptr<IBase> base2;
-                        base.copy_to(base2.get_address_of());
-
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                    }
-
-                    {
-                        // Should be able to down-cast
-                        dhorn::experimental::com_ptr<IUnknown> unk;
-                        base.copy_to(unk.get_address_of());
-
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                    }
-
-                    {
-                        // Should be able to up-cast
-                        dhorn::experimental::com_ptr<IFoo> foo;
-                        base.copy_to(foo.get_address_of());
-
-                        Assert::IsTrue(pFoo->RefCount() == 3);
-                    }
-
-                    // base cannot be up-casted to IBar and IBar should be set to null on failure
-                    IBar *pBar = reinterpret_cast<IBar *>(0xc0ffee);
-                    try
-                    {
-                        base.copy_to(&pBar);
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                        Assert::IsTrue(pFoo->RefCount() == 2);
-                        Assert::IsTrue(pBar == nullptr);
-                    }
-                }
-
-                // Null pointer should be copyable regardless of the type
-                dhorn::experimental::com_ptr<IFoo> foo;
-                dhorn::experimental::com_ptr<IBar> bar;
-
-                foo.copy_to(bar.get_address_of());
-                bar.copy_to(foo.get_address_of());
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
-
-            TEST_METHOD(CopyToIIDTest)
-            {
-                IBase *pBase = static_cast<IFoo *>(new FooBar());
-                IFoo *pFoo = new Foo();
-
-                {
-                    // Can copy pBase to anything
-                    dhorn::experimental::com_ptr<IBase> base(pBase);
-                    dhorn::experimental::com_ptr<IFoo> foo;
-                    dhorn::experimental::com_ptr<IBar> bar;
-                    dhorn::experimental::com_ptr<IBase> base2;
-                    dhorn::experimental::com_ptr<IUnknown> unk;
-
-                    base.copy_to(IID_PPV_ARGS(foo.release_and_get_address_of()));
-                    base.copy_to(IID_PPV_ARGS(bar.release_and_get_address_of()));
-                    base.copy_to(IID_PPV_ARGS(base2.release_and_get_address_of()));
-                    base.copy_to(IID_PPV_ARGS(unk.release_and_get_address_of()));
-                    Assert::IsTrue(pBase->RefCount() == 6);
-
-                    // Can copy pFoo to anything but IBar
-                    base = pFoo;
-
-                    base.copy_to(IID_PPV_ARGS(foo.release_and_get_address_of()));
-                    base.copy_to(IID_PPV_ARGS(base2.release_and_get_address_of()));
-                    base.copy_to(IID_PPV_ARGS(unk.release_and_get_address_of()));
-                    Assert::IsTrue(pFoo->RefCount() == 5);
-
-                    try
-                    {
-                        base.copy_to(IID_PPV_ARGS(bar.release_and_get_address_of()));
-                        Assert::Fail(L"Expected an exception");
-                    }
-                    catch ( dhorn::experimental::hresult_exception &e)
-                    {
-                        Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                    }
-
-                    Assert::IsTrue(pBase->RefCount() == 1);
-                    Assert::IsTrue(pFoo->RefCount() == 5);
-                }
-
-                Assert::IsTrue(pBase->RefCount() == 1);
-                Assert::IsTrue(pFoo->RefCount() == 1);
-
-                pBase->Release();
-                pFoo->Release();
-            }
-
-            TEST_METHOD(OperatorAmpersandTest)
-            {
-                IFoo *pFoo = new Foo();
-                dhorn::experimental::com_ptr<IFoo> foo;
-
-                // Can cast to interface_type **, which releases
-                foo = pFoo;
-                Assert::IsTrue(pFoo->RefCount() == 2);
-                IFoo **ppFoo = &foo;
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                UNREFERENCED_PARAMETER(ppFoo);
-
-                // Casting to dhorn::experimental::com_ptr * does not release
-                foo = pFoo;
-                Assert::IsTrue(pFoo->RefCount() == 2);
-                dhorn::experimental::com_ptr<IFoo> *pComPtr = &foo;
-                Assert::IsTrue(pFoo->RefCount() == 2);
-                UNREFERENCED_PARAMETER(pComPtr);
-
-                // Can be used with IID_PPV_ARGS
-                dhorn::experimental::com_ptr<IBar> bar;
-                dhorn::experimental::com_ptr<IBase> base;
-                dhorn::experimental::com_ptr<IUnknown> unk;
-
-                // Should succeed with all but IBase
-                GetFoo(IID_PPV_ARGS(&foo));
-                Assert::IsTrue(pFoo->RefCount() == 1);      // Recall we didn't release earlier
-                Assert::IsTrue(foo->RefCount() == 2);
-
-                GetFoo(IID_PPV_ARGS(&base));
-                Assert::IsTrue(base->RefCount() == 3);
-
-                GetFoo(IID_PPV_ARGS(&unk));
-                Assert::IsTrue(foo->RefCount() == 4);
-
-                // Fails with IBar
-                try
-                {
-                    GetFoo(IID_PPV_ARGS(&bar));
-                    Assert::Fail(L"Expected an exception");
-                }
-                catch ( dhorn::experimental::hresult_exception &e)
-                {
-                    Assert::IsTrue(e.get_hresult() == E_NOINTERFACE);
-                }
-                Assert::IsTrue(foo->RefCount() == 4);
-
-                Assert::IsTrue(pFoo->RefCount() == 1);
-                pFoo->Release();
-            }
+            Assert::AreEqual(1u, foobar->RefCount());
+            foobar->Release();
+        }
 
 #pragma endregion
+
+
+
+        /*
+         * Conversion Tests
+         */
+#pragma region Conversion Tests
+
+        template <typename TestTy>
+        static void DoConversionTest(const TestTy& test)
+        {
+            DoTest([&](Foo* foo, Bar* bar, FooBar* foobar)
+            {
+                // FooBar: IUnknown -> IFace
+                test.template run<true, IUnknown, IUnknown, IFoo>(foobar);
+                test.template run<true, IBase, IUnknown, IFoo>(foobar);
+                test.template run<true, IFoo, IUnknown, IFoo>(foobar);
+                test.template run<true, IBar, IUnknown, IFoo>(foobar);
+
+                // FooBar: IBase -> IFace
+                test.template run<true, IUnknown, IBase, IFoo>(foobar);
+                test.template run<true, IBase, IBase, IFoo>(foobar);
+                test.template run<true, IFoo, IBase, IFoo>(foobar);
+                test.template run<true, IBar, IBase, IFoo>(foobar);
+
+                // FooBar: IFoo -> IFace
+                test.template run<true, IUnknown, IFoo>(foobar);
+                test.template run<true, IBase, IFoo>(foobar);
+                test.template run<true, IFoo, IFoo>(foobar);
+                test.template run<true, IBar, IFoo>(foobar);
+
+                // FooBar: IBar -> IFace
+                test.template run<true, IUnknown, IBar>(foobar);
+                test.template run<true, IBase, IBar>(foobar);
+                test.template run<true, IFoo, IBar>(foobar);
+                test.template run<true, IBar, IBar>(foobar);
+
+
+
+                // Foo: IUnknown -> IFace
+                test.template run<true, IUnknown, IUnknown, IFoo>(foo);
+                test.template run<true, IBase, IUnknown, IFoo>(foo);
+                test.template run<true, IFoo, IUnknown, IFoo>(foo);
+                test.template run<false, IBar, IUnknown, IFoo>(foo);
+
+                // Foo: IBase -> IFace
+                test.template run<true, IUnknown, IBase, IFoo>(foo);
+                test.template run<true, IBase, IBase, IFoo>(foo);
+                test.template run<true, IFoo, IBase, IFoo>(foo);
+                test.template run<false, IBar, IBase, IFoo>(foo);
+
+                // Foo: IFoo -> IFace
+                test.template run<true, IUnknown, IFoo>(foo);
+                test.template run<true, IBase, IFoo>(foo);
+                test.template run<true, IFoo, IFoo>(foo);
+                test.template run<false, IBar, IFoo>(foo);
+
+
+
+                // Bar: IUnknown -> IFace
+                test.template run<true, IUnknown, IUnknown, IBar>(bar);
+                test.template run<true, IBase, IUnknown, IBar>(bar);
+                test.template run<false, IFoo, IUnknown, IBar>(bar);
+                test.template run<true, IBar, IUnknown, IBar>(bar);
+
+                // Bar: IBase -> IFace
+                test.template run<true, IUnknown, IBase, IBar>(bar);
+                test.template run<true, IBase, IBase, IBar>(bar);
+                test.template run<false, IFoo, IBase, IBar>(bar);
+                test.template run<true, IBar, IBase, IBar>(bar);
+
+                // Bar: IBar -> IFace
+                test.template run<true, IUnknown, IBar>(bar);
+                test.template run<true, IBase, IBar>(bar);
+                test.template run<false, IFoo, IBar>(bar);
+                test.template run<true, IBar, IBar>(bar);
+            });
+        }
+
+        template <typename TestTy>
+        static void DoNoExceptConversionTest(const TestTy& test)
+        {
+            // FooBar -> IFace
+            test.template run<true, foobar_ptr, IFoo>();
+            test.template run<true, foobar_ptr, IBar>();
+            test.template run<false, foobar_ptr, IBase>();
+            test.template run<false, foobar_ptr, IUnknown>();
+
+            // Foo -> IFace
+            test.template run<true, foo_ptr, IFoo>();
+            test.template run<false, foo_ptr, IBar>();
+            test.template run<false, foo_ptr, IBase>();
+            test.template run<false, foo_ptr, IUnknown>();
+
+            // Bar -> IFace
+            test.template run<false, bar_ptr, IFoo>();
+            test.template run<true, bar_ptr, IBar>();
+            test.template run<false, bar_ptr, IBase>();
+            test.template run<false, bar_ptr, IUnknown>();
+
+
+
+            // IFoo -> IFace
+            test.template run<true, foo_interface_ptr, IFoo>();
+            test.template run<false, foo_interface_ptr, IBar>();
+            test.template run<true, foo_interface_ptr, IBase>();
+            test.template run<true, foo_interface_ptr, IUnknown>();
+
+            // IBar -> IFace
+            test.template run<false, bar_interface_ptr, IFoo>();
+            test.template run<true, bar_interface_ptr, IBar>();
+            test.template run<true, bar_interface_ptr, IBase>();
+            test.template run<true, bar_interface_ptr, IUnknown>();
+
+            // IBase -> IFace
+            test.template run<false, base_interface_ptr, IFoo>();
+            test.template run<false, base_interface_ptr, IBar>();
+            test.template run<true, base_interface_ptr, IBase>();
+            test.template run<true, base_interface_ptr, IUnknown>();
+
+            // IUnknown -> IFace
+            test.template run<false, unknown_interface_ptr, IFoo>();
+            test.template run<false, unknown_interface_ptr, IBar>();
+            test.template run<false, unknown_interface_ptr, IBase>();
+            test.template run<true, unknown_interface_ptr, IUnknown>();
+        }
+
+
+
+        struct AsTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+                constexpr bool shouldQI = !std::is_convertible_v<FromTy*, Ty*>;
+
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                try
+                {
+                    auto comPtr = fromPtr.as<Ty>();
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(3u, ptr->RefCount());
+
+                    // Query succeeded. Two AddRefs and QI only if needed
+                    Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
+                    Assert::AreEqual(qiCount + (shouldQI ? 1 : 0), ptr->QueryCount());
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+
+                        // Query failed. One (initial) AddRef, but should have attempted QI
+                        Assert::IsTrue(shouldQI);
+                        Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + 1, ptr->QueryCount());
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
         };
-    }
+
+        TEST_METHOD(AsTest)
+        {
+            DoConversionTest(AsTester{});
+        }
+
+        struct AsNoExceptTester
+        {
+            template <bool NoExcept, typename FromTy, typename ToTy>
+            void run() const
+            {
+                Assert::AreEqual(NoExcept, noexcept(std::declval<FromTy>().as<ToTy>()));
+            }
+        };
+
+        TEST_METHOD(AsNoExceptTest)
+        {
+            DoNoExceptConversionTest(AsNoExceptTester{});
+        }
+
+
+
+        struct TryAsTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+                constexpr bool shouldQI = !std::is_convertible_v<FromTy*, Ty*>;
+
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                {
+                    auto comPtr = fromPtr.try_as<Ty>();
+
+                    if (ShouldSucceed)
+                    {
+                        Assert::AreEqual(3u, ptr->RefCount());
+                        Assert::IsTrue(comPtr);
+
+                        // Query succeeded. Two AddRefs and QI only if needed
+                        Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + (shouldQI ? 1 : 0), ptr->QueryCount());
+                    }
+                    else
+                    {
+                        Assert::AreEqual(2u, ptr->RefCount());
+                        Assert::IsFalse(comPtr);
+
+                        // Query failed. One (initial) AddRef, but should have attempted QI
+                        Assert::IsTrue(shouldQI);
+                        Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + 1, ptr->QueryCount());
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(TryAsTest)
+        {
+            DoConversionTest(TryAsTester{});
+        }
+
+
+
+        struct CopyToTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+                constexpr bool shouldQI = !std::is_convertible_v<FromTy*, Ty*>;
+
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                try
+                {
+                    Ty* rawPtr;
+                    fromPtr.copy_to(&rawPtr);
+
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(3u, ptr->RefCount());
+                    rawPtr->Release();
+
+                    // Query succeeded. Two AddRefs and QI only if needed
+                    Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
+                    Assert::AreEqual(qiCount + (shouldQI ? 1 : 0), ptr->QueryCount());
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+
+                        // Query failed. One (initial) AddRef, but should have attempted QI
+                        Assert::IsTrue(shouldQI);
+                        Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + 1, ptr->QueryCount());
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(CopyToTest)
+        {
+            DoConversionTest(CopyToTester{});
+        }
+
+        struct CopyToNoExceptTester
+        {
+            template <bool NoExcept, typename FromTy, typename ToTy>
+            void run() const
+            {
+                Assert::AreEqual(NoExcept, noexcept(std::declval<FromTy>().copy_to(std::declval<ToTy**>())));
+            }
+        };
+
+        TEST_METHOD(CopyToNoExceptTest)
+        {
+            DoNoExceptConversionTest(CopyToNoExceptTester{});
+        }
+
+
+
+        struct CopyToIIDTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+
+                dhorn::com::com_ptr<FromTy> fromPtr(static_cast<CastTy*>(ptr));
+                try
+                {
+                    Ty* rawPtr;
+                    fromPtr.copy_to(IID_PPV_ARGS(&rawPtr));
+
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(3u, ptr->RefCount());
+                    rawPtr->Release();
+
+                    // Query succeeded. Two AddRefs and always attempt QI
+                    Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
+                    Assert::AreEqual(qiCount + 1, ptr->QueryCount());
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+
+                        // Query failed. One (initial) AddRef, but should have attempted QI
+                        Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + 1, ptr->QueryCount());
+                    }
+                }
+
+                Assert::AreEqual(2u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(CopyToIIDTest)
+        {
+            DoConversionTest(CopyToIIDTester{});
+        }
+
+
+
+        struct QueryTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+                constexpr bool shouldQI = !std::is_convertible_v<FromTy*, Ty*>;
+
+                try
+                {
+                    FromTy* rawPtr = static_cast<CastTy*>(ptr);
+                    auto comPtr = dhorn::com::query<Ty>(rawPtr);
+                    if (!ShouldSucceed)
+                    {
+                        Assert::Fail(L"Expected an exception");
+                    }
+
+                    Assert::AreEqual(2u, ptr->RefCount());
+
+                    // Query succeeded. One AddRef and QI only if needed
+                    Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                    Assert::AreEqual(qiCount + (shouldQI ? 1 : 0), ptr->QueryCount());
+                }
+                catch (std::system_error& e)
+                {
+                    if (ShouldSucceed)
+                    {
+                        Assert::Fail(L"QueryInterface expected to succeed");
+                    }
+                    else if (e.code().category() != dhorn::com::hresult_category())
+                    {
+                        Assert::Fail(L"Expected an HRESULT failure");
+                    }
+                    else
+                    {
+                        Assert::AreEqual(static_cast<int>(E_NOINTERFACE), e.code().value());
+
+                        // Query failed. No AddRefs, but should have attempted QI
+                        Assert::IsTrue(shouldQI);
+                        Assert::AreEqual(addRefCount, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + 1, ptr->QueryCount());
+                    }
+                }
+
+                Assert::AreEqual(1u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(QueryTest)
+        {
+            DoConversionTest(QueryTester{});
+        }
+
+        struct QueryNoExceptTester
+        {
+            template <bool NoExcept, typename FromTy, typename ToTy>
+            void run() const
+            {
+                Assert::AreEqual(NoExcept, noexcept(dhorn::com::query<ToTy>(std::declval<typename FromTy::element_type*>())));
+            }
+        };
+
+        TEST_METHOD(QueryNoExceptTest)
+        {
+            DoNoExceptConversionTest(QueryNoExceptTester{});
+        }
+
+
+
+        struct TryQueryTester
+        {
+            template <bool ShouldSucceed, typename Ty, typename FromTy, typename CastTy = FromTy, typename PtrTy>
+            void run(PtrTy* ptr) const
+            {
+                auto addRefCount = ptr->AddRefCount();
+                auto qiCount = ptr->QueryCount();
+                constexpr bool shouldQI = !std::is_convertible_v<FromTy*, Ty*>;
+
+                {
+                    FromTy* rawPtr = static_cast<CastTy*>(ptr);
+                    auto comPtr = dhorn::com::try_query<Ty>(rawPtr);
+
+                    if (ShouldSucceed)
+                    {
+                        Assert::AreEqual(2u, ptr->RefCount());
+                        Assert::IsTrue(comPtr);
+
+                        // Query succeeded. One AddRef and QI only if needed
+                        Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + (shouldQI ? 1 : 0), ptr->QueryCount());
+                    }
+                    else
+                    {
+                        Assert::AreEqual(1u, ptr->RefCount());
+                        Assert::IsFalse(comPtr);
+
+                        // Query failed. No AddRefs, but should have attempted QI
+                        Assert::IsTrue(shouldQI);
+                        Assert::AreEqual(addRefCount, ptr->AddRefCount());
+                        Assert::AreEqual(qiCount + 1, ptr->QueryCount());
+                    }
+                }
+
+                Assert::AreEqual(1u, ptr->RefCount());
+            }
+        };
+
+        TEST_METHOD(TryQueryTest)
+        {
+            DoConversionTest(TryQueryTester{});
+        }
+
+#pragma endregion
+    };
 }

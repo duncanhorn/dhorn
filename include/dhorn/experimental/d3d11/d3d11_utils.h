@@ -13,9 +13,10 @@
 #include <fstream>
 #include <vector>
 
-#include "../com_ptr.h"
-#include "../d3d/d3d_utils.h"
 #include "../../type_traits.h"
+#include "../../com/com_ptr.h"
+
+#include "../d3d/d3d_utils.h"
 #include "../windows_exception.h"
 
 namespace dhorn
@@ -143,14 +144,14 @@ namespace dhorn
 #pragma region Shaders
 
             template <typename CharT>
-            com_ptr<ID3D11VertexShader> load_vertex_shader(
+            com::com_ptr<ID3D11VertexShader> load_vertex_shader(
                 ID3D11Device *device,
                 const CharT *path,
                 std::vector<uint8_t> &bytecode)
             {
                 bytecode = d3d::read_shader_file(path);
 
-                com_ptr<ID3D11VertexShader> vertexShader;
+                com::com_ptr<ID3D11VertexShader> vertexShader;
                 throw_if_failed(device->CreateVertexShader(
                     bytecode.data(),
                     bytecode.size(),
@@ -161,18 +162,18 @@ namespace dhorn
             }
 
             template <typename CharT>
-            com_ptr<ID3D11VertexShader> load_vertex_shader(ID3D11Device *device, const CharT *path)
+            com::com_ptr<ID3D11VertexShader> load_vertex_shader(ID3D11Device *device, const CharT *path)
             {
                 std::vector<uint8_t> bytecode;
                 return load_vertex_shader(device, path, bytecode);
             }
 
             template <typename CharT>
-            static com_ptr<ID3D11PixelShader> load_pixel_shader(ID3D11Device *device, const CharT *path)
+            static com::com_ptr<ID3D11PixelShader> load_pixel_shader(ID3D11Device *device, const CharT *path)
             {
                 auto bytecode = d3d::read_shader_file(path);
 
-                com_ptr<ID3D11PixelShader> pixelShader;
+                com::com_ptr<ID3D11PixelShader> pixelShader;
                 throw_if_failed(device->CreatePixelShader(
                     bytecode.data(),
                     bytecode.size(),
@@ -192,7 +193,7 @@ namespace dhorn
 #pragma region Buffers/Geometry
 
             template <typename Ty>
-            inline com_ptr<ID3D11Buffer> create_buffer(
+            inline com::com_ptr<ID3D11Buffer> create_buffer(
                 ID3D11Device *device,
                 const Ty *bufferData,
                 size_t length,
@@ -201,31 +202,31 @@ namespace dhorn
                 D3D11_BUFFER_DESC desc = buffer_desc(length * sizeof(Ty), bindFlags);
                 D3D11_SUBRESOURCE_DATA data = { bufferData };
 
-                com_ptr<ID3D11Buffer> buffer;
+                com::com_ptr<ID3D11Buffer> buffer;
                 throw_if_failed(device->CreateBuffer(&desc, &data, &buffer));
 
                 return buffer;
             }
 
             template <typename Ty>
-            inline com_ptr<ID3D11Buffer> create_buffer(ID3D11Device *device, const std::vector<Ty> &data, UINT bindFlags)
+            inline com::com_ptr<ID3D11Buffer> create_buffer(ID3D11Device *device, const std::vector<Ty> &data, UINT bindFlags)
             {
                 return create_buffer(device, data.data(), data.size(), bindFlags);
             }
 
             template <typename Ty, size_t Size>
-            inline com_ptr<ID3D11Buffer> create_buffer(ID3D11Device *device, const Ty(&data)[Size], UINT bindFlags)
+            inline com::com_ptr<ID3D11Buffer> create_buffer(ID3D11Device *device, const Ty(&data)[Size], UINT bindFlags)
             {
                 return create_buffer(device, data, Size, bindFlags);
             }
 
             template <typename Ty>
-            inline com_ptr<ID3D11Buffer> create_constant_buffer(ID3D11Device *device)
+            inline com::com_ptr<ID3D11Buffer> create_constant_buffer(ID3D11Device *device)
             {
                 auto desc = buffer_desc(sizeof(Ty), D3D11_BIND_CONSTANT_BUFFER);
                 desc.Usage = D3D11_USAGE_DEFAULT;
 
-                com_ptr<ID3D11Buffer> buffer;
+                com::com_ptr<ID3D11Buffer> buffer;
                 throw_if_failed(device->CreateBuffer(&desc, nullptr, &buffer));
 
                 return buffer;

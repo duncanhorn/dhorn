@@ -1,13 +1,13 @@
 /*
  * Duncan Horn
  *
- * ComPtrTests.cpp
+ * ComTraitsTests.cpp
  *
- * Tests for the com_utility.h header
+ * Tests for the com_traits.h header
  */
 #include "stdafx.h"
 
-#include <dhorn/com/com_utility.h>
+#include <dhorn/com/com_traits.h>
 
 #include "TestInterfaces.h"
 

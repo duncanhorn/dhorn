@@ -139,7 +139,7 @@
     <ClCompile Include="BitmaskTests.cpp" />
     <ClCompile Include="CommandLineTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
-    <ClCompile Include="ComUtilityTests.cpp" />
+    <ClCompile Include="ComTraitsTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
     <ClCompile Include="FunctionalTests.cpp" />

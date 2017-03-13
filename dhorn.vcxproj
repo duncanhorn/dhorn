@@ -165,7 +165,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\bitmask.h" />
-    <ClInclude Include="include\dhorn\com\com_utility.h" />
+    <ClInclude Include="include\dhorn\com\com_ptr.h" />
+    <ClInclude Include="include\dhorn\com\com_traits.h" />
     <ClInclude Include="include\dhorn\com\hresult_error.h" />
     <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\debug.h" />
@@ -174,7 +175,6 @@
     <ClInclude Include="include\dhorn\experimental\animation_manager.h" />
     <ClInclude Include="include\dhorn\experimental\array_reference.h" />
     <ClInclude Include="include\dhorn\experimental\command_line.h" />
-    <ClInclude Include="include\dhorn\experimental\com_ptr.h" />
     <ClInclude Include="include\dhorn\experimental\com_utility.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_window.h" />
@@ -218,7 +218,7 @@
     <ClInclude Include="include\dhorn\unique_any.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
-    <ClInclude Include="include\dhorn\winrt\winrt_utility.h" />
+    <ClInclude Include="include\dhorn\winrt\winrt_traits.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

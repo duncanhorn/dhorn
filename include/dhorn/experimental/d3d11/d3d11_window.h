@@ -9,7 +9,8 @@
 
 #pragma comment(lib, "d3d11.lib")
 
-#include "../com_ptr.h"
+#include "../../com/com_ptr.h"
+
 #include "../functional.h"
 #include "../unique_any.h"
 #include "../windows/window.h"
@@ -95,7 +96,7 @@ namespace dhorn
                     // Note to callers: this does not AddRef. Therefore, if you call this function, you must have a strong
                     // reference to this d3d11_window instance to ensure that the object is not destroyed as the result of
                     // a call to the destructor.
-                    return this->_device;
+                    return this->_device.get();
                 }
 
                 ID3D11DeviceContext *context(void) const
@@ -103,7 +104,7 @@ namespace dhorn
                     // Note to callers: this does not AddRef. Therefore, if you call this function, you must have a strong
                     // reference to this d3d11_window instance to ensure that the object is not destroyed as the result of
                     // a call to the destructor.
-                    return this->_deviceContext;
+                    return this->_deviceContext.get();
                 }
 
 
@@ -154,7 +155,7 @@ namespace dhorn
                     // Check MSAA support
                     if (this->_qualityFunc)
                     {
-                        this->_sampleQuality = this->_qualityFunc(this->_device, &this->_sampleCount);
+                        this->_sampleQuality = this->_qualityFunc(this->_device.get(), &this->_sampleCount);
                     }
                     else
                     {
@@ -204,22 +205,22 @@ namespace dhorn
                         Traits::swap_chain_format,
                         Traits::back_buffer_count);
 
-                    com_ptr<IDXGIDevice> device = this->_device;
-                    com_ptr<IDXGIAdapter> adapter;
-                    com_ptr<IDXGIFactory> factory;
+                    auto device = this->_device.as<IDXGIDevice>();
+                    com::com_ptr<IDXGIAdapter> adapter;
+                    com::com_ptr<IDXGIFactory> factory;
                     throw_if_failed(device->GetParent(IID_PPV_ARGS(&adapter)));
                     throw_if_failed(adapter->GetParent(IID_PPV_ARGS(&factory)));
-                    throw_if_failed(factory->CreateSwapChain(this->_device, &desc, &this->_swapChain));
+                    throw_if_failed(factory->CreateSwapChain(this->_device.get(), &desc, &this->_swapChain));
                 }
 
                 virtual void create_render_target_view()
                 {
                     assert(!this->_renderTargetView);
 
-                    com_ptr<ID3D11Texture2D> backBuffer;
+                    com::com_ptr<ID3D11Texture2D> backBuffer;
                     throw_if_failed(this->_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
                     throw_if_failed(this->_device->CreateRenderTargetView(
-                        backBuffer,
+                        backBuffer.get(),
                         nullptr,                    // D3D11_RENDER_TARGET_VIEW_DESC
                         &this->_renderTargetView));
                 }
@@ -246,7 +247,7 @@ namespace dhorn
                     assert(this->_depthStencilBuffer);
                     assert(!this->_depthStencilView);
                     throw_if_failed(this->_device->CreateDepthStencilView(
-                        this->_depthStencilBuffer,
+                        this->_depthStencilBuffer.get(),
                         nullptr,                    // D3D11_DEPTH_STENCIL_VIEW_DESC
                         &this->_depthStencilView));
                 }
@@ -287,8 +288,8 @@ namespace dhorn
                     // Bind the views
                     this->_deviceContext->OMSetRenderTargets(
                         1, // Number of render target views
-                        this->_renderTargetView.get_address_of(),
-                        this->_depthStencilView);
+                        this->_renderTargetView.address_of(),
+                        this->_depthStencilView.get());
 
                     this->set_viewports(clientArea);
 
@@ -314,16 +315,18 @@ namespace dhorn
 
                 virtual void render(void)
                 {
-                    this->_deviceContext->ClearRenderTargetView(this->_renderTargetView, &this->_backgroundColor.x);
+                    this->_deviceContext->ClearRenderTargetView(
+                        this->_renderTargetView.get(),
+                        &this->_backgroundColor.x);
                     this->_deviceContext->ClearDepthStencilView(
-                        this->_depthStencilView,
+                        this->_depthStencilView.get(),
                         D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
                         1.0f,
                         0);
 
                     if (this->_drawFunc)
                     {
-                        this->_drawFunc(this->_device, this->_deviceContext);
+                        this->_drawFunc(this->_device.get(), this->_deviceContext.get());
                     }
 
                     throw_if_failed(this->_swapChain->Present(0, 0));
@@ -412,12 +415,12 @@ namespace dhorn
 
                  // DirectX Interface Pointers
                 D3D_FEATURE_LEVEL _featureLevel;
-                com_ptr<ID3D11Device> _device;
-                com_ptr<ID3D11DeviceContext> _deviceContext;
-                com_ptr<IDXGISwapChain> _swapChain;
-                com_ptr<ID3D11RenderTargetView> _renderTargetView;
-                com_ptr<ID3D11Texture2D> _depthStencilBuffer;
-                com_ptr<ID3D11DepthStencilView> _depthStencilView;
+                com::com_ptr<ID3D11Device> _device;
+                com::com_ptr<ID3D11DeviceContext> _deviceContext;
+                com::com_ptr<IDXGISwapChain> _swapChain;
+                com::com_ptr<ID3D11RenderTargetView> _renderTargetView;
+                com::com_ptr<ID3D11Texture2D> _depthStencilBuffer;
+                com::com_ptr<ID3D11DepthStencilView> _depthStencilView;
 
                 // Data that can be set so that clients need not derive from this class unless actually needed
                 QualityFunc _qualityFunc;

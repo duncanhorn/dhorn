@@ -42,9 +42,6 @@
     <ClInclude Include="include\dhorn\experimental\array_reference.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\com_ptr.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\com_utility.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -174,12 +171,6 @@
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h">
       <Filter>include\windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\com\com_utility.h">
-      <Filter>include\com</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\winrt\winrt_utility.h">
-      <Filter>include\winrt</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\console.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -192,11 +183,20 @@
     <ClInclude Include="include\dhorn\thread_pool.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\unique_any.h">
+      <Filter>include</Filter>
+    </ClInclude>
     <ClInclude Include="include\dhorn\com\hresult_error.h">
       <Filter>include\com</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\unique_any.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\dhorn\com\com_ptr.h">
+      <Filter>include\com</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\com\com_traits.h">
+      <Filter>include\com</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\winrt\winrt_traits.h">
+      <Filter>include\winrt</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
