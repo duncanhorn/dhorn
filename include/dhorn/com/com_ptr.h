@@ -18,7 +18,7 @@
 
 #include <cassert>
 
-#include "com_utility.h"
+#include "com_traits.h"
 #include "hresult_error.h"
 
 namespace dhorn::com

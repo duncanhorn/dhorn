@@ -1,7 +1,7 @@
 /*
  * Duncan Horn
  *
- * com_utility.h
+ * com_traits.h
  *
  * Helpers and type traits for dealing with COM types and objects.
  */

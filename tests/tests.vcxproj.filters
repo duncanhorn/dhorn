@@ -116,9 +116,6 @@
     <ClCompile Include="ScopeGuardTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ComUtilityTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ThreadPoolTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,6 +123,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AllIncludeTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ComTraitsTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

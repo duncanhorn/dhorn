@@ -171,9 +171,6 @@
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h">
       <Filter>include\windows</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\com\com_utility.h">
-      <Filter>include\com</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\winrt\winrt_utility.h">
       <Filter>include\winrt</Filter>
     </ClInclude>
@@ -193,6 +190,9 @@
       <Filter>include\com</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\com\com_ptr.h">
+      <Filter>include\com</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\com\com_traits.h">
       <Filter>include\com</Filter>
     </ClInclude>
   </ItemGroup>

@@ -166,7 +166,7 @@
   <ItemGroup>
     <ClInclude Include="include\dhorn\bitmask.h" />
     <ClInclude Include="include\dhorn\com\com_ptr.h" />
-    <ClInclude Include="include\dhorn\com\com_utility.h" />
+    <ClInclude Include="include\dhorn\com\com_traits.h" />
     <ClInclude Include="include\dhorn\com\hresult_error.h" />
     <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\debug.h" />
