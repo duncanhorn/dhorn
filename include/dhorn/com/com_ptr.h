@@ -3,7 +3,16 @@
  *
  * com_ptr.h
  *
- * A throwing COM pointer implementation
+ * A throwing COM pointer implementation. The usage of `com_ptr` is intended to be similar to that of `std::shared_ptr`
+ * (with obvious differences since we are inter-operating with COM). Construction/assignment/etc. to a `com_ptr` can
+ * always be done implicitly if the pointer types are implicitly convertable. E.g. you can assign an `IFoo*` or a
+ * `com_ptr<IFoo>` to a `com_ptr<IUnknown>`.
+ *
+ * Non-implicit conversions can be done explicitly through the `com_ptr::as`/`com_ptr::try_as` and `query`/`try_query`
+ * functions. In all four cases, the conversion is done implicitly if possible, otherwise `QueryInterface` is called on
+ * the pointer to do the conversion. The non-"try" variants will throw a `std::system_error` with `hresult_category()`
+ * if the `QueryInterface` call fails, whereas the "try" variants will swallow the failed `HRESULT` and return null on
+ * failure.
  */
 #pragma once
 
@@ -91,8 +100,8 @@ namespace dhorn::com
             return *this;
         }
 
-        template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
-        com_ptr& operator=(Ty* ptr) noexcept(std::is_convertible_v<Ty*, IFace*>)
+        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        com_ptr& operator=(Ty* ptr) noexcept
         {
             Release();
             Assign(ptr);
@@ -111,8 +120,8 @@ namespace dhorn::com
             return *this;
         }
 
-        template <typename Ty>
-        com_ptr& operator=(const com_ptr<Ty>& other) noexcept(std::is_convertible_v<Ty*, IFace*>)
+        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        com_ptr& operator=(const com_ptr<Ty>& other) noexcept
         {
             Release();
             Assign(other._ptr);
