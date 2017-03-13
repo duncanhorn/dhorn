@@ -55,4 +55,44 @@ namespace dhorn::com
     constexpr bool is_unknown_v = is_unknown<IFace>::value;
 
 #pragma endregion
+
+
+
+    /*
+     * interface_traits
+     */
+#pragma region interface_traits
+
+    template <typename IFace>
+    struct interface_traits
+    {
+        static_assert(is_unknown_v<IFace>, "Interfaces must derive from IUnknown to be used with interface_traits");
+
+        /*
+         * Types
+         */
+        using difference_type = std::ptrdiff_t;
+        using value_type = IFace;
+        using pointer = IFace*;
+        using reference = IFace&;
+
+
+
+        /* 
+         * Static Functions
+         */
+        static constexpr const GUID& interface_id() noexcept
+        {
+            return __uuidof(IFace);
+        }
+
+        template <typename OtherIFace>
+        static HRESULT query_interface(pointer ptr, OtherIFace** output) noexcept
+        {
+            using OtherTraits = interface_traits<OtherIFace>;
+            return ptr->QueryInterface(OtherTraits::interface_id(), reinterpret_cast<void**>(output));
+        }
+    };
+
+#pragma endregion
 }

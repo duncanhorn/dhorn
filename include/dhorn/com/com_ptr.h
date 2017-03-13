@@ -298,7 +298,7 @@ namespace dhorn::com
             assert(!this->_ptr);
             if (ptr)
             {
-                check_hresult(ptr->QueryInterface(IID_PPV_ARGS(&this->_ptr)));
+                check_hresult(interface_traits<Ty>::query_interface(ptr, &this->_ptr));
             }
         }
 
@@ -319,7 +319,7 @@ namespace dhorn::com
             assert(!this->_ptr);
             if (ptr)
             {
-                if (FAILED(ptr->QueryInterface(IID_PPV_ARGS(&this->_ptr))))
+                if (FAILED(interface_traits<Ty>::query_interface(ptr, &this->_ptr)))
                 {
                     this->_ptr = nullptr;
                 }
@@ -359,7 +359,7 @@ namespace dhorn::com
     inline com_ptr<Ty> query(FromTy* ptr)
     {
         com_ptr<Ty> result;
-        check_hresult(ptr->QueryInterface(IID_PPV_ARGS(&result)));
+        check_hresult(interface_traits<FromTy>::query_interface(ptr, &result));
         return result;
     }
 
@@ -384,7 +384,7 @@ namespace dhorn::com
     inline com_ptr<Ty> try_query(FromTy* ptr) noexcept
     {
         com_ptr<Ty> result;
-        if (SUCCEEDED(ptr->QueryInterface(IID_PPV_ARGS(&result))))
+        if (SUCCEEDED(interface_traits<FromTy>::query_interface(ptr, &result)))
         {
             return result;
         }
