@@ -27,4 +27,4 @@
 #include <dhorn/windows/tick_count_clock.h>
 
 // WinRT Includes
-#include <dhorn/winrt/winrt_utility.h>
+#include <dhorn/winrt/winrt_traits.h>

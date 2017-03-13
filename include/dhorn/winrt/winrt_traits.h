@@ -1,7 +1,7 @@
 /*
  * Duncan Horn
  *
- * winrt_utility.h
+ * winrt_traits.h
  *
  * Helpers and type traits for dealing with WinRt types and objects.
  */
