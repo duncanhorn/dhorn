@@ -74,6 +74,7 @@ namespace dhorn::com
         using difference_type = std::ptrdiff_t;
         using value_type = IFace;
         using pointer = IFace*;
+        using output_pointer = IFace**;
         using reference = IFace&;
 
 
@@ -86,11 +87,11 @@ namespace dhorn::com
             return __uuidof(IFace);
         }
 
-        template <typename OtherIFace>
-        static HRESULT query_interface(pointer ptr, OtherIFace** output) noexcept
+        template <typename Ty>
+        static HRESULT query_from(Ty* ptr, output_pointer result) noexcept
         {
-            using OtherTraits = interface_traits<OtherIFace>;
-            return ptr->QueryInterface(OtherTraits::interface_id(), reinterpret_cast<void**>(output));
+            assert(*result == nullptr);
+            return ptr->QueryInterface(interface_id(), reinterpret_cast<void**>(result));
         }
     };
 

@@ -34,11 +34,14 @@ namespace dhorn::com
         template <typename Ty>
         friend class com_ptr;
 
+        using Traits = interface_traits<IFace>;
+
     public:
         /*
          * Public Types
          */
-        using element_type = IFace;
+        using element_type = typename Traits::value_type;
+        using pointer = typename Traits::pointer;
 
 
 
@@ -147,12 +150,12 @@ namespace dhorn::com
             return *this->_ptr;
         }
 
-        element_type* operator->() const noexcept
+        pointer operator->() const noexcept
         {
             return this->_ptr;
         }
 
-        element_type** operator&() noexcept
+        pointer* operator&() noexcept
         {
             Release();
             return &this->_ptr;
@@ -191,7 +194,7 @@ namespace dhorn::com
             this->_ptr = ptr;
         }
 
-        element_type* detach() noexcept
+        pointer detach() noexcept
         {
             auto ptr = this->_ptr;
             this->_ptr = nullptr;
@@ -203,7 +206,7 @@ namespace dhorn::com
             std::swap(this->_ptr, other._ptr);
         }
 
-        element_type** release_and_get_address_of() noexcept
+        pointer* release_and_get_address_of() noexcept
         {
             Release();
             return &this->_ptr;
@@ -218,12 +221,12 @@ namespace dhorn::com
          */
 #pragma region Observers
 
-        element_type* get() const noexcept
+        pointer get() const noexcept
         {
             return this->_ptr;
         }
 
-        element_type** address_of() noexcept
+        pointer* address_of() noexcept
         {
             return &this->_ptr;
         }
@@ -298,7 +301,7 @@ namespace dhorn::com
             assert(!this->_ptr);
             if (ptr)
             {
-                check_hresult(interface_traits<Ty>::query_interface(ptr, &this->_ptr));
+                check_hresult(Traits::query_from(ptr, &this->_ptr));
             }
         }
 
@@ -319,7 +322,7 @@ namespace dhorn::com
             assert(!this->_ptr);
             if (ptr)
             {
-                if (FAILED(interface_traits<Ty>::query_interface(ptr, &this->_ptr)))
+                if (FAILED(Traits::query_from(ptr, &this->_ptr)))
                 {
                     this->_ptr = nullptr;
                 }
@@ -328,7 +331,7 @@ namespace dhorn::com
 
 
 
-        element_type* _ptr = nullptr;
+        pointer _ptr = nullptr;
     };
 
 
@@ -359,7 +362,7 @@ namespace dhorn::com
     inline com_ptr<Ty> query(FromTy* ptr)
     {
         com_ptr<Ty> result;
-        check_hresult(interface_traits<FromTy>::query_interface(ptr, &result));
+        check_hresult(interface_traits<Ty>::query_from(ptr, &result));
         return result;
     }
 
@@ -384,7 +387,7 @@ namespace dhorn::com
     inline com_ptr<Ty> try_query(FromTy* ptr) noexcept
     {
         com_ptr<Ty> result;
-        if (SUCCEEDED(interface_traits<FromTy>::query_interface(ptr, &result)))
+        if (SUCCEEDED(interface_traits<Ty>::query_from(ptr, &result)))
         {
             return result;
         }
