@@ -7,6 +7,8 @@
  */
 #include "stdafx.h"
 
+#include <dhorn/unique_any.h>
+
 #include <dhorn/experimental/unique_any.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -18,6 +20,34 @@ namespace dhorn
         static int count = 0;
 
         TEST_CLASS(UniqueAnyTests)
+        {
+            template <typename CharT>
+            struct unique_basic_string_traits
+            {
+                using value_type = std::basic_string<CharT>;
+
+                static constexpr bool valid(const value_type& value) noexcept
+                {
+                    return !value.empty();
+                }
+
+                static constexpr value_type default_value() noexcept
+                {
+                    return value_type{};
+                }
+
+                static void destroy(value_type&) noexcept
+                {
+                    // Strings delete themselves
+                }
+            };
+            using unique_string = unique_any<std::string, unique_basic_string_traits<char>>;
+            using unique_wstring = unique_any<std::wstring, unique_basic_string_traits<wchar_t>>;
+        };
+
+
+
+        TEST_CLASS(UniqueAnyTests_Old)
         {
             class test_class
             {

@@ -7,15 +7,47 @@
  */
 #pragma once
 
-#include "type_traits.h"
+#include <memory>
+#include <tuple>
 
 namespace dhorn
 {
     /*
+     * unique_any Traits Types
+     *
+     * Expected to provide the following type aliases:
+     *      * value_type    This is the type returned by `unique_any` to its caller. In general, this should be the same
+     *                      as the template type, but there are some obvious exceptions (e.g. arrays).
+     *      * storage_type  This is the type that `unique_any` stores internally and is the type that gets passed to the
+     *                      static functions on the traits type. This allows things like custom deleters, etc. without
+     *                      dirtying the user-facing API.
+     *
+     * Expected to provide the following static member functions:
+     *      * default_value Returns a `storage_type` object that represents the value of a default constructed
+     *                      `unique_any` object. Note that unlike the `construct` function, the return value of this
+     *                      function is _not_ a `std::tuple` since it is used for `reset`, etc. as well.
+     *      * construct     Returns a `std::tuple` that is used to construct the `storage_type` member. In general, this
+     *                      should return `std::forward_as_tuple` for the input argument(s). Note that this function
+     *                      function is _not_ called for the default constructor (`default_value` is).
+     *      * destroy       
+     *      * valid         Tests a `storage_type` value to see if it contains a valid value (e.g. non-null, etc.).
+     */
+#pragma region unique_any Traits Types
+
+    /*
+     * unique_pointer_traits
+     */
+    template <typename Ty, typename Deleter = std::default_delete<Ty>>
+    struct unique_pointer_traits
+    {
+        using value_type = Ty*;
+    };
+
+
+
+    /*
      * unique_any_traits
      */
-#pragma region unique_any_traits
-
     template <typename Ty>
     struct unique_any_traits;
 
@@ -54,9 +86,18 @@ namespace dhorn
 
 
 
+    /*
+     * unique_any
+     */
     template <typename Ty, typename Traits = unique_any_traits<Ty>>
     class unique_any
     {
+        // Validate properties on the traits type
+        static_assert(std::is_constructible_v<Ty, decltype(Traits::default_value())>,
+            "Must be able to construct value_type with the result of default_value");
+        static_assert(std::is_assignable_v<Ty&, decltype(Traits::default_value())>,
+            "Must be able to assign the result of default_value to value_type");
+
     public:
         /*
          * Public Types
@@ -70,31 +111,82 @@ namespace dhorn
          */
 #pragma region Constructor(s)/Destructor
 
-        // Default/no-arg Construction:
-        //  * Always constexpr
-        //  * explicit if construction of Ty is explicit
-
-
-
-
-
-
-        unique_any() noexcept :
+        // Default/no-arg Construction
+        template <std::enable_if_t<std::is_convertible_v<decltype(Traits::default_value()), value_type>, int> = 0>
+        constexpr unique_any() noexcept(std::is_nothrow_constructible_v<value_type, decltype(Traits::default_value())>) :
             _value(Traits::default_value())
         {
         }
 
+        template <std::enable_if_t<!std::is_convertible_v<decltype(Traits::default_value()), value_type>, int> = 0>
+        explicit constexpr unique_any() noexcept(std::is_nothrow_constructible_v<value_type, decltype(Traits::default_value())>) :
+            _value(Traits::default_value())
+        {
+        }
+
+        // Value Construction
+        //template <
+        //    std::enable_if_t<std::is_copy_constructible_v<value_type>, int> = 0,
+        //    std::enable_if_t<std::is_convertible_v<const value_type&, value_type>, int> = 0>
+        //constexpr unique_any(const value_type& value) noexcept(std::is_nothrow_copy_constructible_v<value_type>) :
+        //    _value(value)
+        //{
+        //}
+        //
+        //template <
+        //    std::enable_if_t<std::is_copy_constructible_v<value_type>, int> = 0,
+        //    std::enable_if_t<!std::is_convertible_v<const value_type&, value_type>, int> = 0>
+        //explicit constexpr unique_any(const value_type& value) noexcept(std::is_nothrow_copy_constructible_v<value_type>) :
+        //    _value(value)
+        //{
+        //}
+
+        // R-Value Construction
+        template <
+            typename OtherTy,
+            std::enable_if_t<std::is_constructible_v<value_type, OtherTy&&>, int> = 0,
+            std::enable_if_t<std::is_convertible_v<OtherTy&&, value_type>, int> = 0>
+        constexpr unique_any(OtherTy&& value) noexcept(std::is_nothrow_constructible_v<value_type, OtherTy&&>) :
+            _value(std::forward<OtherTy>(value))
+        {
+        }
+
+        template <
+            typename OtherTy,
+            std::enable_if_t<std::is_constructible_v<value_type, OtherTy&&>, int> = 0,
+            std::enable_if_t<!std::is_convertible_v<OtherTy&&, value_type>, int> = 0>
+        explicit constexpr unique_any(OtherTy&& value) noexcept(std::is_nothrow_constructible_v<value_type, OtherTy&&>) :
+            _value(std::forward<OtherTy>(value))
+        {
+        }
+
+        // Cannot copy unique objects
         unique_any(const unique_any&) = delete;
 
-        unique_any(unique_any&& other) : // TODO: noexcept
+        // Move Construction
+        template <
+            typename OtherTy,
+            std::enable_if_t<std::is_constructible_v<value_type, OtherTy&&>, int> = 0,
+            std::enable_if_t<std::is_convertible_v<OtherTy&&, value_type>, int> = 0>
+        unique_any(unique_any<OtherTy>&& other) noexcept(std::is_nothrow_constructible_v<value_type, OtherTy&&>) :
             _value(std::move(other._value))
         {
-            other.swap(*this);
+            // TODO: Detach/invalidate other
+        }
+        
+        template <
+            typename OtherTy,
+            std::enable_if_t<std::is_constructible_v<value_type, OtherTy&&>, int> = 0,
+            std::enable_if_t<!std::is_convertible_v<OtherTy&&, value_type>, int> = 0>
+        explicit unique_any(unique_any<OtherTy>&& other) noexcept(std::is_nothrow_constructible_v<value_type, OtherTy&&>) :
+            _value(std::move(other._value))
+        {
+            // TODO: Detach/invalidate other
         }
 
         ~unique_any()
         {
-            // reset();
+            // TODO: reset();
         }
 
 #pragma endregion
@@ -108,11 +200,19 @@ namespace dhorn
 
         unique_any& operator=(const unique_any&) = delete;
 
-        unique_any& operator=(unique_any&& other) noexcept(swap(other))
+        template <
+            typename OtherTy,
+            std::enable_if_t<std::is_assignable_v<value_type&, OtherTy&&>, int> = 0>
+        unique_any& operator=(unique_any<OtherTy>&& other) noexcept(std::is_nothrow_assignable_v<value_type, OtherTy&&>)
         {
-            other.swap(*this);
-            return *this;
+
         }
+
+        //unique_any& operator=(unique_any&& other) noexcept(swap(other))
+        //{
+        //    other.swap(*this);
+        //    return *this;
+        //}
 
         operator bool() const noexcept
         {

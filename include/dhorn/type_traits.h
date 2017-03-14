@@ -157,6 +157,37 @@ namespace dhorn
 
 
     /*
+     * is_implicitly_default_constructible
+     *
+     * Type trait for determining if a type is implicitly default constructor. That is, its default constructor:
+     * (1) exists, and (2) is not marked as explicit.
+     */
+#pragma region is_implicitly_default_constructible
+
+    template <typename Ty>
+    struct is_implicitly_default_constructible
+    {
+    private:
+
+        template <typename T = Ty>
+        static auto invoke(int) -> decltype(std::declval<T&>() = {}, std::true_type{});
+
+        template <typename T = Ty>
+        static auto invoke(float)->std::false_type;
+
+    public:
+
+        static const bool value = decltype(invoke(0))::value;
+    };
+
+    template <typename Ty>
+    constexpr bool is_implicitly_default_constructible_v = is_implicitly_default_constructible<Ty>::value;
+
+#pragma endregion
+
+
+
+    /*
      * byte_offset
      *
      * An easy way to get the byte offset of a member within a struct. This works similar to the macro offsetof, but
@@ -210,37 +241,6 @@ namespace dhorn
 
     template <typename Ty>
     constexpr bool is_c_string_v = is_c_string<Ty>::value;
-
-#pragma endregion
-
-
-
-    /*
-     * is_implicitly_default_constructible
-     *
-     * Type trait for determining if a type is implicitly default constructor. That is, its default constructor:
-     * (1) exists, and (2) is not marked as explicit.
-     */
-#pragma region is_implicitly_default_constructible
-
-    template <typename Ty>
-    struct is_implicitly_default_constructible
-    {
-    private:
-
-        template <typename T = Ty>
-        static auto invoke(int) -> decltype(std::declval<T&>() = {}, std::true_type{});
-
-        template <typename T = Ty>
-        static auto invoke(float)->std::false_type;
-
-    public:
-
-        static const bool value = decltype(invoke(0))::value;
-    };
-
-    template <typename Ty>
-    constexpr bool is_implicitly_default_constructible_v = is_implicitly_default_constructible<Ty>::value;
 
 #pragma endregion
 }
