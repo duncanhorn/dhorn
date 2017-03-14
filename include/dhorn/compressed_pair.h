@@ -1,12 +1,13 @@
 /*
  * Duncan Horn
  *
- * compact_pair.h
+ * compressed_pair.h
  *
  * 
  */
 #pragma once
 
+#include <tuple>
 #include <type_traits>
 
 #include "type_traits.h"
@@ -14,7 +15,7 @@
 namespace dhorn
 {
     /*
-     * compact_pair
+     * compressed_pair
      *
      * Generic implementation: Both are either final or non-empty; act like a normal pair
      */
@@ -23,17 +24,17 @@ namespace dhorn
         typename Second,
         bool CanDeriveFirst = !std::is_final_v<First> && std::is_empty_v<First>,
         bool CanDeriveSecond = !std::is_final_v<Second> && std::is_empty_v<Second>>
-    class compact_pair
+    class compressed_pair
     {
         // Friends
         template <typename, typename, bool, bool>
-        friend class compact_pair;
+        friend class compressed_pair;
 
 
 
         // Tuple Construction Helper
         template <typename... FirstTypes, typename... SecondTypes, size_t... FirstIndices, size_t... SecondIndices>
-        compact_pair(
+        compressed_pair(
             std::tuple<FirstTypes...>& firstTuple,
             std::tuple<SecondTypes...>& secondTuple,
             std::index_sequence<FirstIndices...>,
@@ -63,7 +64,7 @@ namespace dhorn
                 dhorn::is_implicitly_default_constructible<FirstTy>,
                 dhorn::is_implicitly_default_constructible<SecondTy>
             >, int> = 0>
-        constexpr compact_pair()
+        constexpr compressed_pair()
             noexcept(std::conjunction_v<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
@@ -80,7 +81,7 @@ namespace dhorn
                 dhorn::is_implicitly_default_constructible<FirstTy>,
                 dhorn::is_implicitly_default_constructible<SecondTy>
             >>, int> = 0>
-        explicit constexpr compact_pair()
+        explicit constexpr compressed_pair()
             noexcept(std::conjunction_v<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
@@ -100,7 +101,7 @@ namespace dhorn
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
             >, int> = 0>
-        constexpr compact_pair(const First& first, const Second& second)
+        constexpr compressed_pair(const First& first, const Second& second)
             noexcept(std::conjunction_v<
                 std::is_nothrow_copy_constructible<First>,
                 std::is_nothrow_copy_constructible<Second>
@@ -121,7 +122,7 @@ namespace dhorn
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
             >>, int> = 0>
-        explicit constexpr compact_pair(const First& first, const Second& second)
+        explicit constexpr compressed_pair(const First& first, const Second& second)
             noexcept(std::conjunction_v<
                 std::is_nothrow_copy_constructible<First>,
                 std::is_nothrow_copy_constructible<Second>
@@ -145,7 +146,7 @@ namespace dhorn
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
             >, int> = 0>
-        constexpr compact_pair(FirstTy&& first, SecondTy&& second)
+        constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
             noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
@@ -166,7 +167,7 @@ namespace dhorn
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
             >>, int> = 0>
-        explicit constexpr compact_pair(FirstTy&& first, SecondTy&& second)
+        explicit constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
             noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
@@ -190,7 +191,7 @@ namespace dhorn
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
             >, int> = 0>
-        constexpr compact_pair(const compact_pair<FirstTy, SecondTy>& other)
+        constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
             noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, const FirstTy&>,
                 std::is_nothrow_constructible<Second, const SecondTy&>
@@ -211,7 +212,7 @@ namespace dhorn
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
             >>, int> = 0>
-        explicit constexpr compact_pair(const compact_pair<FirstTy, SecondTy>& other)
+        explicit constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
             noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, const FirstTy&>,
                 std::is_nothrow_constructible<Second, const SecondTy&>
@@ -235,7 +236,7 @@ namespace dhorn
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
             >, int> = 0>
-        constexpr compact_pair(compact_pair<FirstTy, SecondTy>&& other)
+        constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
             noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
@@ -256,7 +257,7 @@ namespace dhorn
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
             >>, int> = 0>
-        explicit constexpr compact_pair(compact_pair<FirstTy, SecondTy>&& other)
+        explicit constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
             noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
@@ -270,11 +271,11 @@ namespace dhorn
 
         // Piecewise Construction
         template <typename... FirstTypes, typename... SecondTypes>
-        constexpr compact_pair(
+        constexpr compressed_pair(
             std::piecewise_construct_t,
             std::tuple<FirstTypes...> firstArgs,
             std::tuple<SecondTypes...> secondArgs) :
-            compact_pair(
+            compressed_pair(
                 firstArgs,
                 secondArgs,
                 std::make_index_sequence<sizeof...(FirstTypes)>{},
@@ -285,10 +286,10 @@ namespace dhorn
 
 
         // Copy Construction
-        compact_pair(const compact_pair&) = default;
+        compressed_pair(const compressed_pair&) = default;
 
         // Move Construction
-        compact_pair(compact_pair&&) = default;
+        compressed_pair(compressed_pair&&) = default;
 
     #pragma endregion
 
@@ -355,7 +356,7 @@ namespace dhorn
 
 
     template <typename First, typename Second, bool CanDeriveSecond>
-    class compact_pair<First, Second, true, CanDeriveSecond> :
+    class compressed_pair<First, Second, true, CanDeriveSecond> :
         public First
     {
     public:
@@ -370,7 +371,7 @@ namespace dhorn
 
 
     template <typename First, typename Second>
-    class compact_pair<First, Second, false, true> :
+    class compressed_pair<First, Second, false, true> :
         public Second
     {
     public:

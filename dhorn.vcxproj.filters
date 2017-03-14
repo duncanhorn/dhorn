@@ -195,7 +195,7 @@
     <ClInclude Include="include\dhorn\winrt\winrt_traits.h">
       <Filter>include\winrt</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\compact_pair.h">
+    <ClInclude Include="include\dhorn\compressed_pair.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

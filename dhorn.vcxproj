@@ -165,7 +165,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\bitmask.h" />
-    <ClInclude Include="include\dhorn\compact_pair.h" />
+    <ClInclude Include="include\dhorn\compressed_pair.h" />
     <ClInclude Include="include\dhorn\com\com_ptr.h" />
     <ClInclude Include="include\dhorn\com\com_traits.h" />
     <ClInclude Include="include\dhorn\com\hresult_error.h" />
