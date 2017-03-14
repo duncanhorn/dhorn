@@ -355,6 +355,11 @@ namespace dhorn
 
 
 
+    /*
+     * compressed_pair
+     *
+     * First type is empty and non-final, so we derive from it
+     */
     template <typename First, typename Second, bool CanDeriveSecond>
     class compressed_pair<First, Second, true, CanDeriveSecond> :
         public First
@@ -370,6 +375,11 @@ namespace dhorn
 
 
 
+    /*
+     * compressed_pair
+     *
+     * First type either non-empty or final, but the second type both, so derive from it instead
+     */
     template <typename First, typename Second>
     class compressed_pair<First, Second, false, true> :
         public Second
