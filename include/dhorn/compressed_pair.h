@@ -291,14 +291,14 @@ namespace dhorn
         // Move Construction
         compressed_pair(compressed_pair&&) = default;
 
-    #pragma endregion
+#pragma endregion
 
 
 
         /*
          * Accessors
          */
-    #pragma region Accessors
+#pragma region Accessors
 
         // First
         First& first() noexcept
@@ -342,8 +342,7 @@ namespace dhorn
             return this->_second;
         }
 
-
-    #pragma endregion
+#pragma endregion
 
 
 
@@ -368,6 +367,59 @@ namespace dhorn
 
         // TODO
 
+
+
+        /*
+         * Accessors
+         */
+#pragma region Accessors
+
+        // First
+        First& first() noexcept
+        {
+            return *this;
+        }
+
+        const First& first() const noexcept
+        {
+            return *this;
+        }
+
+        volatile First& first() volatile noexcept
+        {
+            return *this;
+        }
+
+        const volatile First& first() const volatile noexcept
+        {
+            return *this;
+        }
+
+        // Second
+        Second& second() noexcept
+        {
+            return this->_second;
+        }
+
+        const Second& second() const noexcept
+        {
+            return this->_second;
+        }
+
+        volatile Second& second() volatile noexcept
+        {
+            return this->_second;
+        }
+
+        const volatile Second& second() const volatile noexcept
+        {
+            return this->_second;
+        }
+
+#pragma endregion
+
+
+
     private:
 
         Second _second;
@@ -387,6 +439,59 @@ namespace dhorn
     public:
 
         // TODO
+
+
+
+        /*
+         * Accessors
+         */
+#pragma region Accessors
+
+        // First
+        First& first() noexcept
+        {
+            return this->_first;
+        }
+
+        const First& first() const noexcept
+        {
+            return this->_first;
+        }
+
+        volatile First& first() volatile noexcept
+        {
+            return this->_first;
+        }
+
+        const volatile First& first() const volatile noexcept
+        {
+            return this->_first;
+        }
+
+        // Second
+        Second& second() noexcept
+        {
+            return *this;
+        }
+
+        const Second& second() const noexcept
+        {
+            return *this;
+        }
+
+        volatile Second& second() volatile noexcept
+        {
+            return *this;
+        }
+
+        const volatile Second& second() const volatile noexcept
+        {
+            return *this;
+        }
+
+#pragma endregion
+
+
 
     private:
 
