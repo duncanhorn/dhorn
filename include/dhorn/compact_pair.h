@@ -9,7 +9,377 @@
 
 #include <type_traits>
 
+#include "type_traits.h"
+
 namespace dhorn
 {
+    /*
+     * compact_pair
+     *
+     * Generic implementation: Both are either final or non-empty; act like a normal pair
+     */
+    template <
+        typename First,
+        typename Second,
+        bool CanDeriveFirst = !std::is_final_v<First> && std::is_empty_v<First>,
+        bool CanDeriveSecond = !std::is_final_v<Second> && std::is_empty_v<Second>>
+    class compact_pair
+    {
+        // Friends
+        template <typename, typename, bool, bool>
+        friend class compact_pair;
+
+
+
+        // Tuple Construction Helper
+        template <typename... FirstTypes, typename... SecondTypes, size_t... FirstIndices, size_t... SecondIndices>
+        compact_pair(
+            std::tuple<FirstTypes...>& firstTuple,
+            std::tuple<SecondTypes...>& secondTuple,
+            std::index_sequence<FirstIndices...>,
+            std::index_sequence<SecondIndices...>) : // TODO: noexcept??
+            _first(std::get<FirstIndices>(firstTuple)...),
+            _second(std::get<SecondIndices>(secondTuple)...)
+        {
+        }
+
+
+
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+#pragma region Constructor(s)/Destructor
+
+        // Default Construction
+        template <
+            typename FirstTy = First,
+            typename SecondTy = Second,
+            std::enable_if_t<std::conjunction_v<
+                std::is_default_constructible<FirstTy>,
+                std::is_default_constructible<SecondTy>
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
+                dhorn::is_implicitly_default_constructible<FirstTy>,
+                dhorn::is_implicitly_default_constructible<SecondTy>
+            >, int> = 0>
+        constexpr compact_pair()
+            noexcept(std::conjunction_v<
+                std::is_nothrow_default_constructible<First>,
+                std::is_nothrow_default_constructible<Second>
+            >) = default;
+
+        template <
+            typename FirstTy = First,
+            typename SecondTy = Second,
+            std::enable_if_t<std::conjunction_v<
+                std::is_default_constructible<FirstTy>,
+                std::is_default_constructible<SecondTy>
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
+                dhorn::is_implicitly_default_constructible<FirstTy>,
+                dhorn::is_implicitly_default_constructible<SecondTy>
+            >>, int> = 0>
+        explicit constexpr compact_pair()
+            noexcept(std::conjunction_v<
+                std::is_nothrow_default_constructible<First>,
+                std::is_nothrow_default_constructible<Second>
+            >) = default;
+
+
+
+        // Value Copy Construction
+        template <
+            typename FirstTy = First,
+            typename SecondTy = Second,
+            std::enable_if_t<std::conjunction_v<
+                std::is_copy_constructible<FirstTy>,
+                std::is_copy_constructible<SecondTy>
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
+                std::is_convertible<const FirstTy&, First>,
+                std::is_convertible<const SecondTy&, Second>
+            >, int> = 0>
+        constexpr compact_pair(const First& first, const Second& second)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_copy_constructible<First>,
+                std::is_nothrow_copy_constructible<Second>
+            >) :
+            _first(first),
+            _second(second)
+        {
+        }
+    
+        template <
+            typename FirstTy = First,
+            typename SecondTy = Second,
+            std::enable_if_t<std::conjunction_v<
+                std::is_copy_constructible<FirstTy>,
+                std::is_copy_constructible<SecondTy>
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
+                std::is_convertible<const FirstTy&, First>,
+                std::is_convertible<const SecondTy&, Second>
+            >>, int> = 0>
+        explicit constexpr compact_pair(const First& first, const Second& second)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_copy_constructible<First>,
+                std::is_nothrow_copy_constructible<Second>
+            >) :
+            _first(first),
+            _second(second)
+        {
+        }
+
+
+
+        // Value Move Construction
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_constructible<First, FirstTy&&>,
+                std::is_constructible<Second, SecondTy&&>
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
+                std::is_convertible<FirstTy&&, First>,
+                std::is_convertible<SecondTy&&, Second>
+            >, int> = 0>
+        constexpr compact_pair(FirstTy&& first, SecondTy&& second)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_constructible<First, FirstTy&&>,
+                std::is_nothrow_constructible<Second, SecondTy&&>
+            >) :
+            _first(std::forward<FirstTy>(first)),
+            _second(std::forward<SecondTy>(second))
+        {
+        }
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_constructible<First, FirstTy&&>,
+                std::is_constructible<Second, SecondTy&&>
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
+                std::is_convertible<FirstTy&&, First>,
+                std::is_convertible<SecondTy&&, Second>
+            >>, int> = 0>
+        explicit constexpr compact_pair(FirstTy&& first, SecondTy&& second)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_constructible<First, FirstTy&&>,
+                std::is_nothrow_constructible<Second, SecondTy&&>
+            >) :
+            _first(std::forward<FirstTy>(first)),
+            _second(std::forward<SecondTy>(second))
+        {
+        }
+
+
+
+        // Copy Conversion Construction
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_constructible<First, const FirstTy&>,
+                std::is_constructible<Second, const SecondTy&>
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
+                std::is_convertible<const FirstTy&, First>,
+                std::is_convertible<const SecondTy&, Second>
+            >, int> = 0>
+        constexpr compact_pair(const compact_pair<FirstTy, SecondTy>& other)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_constructible<First, const FirstTy&>,
+                std::is_nothrow_constructible<Second, const SecondTy&>
+            >) :
+            _first(other.first()),
+            _second(other.second())
+        {
+        }
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_constructible<First, const FirstTy&>,
+                std::is_constructible<Second, const SecondTy&>
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
+                std::is_convertible<const FirstTy&, First>,
+                std::is_convertible<const SecondTy&, Second>
+            >>, int> = 0>
+        explicit constexpr compact_pair(const compact_pair<FirstTy, SecondTy>& other)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_constructible<First, const FirstTy&>,
+                std::is_nothrow_constructible<Second, const SecondTy&>
+            >) :
+            _first(other.first()),
+            _second(other.second())
+        {
+        }
+
+
+
+        // Move Conversion Construction
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_constructible<First, FirstTy&&>,
+                std::is_constructible<Second, SecondTy&&>
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
+                std::is_convertible<FirstTy&&, First>,
+                std::is_convertible<SecondTy&&, Second>
+            >, int> = 0>
+        constexpr compact_pair(compact_pair<FirstTy, SecondTy>&& other)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_constructible<First, FirstTy&&>,
+                std::is_nothrow_constructible<Second, SecondTy&&>
+            >) :
+            _first(std::forward<FirstTy>(other.first())),
+            _second(std::forward<SecondTy>(other.second()))
+        {
+        }
+    
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_constructible<First, FirstTy&&>,
+                std::is_constructible<Second, SecondTy&&>
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
+                std::is_convertible<FirstTy&&, First>,
+                std::is_convertible<SecondTy&&, Second>
+            >>, int> = 0>
+        explicit constexpr compact_pair(compact_pair<FirstTy, SecondTy>&& other)
+            noexcept(std::conjunction_v<
+                std::is_nothrow_constructible<First, FirstTy&&>,
+                std::is_nothrow_constructible<Second, SecondTy&&>
+            >) :
+            _first(std::forward<FirstTy>(other.first())),
+            _second(std::forward<SecondTy>(other.second()))
+        {
+        }
+
+
+
+        // Piecewise Construction
+        template <typename... FirstTypes, typename... SecondTypes>
+        constexpr compact_pair(
+            std::piecewise_construct_t,
+            std::tuple<FirstTypes...> firstArgs,
+            std::tuple<SecondTypes...> secondArgs) :
+            compact_pair(
+                firstArgs,
+                secondArgs,
+                std::make_index_sequence<sizeof...(FirstTypes)>{},
+                std::make_index_sequence<sizeof...(SecondTypes)>{})
+        {
+        }
+
+
+
+        // Copy Construction
+        compact_pair(const compact_pair&) = default;
+
+        // Move Construction
+        compact_pair(compact_pair&&) = default;
+
+    #pragma endregion
+
+
+
+        /*
+         * Accessors
+         */
+    #pragma region Accessors
+
+        // First
+        First& first() noexcept
+        {
+            return this->_first;
+        }
+
+        const First& first() const noexcept
+        {
+            return this->_first;
+        }
+
+        volatile First& first() volatile noexcept
+        {
+            return this->_first;
+        }
+
+        const volatile First& first() const volatile noexcept
+        {
+            return this->_first;
+        }
+
+        // Second
+        Second& second() noexcept
+        {
+            return this->_second;
+        }
+
+        const Second& second() const noexcept
+        {
+            return this->_second;
+        }
+
+        volatile Second& second() volatile noexcept
+        {
+            return this->_second;
+        }
+
+        const volatile Second& second() const volatile noexcept
+        {
+            return this->_second;
+        }
+
+
+    #pragma endregion
+
+
+
+    private:
+
+        First _first;
+        Second _second;
+    };
+
+
+
+    template <typename First, typename Second, bool CanDeriveSecond>
+    class compact_pair<First, Second, true, CanDeriveSecond> :
+        public First
+    {
+    public:
+
+        // TODO
+
+    private:
+
+        Second _second;
+    };
+
+
+
+    template <typename First, typename Second>
+    class compact_pair<First, Second, false, true> :
+        public Second
+    {
+    public:
+
+        // TODO
+
+    private:
+
+        First _second;
+    };
 
 }
