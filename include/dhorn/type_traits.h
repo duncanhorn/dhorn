@@ -169,11 +169,14 @@ namespace dhorn
     {
     private:
 
-        template <typename T = Ty>
-        static auto invoke(int) -> decltype(std::declval<T&>() = {}, std::true_type{});
+        template <typename T>
+        struct test_struct { T value; };
 
         template <typename T = Ty>
-        static auto invoke(float)->std::false_type;
+        static auto invoke(int) -> decltype(test_struct<T>{}, std::true_type{});
+
+        template <typename = Ty>
+        static std::false_type invoke(float);
 
     public:
 

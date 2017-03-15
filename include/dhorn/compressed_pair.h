@@ -61,14 +61,16 @@ namespace dhorn
                 std::is_default_constructible<SecondTy>
             >, int> = 0,
             std::enable_if_t<std::conjunction_v<
-                dhorn::is_implicitly_default_constructible<FirstTy>,
-                dhorn::is_implicitly_default_constructible<SecondTy>
+                is_implicitly_default_constructible<FirstTy>,
+                is_implicitly_default_constructible<SecondTy>
             >, int> = 0>
         constexpr compressed_pair()
             noexcept(std::conjunction_v<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
-            >) = default;
+            >)
+        {
+        }
 
         template <
             typename FirstTy = First,
@@ -78,14 +80,16 @@ namespace dhorn
                 std::is_default_constructible<SecondTy>
             >, int> = 0,
             std::enable_if_t<std::negation_v<std::conjunction<
-                dhorn::is_implicitly_default_constructible<FirstTy>,
-                dhorn::is_implicitly_default_constructible<SecondTy>
+                is_implicitly_default_constructible<FirstTy>,
+                is_implicitly_default_constructible<SecondTy>
             >>, int> = 0>
         explicit constexpr compressed_pair()
             noexcept(std::conjunction_v<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
-            >) = default;
+            >)
+        {
+        }
 
 
 
@@ -495,7 +499,7 @@ namespace dhorn
 
     private:
 
-        First _second;
+        First _first;
     };
 
 }
