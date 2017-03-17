@@ -24,20 +24,13 @@ namespace dhorn
         template <typename Lhs, typename Rhs>
         struct IsComparable
         {
-            template <typename Left, typename Right>
-            static auto Fn(int) ->
-                decltype((std::declval<Left>() == std::declval<Right>()), std::true_type{})
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(int) -> decltype((std::declval<Left>() == std::declval<Right>()), std::true_type{});
 
-            // The compiler will prefer int over float for integral constants
-            template <typename Left, typename Right>
-            static auto Fn(float) ->
-                std::false_type
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(float) -> std::false_type;
 
-            using type = decltype(Fn<Lhs, Rhs>(0));
+            using type = decltype(evaluate(0));
         };
     }
 
@@ -66,20 +59,13 @@ namespace dhorn
         template <typename Lhs, typename Rhs>
         struct IsLessThanComparable
         {
-            template <typename Left, typename Right>
-            static auto Fn(int) ->
-                decltype((std::declval<Left>() < std::declval<Right>()), std::true_type{})
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(int) -> decltype((std::declval<Left>() < std::declval<Right>()), std::true_type{});
 
-            // The compiler will prefer int over float for integral constants
-            template <typename Left, typename Right>
-            static auto Fn(float) ->
-                std::false_type
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(float) -> std::false_type;
 
-            using type = decltype(Fn<Lhs, Rhs>(0));
+            using type = decltype(evaluate(0));
         };
     }
 
@@ -91,6 +77,52 @@ namespace dhorn
 
     template <typename Lhs, typename Rhs>
     constexpr bool is_less_than_comparable_v = is_less_than_comparable<Lhs, Rhs>::value;
+
+#pragma endregion
+
+
+
+    /*
+     * is_implicitly_constructible
+     *
+     * Type trait for determining if a type is implicitly constructible for a given set of arguments.
+     */
+#pragma region is_implicitly_constructible
+
+    namespace details
+    {
+        template <typename Ty, typename... Args>
+        struct IsImplicitlyConstructible
+        {
+            template <typename T>
+            struct test_struct { T value; };
+
+            template <typename T = Ty>
+            static auto evaluate(int) -> decltype(test_struct<T>{ { std::declval<Args>()... } }, std::true_type{});
+
+            template <typename = Ty>
+            static auto evaluate(float)->std::false_type;
+
+            using type = decltype(evaluate(0));
+        };
+    }
+
+    template <typename Ty, typename... Args>
+    struct is_implicitly_constructible :
+        public details::IsImplicitlyConstructible<Ty, Args...>::type
+    {
+    };
+
+    template <typename Ty, typename... Args>
+    constexpr bool is_implicitly_constructible_v = is_implicitly_constructible<Ty, Args...>::value;
+
+
+
+    template <typename Ty>
+    using is_implicitly_default_constructible = is_implicitly_constructible<Ty>;
+
+    template <typename Ty>
+    constexpr bool is_implicitly_default_constructible_v = is_implicitly_default_constructible<Ty>::value;
 
 #pragma endregion
 
@@ -151,40 +183,6 @@ namespace dhorn
 
     template <typename Base, typename... Derived>
     constexpr bool all_base_of_v = all_base_of<Base, Derived...>::value;
-
-#pragma endregion
-
-
-
-    /*
-     * is_implicitly_default_constructible
-     *
-     * Type trait for determining if a type is implicitly default constructor. That is, its default constructor:
-     * (1) exists, and (2) is not marked as explicit.
-     */
-#pragma region is_implicitly_default_constructible
-
-    template <typename Ty>
-    struct is_implicitly_default_constructible
-    {
-    private:
-
-        template <typename T>
-        struct test_struct { T value; };
-
-        template <typename T = Ty>
-        static auto invoke(int) -> decltype(test_struct<T>{}, std::true_type{});
-
-        template <typename = Ty>
-        static std::false_type invoke(float);
-
-    public:
-
-        static const bool value = decltype(invoke(0))::value;
-    };
-
-    template <typename Ty>
-    constexpr bool is_implicitly_default_constructible_v = is_implicitly_default_constructible<Ty>::value;
 
 #pragma endregion
 

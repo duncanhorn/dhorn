@@ -9,7 +9,11 @@
 
 #include <dhorn/compressed_pair.h>
 
+#include <string>
+#include <vector>
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace std::literals;
 
 namespace dhorn::tests
 {
@@ -121,29 +125,191 @@ namespace dhorn::tests
 
 #pragma region Construction Tests
 
+        template <typename TestTy>
+        static void DoNonExplicitConstructionTest(const TestTy& test)
+        {
+            test.template run<empty, empty, true>();
+            test.template run<empty, empty_final, true>();
+            test.template run<empty, non_empty, true>();
+
+            test.template run<empty_final, empty_final, true>();
+            test.template run<empty_final, non_empty, true>();
+
+            test.template run<non_empty, non_empty, true>();
+        }
+
+        template <typename TestTy>
+        static void DoExplicitConstructionTest(const TestTy& test)
+        {
+            test.template run<empty_explicit, empty, false>();
+            test.template run<empty_explicit, empty_explicit, false>();
+            test.template run<empty_explicit, empty_final, false>();
+            test.template run<empty_explicit, empty_final_explicit, false>();
+            test.template run<empty_explicit, non_empty, false>();
+            test.template run<empty_explicit, non_empty_explicit, false>();
+
+            test.template run<empty_final_explicit, empty, false>();
+            test.template run<empty_final_explicit, empty_final, false>();
+            test.template run<empty_final_explicit, empty_final_explicit, false>();
+            test.template run<empty_final_explicit, non_empty, false>();
+            test.template run<empty_final_explicit, non_empty_explicit, false>();
+
+            test.template run<non_empty_explicit, empty, false>();
+            test.template run<non_empty_explicit, empty_final, false>();
+            test.template run<non_empty_explicit, non_empty, false>();
+            test.template run<non_empty_explicit, non_empty_explicit, false>();
+        }
+
 #pragma region Default Construction
 
-        TEST_METHOD(CompressedDefaultConstructionTest)
+        struct DefaultConstructionTester
         {
+            template <typename T1, typename T2, bool Expect>
+            void run() const
+            {
+                Assert::AreEqual(Expect, is_implicitly_default_constructible_v<compressed_pair<T1, T2>>);
+                Assert::AreEqual(Expect, is_implicitly_default_constructible_v<compressed_pair<T2, T1>>);
+            }
+        };
 
+        TEST_METHOD(DefaultConstructionTest)
+        {
+            DoNonExplicitConstructionTest(DefaultConstructionTester{});
         }
 
-        TEST_METHOD(CompressedExplicitDefaultConstructionTest)
+        TEST_METHOD(ExplicitDefaultConstructionTest)
         {
-
-        }
-
-        TEST_METHOD(NonCompressedDefaultConstructionTest)
-        {
-            Assert::IsTrue(is_implicitly_default_constructible_v<compressed_pair<non_empty, non_empty>>);
-        }
-
-        TEST_METHOD(NonCompressedExplicitDefaultConstructionTest)
-        {
-            Assert::IsFalse(is_implicitly_default_constructible_v<compressed_pair<non_empty_explicit, non_empty_explicit>>);
+            DoExplicitConstructionTest(DefaultConstructionTester{});
         }
 
 #pragma endregion
+
+#pragma region Value Copy Construction
+
+        struct ValueConstructionTester
+        {
+            template <typename T1, typename T2, bool Expect>
+            void run() const
+            {
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, const T1&, const T2&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, const T2&, const T1&>);
+            }
+        };
+
+        TEST_METHOD(ValueConstructionTest)
+        {
+            DoNonExplicitConstructionTest(ValueConstructionTester{});
+        }
+
+        TEST_METHOD(ExplicitValueConstructionTest)
+        {
+            DoExplicitConstructionTest(ValueConstructionTester{});
+        }
+
+#pragma endregion
+
+#pragma region Value Copy Construction
+
+        struct ValueMoveConstructionTester
+        {
+            template <typename T1, typename T2, bool Expect>
+            void run() const
+            {
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, T1&&, T2&&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, T2&&, T1&&>);
+            }
+        };
+
+        TEST_METHOD(ValueMoveConstructionTest)
+        {
+            DoNonExplicitConstructionTest(ValueMoveConstructionTester{});
+        }
+
+        TEST_METHOD(ExplicitValueMoveConstructionTest)
+        {
+            DoExplicitConstructionTest(ValueMoveConstructionTester{});
+        }
+
+#pragma endregion
+
+#pragma region Piecewise Construction
+
+        TEST_METHOD(PiecewiseConstructionTest)
+        {
+            // First is empty
+            dhorn::compressed_pair<empty, int> p1(
+                std::piecewise_construct,
+                std::forward_as_tuple(),
+                std::forward_as_tuple(42));
+            Assert::AreEqual(42, p1.second());
+
+            // Second is empty
+            dhorn::compressed_pair<int, empty_explicit> p2(
+                std::piecewise_construct,
+                std::forward_as_tuple(42),
+                std::forward_as_tuple());
+            Assert::AreEqual(42, p2.first());
+
+            // Neither are empty
+            dhorn::compressed_pair<std::string, std::vector<int>> p3(
+                std::piecewise_construct,
+                std::forward_as_tuple("foo"),
+                std::forward_as_tuple(8));
+            Assert::AreEqual("foo"s, p3.first());
+            Assert::AreEqual(8u, p3.second().size());
+        }
+
+#pragma endregion
+
+        /* TODO: Default copy/move seems broken :(
+#pragma region Copy Construction
+
+        struct CopyConstructionTester
+        {
+            template <typename T1, typename T2, bool Expect>
+            void run() const
+            {
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, const compressed_pair<T1, T2>&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, const compressed_pair<T2, T1>&>);
+            }
+        };
+
+        TEST_METHOD(CopyConstructionTest)
+        {
+            DoNonExplicitConstructionTest(CopyConstructionTester{});
+        }
+
+        TEST_METHOD(ExplicitCopyConstructionTest)
+        {
+            DoExplicitConstructionTest(CopyConstructionTester{});
+        }
+
+#pragma endregion
+
+#pragma region Move Construction
+
+        struct MoveConstructionTester
+        {
+            template <typename T1, typename T2, bool Expect>
+            void run() const
+            {
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, compressed_pair<T1, T2>&&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, compressed_pair<T2, T1>&&>);
+            }
+        };
+
+        TEST_METHOD(MoveConstructionTest)
+        {
+            DoNonExplicitConstructionTest(MoveConstructionTester{});
+        }
+
+        TEST_METHOD(ExplicitMoveConstructionTest)
+        {
+            DoExplicitConstructionTest(MoveConstructionTester{});
+        }
+
+#pragma endregion
+        */
 
 #pragma endregion
     };
