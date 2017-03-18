@@ -14,6 +14,8 @@
 
 namespace dhorn
 {
+#pragma region compressed_pair
+
     /*
      * compressed_pair
      *
@@ -300,6 +302,47 @@ namespace dhorn
 
 
         /*
+         * Assignment Operators
+         */
+#pragma region Assignment Operators
+
+        compressed_pair& operator=(const compressed_pair& other) = default;
+
+        compressed_pair& operator=(compressed_pair&& other) = default;
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_assignable<First&, const FirstTy&>,
+                std::is_assignable<Second&, const SecondTy&>
+            >, int> = 0>
+        compressed_pair& operator=(const compressed_pair<FirstTy, SecondTy>& other)
+        {
+            this->_first = other.first();
+            this->_second = other.second();
+            return *this;
+        }
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_assignable<First&, FirstTy&&>,
+                std::is_assignable<Second&, SecondTy&&>
+            >, int> = 0>
+        compressed_pair& operator=(compressed_pair<FirstTy, SecondTy>&& other)
+        {
+            this->_first = std::forward<FirstTy>(other.first());
+            this->_second = std::forward<SecondTy>(other.second());
+            return *this;
+        }
+
+#pragma endregion
+
+
+
+        /*
          * Accessors
          */
 #pragma region Accessors
@@ -350,6 +393,32 @@ namespace dhorn
 
 
 
+        /*
+         * Modifiers
+         */
+#pragma region Modifiers
+            
+        template <
+            typename FirstTy = First,
+            typename SecondTy = Second,
+            std::enable_if_t<std::conjunction_v<
+                std::is_swappable<FirstTy>,
+                std::is_swappable<SecondTy>
+            >, int> = 0>
+        void swap(compressed_pair& other)
+            noexcept(std::is_nothrow_swappable_v<First> && std::is_nothrow_swappable_v<Second>)
+        {
+            if (this != std::addressof(other))
+            {
+                std::swap(this->_first, other._first);
+                std::swap(this->_second, other._second);
+            }
+        }
+
+#pragma endregion
+
+
+
     private:
 
         First _first;
@@ -359,10 +428,10 @@ namespace dhorn
 
 
     /*
-     * compressed_pair
-     *
-     * First type is empty and non-final, so we derive from it
-     */
+        * compressed_pair
+        *
+        * First type is empty and non-final, so we derive from it
+        */
     template <typename First, typename Second, bool CanDeriveSecond>
     class compressed_pair<First, Second, true, CanDeriveSecond> :
         public First
@@ -644,6 +713,47 @@ namespace dhorn
 
 
         /*
+         * Assignment Operators
+         */
+#pragma region Assignment Operators
+
+        compressed_pair& operator=(const compressed_pair& other) = default;
+
+        compressed_pair& operator=(compressed_pair&& other) = default;
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_assignable<First&, const FirstTy&>,
+                std::is_assignable<Second&, const SecondTy&>
+            >, int> = 0>
+        compressed_pair& operator=(const compressed_pair<FirstTy, SecondTy>& other)
+        {
+            static_cast<First&>(*this) = other.first();
+            this->_second = other.second();
+            return *this;
+        }
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_assignable<First&, FirstTy&&>,
+                std::is_assignable<Second&, SecondTy&&>
+            >, int> = 0>
+        compressed_pair& operator=(compressed_pair<FirstTy, SecondTy>&& other)
+        {
+            static_cast<First&>(*this) = std::forward<FirstTy>(other.first());
+            this->_second = std::forward<SecondTy>(other.second());
+            return *this;
+        }
+
+#pragma endregion
+
+
+
+        /*
          * Accessors
          */
 #pragma region Accessors
@@ -688,6 +798,31 @@ namespace dhorn
         const volatile Second& second() const volatile noexcept
         {
             return this->_second;
+        }
+
+#pragma endregion
+
+
+
+        /*
+         * Modifiers
+         */
+#pragma region Modifiers
+            
+        template <
+            typename FirstTy = First,
+            typename SecondTy = Second,
+            std::enable_if_t<std::conjunction_v<
+                std::is_swappable<FirstTy>,
+                std::is_swappable<SecondTy>
+            >, int> = 0>
+        void swap(compressed_pair& other)
+            noexcept(std::is_nothrow_swappable_v<First> && std::is_nothrow_swappable_v<Second>)
+        {
+            if (this != std::addressof(other))
+            {
+                std::swap(this->_second, other._second);
+            }
         }
 
 #pragma endregion
@@ -987,6 +1122,47 @@ namespace dhorn
 
 
         /*
+         * Assignment Operators
+         */
+#pragma region Assignment Operators
+
+        compressed_pair& operator=(const compressed_pair& other) = default;
+
+        compressed_pair& operator=(compressed_pair&& other) = default;
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_assignable<First&, const FirstTy&>,
+                std::is_assignable<Second&, const SecondTy&>
+            >, int> = 0>
+        compressed_pair& operator=(const compressed_pair<FirstTy, SecondTy>& other)
+        {
+            this->_first = other.first();
+            static_cast<Second&>(*this) = other.second();
+            return *this;
+        }
+
+        template <
+            typename FirstTy,
+            typename SecondTy,
+            std::enable_if_t<std::conjunction_v<
+                std::is_assignable<First&, FirstTy&&>,
+                std::is_assignable<Second&, SecondTy&&>
+            >, int> = 0>
+        compressed_pair& operator=(compressed_pair<FirstTy, SecondTy>&& other)
+        {
+            this->_first = std::forward<FirstTy>(other.first());
+            static_cast<Second&>(*this) = std::forward<SecondTy>(other.second());
+            return *this;
+        }
+
+#pragma endregion
+
+
+
+        /*
          * Accessors
          */
 #pragma region Accessors
@@ -1037,9 +1213,75 @@ namespace dhorn
 
 
 
+        /*
+         * Modifiers
+         */
+#pragma region Modifiers
+
+        template <
+            typename FirstTy = First,
+            typename SecondTy = Second,
+            std::enable_if_t<std::conjunction_v<
+                std::is_swappable<FirstTy>,
+                std::is_swappable<SecondTy>
+            >, int> = 0>
+        void swap(compressed_pair& other)
+            noexcept(std::is_nothrow_swappable_v<First> && std::is_nothrow_swappable_v<Second>)
+        {
+            if (this != std::addressof(other))
+            {
+                std::swap(this->_first, other._first);
+            }
+        }
+
+#pragma endregion
+
+
+
     private:
 
         First _first;
     };
 
+#pragma endregion
+
+
+
+    /*
+     * make_compressed_pair
+     */
+#pragma region make_compressed_pair
+
+    template <typename First, typename Second>
+    inline constexpr compressed_pair<decay_ref_t<First>, decay_ref_t<Second>> make_compressed_pair(
+        First&& first,
+        Second&& second)
+    {
+        using return_type = compressed_pair<decay_ref_t<First>, decay_ref_t<Second>>;
+        return return_type(std::forward<First>(first), std::forward<Second>(second));
+    }
+
+#pragma endregion
 }
+
+
+
+#ifndef DHORN_NO_STD
+
+namespace std
+{
+    template <
+        typename First,
+        typename Second,
+        std::enable_if_t<std::conjunction_v<
+            std::is_swappable<First>,
+            std::is_swappable<Second>
+        >, int> = 0>
+    inline void swap(dhorn::compressed_pair<First, Second>& lhs, dhorn::compressed_pair<First, Second>& rhs)
+        noexcept(noexcept(lhs.swap(rhs)))
+    {
+        lhs.swap(rhs);
+    }
+}
+
+#endif

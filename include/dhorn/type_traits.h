@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <type_traits>
 
 namespace dhorn
@@ -183,6 +184,42 @@ namespace dhorn
 
     template <typename Base, typename... Derived>
     constexpr bool all_base_of_v = all_base_of<Base, Derived...>::value;
+
+#pragma endregion
+
+
+
+    /*
+     * decay_ref
+     *
+     * Decays a type by `std::decay_t<T>`, unless the decayed type is `std::reference_wrapper<T>`, in which case the
+     * result is `T&`.
+     */
+#pragma region decay_ref
+
+    namespace details
+    {
+        template <typename Ty>
+        struct decay_ref_helper
+        {
+            using type = Ty;
+        };
+
+        template <typename Ty>
+        struct decay_ref_helper<std::reference_wrapper<Ty>>
+        {
+            using type = Ty&;
+        };
+    }
+
+    template <typename Ty>
+    struct decay_ref
+    {
+        using type = typename details::decay_ref_helper<std::decay_t<Ty>>::type;
+    };
+
+    template <typename Ty>
+    using decay_ref_t = typename decay_ref<Ty>::type;
 
 #pragma endregion
 

@@ -86,6 +86,38 @@ namespace dhorn::tests
             Assert::IsTrue(is_implicitly_default_constructible_v<std::vector<int>>);
         }
 
+        template <typename Ty, typename ExpectedTy = Ty>
+        static void DoDecayRefTest()
+        {
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<Ty>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const Ty>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<volatile Ty>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const volatile Ty>>);
+
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<Ty&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const Ty&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<volatile Ty&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const volatile Ty&>>);
+
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<Ty&&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const Ty&&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<volatile Ty&&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const volatile Ty&&>>);
+        }
+
+        TEST_METHOD(DecayRefTest)
+        {
+            DoDecayRefTest<int>();
+            DoDecayRefTest<std::string>();
+            DoDecayRefTest<void*>();
+
+            DoDecayRefTest<std::reference_wrapper<int>, int&>();
+            DoDecayRefTest<std::reference_wrapper<const int>, const int&>();
+            DoDecayRefTest<std::reference_wrapper<volatile int>, volatile int&>();
+            DoDecayRefTest<std::reference_wrapper<const volatile int>, const volatile int&>();
+            DoDecayRefTest<std::reference_wrapper<std::string>, std::string&>();
+        }
+
         TEST_METHOD(ByteOffsetTest)
         {
             struct foo

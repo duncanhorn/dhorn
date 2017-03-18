@@ -21,6 +21,8 @@ namespace dhorn::tests
     {
 #pragma region Test Types
 
+#pragma region Empty Types
+
         struct empty
         {
         };
@@ -32,9 +34,23 @@ namespace dhorn::tests
             explicit empty_explicit(empty_explicit&&) {}
         };
 
-        struct empty_final final
+        struct can_copy_empty
         {
         };
+
+        struct cannot_copy_empty
+        {
+            cannot_copy_empty(const cannot_copy_empty&) = delete;
+            cannot_copy_empty& operator=(const cannot_copy_empty&) = delete;
+        };
+
+#pragma endregion
+
+
+
+#pragma region Final Types
+
+        struct empty_final final {};
 
         struct empty_final_explicit final
         {
@@ -42,6 +58,22 @@ namespace dhorn::tests
             explicit empty_final_explicit(const empty_final_explicit&) {}
             explicit empty_final_explicit(empty_final_explicit&&) {}
         };
+
+        struct can_copy_final final
+        {
+        };
+
+        struct cannot_copy_final final
+        {
+            cannot_copy_final(const cannot_copy_final&) = delete;
+            cannot_copy_final& operator=(const cannot_copy_final&) = delete;
+        };
+
+#pragma endregion
+
+
+
+#pragma region Non-Empty Types
 
         struct non_empty
         {
@@ -57,7 +89,25 @@ namespace dhorn::tests
             int value = 42;
         };
 
+        struct can_copy_non_empty
+        {
+            can_copy_non_empty() = default;
+            can_copy_non_empty(int value) : value(value) {}
+            int value = 42;
+        };
 
+        struct cannot_copy_non_empty
+        {
+            cannot_copy_non_empty(const cannot_copy_non_empty&) = delete;
+            cannot_copy_non_empty& operator=(const cannot_copy_non_empty&) = delete;
+            int value = 42;
+        };
+
+#pragma endregion
+
+
+
+#pragma region Adapters
 
         template <typename Ty>
         struct empty_adapter
@@ -104,6 +154,8 @@ namespace dhorn::tests
 
             int value = 42;
         };
+
+#pragma endregion
 
 #pragma endregion
 
@@ -261,11 +313,33 @@ namespace dhorn::tests
         TEST_METHOD(DefaultConstructionTest)
         {
             DoNonExplicitConstructionTest(DefaultConstructionTester{});
+
+            // TODO: Intellisense
+            //dhorn::compressed_pair<non_empty, non_empty> p1 = {};
+            //Assert::AreEqual(42, p1.first().value);
+            //Assert::AreEqual(42, p1.second().value);
+
+            //dhorn::compressed_pair<empty, non_empty> p2 = {};
+            //Assert::AreEqual(42, p1.second().value);
+
+            //dhorn::compressed_pair<non_empty, empty> p3 = {};
+            //Assert::AreEqual(42, p1.first().value);
         }
 
         TEST_METHOD(ExplicitDefaultConstructionTest)
         {
             DoExplicitConstructionTest(DefaultConstructionTester{});
+
+            // TODO: Intellisense
+            //dhorn::compressed_pair<non_empty_explicit, non_empty_explicit> p1;
+            //Assert::AreEqual(42, p1.first().value);
+            //Assert::AreEqual(42, p1.second().value);
+
+            //dhorn::compressed_pair<empty_explicit, non_empty> p2;
+            //Assert::AreEqual(42, p1.second().value);
+
+            //dhorn::compressed_pair<non_empty, empty_explicit> p3;
+            //Assert::AreEqual(42, p1.first().value);
         }
 
 #pragma endregion
@@ -400,6 +474,186 @@ namespace dhorn::tests
         }
 
 #pragma endregion
+
+#pragma endregion
+
+
+
+#pragma region Assignment Tests
+
+        template <typename T1, typename T2, bool Expect, typename TestTy>
+        static void DoAssignmentTest_Helper(const TestTy& test)
+        {
+            test.template run<compressed_pair<T1, T2>, compressed_pair<T1, T2>, Expect>();
+            test.template run<compressed_pair<T2, T1>, compressed_pair<T2, T1>, Expect>();
+        }
+
+        template <typename TestTy>
+        static void DoAssignmentTest(const TestTy& test)
+        {
+            DoAssignmentTest_Helper<can_copy_empty, can_copy_empty, true>(test);
+            DoAssignmentTest_Helper<can_copy_empty, can_copy_final, true>(test);
+            DoAssignmentTest_Helper<can_copy_empty, can_copy_non_empty, true>(test);
+            DoAssignmentTest_Helper<can_copy_empty, cannot_copy_empty, false>(test);
+            DoAssignmentTest_Helper<can_copy_empty, cannot_copy_final, false>(test);
+            DoAssignmentTest_Helper<can_copy_empty, cannot_copy_non_empty, false>(test);
+
+            DoAssignmentTest_Helper<can_copy_final, can_copy_final, true>(test);
+            DoAssignmentTest_Helper<can_copy_final, can_copy_non_empty, true>(test);
+            DoAssignmentTest_Helper<can_copy_final, cannot_copy_empty, false>(test);
+            DoAssignmentTest_Helper<can_copy_final, cannot_copy_final, false>(test);
+            DoAssignmentTest_Helper<can_copy_final, cannot_copy_non_empty, false>(test);
+
+            DoAssignmentTest_Helper<can_copy_non_empty, can_copy_non_empty, true>(test);
+            DoAssignmentTest_Helper<can_copy_non_empty, cannot_copy_empty, false>(test);
+            DoAssignmentTest_Helper<can_copy_non_empty, cannot_copy_final, false>(test);
+            DoAssignmentTest_Helper<can_copy_non_empty, cannot_copy_non_empty, false>(test);
+
+            DoAssignmentTest_Helper<cannot_copy_empty, cannot_copy_empty, false>(test);
+            DoAssignmentTest_Helper<cannot_copy_empty, cannot_copy_final, false>(test);
+            DoAssignmentTest_Helper<cannot_copy_empty, cannot_copy_non_empty, false>(test);
+
+            DoAssignmentTest_Helper<cannot_copy_final, cannot_copy_final, false>(test);
+            DoAssignmentTest_Helper<cannot_copy_final, cannot_copy_non_empty, false>(test);
+
+            DoAssignmentTest_Helper<cannot_copy_non_empty, cannot_copy_non_empty, false>(test);
+        }
+
+        template <typename TestTy>
+        static void DoConversionAssignmentTest(const TestTy& test)
+        {
+            // TODO
+            test;
+        }
+
+        struct CopyAssignmentTester
+        {
+            template <typename To, typename From, bool Expect>
+            void run() const
+            {
+                Assert::AreEqual(Expect, std::is_assignable_v<To&, const From&>);
+            }
+        };
+
+        TEST_METHOD(CopyAssignmentTest)
+        {
+            DoAssignmentTest(CopyAssignmentTester{});
+        }
+
+        TEST_METHOD(CopyConversionAssignmentTest)
+        {
+            DoConversionAssignmentTest(CopyAssignmentTester{});
+        }
+
+        struct MoveAssignmentTester
+        {
+            template <typename To, typename From, bool Expect>
+            void run() const
+            {
+                Assert::AreEqual(Expect, std::is_assignable_v<To&, From&&>);
+            }
+        };
+
+        TEST_METHOD(MoveAssignmentTest)
+        {
+            DoAssignmentTest(MoveAssignmentTester{});
+        }
+
+        TEST_METHOD(MoveConversionAssignmentTest)
+        {
+            DoConversionAssignmentTest(MoveAssignmentTester{});
+        }
+
+#pragma endregion
+
+
+
+#pragma region Accessor Tests
+
+
+
+#pragma endregion
+
+
+
+#pragma region Modifier Tests
+
+        TEST_METHOD(SwapTest)
+        {
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_empty, can_copy_empty>>);
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_empty, can_copy_final>>);
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_empty, can_copy_non_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_empty, cannot_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_empty, cannot_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_empty, cannot_copy_non_empty>>);
+
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_final, can_copy_empty>>);
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_final, can_copy_final>>);
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_final, can_copy_non_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_final, cannot_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_final, cannot_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_final, cannot_copy_non_empty>>);
+
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_non_empty, can_copy_empty>>);
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_non_empty, can_copy_final>>);
+            Assert::IsTrue(std::is_swappable_v<compressed_pair<can_copy_non_empty, can_copy_non_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_non_empty, cannot_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_non_empty, cannot_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<can_copy_non_empty, cannot_copy_non_empty>>);
+
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_empty, can_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_empty, can_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_empty, can_copy_non_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_empty, cannot_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_empty, cannot_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_empty, cannot_copy_non_empty>>);
+
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_final, can_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_final, can_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_final, can_copy_non_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_final, cannot_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_final, cannot_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_final, cannot_copy_non_empty>>);
+
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, can_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, can_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, can_copy_non_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, cannot_copy_empty>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, cannot_copy_final>>);
+            Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, cannot_copy_non_empty>>);
+
+            // TODO: Intellisense
+            //compressed_pair<can_copy_non_empty, can_copy_non_empty> p1(1, 2);
+            //compressed_pair<can_copy_non_empty, can_copy_non_empty> p2(3, 4);
+            //p1.swap(p2);
+            //Assert::AreEqual(1, p2.first().value);
+            //Assert::AreEqual(2, p2.second().value);
+            //Assert::AreEqual(3, p1.first().value);
+            //Assert::AreEqual(4, p1.second().value);
+            //std::swap(p1, p2);
+            //Assert::AreEqual(1, p1.first().value);
+            //Assert::AreEqual(2, p1.second().value);
+            //Assert::AreEqual(3, p2.first().value);
+            //Assert::AreEqual(4, p2.second().value);
+
+            //compressed_pair<can_copy_empty, can_copy_non_empty> p3(can_copy_empty{}, 1);
+            //compressed_pair<can_copy_empty, can_copy_non_empty> p4(can_copy_empty{}, 2);
+            //p3.swap(p4);
+            //Assert::AreEqual(1, p4.second().value);
+            //Assert::AreEqual(2, p3.second().value);
+            //std::swap(p3, p4);
+            //Assert::AreEqual(1, p3.second().value);
+            //Assert::AreEqual(2, p4.second().value);
+
+            //compressed_pair<can_copy_non_empty, can_copy_empty> p5(1, can_copy_empty{});
+            //compressed_pair<can_copy_non_empty, can_copy_empty> p6(2, can_copy_empty{});
+            //p5.swap(p6);
+            //Assert::AreEqual(1, p6.first().value);
+            //Assert::AreEqual(2, p5.first().value);
+            //std::swap(p5, p6);
+            //Assert::AreEqual(1, p5.first().value);
+            //Assert::AreEqual(2, p6.first().value);
+        }
 
 #pragma endregion
     };
