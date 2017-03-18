@@ -57,6 +57,54 @@ namespace dhorn::tests
             int value = 42;
         };
 
+
+
+        template <typename Ty>
+        struct empty_adapter
+        {
+            empty_adapter(const Ty&) {}
+            empty_adapter(Ty&&) {}
+        };
+
+        template <typename Ty>
+        struct empty_explicit_adapter
+        {
+            explicit empty_explicit_adapter(const Ty&) {}
+            explicit empty_explicit_adapter(Ty&&) {}
+        };
+
+        template <typename Ty>
+        struct empty_final_adapter final
+        {
+            empty_final_adapter(const Ty&) {}
+            empty_final_adapter(Ty&&) {}
+        };
+
+        template <typename Ty>
+        struct empty_final_explicit_adapter final
+        {
+            explicit empty_final_explicit_adapter(const Ty&) {}
+            explicit empty_final_explicit_adapter(Ty&&) {}
+        };
+
+        template <typename Ty>
+        struct non_empty_adapter
+        {
+            non_empty_adapter(const Ty&) {}
+            non_empty_adapter(Ty&&) {}
+
+            int value = 42;
+        };
+
+        template <typename Ty>
+        struct non_empty_explicit_adapter
+        {
+            explicit non_empty_explicit_adapter(const Ty&) {}
+            explicit non_empty_explicit_adapter(Ty&&) {}
+
+            int value = 42;
+        };
+
 #pragma endregion
 
 
@@ -160,6 +208,41 @@ namespace dhorn::tests
             test.template run<non_empty_explicit, non_empty_explicit, false>();
         }
 
+        template <typename T1, typename T2, typename TestTy>
+        static void DoNonExplicitCopyMoveConstructionTest(const TestTy& test)
+        {
+            test.template run<empty_adapter<T1>, empty_adapter<int>, T1, T2, true>();
+            test.template run<empty_adapter<T1>, empty_final_adapter<int>, T1, T2, true>();
+            test.template run<empty_adapter<T1>, non_empty_adapter<int>, T1, T2, true>();
+
+            test.template run<empty_final_adapter<T1>, empty_final_adapter<int>, T1, T2, true>();
+            test.template run<empty_final_adapter<T1>, non_empty_adapter<int>, T1, T2, true>();
+
+            test.template run<non_empty_adapter<T1>, non_empty_adapter<int>, T1, T2, true>();
+        }
+
+        template <typename T1, typename T2, typename TestTy>
+        static void DoExplicitCopyMoveConstructionTest(const TestTy& test)
+        {
+            test.template run<empty_explicit_adapter<T1>, empty_adapter<T2>, T1, T2, false>();
+            test.template run<empty_explicit_adapter<T1>, empty_explicit_adapter<T2>, T1, T2, false>();
+            test.template run<empty_explicit_adapter<T1>, empty_final_adapter<T2>, T1, T2, false>();
+            test.template run<empty_explicit_adapter<T1>, empty_final_explicit_adapter<T2>, T1, T2, false>();
+            test.template run<empty_explicit_adapter<T1>, non_empty_adapter<T2>, T1, T2, false>();
+            test.template run<empty_explicit_adapter<T1>, non_empty_explicit_adapter<T2>, T1, T2, false>();
+
+            test.template run<empty_final_explicit_adapter<T1>, empty_adapter<T2>, T1, T2, false>();
+            test.template run<empty_final_explicit_adapter<T1>, empty_final_adapter<T2>, T1, T2, false>();
+            test.template run<empty_final_explicit_adapter<T1>, empty_final_explicit_adapter<T2>, T1, T2, false>();
+            test.template run<empty_final_explicit_adapter<T1>, non_empty_adapter<T2>, T1, T2, false>();
+            test.template run<empty_final_explicit_adapter<T1>, non_empty_explicit_adapter<T2>, T1, T2, false>();
+
+            test.template run<non_empty_explicit_adapter<T1>, empty_adapter<T2>, T1, T2, false>();
+            test.template run<non_empty_explicit_adapter<T1>, empty_final_adapter<T2>, T1, T2, false>();
+            test.template run<non_empty_explicit_adapter<T1>, non_empty_adapter<T2>, T1, T2, false>();
+            test.template run<non_empty_explicit_adapter<T1>, non_empty_explicit_adapter<T2>, T1, T2, false>();
+        }
+
 #pragma region Default Construction
 
         struct DefaultConstructionTester
@@ -169,6 +252,9 @@ namespace dhorn::tests
             {
                 Assert::AreEqual(Expect, is_implicitly_default_constructible_v<compressed_pair<T1, T2>>);
                 Assert::AreEqual(Expect, is_implicitly_default_constructible_v<compressed_pair<T2, T1>>);
+
+                Assert::IsTrue(std::is_default_constructible_v<compressed_pair<T1, T2>>);
+                Assert::IsTrue(std::is_default_constructible_v<compressed_pair<T2, T1>>);
             }
         };
 
@@ -193,6 +279,9 @@ namespace dhorn::tests
             {
                 Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, const T1&, const T2&>);
                 Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, const T2&, const T1&>);
+
+                Assert::IsTrue(std::is_constructible_v<compressed_pair<T1, T2>, const T1&, const T2&>);
+                Assert::IsTrue(std::is_constructible_v<compressed_pair<T2, T1>, const T2&, const T1&>);
             }
         };
 
@@ -217,6 +306,9 @@ namespace dhorn::tests
             {
                 Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, T1&&, T2&&>);
                 Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, T2&&, T1&&>);
+
+                Assert::IsTrue(std::is_constructible_v<compressed_pair<T1, T2>, T1&&, T2&&>);
+                Assert::IsTrue(std::is_constructible_v<compressed_pair<T2, T1>, T2&&, T1&&>);
             }
         };
 
@@ -261,27 +353,26 @@ namespace dhorn::tests
 
 #pragma endregion
 
-        /* TODO: Default copy/move seems broken :(
 #pragma region Copy Construction
 
         struct CopyConstructionTester
         {
-            template <typename T1, typename T2, bool Expect>
+            template <typename T1, typename T2, typename From1, typename From2, bool Expect>
             void run() const
             {
-                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, const compressed_pair<T1, T2>&>);
-                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, const compressed_pair<T2, T1>&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, const compressed_pair<From1, From2>&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, const compressed_pair<From2, From1>&>);
             }
         };
 
         TEST_METHOD(CopyConstructionTest)
         {
-            DoNonExplicitConstructionTest(CopyConstructionTester{});
+            DoNonExplicitCopyMoveConstructionTest<int, int>(CopyConstructionTester{});
         }
 
         TEST_METHOD(ExplicitCopyConstructionTest)
         {
-            DoExplicitConstructionTest(CopyConstructionTester{});
+            DoExplicitCopyMoveConstructionTest<int, int>(CopyConstructionTester{});
         }
 
 #pragma endregion
@@ -290,26 +381,25 @@ namespace dhorn::tests
 
         struct MoveConstructionTester
         {
-            template <typename T1, typename T2, bool Expect>
+            template <typename T1, typename T2, typename From1, typename From2, bool Expect>
             void run() const
             {
-                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, compressed_pair<T1, T2>&&>);
-                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, compressed_pair<T2, T1>&&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T1, T2>, compressed_pair<From1, From2>&&>);
+                Assert::AreEqual(Expect, is_implicitly_constructible_v<compressed_pair<T2, T1>, compressed_pair<From2, From1>&&>);
             }
         };
 
         TEST_METHOD(MoveConstructionTest)
         {
-            DoNonExplicitConstructionTest(MoveConstructionTester{});
+            DoExplicitCopyMoveConstructionTest<int, int>(MoveConstructionTester{});
         }
 
         TEST_METHOD(ExplicitMoveConstructionTest)
         {
-            DoExplicitConstructionTest(MoveConstructionTester{});
+            DoExplicitCopyMoveConstructionTest<int, int>(MoveConstructionTester{});
         }
 
 #pragma endregion
-        */
 
 #pragma endregion
     };
