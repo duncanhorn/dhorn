@@ -19,856 +19,365 @@ namespace dhorn
     /*
      * compressed_pair
      *
-     * Generic implementation: Both are either final or non-empty; act like a normal pair
+     * 
      */
-    template <
-        typename First,
-        typename Second,
-        bool CanDeriveFirst = !std::is_final_v<First> && std::is_empty_v<First>,
-        bool CanDeriveSecond = !std::is_final_v<Second> && std::is_empty_v<Second>>
-    class compressed_pair
+#pragma region compressed_pair
+
+    namespace details
     {
-        // Friends
-        template <typename, typename, bool, bool>
-        friend class compressed_pair;
-
-
-
-        // Tuple Construction Helper
-        template <typename... FirstTypes, typename... SecondTypes, size_t... FirstIndices, size_t... SecondIndices>
-        compressed_pair(
-            std::tuple<FirstTypes...>& firstTuple,
-            std::tuple<SecondTypes...>& secondTuple,
-            std::index_sequence<FirstIndices...>,
-            std::index_sequence<SecondIndices...>) : // TODO: noexcept??
-            _first(std::get<FirstIndices>(firstTuple)...),
-            _second(std::get<SecondIndices>(secondTuple)...)
-        {
-        }
-
-
-
-    public:
         /*
-         * Constructor(s)/Destructor
+         * compressed_base
+         *
+         * Conditionally derives from the type if (1) the type is not final, and (2) the type is empty. This allows size
+         * optimizations if we are to derive from `compressed_base` more than once. Note that although there's not
+         * really anything wrong from deriving from a non-final, non-empty type, this does help us avoid deriving from
+         * types such as `int` which would fail to compile.
          */
+#pragma region compressed_base
+
+        // CanDerive == false overload. Keep the value as a member as opposed to deriving from it
+        template <typename Ty, bool CanDerive = !std::is_final<Ty>::value && std::is_empty<Ty>::value>
+        class compressed_base
+        {
+            // Friends
+            template <typename, bool>
+            friend class compressed_base;
+
+            // Tuple Construction Helper
+            template <typename... Types, size_t... Indices>
+            compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>) : // TODO: noexcept?
+                _value(std::get<Indices>(args)...)
+            {
+            }
+
+
+
+        public:
+            /*
+             * Constructor(s)/Destructor
+             */
 #pragma region Constructor(s)/Destructor
 
-        // Default Construction
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_default_constructible<FirstTy>,
-                std::is_default_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                is_implicitly_default_constructible<FirstTy>,
-                is_implicitly_default_constructible<SecondTy>
-            >, int> = 0>
-        constexpr compressed_pair()
-            noexcept(std::conjunction_v<
-                std::is_nothrow_default_constructible<First>,
-                std::is_nothrow_default_constructible<Second>
-            >)
-        {
-        }
+            // Default Construction
+            template <typename Type = Ty, std::enable_if_t<std::is_default_constructible<Type>::value, int> = 0>
+            constexpr compressed_base() noexcept(std::is_nothrow_default_constructible<Ty>::value)
+            {
+            }
 
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_default_constructible<FirstTy>,
-                std::is_default_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                is_implicitly_default_constructible<FirstTy>,
-                is_implicitly_default_constructible<SecondTy>
-            >>, int> = 0>
-        explicit constexpr compressed_pair()
-            noexcept(std::conjunction_v<
-                std::is_nothrow_default_constructible<First>,
-                std::is_nothrow_default_constructible<Second>
-            >)
-        {
-        }
+            // Value Copy Construction
+            template <typename Type = Ty, std::enable_if_t<std::is_copy_constructible<Type>::value, int> = 0>
+            constexpr compressed_base(const Ty& value) noexcept(std::is_nothrow_copy_constructible<Ty>::value) :
+                _value(value)
+            {
+            }
 
+            // Value Move Construction
+            template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
+            constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+                _value(std::forward<Type>(value))
+            {
+            }
 
+            // Copy Conversion Construction
+            template <typename Type, std::enable_if_t<std::is_constructible<Ty, const Type&>::value, int> = 0>
+            constexpr compressed_base(const compressed_base<Type>& other)
+                noexcept(std::is_nothrow_constructible<Ty, const Type&>::value) :
+                _value(other.value())
+            {
+            }
 
-        // Value Copy Construction
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_copy_constructible<FirstTy>,
-                std::is_copy_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(const First& first, const Second& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_copy_constructible<First>,
-                std::is_nothrow_copy_constructible<Second>
-            >) :
-            _first(first),
-            _second(second)
-        {
-        }
-    
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_copy_constructible<FirstTy>,
-                std::is_copy_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(const First& first, const Second& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_copy_constructible<First>,
-                std::is_nothrow_copy_constructible<Second>
-            >) :
-            _first(first),
-            _second(second)
-        {
-        }
+            // Move Conversion Construction
+            template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
+            constexpr compressed_base(compressed_base<Type>&& other)
+                noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+                _value(std::forward<Type>(other.value()))
+            {
+            }
 
+            // Tuple Construction
+            template <typename... Types>
+            constexpr compressed_base(std::tuple<Types...> args) : // noexcet?
+                compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
+            {
+            }
 
+            // Copy Construction
+            compressed_base(const compressed_base&) = default;
 
-        // Value Move Construction
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(first)),
-            _second(std::forward<SecondTy>(second))
-        {
-        }
-
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(first)),
-            _second(std::forward<SecondTy>(second))
-        {
-        }
-
-
-
-        // Copy Conversion Construction
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, const FirstTy&>,
-                std::is_constructible<Second, const SecondTy&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, const FirstTy&>,
-                std::is_nothrow_constructible<Second, const SecondTy&>
-            >) :
-            _first(other.first()),
-            _second(other.second())
-        {
-        }
-
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, const FirstTy&>,
-                std::is_constructible<Second, const SecondTy&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, const FirstTy&>,
-                std::is_nothrow_constructible<Second, const SecondTy&>
-            >) :
-            _first(other.first()),
-            _second(other.second())
-        {
-        }
-
-
-
-        // Move Conversion Construction
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(other.first())),
-            _second(std::forward<SecondTy>(other.second()))
-        {
-        }
-    
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(other.first())),
-            _second(std::forward<SecondTy>(other.second()))
-        {
-        }
-
-
-
-        // Piecewise Construction
-        template <typename... FirstTypes, typename... SecondTypes>
-        constexpr compressed_pair(
-            std::piecewise_construct_t,
-            std::tuple<FirstTypes...> firstArgs,
-            std::tuple<SecondTypes...> secondArgs) :
-            compressed_pair(
-                firstArgs,
-                secondArgs,
-                std::make_index_sequence<sizeof...(FirstTypes)>{},
-                std::make_index_sequence<sizeof...(SecondTypes)>{})
-        {
-        }
-
-
-
-        // Copy Construction
-        compressed_pair(const compressed_pair&) = default;
-
-        // Move Construction
-        compressed_pair(compressed_pair&&) = default;
+            // Move Construction
+            compressed_base(compressed_base&&) = default;
 
 #pragma endregion
 
 
 
-        /*
-         * Assignment Operators
-         */
+            /*
+             * Assignment Operators
+             */
 #pragma region Assignment Operators
 
-        compressed_pair& operator=(const compressed_pair& other) = default;
+            compressed_base& operator=(const compressed_base&) = default;
+            compressed_base& operator=(compressed_base&&) = default;
 
-        compressed_pair& operator=(compressed_pair&& other) = default;
+            template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
+            compressed_base& operator=(const compressed_base<Type>& other)
+            {
+                this->_value = other.value();
+                return *this;
+            }
 
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_assignable<First&, const FirstTy&>,
-                std::is_assignable<Second&, const SecondTy&>
-            >, int> = 0>
-        compressed_pair& operator=(const compressed_pair<FirstTy, SecondTy>& other)
-        {
-            this->_first = other.first();
-            this->_second = other.second();
-            return *this;
-        }
-
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_assignable<First&, FirstTy&&>,
-                std::is_assignable<Second&, SecondTy&&>
-            >, int> = 0>
-        compressed_pair& operator=(compressed_pair<FirstTy, SecondTy>&& other)
-        {
-            this->_first = std::forward<FirstTy>(other.first());
-            this->_second = std::forward<SecondTy>(other.second());
-            return *this;
-        }
+            template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
+            compressed_base& operator=(compressed_base<Type>&& other)
+            {
+                this->_value = std::forward<Type>(other.value());
+                return *this;
+            }
 
 #pragma endregion
 
 
 
-        /*
-         * Accessors
-         */
+            /*
+             * Accessors
+             */
 #pragma region Accessors
 
-        // First
-        First& first() noexcept
-        {
-            return this->_first;
-        }
-
-        const First& first() const noexcept
-        {
-            return this->_first;
-        }
-
-        volatile First& first() volatile noexcept
-        {
-            return this->_first;
-        }
-
-        const volatile First& first() const volatile noexcept
-        {
-            return this->_first;
-        }
-
-        // Second
-        Second& second() noexcept
-        {
-            return this->_second;
-        }
-
-        const Second& second() const noexcept
-        {
-            return this->_second;
-        }
-
-        volatile Second& second() volatile noexcept
-        {
-            return this->_second;
-        }
-
-        const volatile Second& second() const volatile noexcept
-        {
-            return this->_second;
-        }
-
-#pragma endregion
-
-
-
-        /*
-         * Modifiers
-         */
-#pragma region Modifiers
-            
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_swappable<FirstTy>,
-                std::is_swappable<SecondTy>
-            >, int> = 0>
-        void swap(compressed_pair& other)
-            noexcept(std::is_nothrow_swappable_v<First> && std::is_nothrow_swappable_v<Second>)
-        {
-            if (this != std::addressof(other))
+            Ty& value() noexcept
             {
-                std::swap(this->_first, other._first);
-                std::swap(this->_second, other._second);
+                return this->_value;
             }
-        }
+
+            const Ty& value() const noexcept
+            {
+                return this->_value;
+            }
+
+            volatile Ty& value() volatile noexcept
+            {
+                return this->_value;
+            }
+
+            const volatile Ty& value() const volatile noexcept
+            {
+                return this->_value;
+            }
 
 #pragma endregion
 
 
 
-    private:
+            /*
+             * Modifiers
+             */
+#pragma region Modifiers
 
-        First _first;
-        Second _second;
-    };
+            template <typename Type = Ty, std::enable_if_t<std::is_swappable<Type>::value, int> = 0>
+            void swap(compressed_base& other) noexcept(std::is_nothrow_swappable<Ty>::value)
+            {
+                if (this != std::addressof(other))
+                {
+                    std::swap(this->_value, other._value);
+                }
+            }
 
-
-
-    /*
-        * compressed_pair
-        *
-        * First type is empty and non-final, so we derive from it
-        */
-    template <typename First, typename Second, bool CanDeriveSecond>
-    class compressed_pair<First, Second, true, CanDeriveSecond> :
-        public First
-    {
-        // Friends
-        template <typename, typename, bool, bool>
-        friend class compressed_pair;
+#pragma endregion
 
 
 
-        // Tuple Construction Helper
-        template <typename... FirstTypes, typename... SecondTypes, size_t... FirstIndices, size_t... SecondIndices>
-        compressed_pair(
-            std::tuple<FirstTypes...>& firstTuple,
-            std::tuple<SecondTypes...>& secondTuple,
-            std::index_sequence<FirstIndices...>,
-            std::index_sequence<SecondIndices...>) : // TODO: noexcept??
-            First(std::get<FirstIndices>(firstTuple)...),
-            _second(std::get<SecondIndices>(secondTuple)...)
+        private:
+
+            Ty _value;
+        };
+
+
+
+        // CanDerive == true overload. Use the type as a base type
+        template <typename Ty>
+        class compressed_base<Ty, true> : public Ty
         {
-            // Visual Studio bug? Warning C4100: unreferenced formal parameter
-            firstTuple;
-            secondTuple;
-        }
+            // Friends
+            template <typename, bool>
+            friend class compressed_base;
+
+            // Tuple Construction Helper
+            template <typename... Types, size_t... Indices>
+            compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>) : // TODO: noexcept?
+                Ty(std::get<Indices>(args)...)
+            {
+                // Visual Studio bug? Warning C4100: unreferenced formal parameter
+                args;
+            }
 
 
 
-    public:
-        /*
-         * Constructor(s)/Destructor
-         */
+        public:
+            /*
+             * Constructor(s)/Destructor
+             */
 #pragma region Constructor(s)/Destructor
 
-        // Default Construction
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_default_constructible<FirstTy>,
-                std::is_default_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                is_implicitly_default_constructible<FirstTy>,
-                is_implicitly_default_constructible<SecondTy>
-            >, int> = 0>
-        constexpr compressed_pair()
-            noexcept(std::conjunction_v<
-                std::is_nothrow_default_constructible<First>,
-                std::is_nothrow_default_constructible<Second>
-            >)
-        {
-        }
+            // Default Construction
+            template <typename Type = Ty, std::enable_if_t<std::is_default_constructible<Type>::value, int> = 0>
+            constexpr compressed_base() noexcept(std::is_nothrow_default_constructible<Ty>::value)
+            {
+            }
 
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_default_constructible<FirstTy>,
-                std::is_default_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                is_implicitly_default_constructible<FirstTy>,
-                is_implicitly_default_constructible<SecondTy>
-            >>, int> = 0>
-        explicit constexpr compressed_pair()
-            noexcept(std::conjunction_v<
-                std::is_nothrow_default_constructible<First>,
-                std::is_nothrow_default_constructible<Second>
-            >)
-        {
-        }
+            // Value Copy Construction
+            template <typename Type = Ty, std::enable_if_t<std::is_copy_constructible<Type>::value, int> = 0>
+            constexpr compressed_base(const Ty& value) noexcept(std::is_nothrow_copy_constructible<Ty>::value) :
+                Ty(value)
+            {
+            }
 
+            // Value Move Construction
+            template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
+            constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+                Ty(std::forward<Type>(value))
+            {
+            }
 
+            // Copy Conversion Construction
+            template <typename Type, std::enable_if_t<std::is_constructible<Ty, const Type&>::value, int> = 0>
+            constexpr compressed_base(const compressed_base<Type>& other)
+                noexcept(std::is_nothrow_constructible<Ty, const Type&>::value) :
+                Ty(other.value())
+            {
+            }
 
-        // Value Copy Construction
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_copy_constructible<FirstTy>,
-                std::is_copy_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(const First& first, const Second& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_copy_constructible<First>,
-                std::is_nothrow_copy_constructible<Second>
-            >) :
-            _first(first),
-            _second(second)
-        {
-        }
-    
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_copy_constructible<FirstTy>,
-                std::is_copy_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(const First& first, const Second& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_copy_constructible<First>,
-                std::is_nothrow_copy_constructible<Second>
-            >) :
-            First(first),
-            _second(second)
-        {
-        }
+            // Move Conversion Construction
+            template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
+            constexpr compressed_base(compressed_base<Type>&& other)
+                noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+                Ty(std::forward<Type>(other.value()))
+            {
+            }
 
+            // Tuple Construction
+            template <typename... Types>
+            constexpr compressed_base(std::tuple<Types...> args) : // noexcet?
+                compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
+            {
+            }
 
+            // Copy Construction
+            compressed_base(const compressed_base&) = default;
 
-        // Value Move Construction
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            First(std::forward<FirstTy>(first)),
-            _second(std::forward<SecondTy>(second))
-        {
-        }
-
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            First(std::forward<FirstTy>(first)),
-            _second(std::forward<SecondTy>(second))
-        {
-        }
-
-
-
-        // Copy Conversion Construction
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, const FirstTy&>,
-                std::is_constructible<Second, const SecondTy&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, const FirstTy&>,
-                std::is_nothrow_constructible<Second, const SecondTy&>
-            >) :
-            First(other.first()),
-            _second(other.second())
-        {
-        }
-
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, const FirstTy&>,
-                std::is_constructible<Second, const SecondTy&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<const FirstTy&, First>,
-                std::is_convertible<const SecondTy&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, const FirstTy&>,
-                std::is_nothrow_constructible<Second, const SecondTy&>
-            >) :
-            First(other.first()),
-            _second(other.second())
-        {
-        }
-
-
-
-        // Move Conversion Construction
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            First(std::forward<FirstTy>(other.first())),
-            _second(std::forward<SecondTy>(other.second()))
-        {
-        }
-    
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_constructible<First, FirstTy&&>,
-                std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
-                std::is_convertible<FirstTy&&, First>,
-                std::is_convertible<SecondTy&&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction_v<
-                std::is_nothrow_constructible<First, FirstTy&&>,
-                std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            First(std::forward<FirstTy>(other.first())),
-            _second(std::forward<SecondTy>(other.second()))
-        {
-        }
-
-
-
-        // Piecewise Construction
-        template <typename... FirstTypes, typename... SecondTypes>
-        constexpr compressed_pair(
-            std::piecewise_construct_t,
-            std::tuple<FirstTypes...> firstArgs,
-            std::tuple<SecondTypes...> secondArgs) :
-            compressed_pair(
-                firstArgs,
-                secondArgs,
-                std::make_index_sequence<sizeof...(FirstTypes)>{},
-                std::make_index_sequence<sizeof...(SecondTypes)>{})
-        {
-        }
-
-
-
-        // Copy Construction
-        compressed_pair(const compressed_pair&) = default;
-
-        // Move Construction
-        compressed_pair(compressed_pair&&) = default;
+            // Move Construction
+            compressed_base(compressed_base&&) = default;
 
 #pragma endregion
 
 
 
-        /*
-         * Assignment Operators
-         */
+            /*
+             * Assignment Operators
+             */
 #pragma region Assignment Operators
 
-        compressed_pair& operator=(const compressed_pair& other) = default;
+            compressed_base& operator=(const compressed_base&) = default;
+            compressed_base& operator=(compressed_base&&) = default;
 
-        compressed_pair& operator=(compressed_pair&& other) = default;
+            template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
+            compressed_base& operator=(const compressed_base<Type>& other)
+            {
+                static_cast<Ty&>(*this) = other.value();
+                return *this;
+            }
 
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_assignable<First&, const FirstTy&>,
-                std::is_assignable<Second&, const SecondTy&>
-            >, int> = 0>
-        compressed_pair& operator=(const compressed_pair<FirstTy, SecondTy>& other)
-        {
-            static_cast<First&>(*this) = other.first();
-            this->_second = other.second();
-            return *this;
-        }
-
-        template <
-            typename FirstTy,
-            typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
-                std::is_assignable<First&, FirstTy&&>,
-                std::is_assignable<Second&, SecondTy&&>
-            >, int> = 0>
-        compressed_pair& operator=(compressed_pair<FirstTy, SecondTy>&& other)
-        {
-            static_cast<First&>(*this) = std::forward<FirstTy>(other.first());
-            this->_second = std::forward<SecondTy>(other.second());
-            return *this;
-        }
+            template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
+            compressed_base& operator=(compressed_base<Type>&& other)
+            {
+                static_cast<Ty&>(*this) = std::forward<Type>(other.value());
+                return *this;
+            }
 
 #pragma endregion
 
 
 
-        /*
-         * Accessors
-         */
+            /*
+             * Accessors
+             */
 #pragma region Accessors
 
-        // First
-        First& first() noexcept
-        {
-            return *this;
-        }
+            Ty& value() noexcept
+            {
+                return *this;
+            }
 
-        const First& first() const noexcept
-        {
-            return *this;
-        }
+            const Ty& value() const noexcept
+            {
+                return *this;
+            }
 
-        volatile First& first() volatile noexcept
-        {
-            return *this;
-        }
+            volatile Ty& value() volatile noexcept
+            {
+                return *this;
+            }
 
-        const volatile First& first() const volatile noexcept
-        {
-            return *this;
-        }
+            const volatile Ty& value() const volatile noexcept
+            {
+                return *this;
+            }
 
-        // Second
-        Second& second() noexcept
-        {
-            return this->_second;
-        }
+#pragma endregion
 
-        const Second& second() const noexcept
-        {
-            return this->_second;
-        }
 
-        volatile Second& second() volatile noexcept
-        {
-            return this->_second;
-        }
 
-        const volatile Second& second() const volatile noexcept
-        {
-            return this->_second;
-        }
+            /*
+             * Modifiers
+             */
+#pragma region Modifiers
+
+            template <typename Type = Ty, std::enable_if_t<std::is_swappable<Type>::value, int> = 0>
+            void swap(compressed_base&) noexcept(std::is_nothrow_swappable<Ty>::value)
+            {
+                // No state, so no need to swap anything
+                // TODO: Is this definitely okay?
+            }
+
+#pragma endregion
+        };
 
 #pragma endregion
 
 
 
         /*
-         * Modifiers
+         *
          */
-#pragma region Modifiers
-            
-        template <
-            typename FirstTy = First,
-            typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
-                std::is_swappable<FirstTy>,
-                std::is_swappable<SecondTy>
-            >, int> = 0>
-        void swap(compressed_pair& other)
-            noexcept(std::is_nothrow_swappable_v<First> && std::is_nothrow_swappable_v<Second>)
+        template <size_t tag, typename Ty>
+        struct tag_base :
+            public Ty
         {
-            if (this != std::addressof(other))
-            {
-                std::swap(this->_second, other._second);
-            }
-        }
+            using Ty::Ty;
+        };
+    }
 
-#pragma endregion
-
-
-
-    private:
-
-        Second _second;
-    };
-
-
-
-    /*
-     * compressed_pair
-     *
-     * First type either non-empty or final, but the second type both, so derive from it instead
-     */
     template <typename First, typename Second>
-    class compressed_pair<First, Second, false, true> :
-        public Second
+    class compressed_pair :
+        public details::tag_base<0, details::compressed_base<First>>,
+        public details::tag_base<1, details::compressed_base<Second>>
     {
+        // Bases
+        using first_base = details::tag_base<0, details::compressed_base<First>>;
+        using second_base = details::tag_base<1, details::compressed_base<Second>>;
+
         // Friends
-        template <typename, typename, bool, bool>
+        template <typename, typename>
         friend class compressed_pair;
 
 
 
-        // Tuple Construction Helper
-        template <typename... FirstTypes, typename... SecondTypes, size_t... FirstIndices, size_t... SecondIndices>
-        compressed_pair(
-            std::tuple<FirstTypes...>& firstTuple,
-            std::tuple<SecondTypes...>& secondTuple,
-            std::index_sequence<FirstIndices...>,
-            std::index_sequence<SecondIndices...>) : // TODO: noexcept??
-            _first(std::get<FirstIndices>(firstTuple)...),
-            Second(std::get<SecondIndices>(secondTuple)...)
-        {
-            // Visual Studio bug? Warning C4100: unreferenced formal parameter
-            firstTuple;
-            secondTuple;
-        }
-
-
-
     public:
+        /*
+         * Public Types
+         */
+        using first_type = First;
+        using second_type = Second;
+
+
+
         /*
          * Constructor(s)/Destructor
          */
@@ -878,38 +387,38 @@ namespace dhorn
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_default_constructible<FirstTy>,
                 std::is_default_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
+            >::value, int> = 0,
+            std::enable_if_t<std::conjunction<
                 is_implicitly_default_constructible<FirstTy>,
                 is_implicitly_default_constructible<SecondTy>
-            >, int> = 0>
+            >::value, int> = 0>
         constexpr compressed_pair()
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
-            >)
+            >::value)
         {
         }
 
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_default_constructible<FirstTy>,
                 std::is_default_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
+            >::value, int> = 0,
+            std::enable_if_t<std::negation<std::conjunction<
                 is_implicitly_default_constructible<FirstTy>,
                 is_implicitly_default_constructible<SecondTy>
-            >>, int> = 0>
+            >>::value, int> = 0>
         explicit constexpr compressed_pair()
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
-            >)
+            >::value)
         {
         }
 
@@ -919,42 +428,42 @@ namespace dhorn
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_copy_constructible<FirstTy>,
                 std::is_copy_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
+            >::value, int> = 0,
+            std::enable_if_t<std::conjunction<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >, int> = 0>
-        constexpr compressed_pair(const First& first, const Second& second)
-            noexcept(std::conjunction_v<
+            >::value, int> = 0>
+        constexpr compressed_pair(const first_type& first, const second_type& second)
+            noexcept(std::conjunction<
                 std::is_nothrow_copy_constructible<First>,
                 std::is_nothrow_copy_constructible<Second>
-            >) :
-            _first(first),
-            _second(second)
+            >::value) :
+            first_base(first),
+            second_base(second)
         {
         }
-    
+
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_copy_constructible<FirstTy>,
                 std::is_copy_constructible<SecondTy>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
+            >::value, int> = 0,
+            std::enable_if_t<std::negation<std::conjunction<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >>, int> = 0>
-        explicit constexpr compressed_pair(const First& first, const Second& second)
-            noexcept(std::conjunction_v<
+            >>::value, int> = 0>
+        explicit constexpr compressed_pair(const first_type& first, const second_type& second)
+            noexcept(std::conjunction<
                 std::is_nothrow_copy_constructible<First>,
                 std::is_nothrow_copy_constructible<Second>
-            >) :
-            _first(first),
-            Second(second)
+            >::value) :
+            first_base(first),
+            second_base(second)
         {
         }
 
@@ -964,42 +473,42 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
+            >::value, int> = 0,
+            std::enable_if_t<std::conjunction<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >, int> = 0>
+            >::value, int> = 0>
         constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(first)),
-            Second(std::forward<SecondTy>(second))
+            >::value) :
+            first_base(std::forward<FirstTy>(first)),
+            second_base(std::forward<SecondTy>(second))
         {
         }
 
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
+            >::value, int> = 0,
+            std::enable_if_t<std::negation<std::conjunction<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >>, int> = 0>
+            >>::value, int> = 0>
         explicit constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(first)),
-            Second(std::forward<SecondTy>(second))
+            >::value) :
+            first_base(std::forward<FirstTy>(first)),
+            second_base(std::forward<SecondTy>(second))
         {
         }
 
@@ -1009,42 +518,42 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_constructible<First, const FirstTy&>,
                 std::is_constructible<Second, const SecondTy&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
+            >::value, int> = 0,
+            std::enable_if_t<std::conjunction<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >, int> = 0>
+            >::value, int> = 0>
         constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_constructible<First, const FirstTy&>,
                 std::is_nothrow_constructible<Second, const SecondTy&>
-            >) :
-            _first(other.first()),
-            Second(other.second())
+            >::value) :
+            first_base(other.first()),
+            second_base(other.second())
         {
         }
 
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_constructible<First, const FirstTy&>,
                 std::is_constructible<Second, const SecondTy&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
+            >::value, int> = 0,
+            std::enable_if_t<std::negation<std::conjunction<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >>, int> = 0>
+            >>::value, int> = 0>
         explicit constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_constructible<First, const FirstTy&>,
                 std::is_nothrow_constructible<Second, const SecondTy&>
-            >) :
-            _first(other.first()),
-            Second(other.second())
+            >::value) :
+            first_base(other.first()),
+            second_base(other.second())
         {
         }
 
@@ -1054,42 +563,42 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::conjunction_v<
+            >::value, int> = 0,
+            std::enable_if_t<std::conjunction<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >, int> = 0>
+            >::value, int> = 0>
         constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(other.first())),
-            Second(std::forward<SecondTy>(other.second()))
+            >::value) :
+            first_base(std::forward<FirstTy>(other.first())),
+            second_base(std::forward<SecondTy>(other.second()))
         {
         }
-    
+
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >, int> = 0,
-            std::enable_if_t<std::negation_v<std::conjunction<
+            >::value, int> = 0,
+            std::enable_if_t<std::negation<std::conjunction<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >>, int> = 0>
+            >>::value, int> = 0>
         explicit constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction_v<
+            noexcept(std::conjunction<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >) :
-            _first(std::forward<FirstTy>(other.first())),
-            Second(std::forward<SecondTy>(other.second()))
+            >::value) :
+            first_base(std::forward<FirstTy>(other.first())),
+            second_base(std::forward<SecondTy>(other.second()))
         {
         }
 
@@ -1101,11 +610,8 @@ namespace dhorn
             std::piecewise_construct_t,
             std::tuple<FirstTypes...> firstArgs,
             std::tuple<SecondTypes...> secondArgs) :
-            compressed_pair(
-                firstArgs,
-                secondArgs,
-                std::make_index_sequence<sizeof...(FirstTypes)>{},
-                std::make_index_sequence<sizeof...(SecondTypes)>{})
+            first_base(std::move(firstArgs)),
+            second_base(std::move(secondArgs))
         {
         }
 
@@ -1133,28 +639,28 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_assignable<First&, const FirstTy&>,
                 std::is_assignable<Second&, const SecondTy&>
-            >, int> = 0>
+            >::value, int> = 0>
         compressed_pair& operator=(const compressed_pair<FirstTy, SecondTy>& other)
         {
-            this->_first = other.first();
-            static_cast<Second&>(*this) = other.second();
+            static_cast<first_base&>(*this) = other.first();
+            static_cast<second_base&>(*this) = other.second();
             return *this;
         }
 
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_assignable<First&, FirstTy&&>,
                 std::is_assignable<Second&, SecondTy&&>
-            >, int> = 0>
+            >::value, int> = 0>
         compressed_pair& operator=(compressed_pair<FirstTy, SecondTy>&& other)
         {
-            this->_first = std::forward<FirstTy>(other.first());
-            static_cast<Second&>(*this) = std::forward<SecondTy>(other.second());
+            static_cast<first_base&>(*this) = std::forward<FirstTy>(other.first());
+            static_cast<second_base&>(*this) = std::forward<SecondTy>(other.second());
             return *this;
         }
 
@@ -1168,45 +674,45 @@ namespace dhorn
 #pragma region Accessors
 
         // First
-        First& first() noexcept
+        first_type& first() noexcept
         {
-            return this->_first;
+            return first_base::value();
         }
 
-        const First& first() const noexcept
+        const first_type& first() const noexcept
         {
-            return this->_first;
+            return first_base::value();
         }
 
-        volatile First& first() volatile noexcept
+        volatile first_type& first() volatile noexcept
         {
-            return this->_first;
+            return first_base::value();
         }
 
-        const volatile First& first() const volatile noexcept
+        const volatile first_type& first() const volatile noexcept
         {
-            return this->_first;
+            return first_base::value();
         }
 
         // Second
-        Second& second() noexcept
+        second_type& second() noexcept
         {
-            return *this;
+            return second_base::value();
         }
 
-        const Second& second() const noexcept
+        const second_type& second() const noexcept
         {
-            return *this;
+            return second_base::value();
         }
 
-        volatile Second& second() volatile noexcept
+        volatile second_type& second() volatile noexcept
         {
-            return *this;
+            return second_base::value();
         }
 
-        const volatile Second& second() const volatile noexcept
+        const volatile second_type& second() const volatile noexcept
         {
-            return *this;
+            return second_base::value();
         }
 
 #pragma endregion
@@ -1221,26 +727,18 @@ namespace dhorn
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction_v<
+            std::enable_if_t<std::conjunction<
                 std::is_swappable<FirstTy>,
                 std::is_swappable<SecondTy>
-            >, int> = 0>
+            >::value, int> = 0>
         void swap(compressed_pair& other)
-            noexcept(std::is_nothrow_swappable_v<First> && std::is_nothrow_swappable_v<Second>)
+            noexcept(std::is_nothrow_swappable<First>::value && std::is_nothrow_swappable<Second>::value)
         {
-            if (this != std::addressof(other))
-            {
-                std::swap(this->_first, other._first);
-            }
+            first_base::swap(static_cast<first_base&>(other));
+            second_base::swap(static_cast<second_base&>(other));
         }
 
 #pragma endregion
-
-
-
-    private:
-
-        First _first;
     };
 
 #pragma endregion
@@ -1273,10 +771,10 @@ namespace std
     template <
         typename First,
         typename Second,
-        std::enable_if_t<std::conjunction_v<
+        std::enable_if_t<std::conjunction<
             std::is_swappable<First>,
             std::is_swappable<Second>
-        >, int> = 0>
+        >::value, int> = 0>
     inline void swap(dhorn::compressed_pair<First, Second>& lhs, dhorn::compressed_pair<First, Second>& rhs)
         noexcept(noexcept(lhs.swap(rhs)))
     {

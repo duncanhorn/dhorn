@@ -315,15 +315,15 @@ namespace dhorn::tests
             DoNonExplicitConstructionTest(DefaultConstructionTester{});
 
             // TODO: Intellisense
-            //dhorn::compressed_pair<non_empty, non_empty> p1 = {};
-            //Assert::AreEqual(42, p1.first().value);
-            //Assert::AreEqual(42, p1.second().value);
+            dhorn::compressed_pair<non_empty, non_empty> p1 = {};
+            Assert::AreEqual(42, p1.first().value);
+            Assert::AreEqual(42, p1.second().value);
 
-            //dhorn::compressed_pair<empty, non_empty> p2 = {};
-            //Assert::AreEqual(42, p1.second().value);
+            dhorn::compressed_pair<empty, non_empty> p2 = {};
+            Assert::AreEqual(42, p1.second().value);
 
-            //dhorn::compressed_pair<non_empty, empty> p3 = {};
-            //Assert::AreEqual(42, p1.first().value);
+            dhorn::compressed_pair<non_empty, empty> p3 = {};
+            Assert::AreEqual(42, p1.first().value);
         }
 
         TEST_METHOD(ExplicitDefaultConstructionTest)
@@ -331,15 +331,15 @@ namespace dhorn::tests
             DoExplicitConstructionTest(DefaultConstructionTester{});
 
             // TODO: Intellisense
-            //dhorn::compressed_pair<non_empty_explicit, non_empty_explicit> p1;
-            //Assert::AreEqual(42, p1.first().value);
-            //Assert::AreEqual(42, p1.second().value);
+            dhorn::compressed_pair<non_empty_explicit, non_empty_explicit> p1;
+            Assert::AreEqual(42, p1.first().value);
+            Assert::AreEqual(42, p1.second().value);
 
-            //dhorn::compressed_pair<empty_explicit, non_empty> p2;
-            //Assert::AreEqual(42, p1.second().value);
+            dhorn::compressed_pair<empty_explicit, non_empty> p2;
+            Assert::AreEqual(42, p1.second().value);
 
-            //dhorn::compressed_pair<non_empty, empty_explicit> p3;
-            //Assert::AreEqual(42, p1.first().value);
+            dhorn::compressed_pair<non_empty, empty_explicit> p3;
+            Assert::AreEqual(42, p1.first().value);
         }
 
 #pragma endregion
@@ -623,36 +623,36 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, cannot_copy_non_empty>>);
 
             // TODO: Intellisense
-            //compressed_pair<can_copy_non_empty, can_copy_non_empty> p1(1, 2);
-            //compressed_pair<can_copy_non_empty, can_copy_non_empty> p2(3, 4);
-            //p1.swap(p2);
-            //Assert::AreEqual(1, p2.first().value);
-            //Assert::AreEqual(2, p2.second().value);
-            //Assert::AreEqual(3, p1.first().value);
-            //Assert::AreEqual(4, p1.second().value);
-            //std::swap(p1, p2);
-            //Assert::AreEqual(1, p1.first().value);
-            //Assert::AreEqual(2, p1.second().value);
-            //Assert::AreEqual(3, p2.first().value);
-            //Assert::AreEqual(4, p2.second().value);
+            compressed_pair<can_copy_non_empty, can_copy_non_empty> p1(1, 2);
+            compressed_pair<can_copy_non_empty, can_copy_non_empty> p2(3, 4);
+            p1.swap(p2);
+            Assert::AreEqual(1, p2.first().value);
+            Assert::AreEqual(2, p2.second().value);
+            Assert::AreEqual(3, p1.first().value);
+            Assert::AreEqual(4, p1.second().value);
+            std::swap(p1, p2);
+            Assert::AreEqual(1, p1.first().value);
+            Assert::AreEqual(2, p1.second().value);
+            Assert::AreEqual(3, p2.first().value);
+            Assert::AreEqual(4, p2.second().value);
 
-            //compressed_pair<can_copy_empty, can_copy_non_empty> p3(can_copy_empty{}, 1);
-            //compressed_pair<can_copy_empty, can_copy_non_empty> p4(can_copy_empty{}, 2);
-            //p3.swap(p4);
-            //Assert::AreEqual(1, p4.second().value);
-            //Assert::AreEqual(2, p3.second().value);
-            //std::swap(p3, p4);
-            //Assert::AreEqual(1, p3.second().value);
-            //Assert::AreEqual(2, p4.second().value);
+            compressed_pair<can_copy_empty, can_copy_non_empty> p3(can_copy_empty{}, 1);
+            compressed_pair<can_copy_empty, can_copy_non_empty> p4(can_copy_empty{}, 2);
+            p3.swap(p4);
+            Assert::AreEqual(1, p4.second().value);
+            Assert::AreEqual(2, p3.second().value);
+            std::swap(p3, p4);
+            Assert::AreEqual(1, p3.second().value);
+            Assert::AreEqual(2, p4.second().value);
 
-            //compressed_pair<can_copy_non_empty, can_copy_empty> p5(1, can_copy_empty{});
-            //compressed_pair<can_copy_non_empty, can_copy_empty> p6(2, can_copy_empty{});
-            //p5.swap(p6);
-            //Assert::AreEqual(1, p6.first().value);
-            //Assert::AreEqual(2, p5.first().value);
-            //std::swap(p5, p6);
-            //Assert::AreEqual(1, p5.first().value);
-            //Assert::AreEqual(2, p6.first().value);
+            compressed_pair<can_copy_non_empty, can_copy_empty> p5(1, can_copy_empty{});
+            compressed_pair<can_copy_non_empty, can_copy_empty> p6(2, can_copy_empty{});
+            p5.swap(p6);
+            Assert::AreEqual(1, p6.first().value);
+            Assert::AreEqual(2, p5.first().value);
+            std::swap(p5, p6);
+            Assert::AreEqual(1, p5.first().value);
+            Assert::AreEqual(2, p6.first().value);
         }
 
 #pragma endregion
