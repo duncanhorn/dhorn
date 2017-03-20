@@ -722,11 +722,15 @@ namespace dhorn
             promise.set_value();
         }
 
+        // TODO: Why is this marked as unreachable
+#pragma warning(push)
+#pragma warning(disable:4702)
         template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<!std::is_void_v<Ty>, int> = 0>
         void apply_set_value(std::promise<Ty>& promise, Func&& func, TupleTy&& tuple)
         {
             promise.set_value(std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple)));
         }
+#pragma warning(pop)
     }
 
 
