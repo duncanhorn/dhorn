@@ -790,13 +790,13 @@ namespace dhorn
     namespace details
     {
         template <typename PairTy>
-        inline constexpr auto compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 0>)
+        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 0>)
         {
             return pair.first();
         }
 
         template <typename PairTy>
-        inline constexpr auto compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 1>)
+        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 1>)
         {
             return pair.second();
         }
@@ -883,14 +883,16 @@ namespace std
     constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
         dhorn::compressed_pair<First, Second>&& pair)
     {
-        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+        return std::forward<tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
+        //return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
     template <size_t Index, typename First, typename Second>
     constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
         const dhorn::compressed_pair<First, Second>&& pair)
     {
-        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+        return std::forward<const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
+        //return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
 

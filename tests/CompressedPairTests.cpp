@@ -1162,5 +1162,85 @@ namespace dhorn::tests
         }
 
 #pragma endregion
+
+
+
+#pragma region Std Functions Tests
+
+        TEST_METHOD(TupleSizeTest)
+        {
+            Assert::AreEqual(2u, std::tuple_size_v<compressed_pair<int, int>>);
+        }
+
+        TEST_METHOD(TupleElementTest)
+        {
+            using test_type = compressed_pair<int, float>;
+            Assert::IsTrue(std::is_same_v<int, std::tuple_element_t<0, test_type>>);
+            Assert::IsTrue(std::is_same_v<float, std::tuple_element_t<1, test_type>>);
+        }
+
+        TEST_METHOD(GetTest)
+        {
+            using test_type = dhorn::compressed_pair<int, std::string>;
+            test_type p;
+
+            // By Index
+            Assert::IsTrue(std::is_same_v<int&, decltype(std::get<0>(p))>);
+            Assert::IsTrue(std::is_same_v<const int&, decltype(std::get<0>(std::as_const(p)))>);
+            Assert::IsTrue(std::is_same_v<int&&, decltype(std::get<0>(std::move(p)))>);
+            Assert::IsTrue(std::is_same_v<const int&&, decltype(std::get<0>(std::move(std::as_const(p))))>);
+
+            Assert::IsTrue(std::is_same_v<std::string&, decltype(std::get<1>(p))>);
+            Assert::IsTrue(std::is_same_v<const std::string&, decltype(std::get<1>(std::as_const(p)))>);
+            Assert::IsTrue(std::is_same_v<std::string&&, decltype(std::get<1>(std::move(p)))>);
+            Assert::IsTrue(std::is_same_v<const std::string&&, decltype(std::get<1>(std::move(std::as_const(p))))>);
+
+            std::get<0>(p) = 42;
+            std::get<1>(p) = "foo";
+            Assert::AreEqual(42, p.first());
+            Assert::IsTrue(p.second() == "foo");
+
+            // By Type
+            Assert::IsTrue(std::is_same_v<int&, decltype(std::get<int>(p))>);
+            Assert::IsTrue(std::is_same_v<const int&, decltype(std::get<int>(std::as_const(p)))>);
+            Assert::IsTrue(std::is_same_v<int&&, decltype(std::get<int>(std::move(p)))>);
+            Assert::IsTrue(std::is_same_v<const int&&, decltype(std::get<int>(std::move(std::as_const(p))))>);
+
+            Assert::IsTrue(std::is_same_v<std::string&, decltype(std::get<std::string>(p))>);
+            Assert::IsTrue(std::is_same_v<const std::string&, decltype(std::get<std::string>(std::as_const(p)))>);
+            Assert::IsTrue(std::is_same_v<std::string&&, decltype(std::get<std::string>(std::move(p)))>);
+            Assert::IsTrue(std::is_same_v<const std::string&&, decltype(std::get<std::string>(std::move(std::as_const(p))))>);
+
+            std::get<int>(p) = 8;
+            std::get<std::string>(p) = "bar";
+            Assert::AreEqual(8, p.first());
+            Assert::IsTrue(p.second() == "bar");
+
+            // The following fails to compile (as it should)
+            //compressed_pair<int, int> p2;
+            //std::get<int>(p2) = 0;
+
+            // Object counting
+            object_counter::reset();
+            compressed_pair<object_counter, object_counter> pair;
+
+            auto obj = std::get<0>(pair);
+            obj = std::get<1>(pair);
+            Assert::AreEqual(2u, object_counter::copy_count);
+
+            obj = std::get<0>(std::as_const(pair));
+            obj = std::get<1>(std::as_const(pair));
+            Assert::AreEqual(4u, object_counter::copy_count);
+
+            obj = std::get<0>(std::move(pair));
+            obj = std::get<1>(std::move(pair));
+            Assert::AreEqual(4u, object_counter::copy_count);
+
+            obj = std::get<0>(std::move(std::as_const(pair)));
+            obj = std::get<1>(std::move(std::as_const(pair)));
+            Assert::AreEqual(4u, object_counter::copy_count);
+        }
+
+#pragma endregion
     };
 }
