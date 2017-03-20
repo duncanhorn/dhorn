@@ -77,12 +77,16 @@ namespace dhorn::tests
 
         struct non_empty
         {
+            non_empty() = default;
+            non_empty(int value) : value(value) {}
+
             int value = 42;
         };
 
         struct non_empty_explicit
         {
             explicit non_empty_explicit() {}
+            explicit non_empty_explicit(int value) : value(value) {}
             explicit non_empty_explicit(const non_empty_explicit& o) : value(o.value) {}
             explicit non_empty_explicit(non_empty_explicit&& o) : value(o.value) {}
 
@@ -112,47 +116,95 @@ namespace dhorn::tests
         template <typename Ty>
         struct empty_adapter
         {
+            empty_adapter() = default;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_constructible_v<T>, int> = 0>
             empty_adapter(const Ty&) {}
+            template <typename T = Ty, std::enable_if_t<std::is_move_constructible_v<T>, int> = 0>
             empty_adapter(Ty&&) {}
+
+            template <typename T = Ty, std::enable_if_t<std::is_copy_assignable_v<T>, int> = 0>
+            empty_adapter& operator=(const Ty&) { return *this; }
+            template <typename T = Ty, std::enable_if_t<std::is_move_assignable_v<T>, int> = 0>
+            empty_adapter& operator=(Ty&&) { return *this; }
         };
 
         template <typename Ty>
         struct empty_explicit_adapter
         {
+            empty_explicit_adapter() = default;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_constructible_v<T>, int> = 0>
             explicit empty_explicit_adapter(const Ty&) {}
+            template <typename T = Ty, std::enable_if_t<std::is_move_constructible_v<T>, int> = 0>
             explicit empty_explicit_adapter(Ty&&) {}
+
+            template <typename T = Ty, std::enable_if_t<std::is_copy_assignable_v<T>, int> = 0>
+            empty_explicit_adapter& operator=(const Ty&) { return *this; }
+            template <typename T = Ty, std::enable_if_t<std::is_move_assignable_v<T>, int> = 0>
+            empty_explicit_adapter& operator=(Ty&&) { return *this; }
         };
 
         template <typename Ty>
         struct empty_final_adapter final
         {
+            empty_final_adapter() = default;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_constructible_v<T>, int> = 0>
             empty_final_adapter(const Ty&) {}
+            template <typename T = Ty, std::enable_if_t<std::is_move_constructible_v<T>, int> = 0>
             empty_final_adapter(Ty&&) {}
+
+            template <typename T = Ty, std::enable_if_t<std::is_copy_assignable_v<T>, int> = 0>
+            empty_final_adapter& operator=(const Ty&) { return *this; }
+            template <typename T = Ty, std::enable_if_t<std::is_move_assignable_v<T>, int> = 0>
+            empty_final_adapter& operator=(Ty&&) { return *this; }
         };
 
         template <typename Ty>
         struct empty_final_explicit_adapter final
         {
+            empty_final_explicit_adapter() = default;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_constructible_v<T>, int> = 0>
             explicit empty_final_explicit_adapter(const Ty&) {}
+            template <typename T = Ty, std::enable_if_t<std::is_move_constructible_v<T>, int> = 0>
             explicit empty_final_explicit_adapter(Ty&&) {}
+
+            template <typename T = Ty, std::enable_if_t<std::is_copy_assignable_v<T>, int> = 0>
+            empty_final_explicit_adapter& operator=(const Ty&) { return *this; }
+            template <typename T = Ty, std::enable_if_t<std::is_move_assignable_v<T>, int> = 0>
+            empty_final_explicit_adapter& operator=(Ty&&) { return *this; }
         };
 
         template <typename Ty>
         struct non_empty_adapter
         {
-            non_empty_adapter(const Ty&) {}
-            non_empty_adapter(Ty&&) {}
+            non_empty_adapter() = default;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_constructible_v<T>, int> = 0>
+            non_empty_adapter(const Ty& value) : value(value) {}
+            template <typename T = Ty, std::enable_if_t<std::is_move_constructible_v<T>, int> = 0>
+            non_empty_adapter(Ty&& value) : value(std::move(value)) {}
 
-            int value = 42;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_assignable_v<T>, int> = 0>
+            non_empty_adapter& operator=(const Ty& value) { this->value = value; return *this; }
+            template <typename T = Ty, std::enable_if_t<std::is_move_assignable_v<T>, int> = 0>
+            non_empty_adapter& operator=(Ty&& value) { this->value = std::move(value); return *this; }
+
+            Ty value;
         };
 
         template <typename Ty>
         struct non_empty_explicit_adapter
         {
-            explicit non_empty_explicit_adapter(const Ty&) {}
-            explicit non_empty_explicit_adapter(Ty&&) {}
+            non_empty_explicit_adapter() = default;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_constructible_v<T>, int> = 0>
+            explicit non_empty_explicit_adapter(const Ty& value) : value(value) {}
+            template <typename T = Ty, std::enable_if_t<std::is_move_constructible_v<T>, int> = 0>
+            explicit non_empty_explicit_adapter(Ty&& value) : value(std::move(value)) {}
 
-            int value = 42;
+            template <typename T = Ty, std::enable_if_t<std::is_copy_assignable_v<T>, int> = 0>
+            non_empty_explicit_adapter& operator=(const Ty& value) { this->value = value; return *this; }
+            template <typename T = Ty, std::enable_if_t<std::is_move_assignable_v<T>, int> = 0>
+            non_empty_explicit_adapter& operator=(Ty&& value) { this->value = std::move(value); return *this; }
+
+            Ty value;
         };
 
 #pragma endregion
@@ -263,6 +315,35 @@ namespace dhorn::tests
         template <typename T1, typename T2, typename TestTy>
         static void DoNonExplicitCopyMoveConstructionTest(const TestTy& test)
         {
+            // Copy/move; ignore input template args. Copy/move are _never_ explicit
+            test.template run<empty, empty, empty, empty, true>();
+            test.template run<empty, empty_final, empty, empty_final, true>();
+            test.template run<empty, non_empty, empty, non_empty, true>();
+            test.template run<empty, empty_explicit, empty, empty_explicit, true>();
+            test.template run<empty, empty_final_explicit, empty, empty_final_explicit, true>();
+            test.template run<empty, non_empty_explicit, empty, non_empty_explicit, true>();
+
+            test.template run<empty_final, empty_final, empty_final, empty_final, true>();
+            test.template run<empty_final, non_empty, empty_final, non_empty, true>();
+            test.template run<empty_final, empty_explicit, empty_final, empty_explicit, true>();
+            test.template run<empty_final, empty_final_explicit, empty_final, empty_final_explicit, true>();
+            test.template run<empty_final, non_empty_explicit, empty_final, non_empty_explicit, true>();
+
+            test.template run<non_empty, non_empty, non_empty, non_empty, true>();
+            test.template run<non_empty, empty_explicit, non_empty, empty_explicit, true>();
+            test.template run<non_empty, empty_final_explicit, non_empty, empty_final_explicit, true>();
+            test.template run<non_empty, non_empty_explicit, non_empty, non_empty_explicit, true>();
+
+            test.template run<empty_explicit, empty_explicit, empty_explicit, empty_explicit, true>();
+            test.template run<empty_explicit, empty_final_explicit, empty_explicit, empty_final_explicit, true>();
+            test.template run<empty_explicit, non_empty_explicit, empty_explicit, non_empty_explicit, true>();
+
+            test.template run<empty_final_explicit, empty_final_explicit, empty_final_explicit, empty_final_explicit, true>();
+            test.template run<empty_final_explicit, non_empty_explicit, empty_final_explicit, non_empty_explicit, true>();
+
+            test.template run<non_empty_explicit, non_empty_explicit, non_empty_explicit, non_empty_explicit, true>();
+
+            // Conversion copy/move
             test.template run<empty_adapter<T1>, empty_adapter<int>, T1, T2, true>();
             test.template run<empty_adapter<T1>, empty_final_adapter<int>, T1, T2, true>();
             test.template run<empty_adapter<T1>, non_empty_adapter<int>, T1, T2, true>();
@@ -276,6 +357,7 @@ namespace dhorn::tests
         template <typename T1, typename T2, typename TestTy>
         static void DoExplicitCopyMoveConstructionTest(const TestTy& test)
         {
+            // Conversion copy/move
             test.template run<empty_explicit_adapter<T1>, empty_adapter<T2>, T1, T2, false>();
             test.template run<empty_explicit_adapter<T1>, empty_explicit_adapter<T2>, T1, T2, false>();
             test.template run<empty_explicit_adapter<T1>, empty_final_adapter<T2>, T1, T2, false>();
@@ -314,15 +396,14 @@ namespace dhorn::tests
         {
             DoNonExplicitConstructionTest(DefaultConstructionTester{});
 
-            // TODO: Intellisense
-            dhorn::compressed_pair<non_empty, non_empty> p1 = {};
+            compressed_pair<non_empty, non_empty> p1 = {};
             Assert::AreEqual(42, p1.first().value);
             Assert::AreEqual(42, p1.second().value);
 
-            dhorn::compressed_pair<empty, non_empty> p2 = {};
+            compressed_pair<empty, non_empty> p2 = {};
             Assert::AreEqual(42, p1.second().value);
 
-            dhorn::compressed_pair<non_empty, empty> p3 = {};
+            compressed_pair<non_empty, empty> p3 = {};
             Assert::AreEqual(42, p1.first().value);
         }
 
@@ -330,15 +411,14 @@ namespace dhorn::tests
         {
             DoExplicitConstructionTest(DefaultConstructionTester{});
 
-            // TODO: Intellisense
-            dhorn::compressed_pair<non_empty_explicit, non_empty_explicit> p1;
+            compressed_pair<non_empty_explicit, non_empty_explicit> p1;
             Assert::AreEqual(42, p1.first().value);
             Assert::AreEqual(42, p1.second().value);
 
-            dhorn::compressed_pair<empty_explicit, non_empty> p2;
+            compressed_pair<empty_explicit, non_empty> p2;
             Assert::AreEqual(42, p1.second().value);
 
-            dhorn::compressed_pair<non_empty, empty_explicit> p3;
+            compressed_pair<non_empty, empty_explicit> p3;
             Assert::AreEqual(42, p1.first().value);
         }
 
@@ -362,16 +442,36 @@ namespace dhorn::tests
         TEST_METHOD(ValueConstructionTest)
         {
             DoNonExplicitConstructionTest(ValueConstructionTester{});
+
+            compressed_pair<non_empty, non_empty> p1 = { 8, 42 };
+            Assert::AreEqual(8, p1.first().value);
+            Assert::AreEqual(42, p1.second().value);
+
+            compressed_pair<empty, non_empty> p2 = { {}, 8 };
+            Assert::AreEqual(8, p2.second().value);
+
+            compressed_pair<non_empty, empty> p3 = { 8, {} };
+            Assert::AreEqual(8, p3.first().value);
         }
 
         TEST_METHOD(ExplicitValueConstructionTest)
         {
             DoExplicitConstructionTest(ValueConstructionTester{});
+
+            compressed_pair<non_empty_explicit, non_empty_explicit> p1(8, 42);
+            Assert::AreEqual(8, p1.first().value);
+            Assert::AreEqual(42, p1.second().value);
+
+            compressed_pair<empty_explicit, non_empty> p2(empty_explicit{}, 8);
+            Assert::AreEqual(8, p2.second().value);
+
+            compressed_pair<non_empty, empty_explicit> p3(8, empty_explicit{});
+            Assert::AreEqual(8, p3.first().value);
         }
 
 #pragma endregion
 
-#pragma region Value Copy Construction
+#pragma region Value Move Construction
 
         struct ValueMoveConstructionTester
         {
@@ -389,11 +489,34 @@ namespace dhorn::tests
         TEST_METHOD(ValueMoveConstructionTest)
         {
             DoNonExplicitConstructionTest(ValueMoveConstructionTester{});
+
+            // NOTE: object_counter has no state, so moving it more than once is okay
+            object_counter::reset();
+            object_counter counter;
+
+            compressed_pair<object_counter, object_counter> p1 = { std::move(counter), std::move(counter) };
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<object_counter, non_empty> p2 = { std::move(counter), non_empty{} };
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<non_empty, object_counter> p3 = { non_empty{}, std::move(counter) };
+            Assert::AreEqual(0u, object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitValueMoveConstructionTest)
         {
             DoExplicitConstructionTest(ValueMoveConstructionTester{});
+
+            // NOTE: object_counter has no state, so moving it more than once is okay
+            object_counter::reset();
+            object_counter counter;
+
+            compressed_pair<object_counter, non_empty_explicit> p1(std::move(counter), non_empty_explicit{});
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<non_empty_explicit, object_counter> p2(non_empty_explicit{}, std::move(counter));
+            Assert::AreEqual(0u, object_counter::copy_count);
         }
 
 #pragma endregion
@@ -403,21 +526,21 @@ namespace dhorn::tests
         TEST_METHOD(PiecewiseConstructionTest)
         {
             // First is empty
-            dhorn::compressed_pair<empty, int> p1(
+            compressed_pair<empty, int> p1(
                 std::piecewise_construct,
                 std::forward_as_tuple(),
                 std::forward_as_tuple(42));
             Assert::AreEqual(42, p1.second());
 
             // Second is empty
-            dhorn::compressed_pair<int, empty_explicit> p2(
+            compressed_pair<int, empty_explicit> p2(
                 std::piecewise_construct,
                 std::forward_as_tuple(42),
                 std::forward_as_tuple());
             Assert::AreEqual(42, p2.first());
 
             // Neither are empty
-            dhorn::compressed_pair<std::string, std::vector<int>> p3(
+            compressed_pair<std::string, std::vector<int>> p3(
                 std::piecewise_construct,
                 std::forward_as_tuple("foo"),
                 std::forward_as_tuple(8));
@@ -442,11 +565,54 @@ namespace dhorn::tests
         TEST_METHOD(CopyConstructionTest)
         {
             DoNonExplicitCopyMoveConstructionTest<int, int>(CopyConstructionTester{});
+
+            object_counter::reset();
+
+            compressed_pair<object_counter, object_counter> p1 = {};
+            compressed_pair<object_counter, object_counter> p2 = p1;
+            Assert::AreEqual(2u, object_counter::copy_count);
+
+            compressed_pair<object_counter, non_empty> p3 = {};
+            compressed_pair<object_counter, non_empty> p4 = p3;
+            Assert::AreEqual(3u, object_counter::copy_count);
+
+            compressed_pair<non_empty, object_counter> p5 = {};
+            compressed_pair<non_empty, object_counter> p6 = p5;
+            Assert::AreEqual(4u, object_counter::copy_count);
+
+            // Converting Copy
+            using adapt = non_empty_adapter<object_counter>;
+            compressed_pair<adapt, adapt> p7 = p1;
+            Assert::AreEqual(6u, object_counter::copy_count);
+
+            compressed_pair<adapt, empty_adapter<non_empty>> p8 = p3;
+            Assert::AreEqual(7u, object_counter::copy_count);
+
+            compressed_pair<empty_adapter<non_empty>, adapt> p9 = p5;
+            Assert::AreEqual(8u, object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitCopyConstructionTest)
         {
             DoExplicitCopyMoveConstructionTest<int, int>(CopyConstructionTester{});
+
+            object_counter::reset();
+
+            compressed_pair<object_counter, non_empty_explicit> p1;
+            compressed_pair<object_counter, non_empty_explicit> p2 = p1;
+            Assert::AreEqual(1u, object_counter::copy_count);
+
+            compressed_pair<non_empty_explicit, object_counter> p3;
+            compressed_pair<non_empty_explicit, object_counter> p4 = p3;
+            Assert::AreEqual(2u, object_counter::copy_count);
+
+            // Converting Copy
+            using adapt = non_empty_explicit_adapter<object_counter>;
+            compressed_pair<adapt, empty_explicit_adapter<non_empty_explicit>> p5(p1);
+            Assert::AreEqual(3u, object_counter::copy_count);
+
+            compressed_pair< empty_explicit_adapter<non_empty_explicit>, adapt> p6(p3);
+            Assert::AreEqual(4u, object_counter::copy_count);
         }
 
 #pragma endregion
@@ -465,12 +631,57 @@ namespace dhorn::tests
 
         TEST_METHOD(MoveConstructionTest)
         {
-            DoExplicitCopyMoveConstructionTest<int, int>(MoveConstructionTester{});
+            DoNonExplicitCopyMoveConstructionTest<int, int>(MoveConstructionTester{});
+
+            object_counter::reset();
+
+            compressed_pair<object_counter, object_counter> p1 = {};
+            compressed_pair<object_counter, object_counter> p2 = std::move(p1);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<object_counter, non_empty> p3 = {};
+            compressed_pair<object_counter, non_empty> p4 = std::move(p3);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<non_empty, object_counter> p5 = {};
+            compressed_pair<non_empty, object_counter> p6 = std::move(p5);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            // Converting Move
+            // NOTE: object_counter has no state, so moving it more than once is okay
+            using adapt = non_empty_adapter<object_counter>;
+            compressed_pair<adapt, adapt> p7 = std::move(p1);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<adapt, empty_adapter<non_empty>> p8 = std::move(p3);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<empty_adapter<non_empty>, adapt> p9 = std::move(p5);
+            Assert::AreEqual(0u, object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitMoveConstructionTest)
         {
             DoExplicitCopyMoveConstructionTest<int, int>(MoveConstructionTester{});
+
+            object_counter::reset();
+
+            compressed_pair<object_counter, non_empty_explicit> p1;
+            compressed_pair<object_counter, non_empty_explicit> p2 = std::move(p1);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<non_empty_explicit, object_counter> p3;
+            compressed_pair<non_empty_explicit, object_counter> p4 = std::move(p3);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            // Converting Move
+            // NOTE: object_counter has no state, so moving it more than once is okay
+            using adapt = non_empty_explicit_adapter<object_counter>;
+            compressed_pair<adapt, empty_explicit_adapter<non_empty_explicit>> p5(std::move(p1));
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair< empty_explicit_adapter<non_empty_explicit>, adapt> p6(std::move(p3));
+            Assert::AreEqual(0u, object_counter::copy_count);
         }
 
 #pragma endregion
@@ -519,11 +730,65 @@ namespace dhorn::tests
             DoAssignmentTest_Helper<cannot_copy_non_empty, cannot_copy_non_empty, false>(test);
         }
 
+        template <typename Adapt1, typename Adapt2, typename T1, typename T2, bool Expect, typename TestTy>
+        static void DoConversionAssignmentTest_Helper_Impl(const TestTy& test)
+        {
+            test.template run<compressed_pair<Adapt1, Adapt2>, compressed_pair<T1, T2>, Expect>();
+            test.template run<compressed_pair<Adapt2, Adapt1>, compressed_pair<T2, T1>, Expect>();
+        }
+
+        template <typename T1, typename T2, bool Expect, typename TestTy>
+        static void DoConversionAssignmentTest_Helper(const TestTy& test)
+        {
+            using empty_1 = empty_adapter<T1>;
+            using empty_2 = empty_adapter<T2>;
+            using final_1 = empty_final_adapter<T1>;
+            using final_2 = empty_final_adapter<T2>;
+            using non_empty_1 = non_empty_adapter<T1>;
+            using non_empty_2 = non_empty_adapter<T2>;
+
+            DoConversionAssignmentTest_Helper_Impl<empty_1, empty_2, T1, T2, Expect>(test);
+            DoConversionAssignmentTest_Helper_Impl<empty_1, final_2, T1, T2, Expect>(test);
+            DoConversionAssignmentTest_Helper_Impl<empty_1, non_empty_2, T1, T2, Expect>(test);
+
+            DoConversionAssignmentTest_Helper_Impl<final_1, empty_2, T1, T2, Expect>(test);
+            DoConversionAssignmentTest_Helper_Impl<final_1, final_2, T1, T2, Expect>(test);
+            DoConversionAssignmentTest_Helper_Impl<final_1, non_empty_2, T1, T2, Expect>(test);
+
+            DoConversionAssignmentTest_Helper_Impl<non_empty_1, empty_2, T1, T2, Expect>(test);
+            DoConversionAssignmentTest_Helper_Impl<non_empty_1, final_2, T1, T2, Expect>(test);
+            DoConversionAssignmentTest_Helper_Impl<non_empty_1, non_empty_2, T1, T2, Expect>(test);
+        }
+
         template <typename TestTy>
         static void DoConversionAssignmentTest(const TestTy& test)
         {
-            // TODO
-            test;
+            DoConversionAssignmentTest_Helper<can_copy_empty, can_copy_empty, true>(test);
+            DoConversionAssignmentTest_Helper<can_copy_empty, can_copy_final, true>(test);
+            DoConversionAssignmentTest_Helper<can_copy_empty, can_copy_non_empty, true>(test);
+            DoConversionAssignmentTest_Helper<can_copy_empty, cannot_copy_empty, false>(test);
+            DoConversionAssignmentTest_Helper<can_copy_empty, cannot_copy_final, false>(test);
+            DoConversionAssignmentTest_Helper<can_copy_empty, cannot_copy_non_empty, false>(test);
+
+            DoConversionAssignmentTest_Helper<can_copy_final, can_copy_final, true>(test);
+            DoConversionAssignmentTest_Helper<can_copy_final, can_copy_non_empty, true>(test);
+            DoConversionAssignmentTest_Helper<can_copy_final, cannot_copy_empty, false>(test);
+            DoConversionAssignmentTest_Helper<can_copy_final, cannot_copy_final, false>(test);
+            DoConversionAssignmentTest_Helper<can_copy_final, cannot_copy_non_empty, false>(test);
+
+            DoConversionAssignmentTest_Helper<can_copy_non_empty, can_copy_non_empty, true>(test);
+            DoConversionAssignmentTest_Helper<can_copy_non_empty, cannot_copy_empty, false>(test);
+            DoConversionAssignmentTest_Helper<can_copy_non_empty, cannot_copy_final, false>(test);
+            DoConversionAssignmentTest_Helper<can_copy_non_empty, cannot_copy_non_empty, false>(test);
+
+            DoConversionAssignmentTest_Helper<cannot_copy_empty, cannot_copy_empty, false>(test);
+            DoConversionAssignmentTest_Helper<cannot_copy_empty, cannot_copy_final, false>(test);
+            DoConversionAssignmentTest_Helper<cannot_copy_empty, cannot_copy_non_empty, false>(test);
+
+            DoConversionAssignmentTest_Helper<cannot_copy_final, cannot_copy_final, false>(test);
+            DoConversionAssignmentTest_Helper<cannot_copy_final, cannot_copy_non_empty, false>(test);
+
+            DoConversionAssignmentTest_Helper<cannot_copy_non_empty, cannot_copy_non_empty, false>(test);
         }
 
         struct CopyAssignmentTester
@@ -538,11 +803,86 @@ namespace dhorn::tests
         TEST_METHOD(CopyAssignmentTest)
         {
             DoAssignmentTest(CopyAssignmentTester{});
+
+            compressed_pair<int, int> a(0, 1);
+            compressed_pair<int, int> b(2, 3);
+            Assert::AreEqual(2, b.first());
+            Assert::AreEqual(3, b.second());
+            b = a;
+            Assert::AreEqual(0, b.first());
+            Assert::AreEqual(1, b.second());
+
+            compressed_pair<empty, int> c({}, 0);
+            compressed_pair<empty, int> d({}, 1);
+            Assert::AreEqual(1, d.second());
+            d = c;
+            Assert::AreEqual(0, d.second());
+
+            compressed_pair<int, empty> e(0, {});
+            compressed_pair<int, empty> f(1, {});
+            Assert::AreEqual(1, f.first());
+            f = e;
+            Assert::AreEqual(0, f.first());
+
+            object_counter::reset();
+
+            compressed_pair<object_counter, object_counter> p1;
+            compressed_pair<object_counter, object_counter> p2;
+            p2 = p1;
+            Assert::AreEqual(2u, object_counter::copy_count);
+
+            compressed_pair<non_empty, object_counter> p3;
+            compressed_pair<non_empty, object_counter> p4;
+            p4 = p3;
+            Assert::AreEqual(3u, object_counter::copy_count);
+
+            compressed_pair<object_counter, non_empty> p5;
+            compressed_pair<object_counter, non_empty> p6;
+            p6 = p5;
+            Assert::AreEqual(4u, object_counter::copy_count);
         }
 
         TEST_METHOD(CopyConversionAssignmentTest)
         {
             DoConversionAssignmentTest(CopyAssignmentTester{});
+
+            compressed_pair<int, int> a(0, 1);
+            compressed_pair<double, double> b(2, 3);
+            Assert::AreEqual(2.0, b.first());
+            Assert::AreEqual(3.0, b.second());
+            b = a;
+            Assert::AreEqual(0.0, b.first());
+            Assert::AreEqual(1.0, b.second());
+
+            compressed_pair<empty, int> c({}, 0);
+            compressed_pair<empty, double> d({}, 1);
+            Assert::AreEqual(1.0, d.second());
+            d = c;
+            Assert::AreEqual(0.0, d.second());
+
+            compressed_pair<int, empty> e(0, {});
+            compressed_pair<double, empty> f(1, {});
+            Assert::AreEqual(1.0, f.first());
+            f = e;
+            Assert::AreEqual(0.0, f.first());
+
+            using adapt = non_empty_adapter<object_counter>;
+            object_counter::reset();
+
+            compressed_pair<object_counter, object_counter> p1;
+            compressed_pair<adapt, adapt> p2;
+            p2 = p1;
+            Assert::AreEqual(2u, object_counter::copy_count);
+
+            compressed_pair<empty, object_counter> p3;
+            compressed_pair<empty, adapt> p4;
+            p4 = p3;
+            Assert::AreEqual(3u, object_counter::copy_count);
+
+            compressed_pair<object_counter, empty> p5;
+            compressed_pair<adapt, empty> p6;
+            p6 = p5;
+            Assert::AreEqual(4u, object_counter::copy_count);
         }
 
         struct MoveAssignmentTester
@@ -557,20 +897,87 @@ namespace dhorn::tests
         TEST_METHOD(MoveAssignmentTest)
         {
             DoAssignmentTest(MoveAssignmentTester{});
+
+            compressed_pair<int, int> a(0, 1);
+            compressed_pair<int, int> b(2, 3);
+            Assert::AreEqual(2, b.first());
+            Assert::AreEqual(3, b.second());
+            b = std::move(a);
+            Assert::AreEqual(0, b.first());
+            Assert::AreEqual(1, b.second());
+
+            compressed_pair<empty, int> c({}, 0);
+            compressed_pair<empty, int> d({}, 1);
+            Assert::AreEqual(1, d.second());
+            d = std::move(c);
+            Assert::AreEqual(0, d.second());
+
+            compressed_pair<int, empty> e(0, {});
+            compressed_pair<int, empty> f(1, {});
+            Assert::AreEqual(1, f.first());
+            f = std::move(e);
+            Assert::AreEqual(0, f.first());
+
+            object_counter::reset();
+
+            compressed_pair<object_counter, object_counter> p1;
+            compressed_pair<object_counter, object_counter> p2;
+            p2 = std::move(p1);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<non_empty, object_counter> p3;
+            compressed_pair<non_empty, object_counter> p4;
+            p4 = std::move(p3);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<object_counter, non_empty> p5;
+            compressed_pair<object_counter, non_empty> p6;
+            p6 = std::move(p5);
+            Assert::AreEqual(0u, object_counter::copy_count);
         }
 
         TEST_METHOD(MoveConversionAssignmentTest)
         {
             DoConversionAssignmentTest(MoveAssignmentTester{});
+
+            compressed_pair<int, int> a(0, 1);
+            compressed_pair<double, double> b(2, 3);
+            Assert::AreEqual(2.0, b.first());
+            Assert::AreEqual(3.0, b.second());
+            b = std::move(a);
+            Assert::AreEqual(0.0, b.first());
+            Assert::AreEqual(1.0, b.second());
+
+            compressed_pair<empty, int> c({}, 0);
+            compressed_pair<empty, double> d({}, 1);
+            Assert::AreEqual(1.0, d.second());
+            d = std::move(c);
+            Assert::AreEqual(0.0, d.second());
+
+            compressed_pair<int, empty> e(0, {});
+            compressed_pair<double, empty> f(1, {});
+            Assert::AreEqual(1.0, f.first());
+            f = std::move(e);
+            Assert::AreEqual(0.0, f.first());
+
+            using adapt = non_empty_adapter<object_counter>;
+            object_counter::reset();
+
+            compressed_pair<object_counter, object_counter> p1;
+            compressed_pair<adapt, adapt> p2;
+            p2 = std::move(p1);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<empty, object_counter> p3;
+            compressed_pair<empty, adapt> p4;
+            p4 = std::move(p3);
+            Assert::AreEqual(0u, object_counter::copy_count);
+
+            compressed_pair<object_counter, empty> p5;
+            compressed_pair<adapt, empty> p6;
+            p6 = std::move(p5);
+            Assert::AreEqual(0u, object_counter::copy_count);
         }
-
-#pragma endregion
-
-
-
-#pragma region Accessor Tests
-
-
 
 #pragma endregion
 
@@ -622,7 +1029,6 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, cannot_copy_final>>);
             Assert::IsFalse(std::is_swappable_v<compressed_pair<cannot_copy_non_empty, cannot_copy_non_empty>>);
 
-            // TODO: Intellisense
             compressed_pair<can_copy_non_empty, can_copy_non_empty> p1(1, 2);
             compressed_pair<can_copy_non_empty, can_copy_non_empty> p2(3, 4);
             p1.swap(p2);
