@@ -19,25 +19,25 @@ namespace dhorn::tests
             ++constructed_count;
         }
 
-        object_counter(const object_counter &) :
+        object_counter(const object_counter&) :
             object_counter()
         {
             ++copy_count;
         }
 
-        object_counter &operator=(const object_counter &)
+        object_counter &operator=(const object_counter&)
         {
             ++copy_count;
             return *this;
         }
 
-        object_counter(object_counter &&) :
+        object_counter(object_counter&&) :
             object_counter()
         {
             ++move_count;
         }
 
-        object_counter &operator=(object_counter &&)
+        object_counter &operator=(object_counter&&)
         {
             ++move_count;
             return *this;

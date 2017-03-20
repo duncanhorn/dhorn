@@ -46,7 +46,7 @@ namespace dhorn
             // Tuple Construction Helper
             template <typename... Types, size_t... Indices>
             compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>) : // TODO: noexcept?
-                _value(std::get<Indices>(args)...)
+                _value(std::get<Indices>(std::move(args))...)
             {
             }
 
@@ -202,7 +202,7 @@ namespace dhorn
             // Tuple Construction Helper
             template <typename... Types, size_t... Indices>
             compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>) : // TODO: noexcept?
-                Ty(std::get<Indices>(args)...)
+                Ty(std::get<Indices>(std::move(args))...)
             {
                 // Visual Studio bug? Warning C4100: unreferenced formal parameter
                 args;

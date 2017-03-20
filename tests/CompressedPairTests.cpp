@@ -405,6 +405,10 @@ namespace dhorn::tests
 
             compressed_pair<non_empty, empty> p3 = {};
             Assert::AreEqual(42, p1.first().value);
+
+            object_counter::reset();
+            compressed_pair<object_counter, object_counter> p;
+            Assert::AreEqual(2u, object_counter::constructed_count);
         }
 
         TEST_METHOD(ExplicitDefaultConstructionTest)
@@ -443,29 +447,39 @@ namespace dhorn::tests
         {
             DoNonExplicitConstructionTest(ValueConstructionTester{});
 
-            compressed_pair<non_empty, non_empty> p1 = { 8, 42 };
+            int a = 8;
+            int b = 42;
+            compressed_pair<non_empty, non_empty> p1 = { a, b };
             Assert::AreEqual(8, p1.first().value);
             Assert::AreEqual(42, p1.second().value);
 
-            compressed_pair<empty, non_empty> p2 = { {}, 8 };
+            compressed_pair<empty, non_empty> p2 = { {}, a };
             Assert::AreEqual(8, p2.second().value);
 
-            compressed_pair<non_empty, empty> p3 = { 8, {} };
+            compressed_pair<non_empty, empty> p3 = { a, {} };
             Assert::AreEqual(8, p3.first().value);
+
+            object_counter::reset();
+            object_counter obj;
+            compressed_pair<object_counter, object_counter> p(obj, obj);
+            Assert::AreEqual(3u, object_counter::constructed_count);
+            Assert::AreEqual(2u, object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitValueConstructionTest)
         {
             DoExplicitConstructionTest(ValueConstructionTester{});
 
-            compressed_pair<non_empty_explicit, non_empty_explicit> p1(8, 42);
+            int a = 8;
+            int b = 42;
+            compressed_pair<non_empty_explicit, non_empty_explicit> p1(a, b);
             Assert::AreEqual(8, p1.first().value);
             Assert::AreEqual(42, p1.second().value);
 
-            compressed_pair<empty_explicit, non_empty> p2(empty_explicit{}, 8);
+            compressed_pair<empty_explicit, non_empty> p2(empty_explicit{}, a);
             Assert::AreEqual(8, p2.second().value);
 
-            compressed_pair<non_empty, empty_explicit> p3(8, empty_explicit{});
+            compressed_pair<non_empty, empty_explicit> p3(a, empty_explicit{});
             Assert::AreEqual(8, p3.first().value);
         }
 
@@ -490,17 +504,29 @@ namespace dhorn::tests
         {
             DoNonExplicitConstructionTest(ValueMoveConstructionTester{});
 
+            int a = 8;
+            int b = 42;
+            compressed_pair<non_empty, non_empty> p1 = { std::move(a), std::move(b) };
+            Assert::AreEqual(8, p1.first().value);
+            Assert::AreEqual(42, p1.second().value);
+
+            compressed_pair<empty, non_empty> p2 = { {}, std::move(a) };
+            Assert::AreEqual(8, p2.second().value);
+
+            compressed_pair<non_empty, empty> p3 = { std::move(a), {} };
+            Assert::AreEqual(8, p3.first().value);
+
             // NOTE: object_counter has no state, so moving it more than once is okay
             object_counter::reset();
             object_counter counter;
 
-            compressed_pair<object_counter, object_counter> p1 = { std::move(counter), std::move(counter) };
+            compressed_pair<object_counter, object_counter> p4 = { std::move(counter), std::move(counter) };
             Assert::AreEqual(0u, object_counter::copy_count);
 
-            compressed_pair<object_counter, non_empty> p2 = { std::move(counter), non_empty{} };
+            compressed_pair<object_counter, non_empty> p5 = { std::move(counter), non_empty{} };
             Assert::AreEqual(0u, object_counter::copy_count);
 
-            compressed_pair<non_empty, object_counter> p3 = { non_empty{}, std::move(counter) };
+            compressed_pair<non_empty, object_counter> p6 = { non_empty{}, std::move(counter) };
             Assert::AreEqual(0u, object_counter::copy_count);
         }
 
@@ -508,14 +534,26 @@ namespace dhorn::tests
         {
             DoExplicitConstructionTest(ValueMoveConstructionTester{});
 
+            int a = 8;
+            int b = 42;
+            compressed_pair<non_empty_explicit, non_empty_explicit> p1(std::move(a), std::move(b));
+            Assert::AreEqual(8, p1.first().value);
+            Assert::AreEqual(42, p1.second().value);
+
+            compressed_pair<empty_explicit, non_empty> p2(empty_explicit{}, std::move(a));
+            Assert::AreEqual(8, p2.second().value);
+
+            compressed_pair<non_empty, empty_explicit> p3(std::move(a), empty_explicit{});
+            Assert::AreEqual(8, p3.first().value);
+
             // NOTE: object_counter has no state, so moving it more than once is okay
             object_counter::reset();
             object_counter counter;
 
-            compressed_pair<object_counter, non_empty_explicit> p1(std::move(counter), non_empty_explicit{});
+            compressed_pair<object_counter, non_empty_explicit> p4(std::move(counter), non_empty_explicit{});
             Assert::AreEqual(0u, object_counter::copy_count);
 
-            compressed_pair<non_empty_explicit, object_counter> p2(non_empty_explicit{}, std::move(counter));
+            compressed_pair<non_empty_explicit, object_counter> p5(non_empty_explicit{}, std::move(counter));
             Assert::AreEqual(0u, object_counter::copy_count);
         }
 
@@ -546,6 +584,16 @@ namespace dhorn::tests
                 std::forward_as_tuple(8));
             Assert::AreEqual("foo"s, p3.first());
             Assert::AreEqual(8u, p3.second().size());
+
+            object_counter::reset();
+            compressed_pair<object_counter, object_counter> p4(
+                std::piecewise_construct,
+                std::forward_as_tuple(),
+                std::forward_as_tuple(object_counter{}));
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(3u, object_counter::constructed_count);
+            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(1u, object_counter::move_count);
         }
 
 #pragma endregion
@@ -565,6 +613,19 @@ namespace dhorn::tests
         TEST_METHOD(CopyConstructionTest)
         {
             DoNonExplicitCopyMoveConstructionTest<int, int>(CopyConstructionTester{});
+
+            compressed_pair<non_empty, non_empty> a = { 0, 1 };
+            compressed_pair<non_empty, non_empty> b = a;
+            Assert::AreEqual(0, b.first().value);
+            Assert::AreEqual(1, b.second().value);
+
+            compressed_pair<non_empty, empty> c = { 0, {} };
+            compressed_pair<non_empty, empty> d = c;
+            Assert::AreEqual(0, d.first().value);
+
+            compressed_pair<empty, non_empty> e = { {}, 0 };
+            compressed_pair<empty, non_empty> f = e;
+            Assert::AreEqual(0, f.second().value);
 
             object_counter::reset();
 
@@ -595,6 +656,19 @@ namespace dhorn::tests
         TEST_METHOD(ExplicitCopyConstructionTest)
         {
             DoExplicitCopyMoveConstructionTest<int, int>(CopyConstructionTester{});
+
+            compressed_pair<non_empty_explicit, non_empty_explicit> a(0, 1);
+            compressed_pair<non_empty_explicit, non_empty_explicit> b = a;
+            Assert::AreEqual(0, b.first().value);
+            Assert::AreEqual(1, b.second().value);
+
+            compressed_pair<non_empty_explicit, empty> c(0, empty{});
+            compressed_pair<non_empty_explicit, empty> d = c;
+            Assert::AreEqual(0, d.first().value);
+
+            compressed_pair<empty, non_empty_explicit> e(empty{}, 0);
+            compressed_pair<empty, non_empty_explicit> f = e;
+            Assert::AreEqual(0, f.second().value);
 
             object_counter::reset();
 
@@ -633,6 +707,19 @@ namespace dhorn::tests
         {
             DoNonExplicitCopyMoveConstructionTest<int, int>(MoveConstructionTester{});
 
+            compressed_pair<non_empty, non_empty> a = { 0, 1 };
+            compressed_pair<non_empty, non_empty> b = std::move(a);
+            Assert::AreEqual(0, b.first().value);
+            Assert::AreEqual(1, b.second().value);
+
+            compressed_pair<non_empty, empty> c = { 0,{} };
+            compressed_pair<non_empty, empty> d = std::move(c);
+            Assert::AreEqual(0, d.first().value);
+
+            compressed_pair<empty, non_empty> e = { {}, 0 };
+            compressed_pair<empty, non_empty> f = std::move(e);
+            Assert::AreEqual(0, f.second().value);
+
             object_counter::reset();
 
             compressed_pair<object_counter, object_counter> p1 = {};
@@ -663,6 +750,19 @@ namespace dhorn::tests
         TEST_METHOD(ExplicitMoveConstructionTest)
         {
             DoExplicitCopyMoveConstructionTest<int, int>(MoveConstructionTester{});
+
+            compressed_pair<non_empty_explicit, non_empty_explicit> a(0, 1);
+            compressed_pair<non_empty_explicit, non_empty_explicit> b = std::move(a);
+            Assert::AreEqual(0, b.first().value);
+            Assert::AreEqual(1, b.second().value);
+
+            compressed_pair<non_empty_explicit, empty> c(0, empty{});
+            compressed_pair<non_empty_explicit, empty> d = std::move(c);
+            Assert::AreEqual(0, d.first().value);
+
+            compressed_pair<empty, non_empty_explicit> e(empty{}, 0);
+            compressed_pair<empty, non_empty_explicit> f = std::move(e);
+            Assert::AreEqual(0, f.second().value);
 
             object_counter::reset();
 
