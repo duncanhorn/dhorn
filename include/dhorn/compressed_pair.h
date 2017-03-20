@@ -3,7 +3,16 @@
  *
  * compressed_pair.h
  *
- * 
+ * It is a rule that in C++ all types have a size of at least one (so that all objects can have a distinct address).
+ * This can be annoying when you need to store empty (or likely to be empty) types within a struct, but you don't want
+ * to pay that extra cost (especially if you never take the address of that object). This is particularly true of types
+ * that include an allocator/deleter/traits object alongside another object/pointer. E.g. you wouldn't want
+ * `std::unique_ptr` to be larger than (and likely twice as large as!) a pointer.
+ *
+ * This is where `compressed_pair` comes in handy. It solves this problem by deriving from types - as opposed to keeping
+ * them as members (and therefore taking up space) - that are both empty and non-final. All other types that don't fit
+ * these restrictions are kept as members. This allows pointers/objects to live alongside a traits type without the
+ * traits type taking up space (so long as the traits type is empty and non-final).
  */
 #pragma once
 
@@ -18,8 +27,6 @@ namespace dhorn
 
     /*
      * compressed_pair
-     *
-     * 
      */
 #pragma region compressed_pair
 
@@ -45,7 +52,8 @@ namespace dhorn
 
             // Tuple Construction Helper
             template <typename... Types, size_t... Indices>
-            compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>) : // TODO: noexcept?
+            compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
+                noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
                 _value(std::get<Indices>(std::move(args))...)
             {
             }
@@ -96,7 +104,8 @@ namespace dhorn
 
             // Tuple Construction
             template <typename... Types>
-            constexpr compressed_base(std::tuple<Types...> args) : // noexcet?
+            compressed_base(std::tuple<Types...> args)
+                /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
                 compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
             {
             }
@@ -201,7 +210,8 @@ namespace dhorn
 
             // Tuple Construction Helper
             template <typename... Types, size_t... Indices>
-            compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>) : // TODO: noexcept?
+            compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
+                noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
                 Ty(std::get<Indices>(std::move(args))...)
             {
                 // Visual Studio bug? Warning C4100: unreferenced formal parameter
@@ -254,7 +264,8 @@ namespace dhorn
 
             // Tuple Construction
             template <typename... Types>
-            constexpr compressed_base(std::tuple<Types...> args) : // noexcet?
+            compressed_base(std::tuple<Types...> args)
+                /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
                 compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
             {
             }
@@ -344,7 +355,11 @@ namespace dhorn
 
 
         /*
+         * tag_base
          *
+         * In C++, it is not possible to directly derive from the same type more than once (for good reasons; you would
+         * otherwise be unable to un-ambiguously differentiate them). The alternate is `tag_base` where you change the
+         * direct type you are deriving from by "tagging" it with an integer.
          */
         template <size_t tag, typename Ty>
         struct tag_base :
@@ -353,6 +368,8 @@ namespace dhorn
             using Ty::Ty;
         };
     }
+
+
 
     template <typename First, typename Second>
     class compressed_pair :
@@ -606,10 +623,14 @@ namespace dhorn
 
         // Piecewise Construction
         template <typename... FirstTypes, typename... SecondTypes>
-        constexpr compressed_pair(
+        compressed_pair(
             std::piecewise_construct_t,
             std::tuple<FirstTypes...> firstArgs,
-            std::tuple<SecondTypes...> secondArgs) :
+            std::tuple<SecondTypes...> secondArgs)
+            noexcept(std::conjunction<
+                std::is_nothrow_constructible<First, FirstTypes&&...>,
+                std::is_nothrow_constructible<Second, SecondTypes&&...>
+            >::value):
             first_base(std::move(firstArgs)),
             second_base(std::move(secondArgs))
         {
@@ -760,6 +781,26 @@ namespace dhorn
     }
 
 #pragma endregion
+
+
+
+    /*
+     * Helpers
+     */
+    namespace details
+    {
+        template <typename PairTy>
+        inline constexpr auto compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 0>)
+        {
+            return pair.first();
+        }
+
+        template <typename PairTy>
+        inline constexpr auto compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 1>)
+        {
+            return pair.second();
+        }
+    }
 }
 
 
@@ -768,6 +809,9 @@ namespace dhorn
 
 namespace std
 {
+    /*
+     * swap
+     */
     template <
         typename First,
         typename Second,
@@ -780,6 +824,127 @@ namespace std
     {
         lhs.swap(rhs);
     }
+
+
+
+    /*
+     * tuple_size
+     */
+    template <typename First, typename Second>
+    struct tuple_size<dhorn::compressed_pair<First, Second>> :
+        public std::integral_constant<size_t, 2>
+    {
+    };
+
+
+
+    /*
+     * tuple_element
+     */
+#pragma region tuple_element
+
+    template <typename First, typename Second>
+    struct tuple_element<0, dhorn::compressed_pair<First, Second>>
+    {
+        using type = First;
+    };
+
+    template <typename First, typename Second>
+    struct tuple_element<1, dhorn::compressed_pair<First, Second>>
+    {
+        using type = Second;
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * get
+     */
+#pragma region get
+
+    // By Index
+    template <size_t Index, typename First, typename Second>
+    constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
+        dhorn::compressed_pair<First, Second>& pair)
+    {
+        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+    }
+
+    template <size_t Index, typename First, typename Second>
+    constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
+        const dhorn::compressed_pair<First, Second>& pair)
+    {
+        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+    }
+
+    template <size_t Index, typename First, typename Second>
+    constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
+        dhorn::compressed_pair<First, Second>&& pair)
+    {
+        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+    }
+
+    template <size_t Index, typename First, typename Second>
+    constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
+        const dhorn::compressed_pair<First, Second>&& pair)
+    {
+        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+    }
+
+
+
+    // By Type
+    template <typename First, typename Second>
+    constexpr First& get(dhorn::compressed_pair<First, Second>& pair)
+    {
+        return pair.first();
+    }
+
+    template <typename First, typename Second>
+    constexpr const First& get(const dhorn::compressed_pair<First, Second>& pair)
+    {
+        return pair.first();
+    }
+
+    template <typename First, typename Second>
+    constexpr First&& get(dhorn::compressed_pair<First, Second>&& pair)
+    {
+        return pair.first();
+    }
+
+    template <typename First, typename Second>
+    constexpr const First&& get(const dhorn::compressed_pair<First, Second>&& pair)
+    {
+        return pair.first();
+    }
+
+    template <typename Second, typename First>
+    constexpr Second& get(dhorn::compressed_pair<First, Second>& pair)
+    {
+        return pair.second();
+    }
+
+    template <typename Second, typename First>
+    constexpr const Second& get(const dhorn::compressed_pair<First, Second>& pair)
+    {
+        return pair.second();
+    }
+
+    template <typename Second, typename First>
+    constexpr Second&& get(dhorn::compressed_pair<First, Second>&& pair)
+    {
+        return pair.second();
+    }
+
+    template <typename Second, typename First>
+    constexpr const Second&& get(const dhorn::compressed_pair<First, Second>&& pair)
+    {
+        return pair.second();
+    }
+
+#pragma endregion
 }
 
 #endif
