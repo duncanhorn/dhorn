@@ -884,7 +884,6 @@ namespace std
         dhorn::compressed_pair<First, Second>&& pair)
     {
         return std::forward<tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
-        //return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
     template <size_t Index, typename First, typename Second>
@@ -892,7 +891,6 @@ namespace std
         const dhorn::compressed_pair<First, Second>&& pair)
     {
         return std::forward<const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
-        //return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
 
