@@ -722,15 +722,11 @@ namespace dhorn
             promise.set_value();
         }
 
-        // TODO: Why is this marked as unreachable
-#pragma warning(push)
-#pragma warning(disable:4702)
         template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<!std::is_void_v<Ty>, int> = 0>
         void apply_set_value(std::promise<Ty>& promise, Func&& func, TupleTy&& tuple)
         {
             promise.set_value(std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple)));
         }
-#pragma warning(pop)
     }
 
 
@@ -841,6 +837,8 @@ namespace dhorn
                 std::forward<Args>(args)...);
         }
 
+#pragma warning(push)
+#pragma warning(disable:4702) // Unreachable code if `func` does not throw
         template <typename Func, typename... Args>
         auto submit_for_result(thread_pool_priority priority, Func&& func, Args&&... args) ->
             std::future<std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>>
@@ -871,6 +869,7 @@ namespace dhorn
 
             return future;
         }
+#pragma warning(pop)
 
 #pragma endregion
 
