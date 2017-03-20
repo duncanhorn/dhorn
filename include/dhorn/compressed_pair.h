@@ -790,13 +790,13 @@ namespace dhorn
     namespace details
     {
         template <typename PairTy>
-        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 0>)
+        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 0>) noexcept
         {
             return pair.first();
         }
 
         template <typename PairTy>
-        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 1>)
+        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 1>) noexcept
         {
             return pair.second();
         }
@@ -867,28 +867,28 @@ namespace std
     // By Index
     template <size_t Index, typename First, typename Second>
     constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
-        dhorn::compressed_pair<First, Second>& pair)
+        dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
     template <size_t Index, typename First, typename Second>
     constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
-        const dhorn::compressed_pair<First, Second>& pair)
+        const dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
     template <size_t Index, typename First, typename Second>
     constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
-        dhorn::compressed_pair<First, Second>&& pair)
+        dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return std::forward<tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
     }
 
     template <size_t Index, typename First, typename Second>
     constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
-        const dhorn::compressed_pair<First, Second>&& pair)
+        const dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return std::forward<const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
     }
@@ -897,49 +897,49 @@ namespace std
 
     // By Type
     template <typename First, typename Second>
-    constexpr First& get(dhorn::compressed_pair<First, Second>& pair)
+    constexpr First& get(dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename First, typename Second>
-    constexpr const First& get(const dhorn::compressed_pair<First, Second>& pair)
+    constexpr const First& get(const dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename First, typename Second>
-    constexpr First&& get(dhorn::compressed_pair<First, Second>&& pair)
+    constexpr First&& get(dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename First, typename Second>
-    constexpr const First&& get(const dhorn::compressed_pair<First, Second>&& pair)
+    constexpr const First&& get(const dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename Second, typename First>
-    constexpr Second& get(dhorn::compressed_pair<First, Second>& pair)
+    constexpr Second& get(dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.second();
     }
 
     template <typename Second, typename First>
-    constexpr const Second& get(const dhorn::compressed_pair<First, Second>& pair)
+    constexpr const Second& get(const dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.second();
     }
 
     template <typename Second, typename First>
-    constexpr Second&& get(dhorn::compressed_pair<First, Second>&& pair)
+    constexpr Second&& get(dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.second();
     }
 
     template <typename Second, typename First>
-    constexpr const Second&& get(const dhorn::compressed_pair<First, Second>&& pair)
+    constexpr const Second&& get(const dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.second();
     }
