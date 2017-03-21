@@ -34,6 +34,8 @@ namespace dhorn
         // We expect try_lock to return false. If it happens to return true, we'll assert fail, but we still want to be
         // continuable if a debugger is attached, so make sure to unlock as well
         assert(!lockable.try_lock() || (lockable.unlock(), false));
+#else
+        lockable;
 #endif
     }
 
@@ -52,6 +54,8 @@ namespace dhorn
 #if DHORN_DEBUG
         // Exclusive means we can't acquire it shared
         assert(!mutex.try_lock_shared() || (mutex.unlock_shared(), false));
+#else
+        mutex;
 #endif
     }
 
@@ -70,6 +74,8 @@ namespace dhorn
 #if DHORN_DEBUG
         // Shared means we can't acquire it exclusively
         assert_lock_held();
+#else
+        mutex;
 #endif
     }
 

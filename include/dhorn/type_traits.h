@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <type_traits>
 
 namespace dhorn
@@ -24,20 +25,13 @@ namespace dhorn
         template <typename Lhs, typename Rhs>
         struct IsComparable
         {
-            template <typename Left, typename Right>
-            static auto Fn(int) ->
-                decltype((std::declval<Left>() == std::declval<Right>()), std::true_type{})
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(int) -> decltype((std::declval<Left>() == std::declval<Right>()), std::true_type{});
 
-            // The compiler will prefer int over float for integral constants
-            template <typename Left, typename Right>
-            static auto Fn(float) ->
-                std::false_type
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(float) -> std::false_type;
 
-            using type = decltype(Fn<Lhs, Rhs>(0));
+            using type = decltype(evaluate(0));
         };
     }
 
@@ -66,20 +60,13 @@ namespace dhorn
         template <typename Lhs, typename Rhs>
         struct IsLessThanComparable
         {
-            template <typename Left, typename Right>
-            static auto Fn(int) ->
-                decltype((std::declval<Left>() < std::declval<Right>()), std::true_type{})
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(int) -> decltype((std::declval<Left>() < std::declval<Right>()), std::true_type{});
 
-            // The compiler will prefer int over float for integral constants
-            template <typename Left, typename Right>
-            static auto Fn(float) ->
-                std::false_type
-            {
-            }
+            template <typename Left = Lhs, typename Right = Rhs>
+            static auto evaluate(float) -> std::false_type;
 
-            using type = decltype(Fn<Lhs, Rhs>(0));
+            using type = decltype(evaluate(0));
         };
     }
 
@@ -91,6 +78,52 @@ namespace dhorn
 
     template <typename Lhs, typename Rhs>
     constexpr bool is_less_than_comparable_v = is_less_than_comparable<Lhs, Rhs>::value;
+
+#pragma endregion
+
+
+
+    /*
+     * is_implicitly_constructible
+     *
+     * Type trait for determining if a type is implicitly constructible for a given set of arguments.
+     */
+#pragma region is_implicitly_constructible
+
+    namespace details
+    {
+        template <typename Ty, typename... Args>
+        struct IsImplicitlyConstructible
+        {
+            template <typename T>
+            struct test_struct { T value; };
+
+            template <typename T = Ty>
+            static auto evaluate(int) -> decltype(test_struct<T>{ { std::declval<Args>()... } }, std::true_type{});
+
+            template <typename = Ty>
+            static auto evaluate(float)->std::false_type;
+
+            using type = decltype(evaluate(0));
+        };
+    }
+
+    template <typename Ty, typename... Args>
+    struct is_implicitly_constructible :
+        public details::IsImplicitlyConstructible<Ty, Args...>::type
+    {
+    };
+
+    template <typename Ty, typename... Args>
+    constexpr bool is_implicitly_constructible_v = is_implicitly_constructible<Ty, Args...>::value;
+
+
+
+    template <typename Ty>
+    using is_implicitly_default_constructible = is_implicitly_constructible<Ty>;
+
+    template <typename Ty>
+    constexpr bool is_implicitly_default_constructible_v = is_implicitly_default_constructible<Ty>::value;
 
 #pragma endregion
 
@@ -151,6 +184,42 @@ namespace dhorn
 
     template <typename Base, typename... Derived>
     constexpr bool all_base_of_v = all_base_of<Base, Derived...>::value;
+
+#pragma endregion
+
+
+
+    /*
+     * decay_ref
+     *
+     * Decays a type by `std::decay_t<T>`, unless the decayed type is `std::reference_wrapper<T>`, in which case the
+     * result is `T&`.
+     */
+#pragma region decay_ref
+
+    namespace details
+    {
+        template <typename Ty>
+        struct decay_ref_helper
+        {
+            using type = Ty;
+        };
+
+        template <typename Ty>
+        struct decay_ref_helper<std::reference_wrapper<Ty>>
+        {
+            using type = Ty&;
+        };
+    }
+
+    template <typename Ty>
+    struct decay_ref
+    {
+        using type = typename details::decay_ref_helper<std::decay_t<Ty>>::type;
+    };
+
+    template <typename Ty>
+    using decay_ref_t = typename decay_ref<Ty>::type;
 
 #pragma endregion
 

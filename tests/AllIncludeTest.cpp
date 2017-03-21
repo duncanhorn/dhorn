@@ -9,6 +9,7 @@
 
 // "Normal" Includes
 #include <dhorn/bitmask.h>
+#include <dhorn/compressed_pair.h>
 #include <dhorn/console.h>
 #include <dhorn/debug.h>
 #include <dhorn/functional.h>

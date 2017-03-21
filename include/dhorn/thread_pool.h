@@ -837,6 +837,8 @@ namespace dhorn
                 std::forward<Args>(args)...);
         }
 
+#pragma warning(push)
+#pragma warning(disable:4702) // Unreachable code if `func` does not throw
         template <typename Func, typename... Args>
         auto submit_for_result(thread_pool_priority priority, Func&& func, Args&&... args) ->
             std::future<std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>>
@@ -867,6 +869,7 @@ namespace dhorn
 
             return future;
         }
+#pragma warning(pop)
 
 #pragma endregion
 
