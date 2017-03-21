@@ -42,7 +42,7 @@ namespace dhorn
          */
 #pragma region compressed_base
 
-        // CanDerive == false overload. Keep the value as a member as opposed to deriving from it
+        // CanDerive == false specialization. Keep the value as a member as opposed to deriving from it
         template <typename Ty, bool CanDerive = !std::is_final<Ty>::value && std::is_empty<Ty>::value>
         class compressed_base
         {
@@ -200,7 +200,7 @@ namespace dhorn
 
 
 
-        // CanDerive == true overload. Use the type as a base type
+        // CanDerive == true specialization. Use the type as a base type
         template <typename Ty>
         class compressed_base<Ty, true> : public Ty
         {
