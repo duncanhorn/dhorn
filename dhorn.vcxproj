@@ -216,7 +216,7 @@
     <ClInclude Include="include\dhorn\string.h" />
     <ClInclude Include="include\dhorn\thread_pool.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
-    <ClInclude Include="include\dhorn\unique_any.h" />
+    <ClInclude Include="include\dhorn\unique.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
     <ClInclude Include="include\dhorn\winrt\winrt_traits.h" />
