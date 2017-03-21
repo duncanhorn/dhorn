@@ -1165,6 +1165,134 @@ namespace dhorn::tests
 
 
 
+#pragma region Comparison Operators Tests
+
+        template <typename TestTy>
+        void DoComparisonTest(const TestTy& test)
+        {
+            compressed_pair<int, int> a1(10, 10);
+            compressed_pair<int, int> a2(10, 10);
+            test.template run<0>(a1, a1);
+            test.template run<0>(a2, a2);
+            test.template run<0>(a1, a2);
+            test.template run<0>(a2, a1);
+
+            a1.first() = 8;
+            test.template run<-1>(a1, a2);
+            test.template run<1>(a2, a1);
+
+            a1.first() = 10;
+            a1.second() = 42;
+            test.template run<1>(a1, a2);
+            test.template run<-1>(a2, a1);
+
+
+            compressed_pair<int, std::string> b1(42, "foo");
+            compressed_pair<int, std::string> b2(42, "foo");
+            test.template run<0>(b1, b1);
+            test.template run<0>(b2, b2);
+            test.template run<0>(b1, b2);
+            test.template run<0>(b2, b1);
+
+            b1.first() = 8;
+            test.template run<-1>(b1, b2);
+            test.template run<1>(b2, b1);
+
+            b1.first() = 42;
+            b2.second() = "bar";
+            test.template run<1>(b1, b2);
+            test.template run<-1>(b2, b1);
+        }
+
+        struct EqualityTester
+        {
+            template <int Compare, typename PairTy>
+            void run(const PairTy& lhs, const PairTy& rhs) const
+            {
+                Assert::AreEqual(Compare == 0, lhs == rhs);
+                Assert::AreEqual(Compare == 0, lhs == rhs);
+            }
+        };
+
+        TEST_METHOD(EqualityComparisonTest)
+        {
+            DoComparisonTest(EqualityTester{});
+        }
+
+        struct InEqualityTester
+        {
+            template <int Compare, typename PairTy>
+            void run(const PairTy& lhs, const PairTy& rhs) const
+            {
+                Assert::AreEqual(Compare != 0, lhs != rhs);
+            }
+        };
+
+        TEST_METHOD(InEqualityComparisonTest)
+        {
+            DoComparisonTest(InEqualityTester{});
+        }
+
+        struct LessThanTester
+        {
+            template <int Compare, typename PairTy>
+            void run(const PairTy& lhs, const PairTy& rhs) const
+            {
+                Assert::AreEqual(Compare < 0, lhs < rhs);
+            }
+        };
+
+        TEST_METHOD(LessThanComparisonTest)
+        {
+            DoComparisonTest(LessThanTester{});
+        }
+
+        struct GreaterThanTester
+        {
+            template <int Compare, typename PairTy>
+            void run(const PairTy& lhs, const PairTy& rhs) const
+            {
+                Assert::AreEqual(Compare > 0, lhs > rhs);
+            }
+        };
+
+        TEST_METHOD(GreaterThanComparisonTest)
+        {
+            DoComparisonTest(GreaterThanTester{});
+        }
+
+        struct LessThanOrEqualTester
+        {
+            template <int Compare, typename PairTy>
+            void run(const PairTy& lhs, const PairTy& rhs) const
+            {
+                Assert::AreEqual(Compare <= 0, lhs <= rhs);
+            }
+        };
+
+        TEST_METHOD(LessThanOrEqualComparisonTest)
+        {
+            DoComparisonTest(LessThanOrEqualTester{});
+        }
+
+        struct GreaterThanOrEqualTester
+        {
+            template <int Compare, typename PairTy>
+            void run(const PairTy& lhs, const PairTy& rhs) const
+            {
+                Assert::AreEqual(Compare >= 0, lhs >= rhs);
+            }
+        };
+
+        TEST_METHOD(GreaterThanOrEqualComparisonTest)
+        {
+            DoComparisonTest(GreaterThanOrEqualTester{});
+        }
+
+#pragma endregion
+
+
+
 #pragma region Std Functions Tests
 
         TEST_METHOD(TupleSizeTest)

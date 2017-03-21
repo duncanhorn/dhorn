@@ -151,22 +151,22 @@ namespace dhorn
              */
 #pragma region Accessors
 
-            Ty& value() noexcept
+            constexpr Ty& value() noexcept
             {
                 return this->_value;
             }
 
-            const Ty& value() const noexcept
+            constexpr const Ty& value() const noexcept
             {
                 return this->_value;
             }
 
-            volatile Ty& value() volatile noexcept
+            constexpr volatile Ty& value() volatile noexcept
             {
                 return this->_value;
             }
 
-            const volatile Ty& value() const volatile noexcept
+            constexpr const volatile Ty& value() const volatile noexcept
             {
                 return this->_value;
             }
@@ -311,22 +311,22 @@ namespace dhorn
              */
 #pragma region Accessors
 
-            Ty& value() noexcept
+            constexpr Ty& value() noexcept
             {
                 return *this;
             }
 
-            const Ty& value() const noexcept
+            constexpr const Ty& value() const noexcept
             {
                 return *this;
             }
 
-            volatile Ty& value() volatile noexcept
+            constexpr volatile Ty& value() volatile noexcept
             {
                 return *this;
             }
 
-            const volatile Ty& value() const volatile noexcept
+            constexpr const volatile Ty& value() const volatile noexcept
             {
                 return *this;
             }
@@ -695,43 +695,43 @@ namespace dhorn
 #pragma region Accessors
 
         // First
-        first_type& first() noexcept
+        constexpr first_type& first() noexcept
         {
             return first_base::value();
         }
 
-        const first_type& first() const noexcept
+        constexpr const first_type& first() const noexcept
         {
             return first_base::value();
         }
 
-        volatile first_type& first() volatile noexcept
+        constexpr volatile first_type& first() volatile noexcept
         {
             return first_base::value();
         }
 
-        const volatile first_type& first() const volatile noexcept
+        constexpr const volatile first_type& first() const volatile noexcept
         {
             return first_base::value();
         }
 
         // Second
-        second_type& second() noexcept
+        constexpr second_type& second() noexcept
         {
             return second_base::value();
         }
 
-        const second_type& second() const noexcept
+        constexpr const second_type& second() const noexcept
         {
             return second_base::value();
         }
 
-        volatile second_type& second() volatile noexcept
+        constexpr volatile second_type& second() volatile noexcept
         {
             return second_base::value();
         }
 
-        const volatile second_type& second() const volatile noexcept
+        constexpr const volatile second_type& second() const volatile noexcept
         {
             return second_base::value();
         }
@@ -778,6 +778,65 @@ namespace dhorn
     {
         using return_type = compressed_pair<decay_ref_t<First>, decay_ref_t<Second>>;
         return return_type(std::forward<First>(first), std::forward<Second>(second));
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * Comparison Operators
+     */
+#pragma region Comparison Operators
+
+    template <typename First, typename Second>
+    inline constexpr bool operator==(
+        const compressed_pair<First, Second>& lhs,
+        const compressed_pair<First, Second>& rhs)
+    {
+        return (lhs.first() == rhs.first()) && (lhs.second() == rhs.second());
+    }
+
+    template <typename First, typename Second>
+    inline constexpr bool operator!=(
+        const compressed_pair<First, Second>& lhs,
+        const compressed_pair<First, Second>& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template <typename First, typename Second>
+    inline constexpr bool operator<(
+        const compressed_pair<First, Second>& lhs,
+        const compressed_pair<First, Second>& rhs)
+    {
+        return (lhs.first() < rhs.first()) || (!(rhs.first() < lhs.first()) && (lhs.second() < rhs.second()));
+    }
+
+    template <typename First, typename Second>
+    inline constexpr bool operator>(
+        const compressed_pair<First, Second>& lhs,
+        const compressed_pair<First, Second>& rhs)
+    {
+        return rhs < lhs;
+    }
+
+    template <typename First, typename Second>
+    inline constexpr bool operator<=(
+        const compressed_pair<First, Second>& lhs,
+        const compressed_pair<First, Second>& rhs)
+    {
+        // Negation of operator>
+        return !(rhs < lhs);
+    }
+
+    template <typename First, typename Second>
+    inline constexpr bool operator>=(
+        const compressed_pair<First, Second>& lhs,
+        const compressed_pair<First, Second>& rhs)
+    {
+        // Negation of operator<
+        return !(lhs < rhs);
     }
 
 #pragma endregion
@@ -866,28 +925,28 @@ namespace std
 
     // By Index
     template <size_t Index, typename First, typename Second>
-    constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
+    inline constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
         dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
     template <size_t Index, typename First, typename Second>
-    constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
+    inline constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
         const dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
     }
 
     template <size_t Index, typename First, typename Second>
-    constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
+    inline constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
         dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return std::forward<tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
     }
 
     template <size_t Index, typename First, typename Second>
-    constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
+    inline constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
         const dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return std::forward<const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
@@ -897,49 +956,49 @@ namespace std
 
     // By Type
     template <typename First, typename Second>
-    constexpr First& get(dhorn::compressed_pair<First, Second>& pair) noexcept
+    inline constexpr First& get(dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename First, typename Second>
-    constexpr const First& get(const dhorn::compressed_pair<First, Second>& pair) noexcept
+    inline constexpr const First& get(const dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename First, typename Second>
-    constexpr First&& get(dhorn::compressed_pair<First, Second>&& pair) noexcept
+    inline constexpr First&& get(dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename First, typename Second>
-    constexpr const First&& get(const dhorn::compressed_pair<First, Second>&& pair) noexcept
+    inline constexpr const First&& get(const dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.first();
     }
 
     template <typename Second, typename First>
-    constexpr Second& get(dhorn::compressed_pair<First, Second>& pair) noexcept
+    inline constexpr Second& get(dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.second();
     }
 
     template <typename Second, typename First>
-    constexpr const Second& get(const dhorn::compressed_pair<First, Second>& pair) noexcept
+    inline constexpr const Second& get(const dhorn::compressed_pair<First, Second>& pair) noexcept
     {
         return pair.second();
     }
 
     template <typename Second, typename First>
-    constexpr Second&& get(dhorn::compressed_pair<First, Second>&& pair) noexcept
+    inline constexpr Second&& get(dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.second();
     }
 
     template <typename Second, typename First>
-    constexpr const Second&& get(const dhorn::compressed_pair<First, Second>&& pair) noexcept
+    inline constexpr const Second&& get(const dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return pair.second();
     }
