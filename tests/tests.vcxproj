@@ -138,6 +138,7 @@
     <ClCompile Include="ArrayReferenceTests.cpp" />
     <ClCompile Include="BitmaskTests.cpp" />
     <ClCompile Include="CommandLineTests.cpp" />
+    <ClCompile Include="CompressedPairTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ComTraitsTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />

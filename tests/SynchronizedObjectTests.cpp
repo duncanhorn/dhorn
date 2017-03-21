@@ -152,6 +152,7 @@ namespace dhorn
                 Assert::AreEqual(num_threads * num_iterations, val.copy_unlocked());
             }
 
+            /*****
             TEST_METHOD(BasicIncorrectLockingTest)
             {
                 dhorn::experimental::synchronized_object<size_t> val = 0;
@@ -183,6 +184,7 @@ namespace dhorn
                 // fail unexpectedly, but it's highly unlikely
                 Assert::AreNotEqual(num_threads * num_iterations, val.copy_unlocked());
             }
+            *****/
 
             TEST_METHOD(BasicMonitorTest)
             {
@@ -266,6 +268,7 @@ namespace dhorn
                 }
             }
 
+            /*****
             TEST_METHOD(CopyUnlockedLockedTest)
             {
                 dhorn::experimental::synchronized_object<copy_count> val;
@@ -306,6 +309,7 @@ namespace dhorn
 
                 Assert::IsTrue(pass);
             }
+            *****/
 
             TEST_METHOD(SetLockedTest)
             {

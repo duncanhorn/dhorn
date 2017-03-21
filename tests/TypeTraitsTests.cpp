@@ -8,6 +8,8 @@
 #include "stdafx.h"
 
 #include <dhorn/type_traits.h>
+#include <string>
+#include <vector>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -46,6 +48,76 @@ namespace dhorn::tests
             Assert::IsFalse(dhorn::is_less_than_comparable_v<comp2, comp1>);
         }
 
+        TEST_METHOD(IsImplicitlyDefaultConstructibleTest)
+        {
+            struct test_1 {};
+            struct test_2 { test_2() = default; };
+            struct test_3 { test_3() {} };
+            struct test_4
+            {
+                explicit test_4() {}
+
+                test_4& operator=(const test_4&) = default;
+                test_4& operator=(test_4&&) = default;
+            };
+            struct test_5 { test_5(int) {} };
+            struct test_6
+            {
+                test_6() = default;
+                test_6(test_6&&) = default;
+
+                test_6& operator=(const test_6&) = delete;
+            };
+
+            Assert::IsTrue(is_implicitly_default_constructible_v<test_1>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<test_2>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<test_3>);
+            Assert::IsFalse(is_implicitly_default_constructible_v<test_4>);
+            Assert::IsFalse(is_implicitly_default_constructible_v<test_5>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<test_6>);
+
+            // Some common types
+            Assert::IsTrue(is_implicitly_default_constructible_v<int>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<double>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<char*>);
+
+            // Some STL types
+            Assert::IsTrue(is_implicitly_default_constructible_v<std::string>);
+            Assert::IsTrue(is_implicitly_default_constructible_v<std::vector<int>>);
+        }
+
+        template <typename Ty, typename ExpectedTy = Ty>
+        static void DoDecayRefTest()
+        {
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<Ty>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const Ty>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<volatile Ty>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const volatile Ty>>);
+
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<Ty&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const Ty&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<volatile Ty&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const volatile Ty&>>);
+
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<Ty&&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const Ty&&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<volatile Ty&&>>);
+            Assert::IsTrue(std::is_same_v<ExpectedTy, decay_ref_t<const volatile Ty&&>>);
+        }
+
+        TEST_METHOD(DecayRefTest)
+        {
+            DoDecayRefTest<int>();
+            DoDecayRefTest<std::string>();
+            DoDecayRefTest<void*>();
+
+            DoDecayRefTest<std::reference_wrapper<int>, int&>();
+            DoDecayRefTest<std::reference_wrapper<const int>, const int&>();
+            DoDecayRefTest<std::reference_wrapper<volatile int>, volatile int&>();
+            DoDecayRefTest<std::reference_wrapper<const volatile int>, const volatile int&>();
+            DoDecayRefTest<std::reference_wrapper<std::string>, std::string&>();
+        }
+
         TEST_METHOD(ByteOffsetTest)
         {
             struct foo
@@ -61,32 +133,7 @@ namespace dhorn::tests
             Assert::AreEqual(dhorn::byte_offset(&foo::uint32), offsetof(foo, uint32));
             Assert::AreEqual(dhorn::byte_offset(&foo::ch), offsetof(foo, ch));
         }
-
-        TEST_METHOD(IsImplicitlyDefaultConstructibleTest)
-        {
-            struct test_1 {};
-            struct test_2 { test_2() = default; };
-            struct test_3 { test_3() {} };
-            struct test_4 { explicit test_4() {} };
-            struct test_5 { test_5(int) {} };
-
-            Assert::IsTrue(is_implicitly_default_constructible_v<test_1>);
-            Assert::IsTrue(is_implicitly_default_constructible_v<test_2>);
-            Assert::IsTrue(is_implicitly_default_constructible_v<test_3>);
-            Assert::IsFalse(is_implicitly_default_constructible_v<test_4>);
-            Assert::IsFalse(is_implicitly_default_constructible_v<test_5>);
-
-            // Some common types
-            Assert::IsTrue(is_implicitly_default_constructible_v<int>);
-            Assert::IsTrue(is_implicitly_default_constructible_v<double>);
-            Assert::IsTrue(is_implicitly_default_constructible_v<char*>);
-
-            // Some STL types
-            Assert::IsTrue(is_implicitly_default_constructible_v<std::string>);
-        }
     };
-
-
 
     TEST_CLASS(AnyBaseOfTests)
     {
@@ -119,8 +166,6 @@ namespace dhorn::tests
             Assert::IsFalse(any_base_of<void, int, float, double, foo, bar, foobar>::value);
         }
     };
-
-
 
     TEST_CLASS(AllBaseOfTests)
     {
@@ -155,8 +200,6 @@ namespace dhorn::tests
             Assert::IsFalse(all_base_of<foobar, foo, bar>::value);
         }
     };
-
-
 
     TEST_CLASS(IsCStringTests)
     {
