@@ -26,7 +26,18 @@
  *                      or assignment to the underlying resource member variable.
  *      traits_type     An alias for `Traits`.
  *
- * 
+ * The traits type is expected has a number of required and optional functions/type aliases:
+ *
+ *      value_type      An optional type alias. If present, is used as the `unique::value_type` alias.
+ *      is_valid        A static member function that takes an argument of type `const unique::value_type&` and returns
+ *                      a `bool` indicating whether or not the resource is valid. I.e. whether or not the resource is
+ *                      something that needs to be cleaned up.
+ *      default_value   A static member function that takes no arguments and returns a value of type
+ *                      `unique::value_type` - or something that is convertible to `unique::value_type`. This function
+ *                      is used for operations such as default construction and resetting the value. Note that values
+ *                      returned by this function need not be considered "invalid" by the `is_valid` function.
+ *      operator()      A non-static member function that takes in arguments of type `unique::value_type&` and is
+ *                      expected to destroy/release that resource.
  */
 #pragma once
 
@@ -43,6 +54,33 @@ namespace dhorn
 #pragma region unique Traits Types
 
     /*
+     * Helpers
+     */
+    namespace details
+    {
+        /*
+         * unique_value_type_from_deleter
+         */
+        template <typename Deleter, typename Ty, typename = void>
+        struct unique_value_type_from_deleter
+        {
+            // Fallback case
+            using type = Ty*;
+        };
+
+        template <typename Deleter, typename Ty>
+        struct unique_value_type_from_deleter<Deleter, Ty, std::void_t<typename Deleter::pointer>>
+        {
+            using type = typename Deleter::pointer;
+        };
+
+        template <typename Deleter, typename Ty>
+        using unique_value_type_from_deleter_t = typename unique_value_type_from_deleter<Deleter, Ty>::type;
+    }
+
+
+
+    /*
      * unique_pointer_traits
      */
     template <typename Ty, typename Deleter = std::default_delete<Ty>>
@@ -56,7 +94,7 @@ namespace dhorn
         /*
          * Type Aliases
          */
-        using value_type = Ty*;
+        using value_type = details::unique_value_type_from_deleter_t<Deleter, Ty>;
 
 
 
@@ -70,7 +108,7 @@ namespace dhorn
         /*
          * Destroy Operator
          */
-        void operator()(value_type ptr)
+        void operator()(value_type ptr) const
         {
             deleter_base::value()(ptr);
         }
@@ -107,7 +145,7 @@ namespace dhorn
         /*
          * Type Aliases
          */
-        using value_type = Ty*;
+        using value_type = details::unique_value_type_from_deleter_t<Deleter, Ty>;
 
 
 
@@ -121,7 +159,8 @@ namespace dhorn
         /*
          * Destroy Operator
          */
-        void operator()(value_type ptr)
+        template <typename Other, std::enable_if_t<std::is_convertible<Other(*)[], Ty(*)[]>::value, int> = 0>
+        void operator()(Other* ptr) const
         {
             deleter_base::value()(ptr);
         }
@@ -201,11 +240,13 @@ namespace dhorn
     template <typename Ty, typename Traits = unique_traits<Ty>>
     class unique
     {
+        // We need to invoke static functions on the traits type, but we allow pointers/references
+        using traits_type = std::remove_reference_t<std::remove_pointer_t<Traits>>;
+
     public:
         /*
          * Public Types
          */
-        using traits_type = Traits;
         using value_type = details::value_type_from_unique_traits_t<Traits, Ty>;
         using semantic_type = Ty;
 
@@ -215,13 +256,15 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         constexpr unique() noexcept :
-            _data()
+            _data(traits_type::default_value(), Traits{})
         {
+            static_assert(!std::is_pointer_v<Traits>,
+                "Construcing a unique object with a null traits object is ill-formed");
         }
 
         template <typename Type, std::enable_if_t<std::is_constructible<Ty, const Type&>::value, int> = 0>
         explicit unique(const Type& value) :
-            _data(value, traits_type{})
+            _data(value, Traits{})
         {
             static_assert(!std::is_pointer_v<Traits>,
                 "Construcing a unique object with a null traits object is ill-formed");
@@ -281,17 +324,31 @@ namespace dhorn
 
     private:
 
+#pragma region Member Accessors
+
         constexpr value_type& my_value() noexcept
         {
             return this->_data.first();
         }
 
-        constexpr traits_type& my_traits() noexcept
+        constexpr const value_type& my_value() const noexcept
+        {
+            return this->_data.first();
+        }
+
+        constexpr Traits& my_traits() noexcept
         {
             return this->_data.second();
         }
 
-        compressed_pair<value_type, traits_type> _data;
+        constexpr const Traits& my_traits() const noexcept
+        {
+            return this->_data.second();
+        }
+
+#pragma endregion
+
+        compressed_pair<value_type, Traits> _data;
     };
 
 #pragma endregion

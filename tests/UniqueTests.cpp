@@ -146,10 +146,53 @@ namespace dhorn::tests
 
 
 
+#pragma region Traits Tests
+
+        template <typename Ty>
+        struct has_value_type_traits
+        {
+            using value_type = std::unique_ptr<Ty>;
+
+            static constexpr bool is_valid(const value_type& value) { return value; }
+            static constexpr value_type default_value() { return {}; }
+            constexpr void operator()(const value_type&) {}
+        };
+
+        template <typename Ty>
+        struct no_value_type_traits
+        {
+            static constexpr bool is_valid(const Ty&) { return true; }
+            static constexpr Ty default_value() { return {}; }
+            constexpr void operator()(const Ty&) {}
+        };
+
+        TEST_METHOD(ValueTypeAliasTest)
+        {
+            Assert::IsTrue(std::is_same_v<int, unique<int, no_value_type_traits<int>>::value_type>);
+            Assert::IsTrue(std::is_same_v<std::unique_ptr<int>, unique<int, has_value_type_traits<int>>::value_type>);
+
+            Assert::IsTrue(std::is_same_v<int*, unique<int*>::value_type>);
+            Assert::IsTrue(std::is_same_v<int*, unique<int(*)[]>::value_type>);
+
+            Assert::IsTrue(std::is_same_v<int*, unique_ptr<int>::value_type>);
+            Assert::IsTrue(std::is_same_v<int*, unique_ptr<int[]>::value_type>);
+        }
+
+#pragma endregion
+
+
+
 #pragma region Tests
 
         TEST_METHOD(DefaultConstructionTest)
         {
+            Assert::IsTrue(std::is_default_constructible_v<unique<int, empty_traits<int>>>);
+
+            // We can't test with std::is_default_constructible_v since SFINAE is not involved (it only fails when
+            // trying to instantiate the function template), but the following should fail to compile:
+            //unique<int, empty_traits<int>&> x;
+            //unique<int, empty_traits<int>*> y;
+
             unique_ptr<int> intPtr;
         }
 
