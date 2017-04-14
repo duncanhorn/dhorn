@@ -150,6 +150,33 @@ namespace dhorn
 
 
         /*
+         * Construction/Assignment Enablement
+         *
+         * Follows the same rules as std::unique_ptr. Same rules apply to both construction and assignment
+         */
+        template <typename ArgTy>
+        struct is_convertible :
+            std::disjunction<
+                std::is_same<std::remove_reference_t<ArgTy>, value_type>,
+                std::is_same<std::remove_reference_t<ArgTy>, std::nullptr_t>,
+                std::conjunction<
+                    std::is_same<value_type, Ty*>,
+                    std::is_pointer<std::remove_reference_t<ArgTy>>,
+                    std::is_convertible<std::remove_pointer_t<std::remove_reference_t<ArgTy>>(*)[], Ty(*)[]>
+                >
+            >
+        {
+        };
+
+        template <typename ArgTy>
+        struct is_constructible :
+            public is_convertible<ArgTy>
+        {
+        };
+
+
+
+        /*
          * Constructor(s)/Destructor
          */
         using deleter_base::deleter_base;
@@ -217,6 +244,8 @@ namespace dhorn
     {
         /*
          * value_type_from_unique_traits
+         *
+         * TraitsTy::value_type if it exists, else Ty
          */
         template <typename TraitsTy, typename Ty, typename = void>
         struct value_type_from_unique_traits
@@ -233,6 +262,28 @@ namespace dhorn
 
         template <typename TraitsTy, typename Ty>
         using value_type_from_unique_traits_t = typename value_type_from_unique_traits<TraitsTy, Ty>::type;
+
+
+
+        /*
+         * is_unique_constructible
+         *
+         * TraitsTy::is_constructible<ArgTy> if it exists, else std::is_constructible<ValueTy, ArgTy>
+         */
+        template <typename TraitsTy, typename ValueTy, typename ArgTy, typename = void>
+        struct is_unique_constructible :
+            public std::is_constructible<ValueTy, ArgTy> // Fallback case
+        {
+        };
+
+        template <typename TraitsTy, typename ValueTy, typename ArgTy>
+        struct is_unique_constructible<TraitsTy, ValueTy, ArgTy, std::void_t<typename TraitsTy::template is_constructible<ArgTy>>> :
+            public TraitsTy::template is_constructible<ArgTy>
+        {
+        };
+
+        template <typename TraitsTy, typename ValueTy, typename ArgTy>
+        constexpr bool is_unique_constructible_v = is_unique_constructible<TraitsTy, ValueTy, ArgTy>::value;
     }
 
 
@@ -240,7 +291,7 @@ namespace dhorn
     template <typename Ty, typename Traits = unique_traits<Ty>>
     class unique
     {
-        // We need to invoke static functions on the traits type, but we allow pointers/references
+        // We need to invoke static functions/type traits on the traits type, but we allow pointers/references
         using traits_type = std::remove_reference_t<std::remove_pointer_t<Traits>>;
 
     public:
@@ -262,20 +313,33 @@ namespace dhorn
                 "Construcing a unique object with a null traits object is ill-formed");
         }
 
-        template <typename Type, std::enable_if_t<std::is_constructible<Ty, const Type&>::value, int> = 0>
-        explicit unique(const Type& value) :
-            _data(value, Traits{})
+        template <
+            typename ArgTy,
+            std::enable_if_t<details::is_unique_constructible<traits_type, value_type, ArgTy&&>::value, int> = 0>
+        explicit unique(ArgTy&& value) :
+            _data(std::forward<ArgTy>(value), Traits{})
         {
             static_assert(!std::is_pointer_v<Traits>,
                 "Construcing a unique object with a null traits object is ill-formed");
         }
 
-        //explicit unique(const value_type& value) :
-        //    _data(value, traits_type{})
-        //{
-        //    static_assert(!std::is_pointer_v<Traits>,
-        //        "Construcing a unique object with a null traits object is ill-formed");
-        //}
+        template <
+            typename ArgTy,
+            std::enable_if_t<details::is_unique_constructible<traits_type, value_type, ArgTy&&>::value, int> = 0>
+        unique(ArgTy&& value, std::conditional_t<std::is_reference<Traits>::value, Traits, const Traits&> traits) :
+            _data(std::forward<ArgTy>(value), traits)
+        {
+        }
+
+        template <
+            typename ArgTy,
+            typename TraitsTy = Traits,
+            std::enable_if_t<details::is_unique_constructible<traits_type, value_type, ArgTy&&>::value, int> = 0,
+            std::enable_if_t<!std::is_reference<TraitsTy>::value, int> = 0>
+        unique(ArgTy&& value, Traits&& traits) :
+            _data(std::forward<ArgTy>(value), std::move(traits))
+        {
+        }
 
         ~unique()
         {

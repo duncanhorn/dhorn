@@ -15,6 +15,21 @@ namespace dhorn::tests
 {
     TEST_CLASS(UniqueTests)
     {
+#pragma region Test Types
+
+        struct base
+        {
+        };
+
+        struct derived :
+            public base
+        {
+        };
+
+#pragma endregion
+
+
+
 #pragma region Test Traits
 
         // Traits type that is guaranteed to be empty. Useful for size tests...
@@ -184,6 +199,8 @@ namespace dhorn::tests
 
 #pragma region Tests
 
+#pragma region Constructor Tests
+
         TEST_METHOD(DefaultConstructionTest)
         {
             Assert::IsTrue(std::is_default_constructible_v<unique<int, empty_traits<int>>>);
@@ -196,10 +213,106 @@ namespace dhorn::tests
             unique_ptr<int> intPtr;
         }
 
-        TEST_METHOD(ClearBufferTest)
+        TEST_METHOD(ValueConstructionTest)
         {
+            // Constructing a unique<int, ...> should follow int's construction rules
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>>, int>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>>, const int>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>>, char>);
+            Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>>, int*>);
+            Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>>, std::string>);
 
+            unique<int, empty_traits<int>> uniqueInt(8);
+
+            // Constructing a unique<std::string, ...> should follow std::string's construction rules
+            Assert::IsTrue(std::is_constructible_v<unique<std::string, empty_traits<std::string>>, const char*>);
+            Assert::IsTrue(std::is_constructible_v<unique<std::string, empty_traits<std::string>>, const std::string&>);
+            Assert::IsTrue(std::is_constructible_v<unique<std::string, empty_traits<std::string>>, std::string&&>);
+            Assert::IsFalse(std::is_constructible_v<unique<std::string, empty_traits<std::string>>, const wchar_t*>);
+            Assert::IsFalse(std::is_constructible_v<unique<std::string, empty_traits<std::string>>, const std::wstring&>);
+            Assert::IsFalse(std::is_constructible_v<unique<std::string, empty_traits<std::string>>, std::wstring&&>);
+
+            unique<std::string, empty_traits<std::string>> uniqueString("foo");
+
+            // Constructing a unique_ptr should follow the same construction rules as std::unique_ptr
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, std::nullptr_t>);
+
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, int*>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<int>, const int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const int>, int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const int>, const int*>);
+
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<base>, derived*>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base>, const derived*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const base>, derived*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const base>, const derived*>);
+
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<derived>, base*>);
+
+            unique_ptr<int> uniqueIntPtr(nullptr);
+            unique_ptr<int> uniqueIntPtr2(new int());
+            unique_ptr<base> uniqueBasePtr(new derived());
+
+            // Constructing a unique_ptr<T[]> should follow the same construction rules as std::unique_ptr<T[]>
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int[]>, std::nullptr_t>);
+
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int[]>, int*>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<int[]>, const int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const int[]>, int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const int[]>, const int*>);
+
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<base[]>, base*>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, const base*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const base[]>, base*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const base[]>, const base*>);
+
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, derived*>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, const derived*>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<const base[]>, derived*>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<const base[]>, const derived*>);
+
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<derived[]>, base*>);
+
+            unique_ptr<int[]> uniqueIntArray(nullptr);
+            unique_ptr<int[]> uniqueIntArray2(new int[4]);
+            unique_ptr<base[]> uniqueBaseArray(new base[8]);
         }
+
+        TEST_METHOD(ConstructWithTraitsTest)
+        {
+            empty_traits<int> emptyIntTraits;
+
+            // Value
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>>, int, empty_traits<int>>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>>, int, empty_traits<int>&>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>>, int, const empty_traits<int>&>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>>, int, empty_traits<int>&&>);
+
+            unique<int, empty_traits<int>> uniqueIntValue1(0, emptyIntTraits);
+            unique<int, empty_traits<int>> uniqueIntValue2(0, empty_traits<int>{});
+
+            // Pointer
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>*>, int, empty_traits<int>*>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>*>, int, empty_traits<int>*&>);
+            Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>*>, int, const empty_traits<int>*&>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>*>, int, empty_traits<int>*&&>);
+
+            Assert::IsTrue(std::is_constructible_v<unique<int, const empty_traits<int>*>, int, empty_traits<int>*>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, const empty_traits<int>*>, int, empty_traits<int>*&>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, const empty_traits<int>*>, int, const empty_traits<int>*&>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, const empty_traits<int>*>, int, empty_traits<int>*&&>);
+
+            unique<int, empty_traits<int>*> uniqueIntPointer1(0, &emptyIntTraits);
+            unique<int, const empty_traits<int>*> uniqueIntPointer2(0, &emptyIntTraits);
+
+            // Reference
+            Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>&>, int, empty_traits<int>>);
+            Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>&>, int, empty_traits<int>&>);
+            Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>&>, int, const empty_traits<int>&>);
+            Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>&>, int, empty_traits<int>&&>);
+        }
+
+#pragma endregion
 
 #pragma endregion
     };
