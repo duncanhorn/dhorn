@@ -291,7 +291,10 @@ namespace dhorn
     template <typename Ty, typename Traits = unique_traits<Ty>>
     class unique
     {
-        // We need to invoke static functions/type traits on the traits type, but we allow pointers/references
+        // We do more than invoke operator() on the traits type, meaning that it can't be a pointer-to-function type
+        static_assert(!std::is_pointer_v<Traits>, "Pointer-to-function types are not allowed for unique traits types");
+
+        // We need to invoke static functions/type traits on the traits type, but we allow references
         using traits_type = std::remove_reference_t<std::remove_pointer_t<Traits>>;
 
     public:
@@ -309,8 +312,6 @@ namespace dhorn
         constexpr unique() noexcept :
             _data(traits_type::default_value(), Traits{})
         {
-            static_assert(!std::is_pointer_v<Traits>,
-                "Construcing a unique object with a null traits object is ill-formed");
         }
 
         template <
@@ -319,8 +320,6 @@ namespace dhorn
         explicit unique(ArgTy&& value) :
             _data(std::forward<ArgTy>(value), Traits{})
         {
-            static_assert(!std::is_pointer_v<Traits>,
-                "Construcing a unique object with a null traits object is ill-formed");
         }
 
         template <
