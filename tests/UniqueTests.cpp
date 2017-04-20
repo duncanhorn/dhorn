@@ -48,6 +48,9 @@ namespace dhorn::tests
         template <typename Ty>
         using unique_empty = unique<Ty, empty_traits<Ty>>;
 
+        class empty_int_traits : public empty_traits<int> {};
+        using unique_empty_int = unique<int, empty_int_traits>;
+
 
 
         template <typename Ty>
@@ -204,13 +207,17 @@ namespace dhorn::tests
         TEST_METHOD(DefaultConstructionTest)
         {
             Assert::IsTrue(std::is_default_constructible_v<unique_empty<int>>);
+            Assert::IsTrue(std::is_default_constructible_v<unique_ptr<int>>);
+            Assert::IsTrue(std::is_default_constructible_v<unique_ptr<int[]>>);
 
             // We can't test with std::is_default_constructible_v since SFINAE is not involved (it only fails when
             // trying to instantiate the function template), but the following should fail to compile:
             //unique<int, empty_traits<int>&> x;
             //unique<int, empty_traits<int>*> y;
 
+            unique_empty<int> uniqueInt;
             unique_ptr<int> intPtr;
+            unique_ptr<int[]> intArray;
         }
 
         TEST_METHOD(ValueConstructionTest)
@@ -225,6 +232,7 @@ namespace dhorn::tests
             unique_empty<int> uniqueInt(8);
 
             // Constructing a unique<std::string, ...> should follow std::string's construction rules
+            Assert::IsTrue(std::is_constructible_v<unique_empty<std::string>, char*>);
             Assert::IsTrue(std::is_constructible_v<unique_empty<std::string>, const char*>);
             Assert::IsTrue(std::is_constructible_v<unique_empty<std::string>, const std::string&>);
             Assert::IsTrue(std::is_constructible_v<unique_empty<std::string>, std::string&&>);
@@ -238,6 +246,7 @@ namespace dhorn::tests
             Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, std::nullptr_t>);
 
             Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, int* const>);
             Assert::IsFalse(std::is_constructible_v<unique_ptr<int>, const int*>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const int>, int*>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const int>, const int*>);
@@ -296,6 +305,53 @@ namespace dhorn::tests
             Assert::IsTrue(std::is_constructible_v<unique<int, empty_traits<int>&>, int, empty_traits<int>&>);
             Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>&>, int, const empty_traits<int>&>);
             Assert::IsFalse(std::is_constructible_v<unique<int, empty_traits<int>&>, int, empty_traits<int>&&>);
+
+            unique<int, empty_traits<int>&> uniqueIntValue3(8, emptyIntTraits);
+
+            std::unique_ptr<int> p;
+        }
+
+        TEST_METHOD(MoveConstructionTest)
+        {
+            // Value
+            Assert::IsTrue(std::is_move_constructible_v<unique_empty<int>>);
+
+            unique_empty<int> uniqueInt(8);
+            unique_empty<int> uniqueIntCopy(std::move(uniqueInt));
+            Assert::AreEqual(uniqueInt.get(), 0);
+            Assert::AreEqual(uniqueIntCopy.get(), 8);
+
+            // Reference Value
+            Assert::IsTrue(std::is_move_constructible_v<unique_empty<int&>>);
+            // References would assign through, so testing move construction is kind of pointless... In fact, it
+            // probably wouldn't even compile since default_value wouldn't make sense
+
+            // Reference Traits
+            Assert::IsTrue(std::is_move_constructible_v<unique<int, unique_empty<int>&>>);
+
+            empty_traits<int> traits;
+            unique<int, empty_traits<int>&> uniqueIntRef(8, traits);
+            unique<int, empty_traits<int>&> uniqueIntRefCopy(std::move(uniqueIntRef));
+            Assert::AreEqual(uniqueIntRef.get(), 0);
+            Assert::AreEqual(uniqueIntRefCopy.get(), 8);
+        }
+
+        TEST_METHOD(MoveConversionConstructionTest)
+        {
+            Assert::IsTrue(std::is_constructible_v<unique_empty<int>, unique_empty_int&&>);
+            Assert::IsFalse(std::is_constructible_v<unique_empty_int, unique_empty<int>&&>);
+
+            unique_empty_int from(8);
+            unique_empty<int> to(std::move(from));
+            Assert::AreEqual(0, from.get());
+            Assert::AreEqual(8, to.get());
+        }
+
+        TEST_METHOD(CannotCopyTest)
+        {
+            Assert::IsFalse(std::is_copy_constructible_v<unique_empty<int>>);
+            Assert::IsFalse(std::is_copy_constructible_v<unique_ptr<int>>);
+            Assert::IsFalse(std::is_copy_constructible_v<unique_ptr<int[]>>);
         }
 
 #pragma endregion

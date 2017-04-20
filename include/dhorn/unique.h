@@ -294,6 +294,9 @@ namespace dhorn
         // We do more than invoke operator() on the traits type, meaning that it can't be a pointer-to-function type
         static_assert(!std::is_pointer_v<Traits>, "Pointer-to-function types are not allowed for unique traits types");
 
+        template <typename, typename>
+        friend class unique;
+
         // We need to invoke static functions/type traits on the traits type, but we allow references
         using traits_type = std::remove_reference_t<std::remove_pointer_t<Traits>>;
 
@@ -340,6 +343,21 @@ namespace dhorn
         {
         }
 
+        unique(unique&& other) :
+            _data(other.release(), std::forward<Traits>(other.my_traits()))
+        {
+        }
+
+        template <
+            typename OtherTy,
+            typename OtherTraits,
+            std::enable_if_t<details::is_unique_constructible<traits_type, value_type, OtherTy&&>::value, int> = 0,
+            std::enable_if_t<std::is_convertible<OtherTraits, Traits>::value, int> = 0>
+        unique(unique<OtherTy, OtherTraits>&& other) :
+            _data(other.release(), std::forward<Traits>(other.my_traits()))
+        {
+        }
+
         ~unique()
         {
             reset();
@@ -382,6 +400,10 @@ namespace dhorn
         /*
          * Observers
          */
+        constexpr const value_type& get() const noexcept
+        {
+            return my_value();
+        }
 
 
 
