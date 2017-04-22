@@ -284,6 +284,47 @@ namespace dhorn
 
         template <typename TraitsTy, typename ValueTy, typename ArgTy>
         constexpr bool is_unique_constructible_v = is_unique_constructible<TraitsTy, ValueTy, ArgTy>::value;
+
+
+
+        /*
+         * has_default_value
+         *
+         * Helper to determine if TraitsTy::default_value() exists
+         */
+        template <typename TraitsTy>
+        struct unique_traits_has_default_value
+        {
+            template <typename Traits = TraitsTy>
+            static auto invoke(int) -> decltype(Traits::default_value(), std::true_type{});
+
+            template <typename Traits = TraitsTy>
+            static std::false_type invoke(float);
+
+            static const bool value = decltype(invoke(0))::value;
+        };
+
+        template <typename TraitsTy>
+        constexpr bool unique_traits_has_default_value_v = unique_traits_has_default_value<TraitsTy>::value;
+
+
+
+        /*
+         * unique_default_value
+         *
+         * TraitsTy::default_value() if it exists, else value_type_from_unique_traits_t<TraitsTy>{}
+         */
+        template <typename TraitsTy, std::enable_if_t<unique_traits_has_default_value<TraitsTy>::value, int> = 0>
+        inline constexpr auto unique_default_value()
+        {
+            return TraitsTy::default_value();
+        }
+
+        template <typename TraitsTy, std::enable_if_t<!unique_traits_has_default_value<TraitsTy>::value, int> = 0>
+        inline constexpr auto unique_default_value()
+        {
+            return value_type_from_unique_traits_t<TraitsTy>{};
+        }
     }
 
 
@@ -313,7 +354,7 @@ namespace dhorn
          * Constructor(s)/Destructor
          */
         constexpr unique() noexcept :
-            _data(traits_type::default_value(), Traits{})
+            _data(details::unique_default_value<traits_type>(), Traits{})
         {
         }
 
@@ -370,14 +411,14 @@ namespace dhorn
          */
         value_type release() noexcept // <-- TOOD: Should this be conditional?
         {
-            value_type result = traits_type::default_value();
+            value_type result = details::unique_default_value<traits_type>();
             std::swap(result, my_value());
             return result;
         }
 
         void reset() noexcept // <-- TODO: Should this be conditional
         {
-            value_type value = traits_type::default_value();
+            value_type value = details::unique_default_value<traits_type>();
             std::swap(value, my_value());
             my_traits()(value);
         }

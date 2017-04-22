@@ -290,6 +290,8 @@ namespace dhorn::tests
         TEST_METHOD(ConstructWithTraitsTest)
         {
             empty_traits<int> emptyIntTraits;
+            unique_traits<int*> uniqueIntPtrTraits;
+            unique_traits<int(*)[]> uniqueIntArrayTraits;
 
             // Value
             Assert::IsTrue(std::is_constructible_v<unique_empty<int>, int, empty_traits<int>>);
@@ -308,7 +310,29 @@ namespace dhorn::tests
 
             unique<int, empty_traits<int>&> uniqueIntValue3(8, emptyIntTraits);
 
-            std::unique_ptr<int> p;
+            // Pointer
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, int*, unique_traits<int*>>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, int*, const unique_traits<int*>&>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<int>, int*, unique_traits<int(*)[]>>);
+
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<base>, derived*, unique_traits<base*>>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<base>, derived*, const unique_traits<base*>&>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base>, derived*, unique_traits<base(*)[]>>);
+
+            unique_ptr<int> uniquePtr1(new int(), unique_traits<int*>{});
+            unique_ptr<int> uniquePtr2(new int(), uniqueIntPtrTraits);
+
+            // Array
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int[]>, int*, unique_traits<int(*)[]>>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int[]>, int*, const unique_traits<int(*)[]>&>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<int[]>, int*, unique_traits<int*>>);
+
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, derived*, unique_traits<base(*)[]>>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, derived*, const unique_traits<base(*)[]>&>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, derived*, unique_traits<base*>>);
+
+            unique_ptr<int[]> uniqueArray1(new int(), unique_traits<int(*)[]>{});
+            unique_ptr<int[]> uniqueArray2(new int(), uniqueIntArrayTraits);
         }
 
         TEST_METHOD(MoveConstructionTest)
@@ -321,8 +345,6 @@ namespace dhorn::tests
             Assert::AreEqual(uniqueInt.get(), 0);
             Assert::AreEqual(uniqueIntCopy.get(), 8);
 
-            // Reference Value
-            Assert::IsTrue(std::is_move_constructible_v<unique_empty<int&>>);
             // References would assign through, so testing move construction is kind of pointless... In fact, it
             // probably wouldn't even compile since default_value wouldn't make sense
 
@@ -334,10 +356,27 @@ namespace dhorn::tests
             unique<int, empty_traits<int>&> uniqueIntRefCopy(std::move(uniqueIntRef));
             Assert::AreEqual(uniqueIntRef.get(), 0);
             Assert::AreEqual(uniqueIntRefCopy.get(), 8);
+
+            // Pointer
+            Assert::IsTrue(std::is_move_constructible_v<unique_ptr<int>>);
+
+            unique_ptr<int> ptr1(new int());
+            unique_ptr<int> ptr2(std::move(ptr1));
+            Assert::IsNull(ptr1.get());
+            Assert::IsNotNull(ptr2.get());
+
+            // Reference
+            Assert::IsTrue(std::is_move_constructible_v<unique_ptr<int[]>>);
+
+            unique_ptr<int[]> array1(new int[8]);
+            unique_ptr<int[]> array2(std::move(array1));
+            Assert::IsNull(array1.get());
+            Assert::IsNotNull(array2.get());
         }
 
         TEST_METHOD(MoveConversionConstructionTest)
         {
+            // empty_int_traits should be implicitly convertible to empty_traits<int>
             Assert::IsTrue(std::is_constructible_v<unique_empty<int>, unique_empty_int&&>);
             Assert::IsFalse(std::is_constructible_v<unique_empty_int, unique_empty<int>&&>);
 
@@ -345,6 +384,10 @@ namespace dhorn::tests
             unique_empty<int> to(std::move(from));
             Assert::AreEqual(0, from.get());
             Assert::AreEqual(8, to.get());
+
+            // Should not be able to convert from arrays to pointers and vice versa
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<int>, unique_ptr<int[]>&&>);
+            Assert::IsFalse(std::is_constructible_v<unique_ptr<int[]>, unique_ptr<int>&&>);
         }
 
         TEST_METHOD(CannotCopyTest)
