@@ -172,7 +172,6 @@
     <ClInclude Include="include\dhorn\com\hresult_error.h" />
     <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\debug.h" />
-    <ClInclude Include="include\dhorn\experimental\algorithm.h" />
     <ClInclude Include="include\dhorn\experimental\animation.h" />
     <ClInclude Include="include\dhorn\experimental\animation_manager.h" />
     <ClInclude Include="include\dhorn\experimental\array_reference.h" />

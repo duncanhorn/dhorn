@@ -7,11 +7,10 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <string>
 #include <memory>
-
-#include "algorithm.h"
 
 namespace dhorn
 {
@@ -1115,7 +1114,7 @@ namespace dhorn
             {
                 size_t currentCapacity = this->Capacity();
                 size_t bufferSize = this->BufferSize();
-                size_t capacity = max(currentCapacity, max_char_size + 1, desiredCapacity + 1);
+                size_t capacity = std::max(max_char_size + 1, std::max(currentCapacity, desiredCapacity + 1));
                 assert(capacity >= (bufferSize + max_char_size + 1));
 
                 // Don't resize if we don't need to
