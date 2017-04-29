@@ -164,6 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\dhorn\algorithm.h" />
     <ClInclude Include="include\dhorn\bitmask.h" />
     <ClInclude Include="include\dhorn\compressed_pair.h" />
     <ClInclude Include="include\dhorn\com\com_ptr.h" />

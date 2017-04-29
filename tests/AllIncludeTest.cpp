@@ -8,6 +8,7 @@
 #include "stdafx.h"
 
 // "Normal" Includes
+#include <dhorn/algorithm.h>
 #include <dhorn/bitmask.h>
 #include <dhorn/compressed_pair.h>
 #include <dhorn/console.h>

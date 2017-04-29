@@ -198,5 +198,8 @@
     <ClInclude Include="include\dhorn\compressed_pair.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\algorithm.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
