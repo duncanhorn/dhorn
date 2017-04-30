@@ -3,7 +3,8 @@
  *
  * algorithm.h
  *
- * 
+ * A set of utility/helper functions that follow the same patterns as the STL algorithm header. Many of these are just
+ * convenience wrappers around functions in the standard `algorithm` header.
  */
 #pragma once
 
@@ -12,6 +13,20 @@
 
 namespace dhorn
 {
+    /*
+     * split/split_if
+     *
+     * Used to split a range into a separate range whose elements are constructed using iterator pairs from all
+     * sub-ranges in the input range that exclude the specified value/condition. The most common scenario is to split
+     * strings into vectors of strings at specific character(s). For example, the following will split at spaces:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *  auto str = "foo bar  foobar "s;
+     *  std::vector<std::string> words;
+     *  split(std::begin(str), std::end(str), ' ', std::back_inserter(words));
+     *  // words = { "foo", "bar", "", "foobar", "" }
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * Values are written to the output range via assignment with an initializer_list. I.e. via `*itr = { begin, end }`.
+     */
 #pragma region split
 
     template <typename ForwardItr, typename OutputItr, typename Ty>
