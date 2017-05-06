@@ -150,9 +150,6 @@
     <ClInclude Include="include\dhorn\experimental\d3d\shapes.h">
       <Filter>include\experimental\d3d</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\algorithm.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\type_traits.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -199,6 +196,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\unique.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\algorithm.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
