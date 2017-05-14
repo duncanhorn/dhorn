@@ -79,6 +79,14 @@ namespace dhorn
                 }
 
                 // Test the char32_t overloads at the "boundaries"
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\u0000'));
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uD7FF'));
+
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uE000'));
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uFFFF'));
+
+                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U00010000'));
+                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U0010FFFF'));
             }
 
             TEST_METHOD(Utf32CodePointSizeTest)
@@ -90,14 +98,6 @@ namespace dhorn
                 }
 
                 // Always returns 1, so there's no real point in wasting our time testing...
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\u0000'));
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uD7FF'));
-
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uE000'));
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uFFFF'));
-
-                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U00010000'));
-                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U0010FFFF'));
             }
 
 #pragma endregion
