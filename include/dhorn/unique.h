@@ -353,6 +353,7 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
+        template <typename Type = Ty, std::enable_if_t<std::is_default_constructible<Type>::value, int> = 0>
         constexpr unique() noexcept :
             _data(details::unique_default_value<traits_type>(), Traits{})
         {

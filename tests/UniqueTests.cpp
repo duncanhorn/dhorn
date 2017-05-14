@@ -200,9 +200,7 @@ namespace dhorn::tests
 
 
 
-#pragma region Tests
-
-#pragma region Constructor Tests
+#pragma region Constructor/Destructor Tests
 
         TEST_METHOD(DefaultConstructionTest)
         {
@@ -210,10 +208,12 @@ namespace dhorn::tests
             Assert::IsTrue(std::is_default_constructible_v<unique_ptr<int>>);
             Assert::IsTrue(std::is_default_constructible_v<unique_ptr<int[]>>);
 
+            struct no_default { no_default() = delete; };
+            Assert::IsFalse(std::is_default_constructible_v<unique_empty<no_default>>);
+
             // We can't test with std::is_default_constructible_v since SFINAE is not involved (it only fails when
             // trying to instantiate the function template), but the following should fail to compile:
             //unique<int, empty_traits<int>&> x;
-            //unique<int, empty_traits<int>*> y;
 
             unique_empty<int> uniqueInt;
             unique_ptr<int> intPtr;
@@ -229,7 +229,10 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<unique_empty<int>, int*>);
             Assert::IsFalse(std::is_constructible_v<unique_empty<int>, std::string>);
 
-            unique_empty<int> uniqueInt(8);
+            // const int should be constructible with int
+            Assert::IsTrue(std::is_constructible_v<unique_empty<const int>, int>);
+
+            unique_empty<const int> uniqueInt(8);
 
             // Constructing a unique<std::string, ...> should follow std::string's construction rules
             Assert::IsTrue(std::is_constructible_v<unique_empty<std::string>, char*>);
@@ -365,7 +368,7 @@ namespace dhorn::tests
             Assert::IsNull(ptr1.get());
             Assert::IsNotNull(ptr2.get());
 
-            // Reference
+            // Array
             Assert::IsTrue(std::is_move_constructible_v<unique_ptr<int[]>>);
 
             unique_ptr<int[]> array1(new int[8]);
@@ -397,7 +400,64 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_copy_constructible_v<unique_ptr<int[]>>);
         }
 
+        TEST_METHOD(DestructorTest)
+        {
+            object_counter::reset();
+
+            {
+                unique_empty<object_counter> a;
+                unique_ptr<object_counter> b(new object_counter());
+                unique_ptr<object_counter[]> c(new object_counter[8]);
+
+                Assert::AreEqual(10u, object_counter::instance_count);
+                Assert::AreEqual(0u, object_counter::copy_count);
+            }
+
+            Assert::AreEqual(0u, object_counter::instance_count);
+            Assert::AreEqual(0u, object_counter::copy_count);
+        }
+
 #pragma endregion
+
+
+
+#pragma region Member Function Tests
+
+        TEST_METHOD(ReleaseTest)
+        {
+            {
+                object_counter::reset();
+                unique_empty<object_counter> uniqueCounter;
+                auto counter = uniqueCounter.release();
+                Assert::AreEqual(2u, object_counter::instance_count);
+                Assert::AreEqual(0u, object_counter::copy_count);
+            }
+            Assert::AreEqual(0u, object_counter::instance_count);
+
+            {
+                object_counter::reset();
+                unique_ptr<object_counter> ptr(new object_counter());
+                auto counter = ptr.release();
+                Assert::AreEqual(1u, object_counter::instance_count);
+                Assert::AreEqual(0u, object_counter::copy_count);
+
+                delete counter;
+                Assert::AreEqual(0u, object_counter::instance_count);
+            }
+            Assert::AreEqual(0u, object_counter::instance_count);
+
+            {
+                object_counter::reset();
+                unique_ptr<object_counter[]> ptr(new object_counter[10]);
+                auto counter = ptr.release();
+                Assert::AreEqual(10u, object_counter::instance_count);
+                Assert::AreEqual(0u, object_counter::copy_count);
+
+                delete[] counter;
+                Assert::AreEqual(0u, object_counter::instance_count);
+            }
+            Assert::AreEqual(0u, object_counter::instance_count);
+        }
 
 #pragma endregion
     };
