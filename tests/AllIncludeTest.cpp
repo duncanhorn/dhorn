@@ -18,6 +18,7 @@
 #include <dhorn/string.h>
 #include <dhorn/thread_pool.h>
 #include <dhorn/type_traits.h>
+#include <dhorn/utf.h>
 
 // COM Includes
 #include <dhorn/com/com_ptr.h>
