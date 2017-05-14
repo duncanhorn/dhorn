@@ -44,6 +44,19 @@ namespace dhorn
                 {
                     Assert::AreEqual(4u, utf_traits<char>::code_point_size(static_cast<char>(ch)));
                 }
+
+                // Test the char32_t overloads at the "boundaries"
+                Assert::AreEqual(1u, utf_traits<char>::code_point_size(U'\u0000'));
+                Assert::AreEqual(1u, utf_traits<char>::code_point_size(U'\u007F'));
+
+                Assert::AreEqual(2u, utf_traits<char>::code_point_size(U'\u0080'));
+                Assert::AreEqual(2u, utf_traits<char>::code_point_size(U'\u07FF'));
+
+                Assert::AreEqual(3u, utf_traits<char>::code_point_size(U'\u0800'));
+                Assert::AreEqual(3u, utf_traits<char>::code_point_size(U'\uFFFF'));
+
+                Assert::AreEqual(4u, utf_traits<char>::code_point_size(U'\U00010000'));
+                Assert::AreEqual(4u, utf_traits<char>::code_point_size(U'\U0010FFFF'));
             }
 
             TEST_METHOD(Utf16CodePointSizeTest)
@@ -64,6 +77,8 @@ namespace dhorn
                 {
                     Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(static_cast<char16_t>(ch)));
                 }
+
+                // Test the char32_t overloads at the "boundaries"
             }
 
             TEST_METHOD(Utf32CodePointSizeTest)
@@ -75,6 +90,14 @@ namespace dhorn
                 }
 
                 // Always returns 1, so there's no real point in wasting our time testing...
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\u0000'));
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uD7FF'));
+
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uE000'));
+                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uFFFF'));
+
+                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U00010000'));
+                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U0010FFFF'));
             }
 
 #pragma endregion
