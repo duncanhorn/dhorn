@@ -34,8 +34,15 @@ namespace dhorn
             return
                 ((ch & 0x80) == 0x00) ? 1 :
                 ((ch & 0xE0) == 0xC0) ? 2 :
-                ((ch & 0xF0) == 0xE0) ? 3 :
-                ((ch & 0xF8) == 0xF0) ? 4 : 0;
+                ((ch & 0xF0) == 0xE0) ? 3 : 4;
+        }
+
+        static constexpr size_t code_point_size(char32_t ch)
+        {
+            return
+                (ch <= 0x00007F) ? 1 :
+                (ch <= 0x0007FF) ? 2 :
+                (ch <= 0x00FFFF) ? 3 : 4;
         }
 
         static constexpr bool is_initial_code_unit(char_type ch)
@@ -79,9 +86,14 @@ namespace dhorn
 
         static constexpr size_t code_point_size(char_type ch)
         {
-            return
-                ((ch & 0xF800) != 0xD800) ? 1 :
-                ((ch & 0xFC00) == 0xD800) ? 2 : 0;
+            return ((ch & 0xF800) != 0xD800) ? 1 : 2;
+        }
+
+        static constexpr size_t code_point_size(char32_t ch)
+        {
+            // Code points U+D800 through U+DFFF are reserved and unassigned, meaning that we don't need to worry about
+            // representation of surrogates
+            return (ch <= 0x00FFFF) ? 1 : 2;
         }
 
         static constexpr bool is_initial_code_unit(char_type ch)
