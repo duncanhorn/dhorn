@@ -181,9 +181,10 @@ namespace dhorn
             template <typename CharTy>
             void UtfReadTest(const CharTy* str, char32_t expected)
             {
-                auto result = utf_traits<CharTy>::read(str);
+                using Traits = utf_traits<CharTy>;
+                auto result = Traits::read(str);
                 Assert::IsTrue(expected == result.first);
-                Assert::IsTrue((str + utf_traits<CharTy>::code_point_size(*str)) == result.second);
+                Assert::IsTrue((str + Traits::code_point_size(*str)) == result.second);
             }
 
             TEST_METHOD(Utf8ReadTest)
@@ -228,6 +229,72 @@ namespace dhorn
                 UtfReadTest(U"\uFFFF", U'\uFFFF');
                 UtfReadTest(U"\U00010000", U'\U00010000');
                 UtfReadTest(U"\U0010FFFF", U'\U0010FFFF');
+            }
+
+#pragma endregion
+
+
+
+#pragma region write Tests
+
+            template <typename CharTy>
+            void UtfWriteTest(const CharTy* expected, char32_t ch)
+            {
+                using Traits = utf_traits<CharTy>;
+                CharTy result[Traits::max_code_point_size];
+                auto ptr = Traits::write(result, ch);
+
+                size_t len = ptr - result;
+                Assert::AreEqual(Traits::code_point_size(ch), len);
+
+                for (size_t i = 0; i < len; ++i)
+                {
+                    Assert::IsTrue(expected[i] == result[i]);
+                }
+            }
+
+            TEST_METHOD(Utf8WriteTest)
+            {
+                // The most interesting tests are the ones at the "boundaries"
+                UtfWriteTest(u8"\u0000", U'\u0000');
+                UtfWriteTest(u8"\u007F", U'\u007F');
+
+                UtfWriteTest(u8"\u0080", U'\u0080');
+                UtfWriteTest(u8"\u07FF", U'\u07FF');
+
+                UtfWriteTest(u8"\u0800", U'\u0800');
+                UtfWriteTest(u8"\uFFFF", U'\uFFFF');
+
+                UtfWriteTest(u8"\U00010000", U'\U00010000');
+                UtfWriteTest(u8"\U0010FFFF", U'\U0010FFFF');
+            }
+
+            TEST_METHOD(Utf16WriteTest)
+            {
+                // The most interesting tests are the ones at the "boundaries"
+                UtfWriteTest(u"\u0000", U'\u0000');
+                UtfWriteTest(u"\uD7FF", U'\uD7FF');
+
+                UtfWriteTest(u"\uE000", U'\uE000');
+                UtfWriteTest(u"\uFFFF", U'\uFFFF');
+
+                UtfWriteTest(u"\U00010000", U'\U00010000');
+                UtfWriteTest(u"\U0010FFFF", U'\U0010FFFF');
+            }
+
+            TEST_METHOD(Utf32WriteTest)
+            {
+                // Always just returns *str, so testing isn't very useful... just do a few anyway
+                UtfWriteTest(U"\u0000", U'\u0000');
+                UtfWriteTest(U"\u007F", U'\u007F');
+                UtfWriteTest(U"\u0080", U'\u0080');
+                UtfWriteTest(U"\u07FF", U'\u07FF');
+                UtfWriteTest(U"\u0800", U'\u0800');
+                UtfWriteTest(U"\uD7FF", U'\uD7FF');
+                UtfWriteTest(U"\uE000", U'\uE000');
+                UtfWriteTest(U"\uFFFF", U'\uFFFF');
+                UtfWriteTest(U"\U00010000", U'\U00010000');
+                UtfWriteTest(U"\U0010FFFF", U'\U0010FFFF');
             }
 
 #pragma endregion
