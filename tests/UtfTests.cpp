@@ -7,6 +7,7 @@
  */
 #include "stdafx.h"
 
+#include <algorithm>
 #include <dhorn/utf.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -15,7 +16,7 @@ namespace dhorn
 {
     namespace tests
     {
-        TEST_CLASS(UtfTests)
+        TEST_CLASS(UtfTraitsTests)
         {
 #pragma region code_point_size Tests
 
@@ -295,6 +296,187 @@ namespace dhorn
                 UtfWriteTest(U"\uFFFF", U'\uFFFF');
                 UtfWriteTest(U"\U00010000", U'\U00010000');
                 UtfWriteTest(U"\U0010FFFF", U'\U0010FFFF');
+            }
+
+#pragma endregion
+
+        };
+
+
+
+        TEST_CLASS(UtfIteratorTests)
+        {
+#pragma region Forward Iteration Tests
+
+            static constexpr char test8[] = u8"\u007F\u0080\u07FF\u0800\uD7FF\uE000\uFFFF\U00010000\U0010FFFF";
+            static constexpr char16_t test16[] = u"\u007F\u0080\u07FF\u0800\uD7FF\uE000\uFFFF\U00010000\U0010FFFF";
+            static constexpr char32_t test32[] = U"\u007F\u0080\u07FF\u0800\uD7FF\uE000\uFFFF\U00010000\U0010FFFF";
+
+            TEST_METHOD(Utf8ForwardIterationTest)
+            {
+                utf8_iterator begin{ std::begin(test8) };
+                utf8_iterator end{ std::end(test8) - 1 };
+
+                size_t index = 0;
+                std::for_each(begin, end, [&](char32_t value)
+                {
+                    Assert::IsTrue(test32[index++] == value);
+                });
+            }
+
+            TEST_METHOD(Utf16ForwardIterationTest)
+            {
+                utf16_iterator begin{ std::begin(test16) };
+                utf16_iterator end{ std::end(test16) - 1 };
+
+                size_t index = 0;
+                std::for_each(begin, end, [&](char32_t value)
+                {
+                    Assert::IsTrue(test32[index++] == value);
+                });
+            }
+
+            TEST_METHOD(Utf32ForwardIterationTest)
+            {
+                utf32_iterator begin{ std::begin(test32) };
+                utf32_iterator end{ std::end(test32) - 1 };
+
+                size_t index = 0;
+                std::for_each(begin, end, [&](char32_t value)
+                {
+                    Assert::IsTrue(test32[index++] == value);
+                });
+            }
+
+#pragma endregion
+
+
+
+#pragma region Reverse Iteration Tests
+
+            TEST_METHOD(Utf8ReverseIterationTest)
+            {
+                utf8_iterator begin{ std::begin(test8) };
+                utf8_iterator end{ std::end(test8) - 1 };
+
+                size_t index = std::size(test32) - 1;
+                do
+                {
+                    Assert::IsTrue(test32[index--] == *end--);
+                }
+                while (begin != end);
+            }
+
+            TEST_METHOD(Utf16ReverseIterationTest)
+            {
+                utf16_iterator begin{ std::begin(test16) };
+                utf16_iterator end{ std::end(test16) - 1 };
+
+                size_t index = std::size(test32) - 1;
+                do
+                {
+                    Assert::IsTrue(test32[index--] == *end--);
+                }
+                while (begin != end);
+            }
+
+            TEST_METHOD(Utf32ReverseIterationTest)
+            {
+                utf32_iterator begin{ std::begin(test32) };
+                utf32_iterator end{ std::end(test32) - 1 };
+
+                size_t index = std::size(test32) - 1;
+                do
+                {
+                    Assert::IsTrue(test32[index--] == *end--);
+                }
+                while (begin != end);
+            }
+
+#pragma endregion
+
+
+
+#pragma region Simple Increment/Decrement Tests
+
+            // Test strings
+            static constexpr char str8[] = u8"abc";
+            static constexpr char16_t str16[] = u"abc";
+            static constexpr char32_t str32[] = U"abc";
+
+            TEST_METHOD(PreIncrementTest)
+            {
+                utf8_iterator i8(str8);
+                Assert::IsTrue(U'b' == *++i8);
+                Assert::IsTrue(U'c' == *++i8);
+                Assert::IsTrue(U'\0' == *++i8);
+
+                utf16_iterator i16(str16);
+                Assert::IsTrue(U'b' == *++i16);
+                Assert::IsTrue(U'c' == *++i16);
+                Assert::IsTrue(U'\0' == *++i16);
+
+                utf32_iterator i32(str32);
+                Assert::IsTrue(U'b' == *++i32);
+                Assert::IsTrue(U'c' == *++i32);
+                Assert::IsTrue(U'\0' == *++i32);
+            }
+
+            TEST_METHOD(PostIncrementTest)
+            {
+                utf8_iterator i8(str8);
+                Assert::IsTrue(U'a' == *i8++);
+                Assert::IsTrue(U'b' == *i8++);
+                Assert::IsTrue(U'c' == *i8++);
+                Assert::IsTrue(U'\0' == *i8);
+
+                utf16_iterator i16(str16);
+                Assert::IsTrue(U'a' == *i16++);
+                Assert::IsTrue(U'b' == *i16++);
+                Assert::IsTrue(U'c' == *i16++);
+                Assert::IsTrue(U'\0' == *i16);
+
+                utf32_iterator i32(str32);
+                Assert::IsTrue(U'a' == *i32++);
+                Assert::IsTrue(U'b' == *i32++);
+                Assert::IsTrue(U'c' == *i32++);
+                Assert::IsTrue(U'\0' == *i32);
+            }
+
+            TEST_METHOD(PreDecrementTest)
+            {
+                utf8_iterator i8(str8 + 3);
+                Assert::IsTrue(U'c' == *--i8);
+                Assert::IsTrue(U'b' == *--i8);
+                Assert::IsTrue(U'a' == *--i8);
+
+                utf16_iterator i16(str16 + 3);
+                Assert::IsTrue(U'c' == *--i16);
+                Assert::IsTrue(U'b' == *--i16);
+                Assert::IsTrue(U'a' == *--i16);
+
+                utf32_iterator i32(str32 + 3);
+                Assert::IsTrue(U'c' == *--i32);
+                Assert::IsTrue(U'b' == *--i32);
+                Assert::IsTrue(U'a' == *--i32);
+            }
+
+            TEST_METHOD(PostDecrementTest)
+            {
+                utf8_iterator i8(str8 + 3);
+                Assert::IsTrue(U'\0' == *i8--);
+                Assert::IsTrue(U'c' == *i8--);
+                Assert::IsTrue(U'b' == *i8--);
+
+                utf16_iterator i16(str16 + 3);
+                Assert::IsTrue(U'\0' == *i16--);
+                Assert::IsTrue(U'c' == *i16--);
+                Assert::IsTrue(U'b' == *i16--);
+
+                utf32_iterator i32(str32 + 3);
+                Assert::IsTrue(U'\0' == *i32--);
+                Assert::IsTrue(U'c' == *i32--);
+                Assert::IsTrue(U'b' == *i32--);
             }
 
 #pragma endregion

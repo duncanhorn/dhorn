@@ -50,13 +50,21 @@ namespace dhorn
             return (ch & 0xC0) != 0x80;
         }
 
-        template <typename Itr>
-        static constexpr std::pair<char32_t, Itr> read(Itr pos)
+        template <typename InputItr>
+        static constexpr InputItr next(InputItr pos)
         {
-            const auto size = code_point_size(*pos);
+            std::advance(pos, code_point_size(*pos));
+            return pos;
+        }
+
+        template <typename InputItr>
+        static constexpr std::pair<char32_t, InputItr> read(InputItr pos)
+        {
+            const auto value = *pos;
+            const auto size = code_point_size(value);
 
             // The first mask has '0's in the highest 'size' bits
-            char32_t result = *pos & (0xFF >> size);
+            char32_t result = value & (0xFF >> size);
             ++pos;
 
             switch (size)
@@ -149,15 +157,23 @@ namespace dhorn
             return (ch & 0xFC00) != 0xDC00;
         }
 
-        template <typename Itr>
-        static constexpr std::pair<char32_t, Itr> read(Itr pos)
+        template <typename InputItr>
+        static constexpr InputItr next(InputItr pos)
         {
-            if (code_point_size(*pos) == 2)
+            std::advance(pos, code_point_size(*pos));
+            return pos;
+        }
+
+        template <typename InputItr>
+        static constexpr std::pair<char32_t, InputItr> read(InputItr pos)
+        {
+            auto value = *pos;
+            if (code_point_size(value) == 2)
             {
                 // The two code units are:
                 // 1101 10XX XXXX XXXX
                 // 1101 11XX XXXX XXXX
-                char32_t result = (*pos & 0x03FF) << 10;
+                char32_t result = (value & 0x03FF) << 10;
                 ++pos;
                 result = result | (*pos & 0x03FF);
                 ++pos;
@@ -166,7 +182,7 @@ namespace dhorn
             }
             else
             {
-                char32_t result = *pos;
+                char32_t result = value;
                 ++pos;
                 return std::make_pair(result, pos);
             }
@@ -212,8 +228,15 @@ namespace dhorn
             return true;
         }
 
-        template <typename Itr>
-        static constexpr std::pair<char32_t, Itr> read(Itr pos)
+        template <typename InputItr>
+        static constexpr InputItr next(InputItr pos)
+        {
+            ++pos;
+            return pos;
+        }
+
+        template <typename InputItr>
+        static constexpr std::pair<char32_t, InputItr> read(InputItr pos)
         {
             char32_t result = *pos;
             ++pos;
@@ -228,6 +251,108 @@ namespace dhorn
             return pos;
         }
     };
+
+#pragma endregion
+
+
+
+    /*
+     * utf_iterator
+     *
+     * A bidirectional "const" iterator for reading from utf-8/utf-16/utf-32 strings. 
+     */
+#pragma region utf_iterator
+
+    template <typename CharTy, typename Traits = utf_traits<CharTy>>
+    class utf_iterator
+    {
+    public:
+        /*
+         * Public Types
+         */
+        using value_type = char32_t;
+        using reference = char32_t;
+        using pointer = void;
+        using difference_type = std::ptrdiff_t;
+        using iterator_category = std::bidirectional_iterator_tag;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        utf_iterator() = default;
+
+        utf_iterator(const CharTy* ptr) :
+            _ptr(ptr)
+        {
+        }
+
+
+
+        /*
+         * Bidirectional Iterator
+         */
+        bool operator==(utf_iterator other) const
+        {
+            // Equality is based solely on where we are pointing
+            return this->_ptr == other._ptr;
+        }
+
+        bool operator!=(utf_iterator other) const
+        {
+            return !(*this == other);
+        }
+
+        reference operator*() const
+        {
+            return Traits::read(this->_ptr).first;
+        }
+
+        utf_iterator& operator++()
+        {
+            this->_ptr = Traits::next(this->_ptr);
+            return *this;
+        }
+
+        utf_iterator operator++(int)
+        {
+            auto copy = *this;
+            ++(*this);
+            return copy;
+        }
+
+        utf_iterator& operator--()
+        {
+            do
+            {
+                --this->_ptr;
+            }
+            while (!Traits::is_initial_code_unit(*this->_ptr));
+
+            return *this;
+        }
+
+        utf_iterator operator--(int)
+        {
+            auto copy = *this;
+            --(*this);
+            return copy;
+        }
+
+
+
+    private:
+
+        const CharTy* _ptr = nullptr;
+    };
+
+
+
+    // Type aliases
+    using utf8_iterator = utf_iterator<char>;
+    using utf16_iterator = utf_iterator<char16_t>;
+    using utf32_iterator = utf_iterator<char32_t>;
 
 #pragma endregion
 }
