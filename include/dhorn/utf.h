@@ -259,11 +259,11 @@ namespace dhorn
     /*
      * utf_iterator
      *
-     * A bidirectional "const" iterator for reading from utf-8/utf-16/utf-32 strings. 
+     * A bidirectional "const" iterator for reading from utf 8/16/32 strings. 
      */
 #pragma region utf_iterator
 
-    template <typename CharTy, typename Traits = utf_traits<CharTy>>
+    template <typename Itr, typename Traits = utf_traits<typename std::iterator_traits<Itr>::value_type>>
     class utf_iterator
     {
     public:
@@ -283,8 +283,8 @@ namespace dhorn
          */
         utf_iterator() = default;
 
-        utf_iterator(const CharTy* ptr) :
-            _ptr(ptr)
+        utf_iterator(Itr itr) :
+            _itr(itr)
         {
         }
 
@@ -295,23 +295,23 @@ namespace dhorn
          */
         bool operator==(utf_iterator other) const
         {
-            // Equality is based solely on where we are pointing
-            return this->_ptr == other._ptr;
+            return !(*this != other);
         }
 
         bool operator!=(utf_iterator other) const
         {
-            return !(*this == other);
+            // Equality and inequality "forward" through to the underlying iterator
+            return this->_itr != other._itr;
         }
 
         reference operator*() const
         {
-            return Traits::read(this->_ptr).first;
+            return Traits::read(this->_itr).first;
         }
 
         utf_iterator& operator++()
         {
-            this->_ptr = Traits::next(this->_ptr);
+            this->_itr = Traits::next(this->_itr);
             return *this;
         }
 
@@ -326,9 +326,9 @@ namespace dhorn
         {
             do
             {
-                --this->_ptr;
+                --this->_itr;
             }
-            while (!Traits::is_initial_code_unit(*this->_ptr));
+            while (!Traits::is_initial_code_unit(*this->_itr));
 
             return *this;
         }
@@ -344,15 +344,15 @@ namespace dhorn
 
     private:
 
-        const CharTy* _ptr = nullptr;
+        Itr _itr{};
     };
 
 
 
     // Type aliases
-    using utf8_iterator = utf_iterator<char>;
-    using utf16_iterator = utf_iterator<char16_t>;
-    using utf32_iterator = utf_iterator<char32_t>;
+    using utf8_iterator = utf_iterator<const char*>;
+    using utf16_iterator = utf_iterator<const char16_t*>;
+    using utf32_iterator = utf_iterator<const char32_t*>;
 
 #pragma endregion
 }
