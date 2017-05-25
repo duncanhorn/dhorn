@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstddef>
+#include <iterator>
 #include <utility>
 
 namespace dhorn
@@ -259,13 +260,28 @@ namespace dhorn
     /*
      * utf_iterator
      *
-     * A bidirectional "const" iterator for reading from utf 8/16/32 strings. 
+     * A non-mutable iterator adapter that's used for reading utf-8/16/32 strings. It is at-best Bidirectional, but may
+     * actually be less powerful, depending on the iterator category of the underlying iterator type. Note, however,
+     * that the iterator type being adapted must at least satisfy ForwardIterator. This is because Iterator requires
+     * CopyConstructible, and any copied iterator must be dereferencible (so long as no other copy is advanced), but the
+     * act of dereferencing may require advancing the underlying iterator, effectively invalidating any copy of the
+     * `utf_iterator`. E.g. the following would break if allowed:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *  std::istream_iterator<char> streamItr = ...;
+     *  auto itr = make_utf_iterator(streamItr);
+     *  auto itrCopy = itr;
+     *  *itr;       // Okay!
+     *  *itrCopy;   // Undefined behavior if *itr >= 128
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
 #pragma region utf_iterator
 
     template <typename Itr, typename Traits = utf_traits<typename std::iterator_traits<Itr>::value_type>>
     class utf_iterator
     {
+        static_assert(std::is_base_of_v<std::forward_iterator_tag, typename std::iterator_traits<Itr>::iterator_category>,
+            "utf_iterator must be used with iterators that satisfy at least ForwardIterator");
+
     public:
         /*
          * Public Types
@@ -274,7 +290,9 @@ namespace dhorn
         using reference = char32_t;
         using pointer = void;
         using difference_type = std::ptrdiff_t;
-        using iterator_category = std::bidirectional_iterator_tag;
+        using iterator_category = std::common_type_t<
+            std::bidirectional_iterator_tag,
+            typename std::iterator_traits<Itr>::iterator_category>;
 
 
 
@@ -291,7 +309,7 @@ namespace dhorn
 
 
         /*
-         * Bidirectional Iterator
+         * Forward Iterator
          */
         bool operator==(utf_iterator other) const
         {
@@ -322,6 +340,11 @@ namespace dhorn
             return copy;
         }
 
+
+
+        /*
+         * Bidirectional Iterator
+         */
         utf_iterator& operator--()
         {
             do
@@ -349,10 +372,19 @@ namespace dhorn
 
 
 
-    // Type aliases
+    // Type aliases for c-style strings
     using utf8_iterator = utf_iterator<const char*>;
     using utf16_iterator = utf_iterator<const char16_t*>;
     using utf32_iterator = utf_iterator<const char32_t*>;
+
+
+
+    // Adapts a forward or higher iterator into a `utf_iterator`.
+    template <typename Itr>
+    inline constexpr utf_iterator<Itr> make_utf_iterator(Itr itr)
+    {
+        return utf_iterator<Itr>(itr);
+    }
 
 #pragma endregion
 }
