@@ -3,7 +3,10 @@
  *
  * utf.h
  *
- * 
+ * Types and helpers for dealing with utf-8/16/32 strings. Most of the heavy lifting is done by the `utf_traits` class
+ * template, which is used to read from and write to encoded strings based off character types. Other abstractions are
+ * built on top of this traits type, such as `utf_iterator` which is used to read from encoded strings, and <<todo>>
+ * which is used to write to encoded strings.
  */
 #pragma once
 
