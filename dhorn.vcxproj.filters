@@ -75,9 +75,6 @@
     <ClInclude Include="include\dhorn\experimental\message_queue.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\nullable_value.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\numeric.h">
       <Filter>include\experimental</Filter>
     </ClInclude>

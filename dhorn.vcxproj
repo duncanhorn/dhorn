@@ -195,7 +195,6 @@
     <ClInclude Include="include\dhorn\experimental\linear_animation.h" />
     <ClInclude Include="include\dhorn\experimental\math.h" />
     <ClInclude Include="include\dhorn\experimental\message_queue.h" />
-    <ClInclude Include="include\dhorn\experimental\nullable_value.h" />
     <ClInclude Include="include\dhorn\experimental\numeric.h" />
     <ClInclude Include="include\dhorn\experimental\service_container.h" />
     <ClInclude Include="include\dhorn\experimental\sockets.h" />

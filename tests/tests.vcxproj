@@ -152,7 +152,6 @@
     <ClCompile Include="HStringTests.cpp" />
     <ClCompile Include="JsonTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
-    <ClCompile Include="NullableValueTest.cpp" />
     <ClCompile Include="NumericTests.cpp" />
     <ClCompile Include="ScopeGuardTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />

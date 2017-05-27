@@ -98,9 +98,6 @@
     <ClCompile Include="ArrayReferenceTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NullableValueTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="TypeTraitsTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
