@@ -54,7 +54,7 @@ namespace dhorn
             return this->_value;
         }
 
-        const Ty& value() noexcept
+        const Ty& operator*() noexcept
         {
             return this->_value;
         }
