@@ -58,7 +58,7 @@ namespace dhorn::com
         {
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         com_ptr(Ty* ptr) noexcept
         {
             Assign(ptr);
@@ -70,13 +70,13 @@ namespace dhorn::com
             Assign(other._ptr);
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         com_ptr(const com_ptr<Ty>& other) noexcept
         {
             Assign(other._ptr);
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         com_ptr(com_ptr<Ty>&& other) noexcept
         {
             this->_ptr = other._ptr;
@@ -103,7 +103,7 @@ namespace dhorn::com
             return *this;
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         com_ptr& operator=(Ty* ptr) noexcept
         {
             Release();
@@ -123,7 +123,7 @@ namespace dhorn::com
             return *this;
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         com_ptr& operator=(const com_ptr<Ty>& other) noexcept
         {
             Release();
@@ -131,7 +131,7 @@ namespace dhorn::com
             return *this;
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         com_ptr& operator=(com_ptr<Ty>&& other) noexcept
         {
             Release();
@@ -180,14 +180,14 @@ namespace dhorn::com
             Release();
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         void reset(Ty* ptr) noexcept
         {
             Release();
             Assign(ptr);
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         void attach(Ty* ptr) noexcept
         {
             Release();
@@ -240,15 +240,15 @@ namespace dhorn::com
          */
 #pragma region Conversion
 
-        template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
-        com_ptr<Ty> as() noexcept(std::is_convertible_v<IFace*, Ty*>)
+        template <typename Ty, std::enable_if_t<is_unknown<Ty>::value, int> = 0>
+        com_ptr<Ty> as() noexcept(std::is_convertible<IFace*, Ty*>::value)
         {
             com_ptr<Ty> result;
             result.Assign(this->_ptr);
             return result;
         }
 
-        template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
+        template <typename Ty, std::enable_if_t<is_unknown<Ty>::value, int> = 0>
         com_ptr<Ty> try_as() noexcept
         {
             com_ptr<Ty> result;
@@ -256,8 +256,8 @@ namespace dhorn::com
             return result;
         }
 
-        template <typename Ty, std::enable_if_t<is_unknown_v<Ty>, int> = 0>
-        void copy_to(Ty** ptr) noexcept(std::is_convertible_v<IFace*, Ty*>)
+        template <typename Ty, std::enable_if_t<is_unknown<Ty>::value, int> = 0>
+        void copy_to(Ty** ptr) noexcept(std::is_convertible<IFace*, Ty*>::value)
         {
             *ptr = nullptr;
             *ptr = as<Ty>().detach();
@@ -284,7 +284,7 @@ namespace dhorn::com
             }
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         void Assign(Ty* ptr) noexcept
         {
             assert(!this->_ptr);
@@ -295,7 +295,7 @@ namespace dhorn::com
             }
         }
 
-        template <typename Ty, std::enable_if_t<!std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<!std::is_convertible<Ty*, IFace*>::value, int> = 0>
         void Assign(Ty* ptr)
         {
             assert(!this->_ptr);
@@ -305,7 +305,7 @@ namespace dhorn::com
             }
         }
 
-        template <typename Ty, std::enable_if_t<std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<std::is_convertible<Ty*, IFace*>::value, int> = 0>
         void TryAssign(Ty* ptr) noexcept
         {
             assert(!this->_ptr);
@@ -316,7 +316,7 @@ namespace dhorn::com
             }
         }
 
-        template <typename Ty, std::enable_if_t<!std::is_convertible_v<Ty*, IFace*>, int> = 0>
+        template <typename Ty, std::enable_if_t<!std::is_convertible<Ty*, IFace*>::value, int> = 0>
         void TryAssign(Ty* ptr) noexcept
         {
             assert(!this->_ptr);
@@ -344,9 +344,9 @@ namespace dhorn::com
     template <
         typename Ty,
         typename FromTy,
-        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
-        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
-        std::enable_if_t<std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+        std::enable_if_t<is_unknown<Ty>::value, int> = 0,
+        std::enable_if_t<is_unknown<FromTy>::value, int> = 0,
+        std::enable_if_t<std::is_convertible<FromTy*, Ty*>::value, int> = 0>
     inline com_ptr<Ty> query(FromTy* ptr) noexcept
     {
         // Pointer is cast-able; no need to QI
@@ -356,9 +356,9 @@ namespace dhorn::com
     template <
         typename Ty,
         typename FromTy,
-        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
-        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
-        std::enable_if_t<!std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+        std::enable_if_t<is_unknown<Ty>::value, int> = 0,
+        std::enable_if_t<is_unknown<FromTy>::value, int> = 0,
+        std::enable_if_t<!std::is_convertible<FromTy*, Ty*>::value, int> = 0>
     inline com_ptr<Ty> query(FromTy* ptr)
     {
         com_ptr<Ty> result;
@@ -369,21 +369,21 @@ namespace dhorn::com
     template <
         typename Ty,
         typename FromTy,
-        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
-        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
-        std::enable_if_t<std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+        std::enable_if_t<is_unknown<Ty>::value, int> = 0,
+        std::enable_if_t<is_unknown<FromTy>::value, int> = 0,
+        std::enable_if_t<std::is_convertible<FromTy*, Ty*>::value, int> = 0>
     inline com_ptr<Ty> try_query(FromTy* ptr) noexcept
     {
         // Pointer is cast-able; no need to QI
         return com_ptr<Ty>(ptr);
     }
-    
+
     template <
         typename Ty,
         typename FromTy,
-        std::enable_if_t<is_unknown_v<Ty>, int> = 0,
-        std::enable_if_t<is_unknown_v<FromTy>, int> = 0,
-        std::enable_if_t<!std::is_convertible_v<FromTy*, Ty*>, int> = 0>
+        std::enable_if_t<is_unknown<Ty>::value, int> = 0,
+        std::enable_if_t<is_unknown<FromTy>::value, int> = 0,
+        std::enable_if_t<!std::is_convertible<FromTy*, Ty*>::value, int> = 0>
     inline com_ptr<Ty> try_query(FromTy* ptr) noexcept
     {
         com_ptr<Ty> result;
