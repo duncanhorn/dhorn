@@ -3,7 +3,10 @@
  *
  * visitor.h
  *
- * 
+ * Creating a visitor for use with `std::visit` (or the visitor pattern in general) is a pain without multiple features
+ * added in C++17, namely class template deduction, variadic pack expansion of in-class using-declarations, and
+ * aggregate initialization of base classes. Unfortunately we have none of those, so we need to employ a C++14 solution
+ * which is much less elegant.
  */
 #pragma once
 
