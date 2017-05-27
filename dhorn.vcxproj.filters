@@ -201,5 +201,8 @@
     <ClInclude Include="include\dhorn\iterator.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\visitor.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

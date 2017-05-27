@@ -131,5 +131,8 @@
     <ClCompile Include="UtfTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VisitorTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

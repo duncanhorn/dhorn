@@ -167,6 +167,7 @@
     <ClCompile Include="UtfStringTests.cpp" />
     <ClCompile Include="UtfTests.cpp" />
     <ClCompile Include="UUIDTests.cpp" />
+    <ClCompile Include="VisitorTests.cpp" />
     <ClCompile Include="WindowsTests.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
