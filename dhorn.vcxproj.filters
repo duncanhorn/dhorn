@@ -102,9 +102,6 @@
     <ClInclude Include="include\dhorn\experimental\units.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\utf_iterator.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\utf_string.h">
       <Filter>include\experimental</Filter>
     </ClInclude>

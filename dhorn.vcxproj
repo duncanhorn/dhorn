@@ -204,7 +204,6 @@
     <ClInclude Include="include\dhorn\experimental\unique_any.h" />
     <ClInclude Include="include\dhorn\experimental\unique_event_cookie.h" />
     <ClInclude Include="include\dhorn\experimental\units.h" />
-    <ClInclude Include="include\dhorn\experimental\utf_iterator.h" />
     <ClInclude Include="include\dhorn\experimental\utf_string.h" />
     <ClInclude Include="include\dhorn\experimental\uuid.h" />
     <ClInclude Include="include\dhorn\experimental\windows\window.h" />

@@ -110,9 +110,6 @@
     <ClCompile Include="StringTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UtfIteratorTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ScopeGuardTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
