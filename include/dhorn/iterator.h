@@ -65,4 +65,23 @@ namespace dhorn
 
         Ty _value;
     };
+
+
+
+    /*
+     * output_iterator_proxy
+     *
+     * Output iterators need to support `*itr++`, meaning they 
+     */
+    //template <typename Ty>
+    //class output_iterator_proxy
+    //{
+    //public:
+
+
+
+    //private:
+
+
+    //};
 }

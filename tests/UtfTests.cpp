@@ -560,6 +560,77 @@ namespace dhorn
             }
 
 #pragma endregion
+
+
+
+#pragma region Output Iterator Tests
+
+            TEST_METHOD(Utf8OutputIteratorTest)
+            {
+                std::string result;
+                auto itr = utf8_output_iterator(std::back_inserter(result));
+                for (auto ch : test32)
+                {
+                    if (ch != U'\0')
+                    {
+                        *itr++ = ch;
+                    }
+                }
+
+                Assert::AreEqual(std::size(test8) - 1, result.size());
+                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test8));
+            }
+
+            TEST_METHOD(Utf16OutputIteratorTest)
+            {
+                std::u16string result;
+                auto itr = utf16_output_iterator(std::back_inserter(result));
+                for (auto ch : test32)
+                {
+                    if (ch != U'\0')
+                    {
+                        *itr++ = ch;
+                    }
+                }
+
+                Assert::AreEqual(std::size(test16) - 1, result.size());
+                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test16));
+            }
+
+            TEST_METHOD(Utf32OutputIteratorTest)
+            {
+                std::u32string result;
+                auto itr = utf32_output_iterator(std::back_inserter(result));
+                for (auto ch : test32)
+                {
+                    if (ch != U'\0')
+                    {
+                        *itr++ = ch;
+                    }
+                }
+
+                Assert::AreEqual(std::size(test32) - 1, result.size());
+                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test32));
+            }
+
+            TEST_METHOD(UtfOutputIteratorPreIncrementTest)
+            {
+                std::string result;
+                auto itr = utf8_output_iterator(std::back_inserter(result));
+                for (auto ch : test32)
+                {
+                    if (ch != U'\0')
+                    {
+                        *itr = ch;
+                        ++itr;
+                    }
+                }
+
+                Assert::AreEqual(std::size(test8) - 1, result.size());
+                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test8));
+            }
+
+#pragma endregion
         };
     }
 }

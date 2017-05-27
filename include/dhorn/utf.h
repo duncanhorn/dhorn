@@ -348,6 +348,9 @@ namespace dhorn
         /*
          * Bidirectional Iterator
          */
+        template <
+            typename Category = iterator_category,
+            std::enable_if_t<std::is_base_of<std::bidirectional_iterator_tag, Category>::value, int> = 0>
         utf_iterator& operator--()
         {
             do
@@ -359,6 +362,9 @@ namespace dhorn
             return *this;
         }
 
+        template <
+            typename Category = iterator_category,
+            std::enable_if_t<std::is_base_of<std::bidirectional_iterator_tag, Category>::value, int> = 0>
         utf_iterator operator--(int)
         {
             auto copy = *this;
@@ -387,6 +393,97 @@ namespace dhorn
     inline constexpr utf_iterator<Itr> make_utf_iterator(Itr itr)
     {
         return utf_iterator<Itr>(itr);
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * output_utf_iterator
+     */
+#pragma region output_utf_iterator
+
+    template <typename CharTy, typename Itr, typename Traits = utf_traits<CharTy>>
+    class utf_output_iterator
+    {
+    public:
+        /*
+         * Public Types
+         */
+        using value_type = void;
+        using reference = void;
+        using pointer = void;
+        using difference_type = void;
+        using iterator_category = std::output_iterator_tag;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        utf_output_iterator(Itr itr) :
+            _itr(itr)
+        {
+        }
+
+
+
+        /*
+         * Output Iterator
+         */
+        utf_output_iterator& operator*()
+        {
+            return *this;
+        }
+
+        utf_output_iterator& operator++()
+        {
+            return *this;
+        }
+
+        utf_output_iterator& operator++(int)
+        {
+            return *this;
+        }
+
+
+
+        /*
+         * Assignment
+         */
+        utf_output_iterator& operator=(char32_t value)
+        {
+            this->_itr = Traits::write(this->_itr, value);
+            return *this;
+        }
+
+
+
+    private:
+
+        Itr _itr;
+    };
+
+
+
+    // Adapter Functions
+    template <typename Itr>
+    inline auto utf8_output_iterator(Itr itr)
+    {
+        return utf_output_iterator<char, Itr>(itr);
+    }
+
+    template <typename Itr>
+    inline auto utf16_output_iterator(Itr itr)
+    {
+        return utf_output_iterator<char16_t, Itr>(itr);
+    }
+
+    template <typename Itr>
+    inline auto utf32_output_iterator(Itr itr)
+    {
+        return utf_output_iterator<char32_t, Itr>(itr);
     }
 
 #pragma endregion
