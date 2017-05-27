@@ -198,5 +198,8 @@
     <ClInclude Include="include\dhorn\visitor.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\winrt\weak_ref.h">
+      <Filter>include\winrt</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

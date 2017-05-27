@@ -59,6 +59,39 @@ namespace dhorn::com
 
 
     /*
+     * has_iid
+     */
+#pragma region has_iid
+
+    namespace details
+    {
+        template <typename Ty, typename = void>
+        struct has_iid_impl :
+            public std::false_type
+        {
+        };
+
+        template <typename Ty>
+        struct has_iid_impl<Ty, std::void_t<decltype(__uuidof(Ty))>> :
+            public std::true_type
+        {
+        };
+    }
+
+    template <typename Ty>
+    struct has_iid :
+        public details::has_iid_impl<Ty>
+    {
+    };
+
+    template <typename Ty>
+    constexpr bool has_iid_v = has_iid<Ty>::value;
+
+#pragma endregion
+
+
+
+    /*
      * interface_traits
      */
 #pragma region interface_traits
