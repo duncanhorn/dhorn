@@ -9,7 +9,7 @@
 
 #include "com_ptr.h"
 #include "com_utility.h"
-#include "windows_exception.h"
+#include "../com/hresult_error.h"
 
 namespace dhorn
 {
@@ -22,7 +22,7 @@ namespace dhorn
         com_ptr<IFace> get_activation_factory(HSTRING activatableClassId)
         {
             com_ptr<IFace> result;
-            throw_if_failed(::RoGetActivationFactory(activatableClassId, IID_PPV_ARGS(&result)));
+            com::check_hresult(::RoGetActivationFactory(activatableClassId, IID_PPV_ARGS(&result)));
             return result;
         }
 
@@ -35,7 +35,7 @@ namespace dhorn
         com_ptr<IFace> activate_instance(HSTRING activatableClassId)
         {
             com_ptr<IInspectable> insp;
-            throw_if_failed(::RoActivateInstance(activatableClassId, &insp));
+            com::check_hresult(::RoActivateInstance(activatableClassId, &insp));
             return insp.as<IFace>();
         }
     }

@@ -108,9 +108,6 @@
     <ClInclude Include="include\dhorn\experimental\uuid.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\windows_exception.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h">
       <Filter>include\experimental</Filter>
     </ClInclude>

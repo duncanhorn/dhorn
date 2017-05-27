@@ -6,6 +6,7 @@
  * Functional tests for the dhorn::experimental::d3d namespace. Namely the d3d_window class
  */
 
+#include <dhorn/com/hresult_error.h>
 #include <dhorn/experimental/d3d11/d3d11_utils.h>
 #include <dhorn/experimental/d3d11/d3d11_window.h>
 #include <dhorn/experimental/d3d/colors.h>
@@ -58,7 +59,7 @@ static void load_shaders(void)
         dhorn::experimental::d3d11::input_element_desc(&vertex::normal, DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL"),
         dhorn::experimental::d3d11::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
     };
-    dhorn::experimental::throw_if_failed(globals::window.device()->CreateInputLayout(
+    dhorn::com::check_hresult(globals::window.device()->CreateInputLayout(
         inputDesc, std::size(inputDesc),
         vertexShaderBytecode.data(), vertexShaderBytecode.size(),
         &globals::input_layout));

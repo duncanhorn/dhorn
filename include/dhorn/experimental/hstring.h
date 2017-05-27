@@ -12,7 +12,7 @@
 #include <winstring.h>
 
 #include "../type_traits.h"
-#include "windows_exception.h"
+#include "../com/hresult_error.h"
 
 namespace dhorn
 {
@@ -161,7 +161,7 @@ namespace dhorn
 
             void copy_to(HSTRING* target) const
             {
-                throw_if_failed(::WindowsDuplicateString(this->_hstr, target));
+                com::check_hresult(::WindowsDuplicateString(this->_hstr, target));
             }
 
             const wchar_t *data(void) const noexcept
@@ -219,7 +219,7 @@ namespace dhorn
 
             void Assign(const wchar_t *str, size_t length)
             {
-                throw_if_failed(::WindowsCreateStringReference(str, length, &this->_header, &this->_hstr));
+                com::check_hresult(::WindowsCreateStringReference(str, length, &this->_header, &this->_hstr));
             }
 
             template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
@@ -565,7 +565,7 @@ namespace dhorn
 
             void copy_to(HSTRING* target) const
             {
-                throw_if_failed(::WindowsDuplicateString(this->_hstr, target));
+                com::check_hresult(::WindowsDuplicateString(this->_hstr, target));
             }
 
             const wchar_t *data(void) const noexcept
@@ -622,13 +622,13 @@ namespace dhorn
             void Assign(HSTRING str)
             {
                 assert(!this->_hstr);
-                throw_if_failed(::WindowsDuplicateString(str, &this->_hstr));
+                com::check_hresult(::WindowsDuplicateString(str, &this->_hstr));
             }
 
             void Assign(const wchar_t *str, size_t length)
             {
                 assert(!this->_hstr);
-                throw_if_failed(::WindowsCreateString(str, length, &this->_hstr));
+                com::check_hresult(::WindowsCreateString(str, length, &this->_hstr));
             }
 
             template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
@@ -677,7 +677,7 @@ namespace dhorn
             void Append(HSTRING str)
             {
                 HSTRING result;
-                throw_if_failed(::WindowsConcatString(this->_hstr, str, &result));
+                com::check_hresult(::WindowsConcatString(this->_hstr, str, &result));
                 Attach(result);
             }
 
@@ -779,7 +779,7 @@ namespace dhorn
                 static hstring append(LhsTy &&lhs, RhsTy &&rhs)
                 {
                     hstring result;
-                    throw_if_failed(::WindowsConcatString(get(as_hstring(lhs)), get(as_hstring(rhs)), &result));
+                    com::check_hresult(::WindowsConcatString(get(as_hstring(lhs)), get(as_hstring(rhs)), &result));
                     return result;
                 }
 

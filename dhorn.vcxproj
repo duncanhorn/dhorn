@@ -208,7 +208,6 @@
     <ClInclude Include="include\dhorn\experimental\uuid.h" />
     <ClInclude Include="include\dhorn\experimental\windows\window.h" />
     <ClInclude Include="include\dhorn\experimental\windows\windows.h" />
-    <ClInclude Include="include\dhorn\experimental\windows_exception.h" />
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h" />
     <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="include\dhorn\iterator.h" />
