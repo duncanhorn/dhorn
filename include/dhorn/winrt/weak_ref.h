@@ -20,6 +20,29 @@ namespace dhorn::winrt
      */
     namespace details
     {
+        /*
+         * get_weak_reference
+         */
+        template <typename Ty>
+        inline com::com_ptr<IWeakReference> get_weak_reference(Ty* ptr)
+        {
+            static_assert(!std::is_same_v<Ty, IWeakReference>, "Cannot get an IWeakReference from an IWeakReference");
+
+            com::com_ptr<IWeakReferenceSource> source;
+            com::check_hresult(ptr->QueryInterface(IID_PPV_ARGS(&source)));
+
+            com::com_ptr<IWeakReference> result;
+            com::check_hresult(source->GetWeakReference(&result));
+            return result;
+        }
+
+
+
+        /*
+         * weak_ref_storage
+         */
+#pragma region weak_ref_storage
+
         template <typename Ty, bool HasIid = com::has_iid<Ty>::value>
         class weak_ref_storage;
 
@@ -34,7 +57,7 @@ namespace dhorn::winrt
 
             template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
             weak_ref_storage(Type* ptr) :
-                _ptr(com::query<IWeakReference>(ptr))
+                _ptr(get_weak_reference(ptr))
             {
             }
 
@@ -80,7 +103,7 @@ namespace dhorn::winrt
             weak_ref_storage() = default;
 
             weak_ref_storage(Ty* ptr) :
-                _weakRef(com::query<IWeakReference>(ptr)),
+                _weakRef(get_weak_reference(ptr)),
                 _ptr(ptr)
             {
             }
@@ -128,6 +151,8 @@ namespace dhorn::winrt
             com::com_ptr<IWeakReference> _weakRef;
             Ty* _ptr = nullptr;
         };
+
+#pragma endregion
     }
 
 
@@ -197,4 +222,15 @@ namespace dhorn::winrt
 
         details::weak_ref_storage<Ty> _data;
     };
+
+
+
+    /*
+     * as_weak
+     */
+    template <typename Ty>
+    inline weak_ref<Ty> as_weak(Ty* ptr)
+    {
+        return weak_ref<Ty>(ptr);
+    }
 }
