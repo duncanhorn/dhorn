@@ -180,12 +180,12 @@ namespace dhorn::winrt
          */
         weak_ref() = default;
 
-        weak_ref(Ty* ptr) :
+        explicit weak_ref(Ty* ptr) :
             _data(ptr)
         {
         }
 
-        weak_ref(const com::com_ptr<Ty>& ptr) :
+        explicit weak_ref(const com::com_ptr<Ty>& ptr) :
             _data(ptr.get())
         {
         }
@@ -195,7 +195,7 @@ namespace dhorn::winrt
             typename Type = Ty,
             std::enable_if_t<com::has_iid<Type>::value, int> = 0,
             std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
-        weak_ref(OtherTy* ptr) :
+        explicit weak_ref(OtherTy* ptr) :
             _data(ptr)
         {
         }
@@ -205,7 +205,7 @@ namespace dhorn::winrt
             typename Type = Ty,
             std::enable_if_t<com::has_iid<Type>::value, int> = 0,
             std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
-        weak_ref(const com::com_ptr<OtherTy>& ptr) :
+        explicit weak_ref(const com::com_ptr<OtherTy>& ptr) :
             _data(ptr.get())
         {
         }
