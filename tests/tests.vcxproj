@@ -80,7 +80,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <EnablePREfast>false</EnablePREfast>
       <DisableSpecificWarnings>4505;4127;6326</DisableSpecificWarnings>
-      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/std:c++latest  /permissive- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

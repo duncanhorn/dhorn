@@ -241,7 +241,7 @@ namespace dhorn::com
 #pragma region Conversion
 
         template <typename Ty, std::enable_if_t<is_unknown<Ty>::value, int> = 0>
-        com_ptr<Ty> as() noexcept(std::is_convertible<IFace*, Ty*>::value)
+        com_ptr<Ty> as() const noexcept(std::is_convertible<IFace*, Ty*>::value)
         {
             com_ptr<Ty> result;
             result.Assign(this->_ptr);
@@ -249,7 +249,7 @@ namespace dhorn::com
         }
 
         template <typename Ty, std::enable_if_t<is_unknown<Ty>::value, int> = 0>
-        com_ptr<Ty> try_as() noexcept
+        com_ptr<Ty> try_as() const noexcept
         {
             com_ptr<Ty> result;
             result.TryAssign(this->_ptr);
@@ -257,13 +257,13 @@ namespace dhorn::com
         }
 
         template <typename Ty, std::enable_if_t<is_unknown<Ty>::value, int> = 0>
-        void copy_to(Ty** ptr) noexcept(std::is_convertible<IFace*, Ty*>::value)
+        void copy_to(Ty** ptr) const noexcept(std::is_convertible<IFace*, Ty*>::value)
         {
             *ptr = nullptr;
             *ptr = as<Ty>().detach();
         }
 
-        void copy_to(REFIID iid, void** ptr)
+        void copy_to(REFIID iid, void** ptr) const
         {
             *ptr = nullptr;
             check_hresult(this->_ptr->QueryInterface(iid, ptr));
@@ -275,7 +275,7 @@ namespace dhorn::com
 
     private:
 
-        void Release()
+        void Release() noexcept
         {
             if (this->_ptr)
             {
@@ -393,6 +393,111 @@ namespace dhorn::com
         }
 
         return nullptr;
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * Comparison Operators
+     */
+#pragma region Comparison Operators
+
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        std::enable_if_t<std::disjunction<
+            std::is_convertible<LhsTy*, RhsTy*>,
+            std::is_convertible<RhsTy*, LhsTy*>
+        >::value, int> = 0>
+    inline bool operator==(const com_ptr<LhsTy>& lhs, const com_ptr<RhsTy>& rhs) noexcept
+    {
+        return lhs.get() == rhs.get();
+    }
+
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        std::enable_if_t<std::disjunction<
+            std::is_convertible<LhsTy*, RhsTy*>,
+            std::is_convertible<RhsTy*, LhsTy*>
+        >::value, int> = 0>
+    inline bool operator!=(const com_ptr<LhsTy>& lhs, const com_ptr<RhsTy>& rhs) noexcept
+    {
+        return lhs.get() != rhs.get();
+    }
+
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        std::enable_if_t<std::disjunction<
+            std::is_convertible<LhsTy*, RhsTy*>,
+            std::is_convertible<RhsTy*, LhsTy*>
+        >::value, int> = 0>
+    inline bool operator==(const com_ptr<LhsTy>& lhs, RhsTy* rhs) noexcept
+    {
+        return lhs.get() == rhs;
+    }
+
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        std::enable_if_t<std::disjunction<
+            std::is_convertible<LhsTy*, RhsTy*>,
+            std::is_convertible<RhsTy*, LhsTy*>
+        >::value, int> = 0>
+    inline bool operator!=(const com_ptr<LhsTy>& lhs, RhsTy* rhs) noexcept
+    {
+        return lhs.get() != rhs;
+    }
+
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        std::enable_if_t<std::disjunction<
+            std::is_convertible<LhsTy*, RhsTy*>,
+            std::is_convertible<RhsTy*, LhsTy*>
+        >::value, int> = 0>
+    inline bool operator==(LhsTy* lhs, const com_ptr<RhsTy>& rhs) noexcept
+    {
+        return lhs == rhs.get();
+    }
+
+    template <
+        typename LhsTy,
+        typename RhsTy,
+        std::enable_if_t<std::disjunction<
+            std::is_convertible<LhsTy*, RhsTy*>,
+            std::is_convertible<RhsTy*, LhsTy*>
+        >::value, int> = 0>
+    inline bool operator!=(LhsTy* lhs, const com_ptr<RhsTy>& rhs) noexcept
+    {
+        return lhs != rhs.get();
+    }
+
+    template <typename LhsTy>
+    inline bool operator==(const com_ptr<LhsTy>& lhs, std::nullptr_t) noexcept
+    {
+        return lhs.get() == nullptr;
+    }
+
+    template <typename LhsTy>
+    inline bool operator!=(const com_ptr<LhsTy>& lhs, std::nullptr_t) noexcept
+    {
+        return lhs.get() != nullptr;
+    }
+
+    template <typename RhsTy>
+    inline bool operator==(std::nullptr_t, const com_ptr<RhsTy>& rhs) noexcept
+    {
+        return nullptr == rhs.get();
+    }
+
+    template <typename RhsTy>
+    inline bool operator!=(std::nullptr_t, const com_ptr<RhsTy>& rhs) noexcept
+    {
+        return nullptr != rhs.get();
     }
 
 #pragma endregion
