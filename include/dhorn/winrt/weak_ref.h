@@ -83,7 +83,13 @@ namespace dhorn::winrt
              */
             com::com_ptr<Ty> resolve() const noexcept
             {
-                return this->_ptr.try_as<Ty>();
+                com::com_ptr<Ty> result;
+                if (this->_ptr && SUCCEEDED(this->_ptr->Resolve(&result)))
+                {
+                    return result;
+                }
+
+                return nullptr;
             }
 
 
@@ -134,14 +140,17 @@ namespace dhorn::winrt
              */
             com::com_ptr<Ty> resolve() const noexcept
             {
-                if (auto ptr = this->_weakRef.try_as<IInspectable>())
+                com::com_ptr<IInspectable> insp;
+                if (this->_weakRef && SUCCEEDED(this->_weakRef->Resolve(&insp)) && insp)
                 {
                     com::com_ptr<Ty> result;
                     result.attach(this->_ptr);
-                    ptr.detach();
+                    insp.detach();
 
                     return result;
                 }
+
+                return nullptr;
             }
 
 
@@ -176,6 +185,11 @@ namespace dhorn::winrt
         {
         }
 
+        weak_ref(const com::com_ptr<Ty>& ptr) :
+            _data(ptr.get())
+        {
+        }
+
         template <
             typename OtherTy,
             typename Type = Ty,
@@ -183,6 +197,16 @@ namespace dhorn::winrt
             std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
         weak_ref(OtherTy* ptr) :
             _data(ptr)
+        {
+        }
+
+        template <
+            typename OtherTy,
+            typename Type = Ty,
+            std::enable_if_t<com::has_iid<Type>::value, int> = 0,
+            std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+        weak_ref(const com::com_ptr<OtherTy>& ptr) :
+            _data(ptr.get())
         {
         }
 
@@ -230,6 +254,12 @@ namespace dhorn::winrt
      */
     template <typename Ty>
     inline weak_ref<Ty> as_weak(Ty* ptr)
+    {
+        return weak_ref<Ty>(ptr);
+    }
+
+    template <typename Ty>
+    inline weak_ref<Ty> as_weak(const com::com_ptr<Ty>& ptr)
     {
         return weak_ref<Ty>(ptr);
     }
