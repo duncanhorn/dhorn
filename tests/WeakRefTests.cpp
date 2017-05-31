@@ -278,7 +278,7 @@ namespace dhorn::tests
                 test.attach(new TestImpl());
 
                 weak = winrt::as_weak(test);
-                weak2 = winrt::as_weak(test);
+                weak2 = weak;
             }
 
             Assert::IsTrue(weak.expired());

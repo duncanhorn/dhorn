@@ -62,8 +62,14 @@ namespace dhorn::winrt
             }
 
             template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
-            weak_ref_storage(const weak_ref_storage<Type>& other) :
+            weak_ref_storage(const weak_ref_storage<Type>& other) noexcept :
                 _ptr(other._ptr)
+            {
+            }
+
+            template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
+            weak_ref_storage(weak_ref_storage<Type>&& other) noexcept :
+                _ptr(other.detach())
             {
             }
 
@@ -83,9 +89,22 @@ namespace dhorn::winrt
                 this->_ptr = other.reference();
             }
 
+            template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
+            void reset(weak_ref_storage<Type>&& other) noexcept
+            {
+                this->_ptr = other.detach();
+            }
+
             void swap(weak_ref_storage& other) noexcept
             {
                 this->_ptr.swap(other._ptr);
+            }
+
+            com::com_ptr<IWeakReference> detach() noexcept
+            {
+                com::com_ptr<IWeakReference> result;
+                this->_ptr.swap(result);
+                return result;
             }
 
 
@@ -148,6 +167,15 @@ namespace dhorn::winrt
             {
                 this->_weakRef.swap(other._weakRef);
                 std::swap(this->_ptr, other._ptr);
+            }
+
+            com::com_ptr<IWeakReference> detach() noexcept
+            {
+                com::com_ptr<IWeakReference> result;
+                this->_weakRef.swap(result);
+                this->_ptr = nullptr;
+
+                return result;
             }
 
 
@@ -240,8 +268,18 @@ namespace dhorn::winrt
             typename Type = Ty,
             std::enable_if_t<com::has_iid<Type>::value, int> = 0,
             std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
-        explicit weak_ref(const weak_ref<OtherTy>& ref) :
+        explicit weak_ref(const weak_ref<OtherTy>& ref) noexcept :
             _data(ref._data)
+        {
+        }
+
+        template <
+            typename OtherTy,
+            typename Type = Ty,
+            std::enable_if_t<com::has_iid<Type>::value, int> = 0,
+            std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+        explicit weak_ref(weak_ref<OtherTy>&& ref) noexcept :
+            _data(std::move(ref._data))
         {
         }
 
@@ -255,9 +293,20 @@ namespace dhorn::winrt
             typename Type = Ty,
             std::enable_if_t<com::has_iid<Type>::value, int> = 0,
             std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
-        weak_ref& operator=(const weak_ref<OtherTy>& ref)
+        weak_ref& operator=(const weak_ref<OtherTy>& ref) noexcept
         {
             this->_data.reset(ref._data);
+            return *this;
+        }
+
+        template <
+            typename OtherTy,
+            typename Type = Ty,
+            std::enable_if_t<com::has_iid<Type>::value, int> = 0,
+            std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+        weak_ref& operator=(weak_ref<OtherTy>&& ref) noexcept
+        {
+            this->_data.reset(std::move(ref._data));
             return *this;
         }
 
@@ -303,6 +352,8 @@ namespace dhorn::winrt
     /*
      * as_weak
      */
+#pragma region as_weak
+
     template <typename Ty>
     inline weak_ref<Ty> as_weak(Ty* ptr)
     {
@@ -314,4 +365,6 @@ namespace dhorn::winrt
     {
         return weak_ref<Ty>(ptr);
     }
+
+#pragma endregion
 }
