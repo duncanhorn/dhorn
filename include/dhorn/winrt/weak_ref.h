@@ -61,6 +61,12 @@ namespace dhorn::winrt
             {
             }
 
+            template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
+            weak_ref_storage(const weak_ref_storage<Type>& other) :
+                _ptr(other._ptr)
+            {
+            }
+
 
 
             /*
@@ -69,6 +75,12 @@ namespace dhorn::winrt
             void reset() noexcept
             {
                 this->_ptr.reset();
+            }
+
+            template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
+            void reset(const weak_ref_storage<Type>& other) noexcept
+            {
+                this->_ptr = other.reference();
             }
 
             void swap(weak_ref_storage& other) noexcept
@@ -90,6 +102,11 @@ namespace dhorn::winrt
                 }
 
                 return nullptr;
+            }
+
+            com::com_ptr<IWeakReference> reference() const noexcept
+            {
+                return this->_ptr;
             }
 
 
@@ -153,6 +170,11 @@ namespace dhorn::winrt
                 return nullptr;
             }
 
+            com::com_ptr<IWeakReference> reference() const noexcept
+            {
+                return this->_weakRef;
+            }
+
 
 
         private:
@@ -173,6 +195,9 @@ namespace dhorn::winrt
     class weak_ref
     {
         static_assert(is_inspectable_v<Ty>, "weak_ref can only be used with WinRT types");
+
+        template <typename>
+        friend class weak_ref;
 
     public:
         /*
@@ -208,6 +233,32 @@ namespace dhorn::winrt
         explicit weak_ref(const com::com_ptr<OtherTy>& ptr) :
             _data(ptr.get())
         {
+        }
+
+        template <
+            typename OtherTy,
+            typename Type = Ty,
+            std::enable_if_t<com::has_iid<Type>::value, int> = 0,
+            std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+        explicit weak_ref(const weak_ref<OtherTy>& ref) :
+            _data(ref._data)
+        {
+        }
+
+
+
+        /*
+         * Assignment
+         */
+        template <
+            typename OtherTy,
+            typename Type = Ty,
+            std::enable_if_t<com::has_iid<Type>::value, int> = 0,
+            std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+        weak_ref& operator=(const weak_ref<OtherTy>& ref)
+        {
+            this->_data.reset(ref._data);
+            return *this;
         }
 
 

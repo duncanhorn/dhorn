@@ -278,7 +278,7 @@ namespace dhorn::tests
                 test.attach(new TestImpl());
 
                 weak = winrt::as_weak(test);
-                // TODO: Allow assignment with "down-cast"
+                weak2 = winrt::as_weak(test);
             }
 
             Assert::IsTrue(weak.expired());
