@@ -63,7 +63,7 @@ namespace dhorn::winrt
 
             template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
             weak_ref_storage(const weak_ref_storage<Type>& other) noexcept :
-                _ptr(other._ptr)
+                _ptr(other.reference())
             {
             }
 

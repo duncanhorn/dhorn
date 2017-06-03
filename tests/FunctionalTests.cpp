@@ -19,10 +19,18 @@ namespace dhorn::tests
 {
     TEST_CLASS(FunctionalTests)
     {
-        TEST_METHOD(MakeLambdaSharedInstanceTest)
+        TEST_METHOD_INITIALIZE(TestInitialize)
         {
             object_counter::reset();
+        }
 
+        TEST_METHOD_CLEANUP(TestCleanup)
+        {
+            Assert::AreEqual(0u, object_counter::instance_count);
+        }
+
+        TEST_METHOD(MakeLambdaSharedInstanceTest)
+        {
             object_counter obj;
             auto lambda = make_lambda_shared([obj = std::move(obj)]()
             {
