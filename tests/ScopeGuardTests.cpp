@@ -17,6 +17,16 @@ namespace dhorn
     {
         TEST_CLASS(ScopeGuardTests)
         {
+            TEST_METHOD_INITIALIZE(TestInitialize)
+            {
+                object_counter::reset();
+            }
+
+            TEST_METHOD_CLEANUP(TestCleanup)
+            {
+                Assert::AreEqual(0u, object_counter::instance_count);
+            }
+
             TEST_METHOD(RunOnExitTest)
             {
                 int x = 0;
@@ -58,8 +68,6 @@ namespace dhorn
 
             TEST_METHOD(MoveConstructTest)
             {
-                object_counter::reset();
-
                 {
                     object_counter cnt;
                     auto fn = dhorn::make_scope_guard([cnt = std::move(cnt)]() {});
@@ -72,8 +80,6 @@ namespace dhorn
 
             TEST_METHOD(CopyConstructorTest)
             {
-                object_counter::reset();
-
                 {
                     object_counter cnt;
                     auto func = [cnt = std::move(cnt)]() {};

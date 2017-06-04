@@ -159,11 +159,14 @@ namespace dhorn
                     }
                     else
                     {
-                        throw_if_failed(this->_device->CheckMultisampleQualityLevels(
+                        com::check_hresult(this->_device->CheckMultisampleQualityLevels(
                             Traits::swap_chain_format,
                             this->_sampleCount,
                             &this->_sampleQuality));
-                        throw_hr_if_false(this->_sampleQuality > 0, E_INVALIDARG);
+                        if (this->_sampleQuality <= 0)
+                        {
+                            com::throw_hresult(E_INVALIDARG);
+                        }
 
                         --this->_sampleQuality;
                     }
@@ -175,7 +178,7 @@ namespace dhorn
 
                 virtual void create_device(void)
                 {
-                    throw_if_failed(::D3D11CreateDevice(
+                    com::check_hresult(::D3D11CreateDevice(
                         nullptr,                    // IDXGIAdapter
                         D3D_DRIVER_TYPE_HARDWARE,
                         nullptr,                    // HMODULE
@@ -187,7 +190,10 @@ namespace dhorn
                         &this->_deviceContext));
 
                     // D3D11 not supported
-                    throw_hr_if_false(this->_featureLevel == D3D_FEATURE_LEVEL_11_0, E_NOTIMPL);
+                    if (this->_featureLevel != D3D_FEATURE_LEVEL_11_0)
+                    {
+                        com::throw_hresult(E_NOTIMPL);
+                    }
                 }
 
                 virtual void create_swap_chain(const rect<size_t> &size)
@@ -208,9 +214,9 @@ namespace dhorn
                     auto device = this->_device.as<IDXGIDevice>();
                     com::com_ptr<IDXGIAdapter> adapter;
                     com::com_ptr<IDXGIFactory> factory;
-                    throw_if_failed(device->GetParent(IID_PPV_ARGS(&adapter)));
-                    throw_if_failed(adapter->GetParent(IID_PPV_ARGS(&factory)));
-                    throw_if_failed(factory->CreateSwapChain(this->_device.get(), &desc, &this->_swapChain));
+                    com::check_hresult(device->GetParent(IID_PPV_ARGS(&adapter)));
+                    com::check_hresult(adapter->GetParent(IID_PPV_ARGS(&factory)));
+                    com::check_hresult(factory->CreateSwapChain(this->_device.get(), &desc, &this->_swapChain));
                 }
 
                 virtual void create_render_target_view()
@@ -218,8 +224,8 @@ namespace dhorn
                     assert(!this->_renderTargetView);
 
                     com::com_ptr<ID3D11Texture2D> backBuffer;
-                    throw_if_failed(this->_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
-                    throw_if_failed(this->_device->CreateRenderTargetView(
+                    com::check_hresult(this->_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
+                    com::check_hresult(this->_device->CreateRenderTargetView(
                         backBuffer.get(),
                         nullptr,                    // D3D11_RENDER_TARGET_VIEW_DESC
                         &this->_renderTargetView));
@@ -236,7 +242,7 @@ namespace dhorn
                         this->_sampleQuality,
                         Traits::depth_stencil_format);
 
-                    throw_if_failed(this->_device->CreateTexture2D(
+                    com::check_hresult(this->_device->CreateTexture2D(
                         &desc,
                         nullptr,                    // D3D11_SUBRESOURCE_DATA
                         &this->_depthStencilBuffer));
@@ -246,7 +252,7 @@ namespace dhorn
                 {
                     assert(this->_depthStencilBuffer);
                     assert(!this->_depthStencilView);
-                    throw_if_failed(this->_device->CreateDepthStencilView(
+                    com::check_hresult(this->_device->CreateDepthStencilView(
                         this->_depthStencilBuffer.get(),
                         nullptr,                    // D3D11_DEPTH_STENCIL_VIEW_DESC
                         &this->_depthStencilView));
@@ -329,7 +335,7 @@ namespace dhorn
                         this->_drawFunc(this->_device.get(), this->_deviceContext.get());
                     }
 
-                    throw_if_failed(this->_swapChain->Present(0, 0));
+                    com::check_hresult(this->_swapChain->Present(0, 0));
                 }
 
 

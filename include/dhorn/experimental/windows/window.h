@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "../math.h"
+#include "../../com/hresult_error.h"
 #include "../../scope_guard.h"
 #include "windows.h"
 
@@ -1084,7 +1085,7 @@ namespace dhorn
                 {
                     if (!this->_window || !this->_running)
                     {
-                        throw hresult_exception(E_HANDLE);
+                        com::throw_hresult(E_HANDLE);
                     }
                 }
 
@@ -1092,7 +1093,7 @@ namespace dhorn
                 {
                     if (this->_window)
                     {
-                        throw hresult_exception(E_ILLEGAL_METHOD_CALL);
+                        com::throw_hresult(E_ILLEGAL_METHOD_CALL);
                     }
                 }
 

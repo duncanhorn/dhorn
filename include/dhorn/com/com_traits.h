@@ -59,7 +59,47 @@ namespace dhorn::com
 
 
     /*
+     * has_iid
+     */
+#pragma region has_iid
+
+    namespace details
+    {
+        template <typename Ty, typename = void>
+        struct has_iid_impl :
+            public std::false_type
+        {
+        };
+
+        template <typename Ty>
+        struct has_iid_impl<Ty, std::void_t<decltype(__uuidof(Ty))>> :
+            public std::true_type
+        {
+        };
+    }
+
+    template <typename Ty>
+    struct has_iid :
+        public details::has_iid_impl<Ty>
+    {
+    };
+
+    template <typename Ty>
+    constexpr bool has_iid_v = has_iid<Ty>::value;
+
+#pragma endregion
+
+
+
+    /*
      * interface_traits
+     *
+     * There are several issues with relying on the `__uuidof` operator. First, and perhaps most importantly, it is
+     * non-standard. The second is that declaring the interface id on a type cannot be done as a constant expression.
+     * That is, it's not possible to declare the interface id of a type as the combination of two or more GUIDs. In
+     * order to make this issue less prominent, all uses of a type's interface id goes through the
+     * `interface_traits<IFace>::uuid()` function, allowing specializations - either full or partial - to define the
+     * interface id in which ever way it wishes to. By default, the `__uuidof` operator is used.
      */
 #pragma region interface_traits
 

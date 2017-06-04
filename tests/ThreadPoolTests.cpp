@@ -18,6 +18,16 @@ namespace dhorn::tests
 {
     TEST_CLASS(ThreadPoolTests)
     {
+        TEST_METHOD_INITIALIZE(TestInitialize)
+        {
+            object_counter::reset();
+        }
+
+        TEST_METHOD_CLEANUP(TestCleanup)
+        {
+            Assert::AreEqual(0u, object_counter::instance_count);
+        }
+
         TEST_METHOD(DefaultInitializeTest)
         {
             thread_pool pool;
@@ -426,8 +436,6 @@ namespace dhorn::tests
 
         TEST_METHOD(DontCopyTest)
         {
-            object_counter::reset();
-
             thread_pool pool;
 
             // Any of the submit functions should not cause a copy to occur

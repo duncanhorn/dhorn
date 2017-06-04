@@ -1662,5 +1662,79 @@ namespace dhorn::tests
         }
 
 #pragma endregion
+
+
+
+#pragma region Comparison Tests
+
+        template <bool Expect, typename FirstTy, typename SecondTy>
+        void DoComparisonTest(FirstTy&& first, SecondTy&& second)
+        {
+            Assert::AreEqual(Expect, first == second);
+            Assert::AreEqual(Expect, second == first);
+            Assert::AreEqual(!Expect, first != second);
+            Assert::AreEqual(!Expect, second != first);
+        }
+
+        TEST_METHOD(SameTypeComparisonTest)
+        {
+            com::com_ptr<IFoo> foo;
+            Assert::IsTrue(foo == foo);
+            Assert::IsFalse(foo != foo);
+
+            com::com_ptr<IFoo> otherFoo;
+            DoComparisonTest<true>(foo, otherFoo);
+
+            auto fooPtr = new Foo();
+            DoComparisonTest<false>(foo, fooPtr);
+
+            foo = fooPtr;
+            Assert::IsTrue(foo == foo);
+            Assert::IsFalse(foo != foo);
+            DoComparisonTest<false>(foo, otherFoo);
+            DoComparisonTest<true>(foo, fooPtr);
+
+            otherFoo = foo;
+            DoComparisonTest<true>(foo, otherFoo);
+
+            otherFoo.attach(new Foo());
+            DoComparisonTest<false>(foo, otherFoo);
+
+            fooPtr->Release();
+        }
+
+        TEST_METHOD(DifferentTypeComparisonType)
+        {
+            com::com_ptr<IFoo> foo;
+            com::com_ptr<IUnknown> unk;
+            DoComparisonTest<true>(foo, unk);
+
+            IFoo* fooPtr = new Foo();
+            DoComparisonTest<false>(unk, fooPtr);
+
+            foo = fooPtr;
+            DoComparisonTest<false>(foo, unk);
+
+            unk = foo;
+            DoComparisonTest<true>(foo, unk);
+            DoComparisonTest<true>(unk, fooPtr);
+
+            unk.attach(static_cast<IFoo*>(new Foo()));
+            DoComparisonTest<false>(foo, unk);
+            DoComparisonTest<false>(unk, fooPtr);
+
+            fooPtr->Release();
+        }
+
+        TEST_METHOD(NullptrComparisonTest)
+        {
+            com::com_ptr<IFoo> foo;
+            DoComparisonTest<true>(foo, nullptr);
+
+            foo.attach(new Foo());
+            DoComparisonTest<false>(foo, nullptr);
+        }
+
+#pragma endregion
     };
 }

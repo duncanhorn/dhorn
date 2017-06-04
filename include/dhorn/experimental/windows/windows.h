@@ -17,7 +17,7 @@ static_assert(false, "Cannot include dhorn/windows/windows.h on a non-Windows ma
 #include <memory>
 #include <vector>
 
-#include "../windows_exception.h"
+#include "../../com/hresult_error.h"
 
 namespace dhorn
 {
@@ -67,14 +67,14 @@ namespace dhorn
                 {
                     if (!func(std::forward<Args>(args)...))
                     {
-                        throw_last_error();
+                        throw std::system_error(::GetLastError(), std::system_category());
                     }
                 }
 
                 template <typename Func, typename... Args>
                 inline void make_hresult_call(Func &func, Args&&... args)
                 {
-                    throw_if_failed(func(std::forward<Args>(args)...));
+                    com::check_hresult(func(std::forward<Args>(args)...));
                 }
 
                 template <typename ResultType, ResultType Failure = ResultType{}, typename Func, typename... Args >
@@ -83,7 +83,7 @@ namespace dhorn
                     auto result = func(std::forward<Args>(args)...);
                     if (result == Failure)
                     {
-                        throw_last_error();
+                        throw std::system_error(::GetLastError(), std::system_category());
                     }
 
                     return result;
@@ -402,14 +402,29 @@ namespace dhorn
                 std::vector<SLPI> result;
 
                 // First attempt. This should fail
-                throw_hr_if_true(!!::GetLogicalProcessorInformation(result.data(), &length), E_UNEXPECTED);
-                expect_error(ERROR_INSUFFICIENT_BUFFER);
+                if (!::GetLogicalProcessorInformation(result.data(), &length))
+                {
+                    com::throw_hresult(E_UNEXPECTED);
+                }
+
+                auto error = ::GetLastError();
+                if (error && (error != ERROR_INSUFFICIENT_BUFFER))
+                {
+                    throw std::system_error(error, std::system_category());
+                }
 
                 // Now that we know the expected length, we can allocate what we need
                 result.reserve(length / sizeof(SLPI));
-                throw_hr_if_false(result.size() * sizeof(SLPI) == length, E_UNEXPECTED);
+                if (result.size() * sizeof(SLPI) != length)
+                {
+                    com::throw_hresult(E_UNEXPECTED);
+                }
+
                 details::make_boolean_call(GetLogicalProcessorInformation, result.data(), &length);
-                throw_hr_if_false(result.size() * sizeof(SLPI) == length, E_UNEXPECTED);
+                if (result.size() * sizeof(SLPI) != length)
+                {
+                    com::throw_hresult(E_UNEXPECTED);
+                }
 
                 return result;
             }

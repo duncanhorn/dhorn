@@ -15,9 +15,9 @@
 
 #include "../../type_traits.h"
 #include "../../com/com_ptr.h"
+#include "../../com/hresult_error.h"
 
 #include "../d3d/d3d_utils.h"
-#include "../windows_exception.h"
 
 namespace dhorn
 {
@@ -152,7 +152,7 @@ namespace dhorn
                 bytecode = d3d::read_shader_file(path);
 
                 com::com_ptr<ID3D11VertexShader> vertexShader;
-                throw_if_failed(device->CreateVertexShader(
+                com::check_hresult(device->CreateVertexShader(
                     bytecode.data(),
                     bytecode.size(),
                     nullptr, // Class linkage
@@ -174,7 +174,7 @@ namespace dhorn
                 auto bytecode = d3d::read_shader_file(path);
 
                 com::com_ptr<ID3D11PixelShader> pixelShader;
-                throw_if_failed(device->CreatePixelShader(
+                com::check_hresult(device->CreatePixelShader(
                     bytecode.data(),
                     bytecode.size(),
                     nullptr, // Class linkage
@@ -203,7 +203,7 @@ namespace dhorn
                 D3D11_SUBRESOURCE_DATA data = { bufferData };
 
                 com::com_ptr<ID3D11Buffer> buffer;
-                throw_if_failed(device->CreateBuffer(&desc, &data, &buffer));
+                com::check_hresult(device->CreateBuffer(&desc, &data, &buffer));
 
                 return buffer;
             }
@@ -227,7 +227,7 @@ namespace dhorn
                 desc.Usage = D3D11_USAGE_DEFAULT;
 
                 com::com_ptr<ID3D11Buffer> buffer;
-                throw_if_failed(device->CreateBuffer(&desc, nullptr, &buffer));
+                com::check_hresult(device->CreateBuffer(&desc, nullptr, &buffer));
 
                 return buffer;
             }

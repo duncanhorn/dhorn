@@ -146,7 +146,7 @@ namespace dhorn
                 std::fstream fileStream(path, std::ios::in | std::ios::binary);
                 if (fileStream.fail() || fileStream.bad())
                 {
-                    throw hresult_exception(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
+                    com::throw_hresult(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
                 }
 
                 // Get the size of the file

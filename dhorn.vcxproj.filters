@@ -75,9 +75,6 @@
     <ClInclude Include="include\dhorn\experimental\message_queue.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\nullable_value.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\numeric.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
@@ -102,16 +99,10 @@
     <ClInclude Include="include\dhorn\experimental\units.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\utf_iterator.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\experimental\utf_string.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\experimental\uuid.h">
-      <Filter>include\experimental</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dhorn\experimental\windows_exception.h">
       <Filter>include\experimental</Filter>
     </ClInclude>
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h">
@@ -200,6 +191,18 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\algorithm.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\utf.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\iterator.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\visitor.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\winrt\weak_ref.h">
+      <Filter>include\winrt</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

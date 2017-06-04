@@ -3,7 +3,7 @@
  *
  * AllIncludeTest.h
  *
- * Makes sure that there aren't any conflicting types/etc. 
+ * Makes sure that there aren't any conflicting types/etc.
  */
 #include "stdafx.h"
 
@@ -19,6 +19,8 @@
 #include <dhorn/thread_pool.h>
 #include <dhorn/type_traits.h>
 #include <dhorn/unique.h>
+#include <dhorn/utf.h>
+#include <dhorn/visitor.h>
 
 // COM Includes
 #include <dhorn/com/com_ptr.h>
@@ -31,3 +33,4 @@
 
 // WinRT Includes
 #include <dhorn/winrt/winrt_traits.h>
+#include <dhorn/winrt/weak_ref.h>

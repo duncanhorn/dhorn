@@ -213,6 +213,18 @@ namespace dhorn::tests
 
 
 
+        TEST_METHOD_INITIALIZE(TestInitialize)
+        {
+            object_counter::reset();
+        }
+
+        TEST_METHOD_CLEANUP(TestCleanup)
+        {
+            Assert::AreEqual(0u, object_counter::instance_count);
+        }
+
+
+
 #pragma region Size Tests
 
         template <typename T1, typename T2, bool EmptyOptimization>
@@ -406,7 +418,6 @@ namespace dhorn::tests
             compressed_pair<non_empty, empty> p3 = {};
             Assert::AreEqual(42, p1.first().value);
 
-            object_counter::reset();
             compressed_pair<object_counter, object_counter> p;
             Assert::AreEqual(2u, object_counter::constructed_count);
         }
@@ -459,7 +470,6 @@ namespace dhorn::tests
             compressed_pair<non_empty, empty> p3 = { a, {} };
             Assert::AreEqual(8, p3.first().value);
 
-            object_counter::reset();
             object_counter obj;
             compressed_pair<object_counter, object_counter> p(obj, obj);
             Assert::AreEqual(3u, object_counter::constructed_count);
@@ -517,7 +527,6 @@ namespace dhorn::tests
             Assert::AreEqual(8, p3.first().value);
 
             // NOTE: object_counter has no state, so moving it more than once is okay
-            object_counter::reset();
             object_counter counter;
 
             compressed_pair<object_counter, object_counter> p4 = { std::move(counter), std::move(counter) };
@@ -547,7 +556,6 @@ namespace dhorn::tests
             Assert::AreEqual(8, p3.first().value);
 
             // NOTE: object_counter has no state, so moving it more than once is okay
-            object_counter::reset();
             object_counter counter;
 
             compressed_pair<object_counter, non_empty_explicit> p4(std::move(counter), non_empty_explicit{});
@@ -585,7 +593,6 @@ namespace dhorn::tests
             Assert::AreEqual("foo"s, p3.first());
             Assert::AreEqual(8u, p3.second().size());
 
-            object_counter::reset();
             compressed_pair<object_counter, object_counter> p4(
                 std::piecewise_construct,
                 std::forward_as_tuple(),
@@ -627,8 +634,6 @@ namespace dhorn::tests
             compressed_pair<empty, non_empty> f = e;
             Assert::AreEqual(0, f.second().value);
 
-            object_counter::reset();
-
             compressed_pair<object_counter, object_counter> p1 = {};
             compressed_pair<object_counter, object_counter> p2 = p1;
             Assert::AreEqual(2u, object_counter::copy_count);
@@ -669,8 +674,6 @@ namespace dhorn::tests
             compressed_pair<empty, non_empty_explicit> e(empty{}, 0);
             compressed_pair<empty, non_empty_explicit> f = e;
             Assert::AreEqual(0, f.second().value);
-
-            object_counter::reset();
 
             compressed_pair<object_counter, non_empty_explicit> p1;
             compressed_pair<object_counter, non_empty_explicit> p2 = p1;
@@ -720,8 +723,6 @@ namespace dhorn::tests
             compressed_pair<empty, non_empty> f = std::move(e);
             Assert::AreEqual(0, f.second().value);
 
-            object_counter::reset();
-
             compressed_pair<object_counter, object_counter> p1 = {};
             compressed_pair<object_counter, object_counter> p2 = std::move(p1);
             Assert::AreEqual(0u, object_counter::copy_count);
@@ -763,8 +764,6 @@ namespace dhorn::tests
             compressed_pair<empty, non_empty_explicit> e(empty{}, 0);
             compressed_pair<empty, non_empty_explicit> f = std::move(e);
             Assert::AreEqual(0, f.second().value);
-
-            object_counter::reset();
 
             compressed_pair<object_counter, non_empty_explicit> p1;
             compressed_pair<object_counter, non_empty_explicit> p2 = std::move(p1);
@@ -924,8 +923,6 @@ namespace dhorn::tests
             f = e;
             Assert::AreEqual(0, f.first());
 
-            object_counter::reset();
-
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<object_counter, object_counter> p2;
             p2 = p1;
@@ -967,7 +964,6 @@ namespace dhorn::tests
             Assert::AreEqual(0.0, f.first());
 
             using adapt = non_empty_adapter<object_counter>;
-            object_counter::reset();
 
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<adapt, adapt> p2;
@@ -1018,8 +1014,6 @@ namespace dhorn::tests
             f = std::move(e);
             Assert::AreEqual(0, f.first());
 
-            object_counter::reset();
-
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<object_counter, object_counter> p2;
             p2 = std::move(p1);
@@ -1061,7 +1055,6 @@ namespace dhorn::tests
             Assert::AreEqual(0.0, f.first());
 
             using adapt = non_empty_adapter<object_counter>;
-            object_counter::reset();
 
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<adapt, adapt> p2;
@@ -1349,7 +1342,6 @@ namespace dhorn::tests
             //std::get<int>(p2) = 0;
 
             // Object counting
-            object_counter::reset();
             compressed_pair<object_counter, object_counter> pair;
 
             auto obj = std::get<0>(pair);

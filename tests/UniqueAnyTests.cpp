@@ -179,9 +179,9 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (const dhorn::experimental::win32_exception &e)
+                catch (const std::system_error& e)
                 {
-                    Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
+                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
                 }
             }
 
@@ -231,9 +231,9 @@ namespace dhorn
                         }
                         Assert::Fail(L"Expected an exception (TEST 1)");
                     }
-                    catch (dhorn::experimental::win32_exception &e)
+                    catch (std::system_error& e)
                     {
-                        Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
+                        Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
                     }
                 });
 
@@ -251,9 +251,9 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception (TEST 3)");
                 }
-                catch (dhorn::experimental::win32_exception &e)
+                catch (std::system_error& e)
                 {
-                    Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
+                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
                 }
 
                 // TEST 4 : No-arg should not cause exception
@@ -301,9 +301,9 @@ namespace dhorn
                         }
                         Assert::Fail(L"Expected an exception (TEST 7)");
                     }
-                    catch (dhorn::experimental::win32_exception &e)
+                    catch (std::system_error& e)
                     {
-                        Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
+                        Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
                     }
                 });
             }
@@ -337,9 +337,9 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::experimental::win32_exception &e)
+                catch (std::system_error& e)
                 {
-                    Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
+                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
                 }
             }
 
@@ -432,9 +432,9 @@ namespace dhorn
                     }
                     Assert::Fail(L"Expected an exception");
                 }
-                catch (dhorn::experimental::win32_exception &e)
+                catch (std::system_error& e)
                 {
-                    Assert::IsTrue(e.get_status() == ERROR_INVALID_HANDLE);
+                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
                 }
             }
         };
