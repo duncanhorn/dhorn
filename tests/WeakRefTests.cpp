@@ -138,7 +138,7 @@ namespace dhorn::tests
         std::atomic_uint32_t _objRefCount{ 1 };
     };
 
-    class TestImpl final :
+    class TestImpl :
         public ITest,
         public IWeakReferenceSource,
         public object_counter
@@ -235,6 +235,12 @@ namespace dhorn::tests
         com::com_ptr<WeakReferenceImpl> _data;
     };
 
+    // Used to ensure that we can construct a weak_ref<TestImpl> from a TestImpl2 instance
+    class TestImplDerived :
+        public TestImpl
+    {
+    };
+
 #pragma endregion
 
 
@@ -267,77 +273,123 @@ namespace dhorn::tests
 
         TEST_METHOD(RawPointerConstructionTest)
         {
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, TestImplDerived*>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, TestImpl*>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, ITest*>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<ITest>, IInspectable*>);
 
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, TestImplDerived*>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, TestImpl*>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, ITest*>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, IInspectable*>);
 
-            com::com_ptr<TestImpl> comPtr;
-            comPtr.attach(new TestImpl());
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, TestImplDerived*>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, TestImpl*>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, ITest*>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, IInspectable*>);
+
+            com::com_ptr<TestImplDerived> comPtr;
+            comPtr.attach(new TestImplDerived());
+            auto derivedPtr = comPtr.get();
+            auto implPtr = static_cast<TestImpl*>(comPtr.get());
             auto interfacePtr = static_cast<ITest*>(comPtr.get());
-            auto implPtr = comPtr.get();
 
             winrt::weak_ref<ITest> interfaceRef(interfacePtr);
             winrt::weak_ref<ITest> interfaceRef2(implPtr);
+            winrt::weak_ref<ITest> interfaceRef3(derivedPtr);
             winrt::weak_ref<TestImpl> implRef(implPtr);
+            winrt::weak_ref<TestImpl> implRef2(derivedPtr);
+            winrt::weak_ref<TestImplDerived> derivedRef(derivedPtr);
 
             Assert::IsFalse(interfaceRef.expired());
             Assert::IsFalse(interfaceRef2.expired());
+            Assert::IsFalse(interfaceRef3.expired());
             Assert::IsFalse(implRef.expired());
+            Assert::IsFalse(implRef2.expired());
+            Assert::IsFalse(derivedRef.expired());
 
             Assert::IsTrue(interfacePtr == interfaceRef.lock());
             Assert::IsTrue(interfacePtr == interfaceRef2.lock());
+            Assert::IsTrue(interfacePtr == interfaceRef3.lock());
             Assert::IsTrue(implPtr == implRef.lock());
+            Assert::IsTrue(implPtr == implRef2.lock());
+            Assert::IsTrue(derivedPtr == derivedRef.lock());
 
             Assert::AreEqual(1ul, comPtr->RefCount());
         }
 
         TEST_METHOD(ComPtrConstructionTest)
         {
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, const com::com_ptr<TestImplDerived>&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, const com::com_ptr<TestImpl>&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, const com::com_ptr<ITest>&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<ITest>, const com::com_ptr<IInspectable>&>);
 
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, const com::com_ptr<TestImplDerived>&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, const com::com_ptr<TestImpl>&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, const com::com_ptr<ITest>&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, const com::com_ptr<IInspectable>&>);
 
-            com::com_ptr<TestImpl> implPtr;
-            implPtr.attach(new TestImpl());
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const com::com_ptr<TestImplDerived>&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const com::com_ptr<TestImpl>&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const com::com_ptr<ITest>&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const com::com_ptr<IInspectable>&>);
+
+            com::com_ptr<TestImplDerived> derivedPtr;
+            derivedPtr.attach(new TestImplDerived());
+            com::com_ptr<TestImpl> implPtr = derivedPtr;
             com::com_ptr<ITest> interfacePtr = implPtr;
 
             winrt::weak_ref<ITest> interfaceRef(interfacePtr);
             winrt::weak_ref<ITest> interfaceRef2(implPtr);
+            winrt::weak_ref<ITest> interfaceRef3(derivedPtr);
             winrt::weak_ref<TestImpl> implRef(implPtr);
+            winrt::weak_ref<TestImpl> implRef2(derivedPtr);
+            winrt::weak_ref<TestImplDerived> derivedRef(derivedPtr);
 
             Assert::IsFalse(interfaceRef.expired());
             Assert::IsFalse(interfaceRef2.expired());
+            Assert::IsFalse(interfaceRef3.expired());
             Assert::IsFalse(implRef.expired());
+            Assert::IsFalse(implRef2.expired());
+            Assert::IsFalse(derivedRef.expired());
 
             Assert::IsTrue(interfacePtr == interfaceRef.lock());
             Assert::IsTrue(interfacePtr == interfaceRef2.lock());
+            Assert::IsTrue(interfacePtr == interfaceRef3.lock());
             Assert::IsTrue(implPtr == implRef.lock());
+            Assert::IsTrue(implPtr == implRef2.lock());
+            Assert::IsTrue(derivedPtr == derivedRef.lock());
 
-            Assert::AreEqual(2ul, implPtr->RefCount());
+            Assert::AreEqual(3ul, implPtr->RefCount());
         }
 
         TEST_METHOD(CopyConstructionTest)
         {
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, const winrt::weak_ref<TestImplDerived>&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, const winrt::weak_ref<TestImpl>&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, const winrt::weak_ref<ITest>&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<ITest>, const winrt::weak_ref<IInspectable>&>);
 
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<TestImplDerived>&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<TestImpl>&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<ITest>&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<IInspectable>&>);
 
-            com::com_ptr<TestImpl> comPtr;
-            comPtr.attach(new TestImpl());
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<TestImplDerived>&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<TestImpl>&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<ITest>&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<IInspectable>&>);
 
-            winrt::weak_ref<TestImpl> implRef(comPtr);
+            com::com_ptr<TestImplDerived> comPtr;
+            comPtr.attach(new TestImplDerived());
+
+            winrt::weak_ref<TestImplDerived> derivedRef(comPtr);
+            winrt::weak_ref<TestImplDerived> derivedRefCopy(derivedRef);
+            Assert::IsTrue(comPtr == derivedRef.lock());
+            Assert::IsTrue(comPtr == derivedRefCopy.lock());
+
+            winrt::weak_ref<TestImpl> implRef(derivedRef);
             winrt::weak_ref<TestImpl> implRefCopy(implRef);
             Assert::IsTrue(comPtr == implRef.lock());
             Assert::IsTrue(comPtr == implRefCopy.lock());
@@ -348,8 +400,13 @@ namespace dhorn::tests
             Assert::IsTrue(comPtr == testRefCopy.lock());
 
             // Copy from null
-            winrt::weak_ref<TestImpl> implEmpty;
+            winrt::weak_ref<TestImplDerived> derivedEmpty;
+            winrt::weak_ref<TestImplDerived> derivedEmptyCopy(derivedEmpty);
+            Assert::IsTrue(derivedEmpty.expired());
+
+            winrt::weak_ref<TestImpl> implEmpty(derivedEmptyCopy);
             winrt::weak_ref<TestImpl> implEmptyCopy(implEmpty);
+            Assert::IsTrue(implEmpty.expired());
             Assert::IsTrue(implEmptyCopy.expired());
 
             winrt::weak_ref<ITest> testEmpty(implEmptyCopy);
@@ -360,18 +417,33 @@ namespace dhorn::tests
 
         TEST_METHOD(MoveConstructionTest)
         {
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, winrt::weak_ref<TestImplDerived>&&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, winrt::weak_ref<TestImpl>&&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<ITest>, winrt::weak_ref<ITest>&&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<ITest>, winrt::weak_ref<IInspectable>&&>);
 
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<TestImplDerived>&&>);
             Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<TestImpl>&&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<ITest>&&>);
             Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<IInspectable>&&>);
 
-            com::com_ptr<TestImpl> comPtr;
-            comPtr.attach(new TestImpl());
+            Assert::IsTrue(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<TestImplDerived>&&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<TestImpl>&&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<ITest>&&>);
+            Assert::IsFalse(std::is_constructible_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<IInspectable>&&>);
 
-            winrt::weak_ref<TestImpl> implRef(comPtr);
+            com::com_ptr<TestImplDerived> comPtr;
+            comPtr.attach(new TestImplDerived());
+
+            winrt::weak_ref<TestImplDerived> derivedRef(comPtr);
+            winrt::weak_ref<TestImplDerived> derivedRefCopy(std::move(derivedRef));
+            Assert::IsTrue(derivedRef.expired());
+            Assert::IsTrue(comPtr == derivedRefCopy.lock());
+
+            winrt::weak_ref<TestImpl> implRef(std::move(derivedRefCopy));
+            Assert::IsTrue(derivedRefCopy.expired());
+            Assert::IsTrue(comPtr == implRef.lock());
+
             winrt::weak_ref<TestImpl> implRefCopy(std::move(implRef));
             Assert::IsTrue(implRef.expired());
             Assert::IsTrue(comPtr == implRefCopy.lock());
@@ -385,8 +457,13 @@ namespace dhorn::tests
             Assert::IsTrue(comPtr == testRefCopy.lock());
 
             // Move from null
-            winrt::weak_ref<TestImpl> implEmpty;
+            winrt::weak_ref<TestImplDerived> derivedEmpty;
+            winrt::weak_ref<TestImplDerived> derivedEmptyCopy(std::move(derivedEmpty));
+            Assert::IsTrue(derivedEmptyCopy.expired());
+
+            winrt::weak_ref<TestImpl> implEmpty(std::move(derivedEmptyCopy));
             winrt::weak_ref<TestImpl> implEmptyCopy(std::move(implEmpty));
+            Assert::IsTrue(implEmpty.expired());
             Assert::IsTrue(implEmptyCopy.expired());
 
             winrt::weak_ref<ITest> testEmpty(std::move(implEmptyCopy));
@@ -397,26 +474,45 @@ namespace dhorn::tests
 
         TEST_METHOD(CopyAssignmentTest)
         {
+            Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<ITest>, const winrt::weak_ref<TestImplDerived>&>);
             Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<ITest>, const winrt::weak_ref<TestImpl>&>);
             Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<ITest>, const winrt::weak_ref<ITest>&>);
             Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<ITest>, const winrt::weak_ref<IInspectable>&>);
 
+            Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<TestImplDerived>&>);
             Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<TestImpl>&>);
             Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<ITest>&>);
             Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImpl>, const winrt::weak_ref<IInspectable>&>);
 
-            com::com_ptr<TestImpl> comPtr;
-            comPtr.attach(new TestImpl());
+            Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<TestImplDerived>&>);
+            Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<TestImpl>&>);
+            Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<ITest>&>);
+            Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, const winrt::weak_ref<IInspectable>&>);
 
-            winrt::weak_ref<TestImpl> implRef(comPtr);
+            com::com_ptr<TestImplDerived> comPtr;
+            comPtr.attach(new TestImplDerived());
+
+            winrt::weak_ref<TestImplDerived> derivedRef(comPtr);
+            winrt::weak_ref<TestImplDerived> derivedRefCopy;
+            winrt::weak_ref<TestImpl> implRef;
             winrt::weak_ref<TestImpl> implRefCopy;
             winrt::weak_ref<ITest> testRef;
             winrt::weak_ref<ITest> testRefCopy;
 
             // Try and prevent optimizations
+            Assert::IsTrue(derivedRefCopy.expired());
+            Assert::IsTrue(implRef.expired());
             Assert::IsTrue(implRefCopy.expired());
             Assert::IsTrue(testRefCopy.expired());
             Assert::IsTrue(testRef.expired());
+
+            derivedRefCopy = derivedRef;
+            Assert::IsTrue(comPtr == derivedRef.lock());
+            Assert::IsTrue(comPtr == derivedRefCopy.lock());
+
+            implRef = derivedRefCopy;
+            Assert::IsTrue(comPtr == derivedRefCopy.lock());
+            Assert::IsTrue(comPtr == implRef.lock());
 
             implRefCopy = implRef;
             Assert::IsTrue(comPtr == implRef.lock());
@@ -428,17 +524,26 @@ namespace dhorn::tests
             Assert::IsTrue(comPtr == testRefCopy.lock());
 
             // Copy from null
+            winrt::weak_ref<TestImplDerived> derivedEmpty;
+            winrt::weak_ref<TestImplDerived> derivedEmptyCopy;
             winrt::weak_ref<TestImpl> implEmpty;
             winrt::weak_ref<TestImpl> implEmptyCopy;
             winrt::weak_ref<ITest> testEmpty;
             winrt::weak_ref<ITest> testEmptyCopy;
 
             // Try and prevent optimizations
+            Assert::IsTrue(derivedEmptyCopy.expired());
+            Assert::IsTrue(implEmpty.expired());
             Assert::IsTrue(implEmptyCopy.expired());
             Assert::IsTrue(testEmpty.expired());
             Assert::IsTrue(testEmptyCopy.expired());
 
+            derivedEmptyCopy = derivedEmpty;
+            Assert::IsTrue(derivedEmptyCopy.expired());
+
+            implEmpty = derivedEmptyCopy;
             implEmptyCopy = implEmpty;
+            Assert::IsTrue(implEmpty.expired());
             Assert::IsTrue(implEmptyCopy.expired());
 
             testEmpty = implEmptyCopy;
@@ -449,26 +554,45 @@ namespace dhorn::tests
 
         TEST_METHOD(MoveAssignmentTest)
         {
+            Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<ITest>, winrt::weak_ref<TestImplDerived>&&>);
             Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<ITest>, winrt::weak_ref<TestImpl>&&>);
             Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<ITest>, winrt::weak_ref<ITest>&&>);
             Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<ITest>, winrt::weak_ref<IInspectable>&&>);
 
+            Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<TestImplDerived>&&>);
             Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<TestImpl>&&>);
             Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<ITest>&&>);
             Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImpl>, winrt::weak_ref<IInspectable>&&>);
 
-            com::com_ptr<TestImpl> comPtr;
-            comPtr.attach(new TestImpl());
+            Assert::IsTrue(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<TestImplDerived>&&>);
+            Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<TestImpl>&&>);
+            Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<ITest>&&>);
+            Assert::IsFalse(std::is_assignable_v<winrt::weak_ref<TestImplDerived>, winrt::weak_ref<IInspectable>&&>);
 
-            winrt::weak_ref<TestImpl> implRef(comPtr);
+            com::com_ptr<TestImplDerived> comPtr;
+            comPtr.attach(new TestImplDerived());
+
+            winrt::weak_ref<TestImplDerived> derivedRef(comPtr);
+            winrt::weak_ref<TestImplDerived> derivedRefCopy;
+            winrt::weak_ref<TestImpl> implRef;
             winrt::weak_ref<TestImpl> implRefCopy;
             winrt::weak_ref<ITest> testRef;
             winrt::weak_ref<ITest> testRefCopy;
 
             // Try and prevent optimizations
+            Assert::IsTrue(derivedRefCopy.expired());
+            Assert::IsTrue(implRef.expired());
             Assert::IsTrue(implRefCopy.expired());
             Assert::IsTrue(testRef.expired());
             Assert::IsTrue(testRefCopy.expired());
+
+            derivedRefCopy = std::move(derivedRef);
+            Assert::IsTrue(derivedRef.expired());
+            Assert::IsTrue(comPtr == derivedRefCopy.lock());
+
+            implRef = std::move(derivedRefCopy);
+            Assert::IsTrue(derivedRefCopy.expired());
+            Assert::IsTrue(comPtr == implRef.lock());
 
             implRefCopy = std::move(implRef);
             Assert::IsTrue(implRef.expired());
@@ -483,17 +607,26 @@ namespace dhorn::tests
             Assert::IsTrue(comPtr == testRefCopy.lock());
 
             // Move from null
+            winrt::weak_ref<TestImpl> derivedEmpty;
+            winrt::weak_ref<TestImpl> derivedEmptyCopy;
             winrt::weak_ref<TestImpl> implEmpty;
             winrt::weak_ref<TestImpl> implEmptyCopy;
             winrt::weak_ref<ITest> testEmpty;
             winrt::weak_ref<ITest> testEmptyCopy;
 
             // Try and prevent optimizations
+            Assert::IsTrue(derivedEmptyCopy.expired());
+            Assert::IsTrue(implEmpty.expired());
             Assert::IsTrue(implEmptyCopy.expired());
             Assert::IsTrue(testEmpty.expired());
             Assert::IsTrue(testEmptyCopy.expired());
 
+            derivedRefCopy = std::move(derivedRef);
+            Assert::IsTrue(derivedRefCopy.expired());
+
+            implEmpty = std::move(derivedRefCopy);
             implEmptyCopy = std::move(implEmpty);
+            Assert::IsTrue(implEmpty.expired());
             Assert::IsTrue(implEmptyCopy.expired());
 
             testEmpty = std::move(implEmptyCopy);

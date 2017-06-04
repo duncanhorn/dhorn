@@ -93,6 +93,13 @@ namespace dhorn::com
 
     /*
      * interface_traits
+     *
+     * There are several issues with relying on the `__uuidof` operator. First, and perhaps most importantly, it is
+     * non-standard. The second is that declaring the interface id on a type cannot be done as a constant expression.
+     * That is, it's not possible to declare the interface id of a type as the combination of two or more GUIDs. In
+     * order to make this issue less prominent, all uses of a type's interface id goes through the
+     * `interface_traits<IFace>::uuid()` function, allowing specializations - either full or partial - to define the
+     * interface id in which ever way it wishes to. By default, the `__uuidof` operator is used.
      */
 #pragma region interface_traits
 
