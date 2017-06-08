@@ -58,14 +58,7 @@ namespace dhorn
         // Default Construction
         constexpr compressed_base() = default;
 
-        // Value Copy Construction
-        template <typename Type = Ty, std::enable_if_t<std::is_copy_constructible<Type>::value, int> = 0>
-        constexpr compressed_base(const Ty& value) noexcept(std::is_nothrow_copy_constructible<Ty>::value) :
-            _value(value)
-        {
-        }
-
-        // Value Move Construction
+        // Forwarding Construction
         template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
         constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
             _value(std::forward<Type>(value))
@@ -88,8 +81,15 @@ namespace dhorn
         {
         }
 
+        // "Emplace" Construction
+        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
+        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
+            _value(std::forward<Types>(types)...)
+        {
+        }
+
         // Tuple Construction
-        template <typename... Types>
+        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
         compressed_base(std::tuple<Types...> args)
             /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
@@ -218,14 +218,7 @@ namespace dhorn
         {
         }
 
-        // Value Copy Construction
-        template <typename Type = Ty, std::enable_if_t<std::is_copy_constructible<Type>::value, int> = 0>
-        constexpr compressed_base(const Ty& value) noexcept(std::is_nothrow_copy_constructible<Ty>::value) :
-            Ty(value)
-        {
-        }
-
-        // Value Move Construction
+        // Forwarding Construction
         template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
         constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
             Ty(std::forward<Type>(value))
@@ -248,8 +241,15 @@ namespace dhorn
         {
         }
 
+        // "Emplace" Construction
+        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
+        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
+            Ty(std::forward<Types>(types)...)
+        {
+        }
+
         // Tuple Construction
-        template <typename... Types>
+        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
         compressed_base(std::tuple<Types...> args)
             /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})

@@ -221,6 +221,44 @@ namespace dhorn::tests
 
 #pragma endregion
 
+
+
+#pragma region Constructable Types
+
+    struct construct_empty
+    {
+        construct_empty() = default;
+        construct_empty(char*, int) noexcept {}
+        construct_empty(const std::string&) {}
+    };
+
+    struct construct_empty_final final
+    {
+        construct_empty_final() = default;
+        construct_empty_final(char*, int) noexcept {}
+        construct_empty_final(const std::string&) {}
+    };
+
+    struct construct_non_empty
+    {
+        construct_non_empty() = default;
+        construct_non_empty(char* str, int len) noexcept : str(str, len) {}
+        construct_non_empty(const std::string& str) : str(str) {}
+
+        std::string str;
+    };
+
+    struct construct_non_empty_final final
+    {
+        construct_non_empty_final() = default;
+        construct_non_empty_final(char* str, int len) noexcept : str(str, len) {}
+        construct_non_empty_final(const std::string& str) : str(str) {}
+
+        std::string str;
+    };
+
+#pragma endregion
+
 #pragma endregion
 
 
@@ -442,6 +480,64 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_nothrow_constructible_v<compressed_base<throwing_to_non_empty>, compressed_base<from_non_empty>&&>);
             Assert::IsFalse(std::is_nothrow_constructible_v<compressed_base<throwing_to_non_empty_final>, compressed_base<from_non_empty_final>&&>);
         }
+
+#pragma endregion
+
+#pragma region Emplace Construction Tests
+
+        TEST_METHOD(EmplaceConstructionTest)
+        {
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty>, char*, int>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty>, std::string>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty_final>, char*, int>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty_final>, std::string>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty>, char*, int>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty>, std::string>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty_final>, char*, int>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty_final>, std::string>);
+
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_empty>, const char*, int>);
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_empty_final>, const char*, int>);
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty>, const char*, int>);
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty_final>, const char*, int>);
+        }
+
+        TEST_METHOD(EmplaceConstructionNoexceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_constructible_v<compressed_base<construct_empty>, char*, int>);
+            Assert::IsFalse(std::is_nothrow_constructible_v<compressed_base<construct_empty>, std::string>);
+            Assert::IsTrue(std::is_nothrow_constructible_v<compressed_base<construct_empty_final>, char*, int>);
+            Assert::IsFalse(std::is_nothrow_constructible_v<compressed_base<construct_empty_final>, std::string>);
+            Assert::IsTrue(std::is_nothrow_constructible_v<compressed_base<construct_non_empty>, char*, int>);
+            Assert::IsFalse(std::is_nothrow_constructible_v<compressed_base<construct_non_empty>, std::string>);
+            Assert::IsTrue(std::is_nothrow_constructible_v<compressed_base<construct_non_empty_final>, char*, int>);
+            Assert::IsFalse(std::is_nothrow_constructible_v<compressed_base<construct_non_empty_final>, std::string>);
+        }
+
+#pragma endregion
+
+#pragma region Tuple Construction Tests
+
+        TEST_METHOD(TupleConstructionTest)
+        {
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty>, std::tuple<char*, int>>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty>, std::tuple<std::string>>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty_final>, std::tuple<char*, int>>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_empty_final>, std::tuple<std::string>>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty>, std::tuple<char*, int>>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty>, std::tuple<std::string>>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty_final>, std::tuple<char*, int>>);
+            Assert::IsTrue(std::is_constructible_v<compressed_base<construct_non_empty_final>, std::tuple<std::string>>);
+
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_empty>, std::tuple<const char*, int>>);
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_empty_final>, std::tuple<const char*, int>>);
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty>, std::tuple<const char*, int>>);
+            Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty_final>, std::tuple<const char*, int>>);
+        }
+
+        //TEST_METHOD(TupleConstructionNoexceptTest)
+        //{
+        //}
 
 #pragma endregion
 
