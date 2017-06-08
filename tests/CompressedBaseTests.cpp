@@ -265,6 +265,18 @@ namespace dhorn::tests
 
     TEST_CLASS(CompressedBaseTests)
     {
+        TEST_METHOD_INITIALIZE(Setup)
+        {
+            object_counter::reset();
+        }
+
+        TEST_METHOD_CLEANUP(Cleanup)
+        {
+            Assert::AreEqual(0u, object_counter::instance_count);
+        }
+
+
+
 #pragma region Constructor Tests
 
 #pragma region Default Construction Tests
@@ -286,6 +298,10 @@ namespace dhorn::tests
 
             compressed_base<non_empty_final> nonEmptyFinal;
             Assert::AreEqual(42, nonEmptyFinal.value().value);
+
+            compressed_base<object_counter> obj;
+            Assert::AreEqual(1u, object_counter::instance_count);
+            Assert::AreEqual(1u, object_counter::constructed_count);
         }
 
         TEST_METHOD(DefaultConstructionNoexceptTest)
@@ -316,6 +332,12 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<compressed_base<cant_construct_empty_final>, const cant_construct_empty_final&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<cant_construct_non_empty>, const cant_construct_non_empty&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<cant_construct_non_empty_final>, const cant_construct_non_empty_final&>);
+
+            object_counter cnt;
+            compressed_base<object_counter> obj(cnt);
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
         }
 
         TEST_METHOD(ValueCopyConstructionNoexceptTest)
@@ -346,6 +368,11 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<compressed_base<cant_construct_empty_final>, cant_construct_empty_final&&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<cant_construct_non_empty>, cant_construct_non_empty&&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<cant_construct_non_empty_final>, cant_construct_non_empty_final&&>);
+
+            compressed_base<object_counter> obj(object_counter{});
+            Assert::AreEqual(1u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::move_count);
         }
 
         TEST_METHOD(ValueMoveConstructionNoexceptTest)
@@ -376,6 +403,12 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_copy_constructible_v<compressed_base<cant_construct_empty_final>>);
             Assert::IsFalse(std::is_copy_constructible_v<compressed_base<cant_construct_non_empty>>);
             Assert::IsFalse(std::is_copy_constructible_v<compressed_base<cant_construct_non_empty_final>>);
+
+            compressed_base<object_counter> obj;
+            compressed_base<object_counter> objCopy(obj);
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
         }
 
         TEST_METHOD(CopyConstructionNoexceptTest)
@@ -406,6 +439,13 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<compressed_base<from_empty_final>, const compressed_base<to_empty_final>&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<from_non_empty>, const compressed_base<to_non_empty>&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<from_non_empty_final>, const compressed_base<to_non_empty_final>&>);
+
+            struct derived : public object_counter {};
+            compressed_base<derived> d;
+            compressed_base<object_counter> obj(d);
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
         }
 
         TEST_METHOD(CopyConversionConstructionNoexceptTest)
@@ -436,6 +476,12 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_move_constructible_v<compressed_base<cant_construct_empty_final>>);
             Assert::IsFalse(std::is_move_constructible_v<compressed_base<cant_construct_non_empty>>);
             Assert::IsFalse(std::is_move_constructible_v<compressed_base<cant_construct_non_empty_final>>);
+
+            compressed_base<object_counter> obj;
+            compressed_base<object_counter> objCopy(std::move(obj));
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::move_count);
         }
 
         TEST_METHOD(MoveConstructionNoexceptTest)
@@ -466,6 +512,13 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<compressed_base<from_empty_final>, compressed_base<to_empty_final>&&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<from_non_empty>, compressed_base<to_non_empty>&&>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<from_non_empty_final>, compressed_base<to_non_empty_final>&&>);
+
+            struct derived : public object_counter {};
+            compressed_base<derived> d;
+            compressed_base<object_counter> obj(std::move(d));
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::move_count);
         }
 
         TEST_METHOD(MoveConversionConstructionNoexceptTest)
