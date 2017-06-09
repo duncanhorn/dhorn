@@ -90,8 +90,8 @@ namespace dhorn
 
         // Tuple Construction
         template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
-        compressed_base(std::tuple<Types...> args)
-            /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
+        compressed_base(std::tuple<Types...> args) /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
+            /*https://developercommunity.visualstudio.com/content/problem/32650/inheriting-constructors-where-base-class-has-noexc.html*/
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
         {
         }
@@ -116,6 +116,7 @@ namespace dhorn
 
         template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
         compressed_base& operator=(const compressed_base<Type>& other)
+            noexcept(std::is_nothrow_assignable<Ty&, const Type&>::value)
         {
             this->_value = other.value();
             return *this;
@@ -123,6 +124,7 @@ namespace dhorn
 
         template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
         compressed_base& operator=(compressed_base<Type>&& other)
+            noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
         {
             this->_value = std::forward<Type>(other.value());
             return *this;
@@ -276,6 +278,7 @@ namespace dhorn
 
         template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
         compressed_base& operator=(const compressed_base<Type>& other)
+            noexcept(std::is_nothrow_assignable<Ty&, const Type&>::value)
         {
             static_cast<Ty&>(*this) = other.value();
             return *this;
@@ -283,6 +286,7 @@ namespace dhorn
 
         template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
         compressed_base& operator=(compressed_base<Type>&& other)
+            noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
         {
             static_cast<Ty&>(*this) = std::forward<Type>(other.value());
             return *this;

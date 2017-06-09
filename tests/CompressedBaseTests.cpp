@@ -45,18 +45,21 @@ namespace dhorn::tests
     {
         cant_construct_empty() = delete;
         cant_construct_empty(const cant_construct_empty&) = delete;
+        cant_construct_empty& operator=(const cant_construct_empty&) = delete;
     };
 
     struct cant_construct_empty_final final
     {
         cant_construct_empty_final() = delete;
         cant_construct_empty_final(const cant_construct_empty_final&) = delete;
+        cant_construct_empty_final& operator=(const cant_construct_empty_final&) = delete;
     };
 
     struct cant_construct_non_empty
     {
         cant_construct_non_empty() = delete;
         cant_construct_non_empty(const cant_construct_non_empty&) = delete;
+        cant_construct_non_empty& operator=(const cant_construct_non_empty&) = delete;
 
         int value = 42;
     };
@@ -65,6 +68,7 @@ namespace dhorn::tests
     {
         cant_construct_non_empty_final() = delete;
         cant_construct_non_empty_final(const cant_construct_non_empty_final&) = delete;
+        cant_construct_non_empty_final& operator=(const cant_construct_non_empty_final&) = delete;
 
         int value = 42;
     };
@@ -79,18 +83,24 @@ namespace dhorn::tests
     {
         throwing_empty() {}
         throwing_empty(const throwing_empty&) {}
+        throwing_empty& operator=(const throwing_empty&) {}
+        throwing_empty& operator=(throwing_empty&&) {}
     };
 
     struct throwing_empty_final final
     {
         throwing_empty_final() {}
         throwing_empty_final(const throwing_empty_final&) {}
+        throwing_empty_final& operator=(const throwing_empty_final&) {}
+        throwing_empty_final& operator=(throwing_empty_final&&) {}
     };
 
     struct throwing_non_empty
     {
         throwing_non_empty() {}
         throwing_non_empty(const throwing_non_empty&) {}
+        throwing_non_empty& operator=(const throwing_non_empty&) {}
+        throwing_non_empty& operator=(throwing_non_empty&&) {}
 
         int value = 42;
     };
@@ -99,6 +109,8 @@ namespace dhorn::tests
     {
         throwing_non_empty_final() {}
         throwing_non_empty_final(const throwing_non_empty_final&) {}
+        throwing_non_empty_final& operator=(const throwing_non_empty_final&) {}
+        throwing_non_empty_final& operator=(throwing_non_empty_final&&) {}
 
         int value = 42;
     };
@@ -132,31 +144,31 @@ namespace dhorn::tests
     struct to_empty
     {
         to_empty() = default;
-        to_empty(const to_empty&) = default;
-        to_empty(to_empty&&) = default;
-
         to_empty(const from_empty&) noexcept {}
         to_empty(from_empty&&) noexcept {}
+
+        to_empty& operator=(const from_empty&) noexcept { return *this; }
+        to_empty& operator=(from_empty&&) noexcept { return *this; }
     };
 
     struct to_empty_final final
     {
         to_empty_final() = default;
-        to_empty_final(const to_empty_final&) = default;
-        to_empty_final(to_empty_final&&) = default;
-
         to_empty_final(const from_empty_final&) noexcept {}
         to_empty_final(from_empty_final&&) noexcept {}
+
+        to_empty_final& operator=(const from_empty_final&) noexcept { return *this; }
+        to_empty_final& operator=(from_empty_final&&) noexcept { return *this; }
     };
 
     struct to_non_empty
     {
         to_non_empty() = default;
-        to_non_empty(const to_non_empty&) = default;
-        to_non_empty(to_non_empty&&) = default;
-
         to_non_empty(const from_non_empty& o) noexcept : value(o.value) {}
         to_non_empty(from_non_empty&& o) noexcept : value(o.value) { o.value = 0; }
+
+        to_non_empty& operator=(const from_non_empty&) noexcept { return *this; }
+        to_non_empty& operator=(from_non_empty&&) noexcept { return *this; }
 
         int value = 42;
     };
@@ -164,11 +176,11 @@ namespace dhorn::tests
     struct to_non_empty_final final
     {
         to_non_empty_final() = default;
-        to_non_empty_final(const to_non_empty_final&) = default;
-        to_non_empty_final(to_non_empty_final&&) = default;
-
         to_non_empty_final(const from_non_empty_final& o) noexcept : value(o.value) {}
         to_non_empty_final(from_non_empty_final&& o) noexcept : value(o.value) { o.value = 0; }
+
+        to_non_empty_final& operator=(const from_non_empty_final&) noexcept { return *this; }
+        to_non_empty_final& operator=(from_non_empty_final&&) noexcept { return *this; }
 
         int value = 42;
     };
@@ -621,6 +633,170 @@ namespace dhorn::tests
         //TEST_METHOD(TupleConstructionNoexceptTest)
         //{
         //}
+
+#pragma endregion
+
+#pragma endregion
+
+
+
+#pragma region Assignment Operator Tests
+
+#pragma region Copy Assignment Operator Tests
+
+        TEST_METHOD(CopyAssignmentOperatorTest)
+        {
+            Assert::IsTrue(std::is_copy_assignable_v<compressed_base<empty>>);
+            Assert::IsTrue(std::is_copy_assignable_v<compressed_base<empty_final>>);
+            Assert::IsTrue(std::is_copy_assignable_v<compressed_base<non_empty>>);
+            Assert::IsTrue(std::is_copy_assignable_v<compressed_base<non_empty_final>>);
+
+            Assert::IsFalse(std::is_copy_assignable_v<compressed_base<cant_construct_empty>>);
+            Assert::IsFalse(std::is_copy_assignable_v<compressed_base<cant_construct_empty_final>>);
+            Assert::IsFalse(std::is_copy_assignable_v<compressed_base<cant_construct_non_empty>>);
+            Assert::IsFalse(std::is_copy_assignable_v<compressed_base<cant_construct_non_empty_final>>);
+
+            compressed_base<object_counter> obj;
+            compressed_base<object_counter> objCopy;
+            Assert::AreEqual(2u, object_counter::instance_count);
+
+            objCopy = obj;
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
+        }
+
+        TEST_METHOD(CopyAssignmentOperatorNoexceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_copy_assignable_v<compressed_base<empty>>);
+            Assert::IsTrue(std::is_nothrow_copy_assignable_v<compressed_base<empty_final>>);
+            Assert::IsTrue(std::is_nothrow_copy_assignable_v<compressed_base<non_empty>>);
+            Assert::IsTrue(std::is_nothrow_copy_assignable_v<compressed_base<non_empty_final>>);
+
+            Assert::IsFalse(std::is_nothrow_copy_assignable_v<compressed_base<throwing_empty>>);
+            Assert::IsFalse(std::is_nothrow_copy_assignable_v<compressed_base<throwing_empty_final>>);
+            Assert::IsFalse(std::is_nothrow_copy_assignable_v<compressed_base<throwing_non_empty>>);
+            Assert::IsFalse(std::is_nothrow_copy_assignable_v<compressed_base<throwing_non_empty_final>>);
+        }
+
+#pragma endregion
+
+#pragma region Copy Conversion Assignment Operator Tests
+
+        TEST_METHOD(CopyConversionAssignmentOperatorTest)
+        {
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_empty>, const compressed_base<from_empty>&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_empty_final>, const compressed_base<from_empty_final>&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_non_empty>, const compressed_base<from_non_empty>&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_non_empty_final>, const compressed_base<from_non_empty_final>&>);
+
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_empty>, const compressed_base<to_empty>&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_empty_final>, const compressed_base<to_empty_final>&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_non_empty>, const compressed_base<to_non_empty>&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_non_empty_final>, const compressed_base<to_non_empty_final>&>);
+
+            struct derived : public object_counter {};
+            compressed_base<derived> d;
+            compressed_base<object_counter> obj;
+            Assert::AreEqual(2u, object_counter::instance_count);
+
+            obj = d;
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
+        }
+
+        TEST_METHOD(CopyConversionAssignmentOperatorNoexceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_empty>, const compressed_base<from_empty>&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_empty_final>, const compressed_base<from_empty_final>&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_non_empty>, const compressed_base<from_non_empty>&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_non_empty_final>, const compressed_base<from_non_empty_final>&>);
+
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_empty>, const compressed_base<from_empty>&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_empty_final>, const compressed_base<from_empty_final>&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_non_empty>, const compressed_base<from_non_empty>&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_non_empty_final>, const compressed_base<from_non_empty_final>&>);
+        }
+
+#pragma endregion
+
+#pragma region Move Assignment Operator Tests
+
+        TEST_METHOD(MoveAssignmentOperatorTest)
+        {
+            Assert::IsTrue(std::is_move_assignable_v<compressed_base<empty>>);
+            Assert::IsTrue(std::is_move_assignable_v<compressed_base<empty_final>>);
+            Assert::IsTrue(std::is_move_assignable_v<compressed_base<non_empty>>);
+            Assert::IsTrue(std::is_move_assignable_v<compressed_base<non_empty_final>>);
+
+            Assert::IsFalse(std::is_move_assignable_v<compressed_base<cant_construct_empty>>);
+            Assert::IsFalse(std::is_move_assignable_v<compressed_base<cant_construct_empty_final>>);
+            Assert::IsFalse(std::is_move_assignable_v<compressed_base<cant_construct_non_empty>>);
+            Assert::IsFalse(std::is_move_assignable_v<compressed_base<cant_construct_non_empty_final>>);
+
+            compressed_base<object_counter> obj;
+            compressed_base<object_counter> objCopy;
+            Assert::AreEqual(2u, object_counter::instance_count);
+
+            objCopy = std::move(obj);
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::move_count);
+        }
+
+        TEST_METHOD(MoveAssignmentOperatorNoexceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_move_assignable_v<compressed_base<empty>>);
+            Assert::IsTrue(std::is_nothrow_move_assignable_v<compressed_base<empty_final>>);
+            Assert::IsTrue(std::is_nothrow_move_assignable_v<compressed_base<non_empty>>);
+            Assert::IsTrue(std::is_nothrow_move_assignable_v<compressed_base<non_empty_final>>);
+
+            Assert::IsFalse(std::is_nothrow_move_assignable_v<compressed_base<throwing_empty>>);
+            Assert::IsFalse(std::is_nothrow_move_assignable_v<compressed_base<throwing_empty_final>>);
+            Assert::IsFalse(std::is_nothrow_move_assignable_v<compressed_base<throwing_non_empty>>);
+            Assert::IsFalse(std::is_nothrow_move_assignable_v<compressed_base<throwing_non_empty_final>>);
+        }
+
+#pragma endregion
+
+#pragma region Move Conversion Assignment Operator Tests
+
+        TEST_METHOD(MoveConversionAssignmentOperatorTest)
+        {
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_empty>, compressed_base<from_empty>&&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_empty_final>, compressed_base<from_empty_final>&&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_non_empty>, compressed_base<from_non_empty>&&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<to_non_empty_final>, compressed_base<from_non_empty_final>&&>);
+
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_empty>, compressed_base<to_empty>&&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_empty_final>, compressed_base<to_empty_final>&&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_non_empty>, compressed_base<to_non_empty>&&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<from_non_empty_final>, compressed_base<to_non_empty_final>&&>);
+
+            struct derived : public object_counter {};
+            compressed_base<derived> d;
+            compressed_base<object_counter> obj;
+            Assert::AreEqual(2u, object_counter::instance_count);
+
+            obj = std::move(d);
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::move_count);
+        }
+
+        TEST_METHOD(MoveConversionAssignmentOperatorNoexceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_empty>, compressed_base<from_empty>&&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_empty_final>, compressed_base<from_empty_final>&&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_non_empty>, compressed_base<from_non_empty>&&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<to_non_empty_final>, compressed_base<from_non_empty_final>&&>);
+
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_empty>, compressed_base<from_empty>&&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_empty_final>, compressed_base<from_empty_final>&&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_non_empty>, compressed_base<from_non_empty>&&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_to_non_empty_final>, compressed_base<from_non_empty_final>&&>);
+        }
 
 #pragma endregion
 
