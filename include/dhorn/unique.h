@@ -85,10 +85,10 @@ namespace dhorn
      */
     template <typename Ty, typename Deleter = std::default_delete<Ty>>
     struct unique_pointer_traits :
-        private details::compressed_base<Deleter>
+        private compressed_base<Deleter>
     {
     private:
-        using deleter_base = details::compressed_base<Deleter>;
+        using deleter_base = compressed_base<Deleter>;
 
     public:
         /*
@@ -136,10 +136,10 @@ namespace dhorn
      */
     template <typename Ty, typename Deleter = std::default_delete<Ty[]>>
     struct unique_array_traits :
-        private details::compressed_base<Deleter>
+        private compressed_base<Deleter>
     {
     private:
-        using deleter_base = details::compressed_base<Deleter>;
+        using deleter_base = compressed_base<Deleter>;
 
     public:
         /*
