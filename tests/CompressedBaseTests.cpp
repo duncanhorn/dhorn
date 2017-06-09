@@ -878,5 +878,19 @@ namespace dhorn::tests
 #pragma endregion
 
 #pragma endregion
+
+
+
+        TEST_METHOD(SwapTest)
+        {
+            compressed_base<non_empty> a;
+            compressed_base<non_empty> b;
+            a.value().value = 42;
+            b.value().value = 8;
+            a.swap(b);
+
+            Assert::AreEqual(8, a.value().value);
+            Assert::AreEqual(42, b.value().value);
+        }
     };
 }

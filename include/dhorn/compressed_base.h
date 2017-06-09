@@ -352,5 +352,5 @@ namespace dhorn
         }
 
 #pragma endregion
-        };
+    };
 }
