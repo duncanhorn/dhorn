@@ -642,6 +642,83 @@ namespace dhorn::tests
 
 #pragma region Assignment Operator Tests
 
+#pragma region Value Copy Assignment Operator Tests
+
+        TEST_METHOD(ValueCopyAssignmentOperatorTest)
+        {
+            Assert::IsTrue(std::is_assignable_v<compressed_base<empty>, const empty&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<empty_final>, const empty_final&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<non_empty>, const non_empty&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<non_empty_final>, const non_empty_final&>);
+
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_empty>, const cant_construct_empty&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_empty_final>, const cant_construct_empty_final&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_non_empty>, const cant_construct_non_empty&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_non_empty_final>, const cant_construct_non_empty_final&>);
+
+            object_counter cnt;
+            compressed_base<object_counter> obj;
+            Assert::AreEqual(2u, object_counter::instance_count);
+
+            obj = cnt;
+            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
+        }
+
+        TEST_METHOD(ValueCopyAssignmentOperatorNoexceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<empty>, const empty&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<empty_final>, const empty_final&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<non_empty>, const non_empty&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<non_empty_final>, const non_empty_final&>);
+
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_empty>, const throwing_empty&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_empty_final>, const throwing_empty_final&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_non_empty>, const throwing_non_empty&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_non_empty_final>, const throwing_non_empty_final&>);
+        }
+
+#pragma endregion
+
+#pragma region Value Move Assignment Operator Tests
+
+        TEST_METHOD(ValueMoveAssignmentOperatorTest)
+        {
+            Assert::IsTrue(std::is_assignable_v<compressed_base<empty>, empty&&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<empty_final>, empty_final&&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<non_empty>, non_empty&&>);
+            Assert::IsTrue(std::is_assignable_v<compressed_base<non_empty_final>, non_empty_final&&>);
+
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_empty>, cant_construct_empty&&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_empty_final>, cant_construct_empty_final&&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_non_empty>, cant_construct_non_empty&&>);
+            Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_non_empty_final>, cant_construct_non_empty_final&&>);
+
+            compressed_base<object_counter> obj;
+            Assert::AreEqual(1u, object_counter::instance_count);
+
+            obj = object_counter{};
+            Assert::AreEqual(1u, object_counter::instance_count);
+            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(1u, object_counter::move_count);
+        }
+
+        TEST_METHOD(ValueMoveAssignmentOperatorNoexceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<empty>, empty&&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<empty_final>, empty_final&&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<non_empty>, non_empty&&>);
+            Assert::IsTrue(std::is_nothrow_assignable_v<compressed_base<non_empty_final>, non_empty_final&&>);
+
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_empty>, throwing_empty&&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_empty_final>, throwing_empty_final&&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_non_empty>, throwing_non_empty&&>);
+            Assert::IsFalse(std::is_nothrow_assignable_v<compressed_base<throwing_non_empty_final>, throwing_non_empty_final&&>);
+        }
+
+#pragma endregion
+
 #pragma region Copy Assignment Operator Tests
 
         TEST_METHOD(CopyAssignmentOperatorTest)

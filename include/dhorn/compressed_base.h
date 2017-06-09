@@ -114,6 +114,13 @@ namespace dhorn
         compressed_base& operator=(const compressed_base&) = default;
         compressed_base& operator=(compressed_base&&) = default;
 
+        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
+        compressed_base& operator=(Type&& value) noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
+        {
+            this->_value = std::forward<Type>(value);
+            return *this;
+        }
+
         template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
         compressed_base& operator=(const compressed_base<Type>& other)
             noexcept(std::is_nothrow_assignable<Ty&, const Type&>::value)
@@ -275,6 +282,13 @@ namespace dhorn
 
         compressed_base& operator=(const compressed_base&) = default;
         compressed_base& operator=(compressed_base&&) = default;
+
+        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
+        compressed_base& operator=(Type&& value) noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
+        {
+            static_cast<Ty&>(*this) = std::forward<Type>(value);
+            return *this;
+        }
 
         template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
         compressed_base& operator=(const compressed_base<Type>& other)
