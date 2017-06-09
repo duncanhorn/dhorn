@@ -50,16 +50,20 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)d3d_tests\$(Configuration)\</OutDir>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/std:c++latest  /permissive- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -68,23 +72,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/std:c++latest  /permissive- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

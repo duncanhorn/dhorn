@@ -250,8 +250,8 @@ namespace dhorn
 
         // Tuple Construction
         template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
-        compressed_base(std::tuple<Types...> args)
-            /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
+        compressed_base(std::tuple<Types...> args) /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
+            /*https://developercommunity.visualstudio.com/content/problem/32650/inheriting-constructors-where-base-class-has-noexc.html*/
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
         {
         }

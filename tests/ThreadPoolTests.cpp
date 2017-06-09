@@ -7,8 +7,13 @@
  */
 #include "stdafx.h"
 
+#pragma warning(push)
+#pragma warning(disable:4702) // Unreachable code since we unconditionally throw
+
 #include <array>
 #include <dhorn/thread_pool.h>
+
+#pragma warning(pop)
 
 using namespace std::literals;
 

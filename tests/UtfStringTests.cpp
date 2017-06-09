@@ -2497,8 +2497,8 @@ namespace dhorn
 
 
         /*
-        * utf32_string Tests
-        */
+         * utf32_string Tests
+         */
         TEST_CLASS(Utf32StringTests)
         {
             using string_type = dhorn::experimental::utf32_string;

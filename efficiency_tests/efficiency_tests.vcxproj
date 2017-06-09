@@ -50,18 +50,22 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
-      <TreatWarningAsError>true</TreatWarningAsError>
       <EnablePREfast>true</EnablePREfast>
       <DisableSpecificWarnings>4505</DisableSpecificWarnings>
-      <AdditionalOptions>/std:c++latest  /permissive- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -70,7 +74,6 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
@@ -78,17 +81,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>true</EnablePREfast>
-      <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4505</DisableSpecificWarnings>
-      <AdditionalOptions>/std:c++latest  /permissive- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

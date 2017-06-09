@@ -553,6 +553,21 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<compressed_base<construct_empty_final>, const char*, int>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty>, const char*, int>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty_final>, const char*, int>);
+
+            struct test
+            {
+                test(const object_counter& obj) : obj(obj) {}
+                test(object_counter&& obj) : obj(std::move(obj)) {}
+
+                object_counter obj;
+            };
+
+            object_counter o;
+            compressed_base<test> a(object_counter{});
+            compressed_base<test> b(o);
+            Assert::AreEqual(3u, object_counter::instance_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(1u, object_counter::move_count);
         }
 
         TEST_METHOD(EmplaceConstructionNoexceptTest)
@@ -586,6 +601,21 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<compressed_base<construct_empty_final>, std::tuple<const char*, int>>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty>, std::tuple<const char*, int>>);
             Assert::IsFalse(std::is_constructible_v<compressed_base<construct_non_empty_final>, std::tuple<const char*, int>>);
+
+            struct test
+            {
+                test(const object_counter& obj) : obj(obj) {}
+                test(object_counter&& obj) : obj(std::move(obj)) {}
+
+                object_counter obj;
+            };
+
+            object_counter o;
+            compressed_base<test> a(std::make_tuple(object_counter{})); // move (twice)
+            compressed_base<test> b(std::forward_as_tuple(o)); // copy
+            Assert::AreEqual(3u, object_counter::instance_count);
+            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(2u, object_counter::move_count);
         }
 
         //TEST_METHOD(TupleConstructionNoexceptTest)
