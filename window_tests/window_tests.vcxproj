@@ -46,15 +46,20 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Create</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
-      <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>
       </MultiProcessorCompilation>
     </ClCompile>
@@ -65,15 +70,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>precomp.h</PrecompiledHeaderFile>
-      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,14 +83,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup>
-    <Link>
-      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
-    </Link>
-    <ClCompile>
-      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

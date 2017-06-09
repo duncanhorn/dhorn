@@ -195,7 +195,7 @@ namespace dhorn
             TEST_METHOD(Utf8ReadTest)
             {
                 // The most interesting tests are the ones at the "boundaries"
-                UtfReadTest(u8"\u0000", U'\u0000');
+                UtfReadTest(u8"", U'\u0000');
                 UtfReadTest(u8"\u007F", U'\u007F');
 
                 UtfReadTest(u8"\u0080", U'\u0080');
@@ -211,7 +211,7 @@ namespace dhorn
             TEST_METHOD(Utf16ReadTest)
             {
                 // The most interesting tests are the ones at the "boundaries"
-                UtfReadTest(u"\u0000", U'\u0000');
+                UtfReadTest(u"", U'\u0000');
                 UtfReadTest(u"\uD7FF", U'\uD7FF');
 
                 UtfReadTest(u"\uE000", U'\uE000');
@@ -224,7 +224,7 @@ namespace dhorn
             TEST_METHOD(Utf32ReadTest)
             {
                 // Always just returns *str, so testing isn't very useful... just do a few anyway
-                UtfReadTest(U"\u0000", U'\u0000');
+                UtfReadTest(U"", U'\u0000');
                 UtfReadTest(U"\u007F", U'\u007F');
                 UtfReadTest(U"\u0080", U'\u0080');
                 UtfReadTest(U"\u07FF", U'\u07FF');
@@ -261,7 +261,7 @@ namespace dhorn
             TEST_METHOD(Utf8WriteTest)
             {
                 // The most interesting tests are the ones at the "boundaries"
-                UtfWriteTest(u8"\u0000", U'\u0000');
+                UtfWriteTest(u8"", U'\u0000');
                 UtfWriteTest(u8"\u007F", U'\u007F');
 
                 UtfWriteTest(u8"\u0080", U'\u0080');
@@ -277,7 +277,7 @@ namespace dhorn
             TEST_METHOD(Utf16WriteTest)
             {
                 // The most interesting tests are the ones at the "boundaries"
-                UtfWriteTest(u"\u0000", U'\u0000');
+                UtfWriteTest(u"", U'\u0000');
                 UtfWriteTest(u"\uD7FF", U'\uD7FF');
 
                 UtfWriteTest(u"\uE000", U'\uE000');
@@ -290,7 +290,7 @@ namespace dhorn
             TEST_METHOD(Utf32WriteTest)
             {
                 // Always just returns *str, so testing isn't very useful... just do a few anyway
-                UtfWriteTest(U"\u0000", U'\u0000');
+                UtfWriteTest(U"", U'\u0000');
                 UtfWriteTest(U"\u007F", U'\u007F');
                 UtfWriteTest(U"\u0080", U'\u0080');
                 UtfWriteTest(U"\u07FF", U'\u07FF');
