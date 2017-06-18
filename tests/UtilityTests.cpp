@@ -76,4 +76,93 @@ namespace dhorn::tests
                 reverse_integer_sequence_t<reverse_integer_sequence_t<std::make_index_sequence<10>>>>);
         }
     };
+
+
+
+    TEST_CLASS(GetByteTests)
+    {
+        TEST_METHOD(Unsigned32BitValueTest)
+        {
+            uint32_t value = 0;
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<3>(value));
+
+            value = 0xAABBCCDD;
+            Assert::AreEqual(static_cast<uint8_t>(0xDD), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xCC), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xBB), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xAA), get_byte<3>(value));
+
+            value = 0x11223344;
+            Assert::AreEqual(static_cast<uint8_t>(0x44), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0x33), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0x22), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0x11), get_byte<3>(value));
+
+            value = 0xFFFFFFFF;
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<3>(value));
+        }
+
+        TEST_METHOD(Signed32BitValueTest)
+        {
+            uint32_t value = 0;
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<3>(value));
+
+            value = 0xAABBCCDD;
+            Assert::AreEqual(static_cast<uint8_t>(0xDD), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xCC), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xBB), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xAA), get_byte<3>(value));
+
+            value = 0x11223344;
+            Assert::AreEqual(static_cast<uint8_t>(0x44), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0x33), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0x22), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0x11), get_byte<3>(value));
+
+            value = 0xFFFFFFFF;
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<0>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<1>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<2>(value));
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<3>(value));
+        }
+
+        TEST_METHOD(Unsigned8BitValueTest)
+        {
+            uint8_t value = 0;
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<0>(value));
+
+            value = 0xAA;
+            Assert::AreEqual(static_cast<uint8_t>(0xAA), get_byte<0>(value));
+
+            value = 0x11;
+            Assert::AreEqual(static_cast<uint8_t>(0x11), get_byte<0>(value));
+
+            value = 0xFF;
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<0>(value));
+        }
+
+        TEST_METHOD(Signed8BitValueTest)
+        {
+            int8_t value = 0;
+            Assert::AreEqual(static_cast<uint8_t>(0), get_byte<0>(value));
+
+            value = static_cast<uint8_t>(0xAA);
+            Assert::AreEqual(static_cast<uint8_t>(0xAA), get_byte<0>(value));
+
+            value = 0x11;
+            Assert::AreEqual(static_cast<uint8_t>(0x11), get_byte<0>(value));
+
+            value = static_cast<uint8_t>(0xFF);
+            Assert::AreEqual(static_cast<uint8_t>(0xFF), get_byte<0>(value));
+        }
+    };
 }

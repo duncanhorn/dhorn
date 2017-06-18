@@ -58,4 +58,25 @@ namespace dhorn
     using reverse_integer_sequence_t = typename reverse_integer_sequence<IntegerSequence>::type;
 
 #pragma endregion
+
+
+
+    /*
+     * get_byte
+     *
+     * Returns the Nth byte in some integer type.
+     */
+#pragma region get_byte
+
+    template <size_t Index, typename Integer>
+    inline constexpr uint8_t get_byte(Integer value)
+    {
+        static_assert(Index < sizeof(Integer), "Attempting to access a byte outside the bounds of the type");
+        using UnsignedInteger = std::make_unsigned_t<Integer>;
+
+        constexpr size_t shift = 8 * Index;
+        return static_cast<uint8_t>((value >> shift) & static_cast<UnsignedInteger>(0xFF));
+    }
+
+#pragma endregion
 }
