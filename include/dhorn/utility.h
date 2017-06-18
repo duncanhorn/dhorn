@@ -3,7 +3,7 @@
  *
  * utility.h
  *
- * 
+ * Functions/types that operate with, or follow the same patterns as functions/types in the STL `utility` header.
  */
 #pragma once
 
@@ -13,6 +13,8 @@ namespace dhorn
 {
     /*
      * join_integer_sequence
+     *
+     * Concatenates, or joins, the values of two `std::integer_sequence`-s
      */
 #pragma region 
 
@@ -34,6 +36,8 @@ namespace dhorn
 
     /*
      * reverse_integer_sequence
+     *
+     * Reverses the values of a `std::integer_sequence`
      */
 #pragma region reverse_integer_sequence
 
