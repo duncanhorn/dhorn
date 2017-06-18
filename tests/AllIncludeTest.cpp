@@ -20,6 +20,7 @@
 #include <dhorn/thread_pool.h>
 #include <dhorn/type_traits.h>
 #include <dhorn/utf.h>
+#include <dhorn/utility.h>
 #include <dhorn/visitor.h>
 
 // COM Includes

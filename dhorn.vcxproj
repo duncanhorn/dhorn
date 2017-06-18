@@ -215,6 +215,7 @@
     <ClInclude Include="include\dhorn\thread_pool.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
     <ClInclude Include="include\dhorn\utf.h" />
+    <ClInclude Include="include\dhorn\utility.h" />
     <ClInclude Include="include\dhorn\visitor.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
