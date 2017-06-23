@@ -47,6 +47,33 @@ namespace dhorn::tests
 
 
 
+    TEST_CLASS(MakeReverseIntegerSequenceTests)
+    {
+        TEST_METHOD(MakeEmptySequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<std::integer_sequence<int>, make_reverse_integer_sequence<int, 0>>);
+            Assert::IsTrue(std::is_same_v<std::index_sequence<>, make_reverse_index_sequence<0>>);
+        }
+
+        TEST_METHOD(MakeSingleElementSequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<std::integer_sequence<int, 0>, make_reverse_integer_sequence<int, 1>>);
+            Assert::IsTrue(std::is_same_v<std::index_sequence<0>, make_reverse_index_sequence<1>>);
+        }
+
+        TEST_METHOD(MakeMultipleElementSequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<
+                std::integer_sequence<int, 5, 4, 3, 2, 1, 0>,
+                make_reverse_integer_sequence<int, 6>>);
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<5, 4, 3, 2, 1, 0>,
+                make_reverse_index_sequence<6>>);
+        }
+    };
+
+
+
     TEST_CLASS(ReverseIntegerSequenceTests)
     {
         TEST_METHOD(ReverseEmptySequenceTest)
