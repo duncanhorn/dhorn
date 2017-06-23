@@ -136,6 +136,7 @@
     <ClCompile Include="HStringTests.cpp" />
     <ClCompile Include="JsonTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
+    <ClCompile Include="NetTests.cpp" />
     <ClCompile Include="NumericTests.cpp" />
     <ClCompile Include="ScopeGuardTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />

@@ -7,28 +7,32 @@
  */
 #pragma once
 
+#include <cstdint>
 #include <utility>
 
 namespace dhorn
 {
     /*
-     * join_integer_sequence
+     * concatenate_integer_sequence
      *
-     * Concatenates, or joins, the values of two `std::integer_sequence`-s
+     * Concatenates the values of two `std::integer_sequence`-s
      */
 #pragma region 
 
     template <typename FirstIntegerSequence, typename SecondIntegerSequence>
-    struct join_integer_sequence;
+    struct concatenate_integer_sequence;
 
     template <typename Ty, Ty... FirstValues, Ty... SecondValues>
-    struct join_integer_sequence<std::integer_sequence<Ty, FirstValues...>, std::integer_sequence<Ty, SecondValues...>>
+    struct concatenate_integer_sequence<
+        std::integer_sequence<Ty, FirstValues...>,
+        std::integer_sequence<Ty, SecondValues...>>
     {
         using type = std::integer_sequence<Ty, FirstValues..., SecondValues...>;
     };
 
     template <typename FirstIntegerSequence, typename SecondIntegerSequence>
-    using join_integer_sequence_t = typename join_integer_sequence<FirstIntegerSequence, SecondIntegerSequence>::type;
+    using concatenate_integer_sequence_t =
+        typename concatenate_integer_sequence<FirstIntegerSequence, SecondIntegerSequence>::type;
 
 #pragma endregion
 
@@ -53,7 +57,7 @@ namespace dhorn
     template <typename Ty, Ty First, Ty... Others>
     struct reverse_integer_sequence<std::integer_sequence<Ty, First, Others...>>
     {
-        using type = join_integer_sequence_t<
+        using type = concatenate_integer_sequence_t<
             typename reverse_integer_sequence<std::integer_sequence<Ty, Others...>>::type,
             std::integer_sequence<Ty, First>>;
     };

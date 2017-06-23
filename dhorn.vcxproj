@@ -210,6 +210,7 @@
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h" />
     <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="include\dhorn\iterator.h" />
+    <ClInclude Include="include\dhorn\net.h" />
     <ClInclude Include="include\dhorn\scope_guard.h" />
     <ClInclude Include="include\dhorn\string.h" />
     <ClInclude Include="include\dhorn\thread_pool.h" />

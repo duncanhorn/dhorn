@@ -15,6 +15,7 @@
 #include <dhorn/console.h>
 #include <dhorn/debug.h>
 #include <dhorn/functional.h>
+#include <dhorn/net.h>
 #include <dhorn/scope_guard.h>
 #include <dhorn/string.h>
 #include <dhorn/thread_pool.h>

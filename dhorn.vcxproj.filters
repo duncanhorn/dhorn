@@ -207,5 +207,8 @@
     <ClInclude Include="include\dhorn\utility.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\net.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
