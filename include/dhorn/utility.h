@@ -35,6 +35,34 @@ namespace dhorn
 
 
     /*
+     * make_reverse_integer_sequence
+     */
+#pragma region make_reverse_integer_sequence
+
+    namespace details
+    {
+        template <typename IntegerSequence>
+        struct make_reverse_integer_sequence;
+
+        template <typename Ty, Ty... Values>
+        struct make_reverse_integer_sequence<std::integer_sequence<Ty, Values...>>
+        {
+            using type = std::integer_sequence<Ty, (sizeof...(Values) - Values - 1)...>;
+        };
+    }
+
+    template <typename Ty, size_t N>
+    using make_reverse_integer_sequence =
+        typename details::make_reverse_integer_sequence<std::make_integer_sequence<Ty, N>>::type;
+
+    template <size_t N>
+    using make_reverse_index_sequence = make_reverse_integer_sequence<size_t, N>;
+
+#pragma endregion
+
+
+
+    /*
      * reverse_integer_sequence
      *
      * Reverses the values of a `std::integer_sequence`
