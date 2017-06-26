@@ -13,35 +13,35 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace dhorn::tests
 {
-    TEST_CLASS(JoinIntegerSequenceTests)
+    TEST_CLASS(ConcatIntegerSequenceTests)
     {
-        TEST_METHOD(JoinEmptySequencesTest)
+        TEST_METHOD(ConcatEmptySequencesTest)
         {
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<>,
-                concatenate_integer_sequence_t<std::index_sequence<>, std::index_sequence<>>>);
+                concat_integer_sequence_t<std::index_sequence<>, std::index_sequence<>>>);
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<1>,
-                concatenate_integer_sequence_t<std::index_sequence<1>, std::index_sequence<>>>);
+                concat_integer_sequence_t<std::index_sequence<1>, std::index_sequence<>>>);
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<1>,
-                concatenate_integer_sequence_t<std::index_sequence<>, std::index_sequence<1>>>);
+                concat_integer_sequence_t<std::index_sequence<>, std::index_sequence<1>>>);
         }
 
-        TEST_METHOD(JoinNonEmptySequencesTest)
+        TEST_METHOD(ConcatNonEmptySequencesTest)
         {
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<0, 1>,
-                concatenate_integer_sequence_t<std::index_sequence<0>, std::index_sequence<1>>>);
+                concat_integer_sequence_t<std::index_sequence<0>, std::index_sequence<1>>>);
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<0, 1, 2, 3>,
-                concatenate_integer_sequence_t<std::index_sequence<0>, std::index_sequence<1, 2, 3>>>);
+                concat_integer_sequence_t<std::index_sequence<0>, std::index_sequence<1, 2, 3>>>);
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<0, 1, 2, 3>,
-                concatenate_integer_sequence_t<std::index_sequence<0, 1, 2>, std::index_sequence<3>>>);
+                concat_integer_sequence_t<std::index_sequence<0, 1, 2>, std::index_sequence<3>>>);
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<0, 1, 2, 3, 4, 5>,
-                concatenate_integer_sequence_t<std::index_sequence<0, 1, 2>, std::index_sequence<3, 4, 5>>>);
+                concat_integer_sequence_t<std::index_sequence<0, 1, 2>, std::index_sequence<3, 4, 5>>>);
         }
     };
 

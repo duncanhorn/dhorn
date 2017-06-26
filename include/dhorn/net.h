@@ -40,7 +40,7 @@ namespace dhorn
     inline constexpr Integer host_to_network(Integer value)
     {
         // First byte should be the most significant byte, second should be second most significant, etc.
-        using seq = reverse_integer_sequence_t<std::make_index_sequence<sizeof(Integer)>>;
+        using seq = make_reverse_index_sequence<sizeof(Integer)>;
         return details::host_to_network(value, seq{});
     }
 
