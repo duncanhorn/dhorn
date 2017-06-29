@@ -12,6 +12,8 @@
 
 namespace dhorn
 {
+#pragma region std::integer_sequence Interop
+
     /*
      * concat_integer_sequence
      *
@@ -40,6 +42,8 @@ namespace dhorn
 
     /*
      * make_reverse_integer_sequence
+     *
+     * Creates a `std::integer_sequence` with decending values such that the last value is zero.
      */
 #pragma region make_reverse_integer_sequence
 
@@ -67,6 +71,36 @@ namespace dhorn
 
 
     /*
+     * integer_sequence_get
+     *
+     * Gets the value from a `std::integer_sequence` at the specified index
+     */
+#pragma region integer_sequence_get
+
+    template <typename IntegerSequence, size_t Index>
+    struct integer_sequence_get;
+
+    template <typename IntegerSequence, size_t Index>
+    constexpr auto integer_sequence_get_v = integer_sequence_get<IntegerSequence, Index>::value;
+
+    template <typename Ty, Ty... Values, size_t Index>
+    struct integer_sequence_get<std::integer_sequence<Ty, Values...>, Index>
+    {
+        static_assert(Index < sizeof...(Values), "Index references a value outside the bounds of the integer_sequence");
+    private:
+
+        static constexpr Ty values[] = { Values... };
+
+    public:
+
+        static constexpr Ty value = values[Index];
+    };
+
+#pragma endregion
+
+
+
+    /*
      * reverse_integer_sequence
      *
      * Reverses the values of a `std::integer_sequence`
@@ -82,16 +116,33 @@ namespace dhorn
         using type = std::integer_sequence<Ty>;
     };
 
-    template <typename Ty, Ty First, Ty... Others>
-    struct reverse_integer_sequence<std::integer_sequence<Ty, First, Others...>>
+    namespace details
     {
-        using type = concat_integer_sequence_t<
-            typename reverse_integer_sequence<std::integer_sequence<Ty, Others...>>::type,
-            std::integer_sequence<Ty, First>>;
+        template <typename IntegerSequence, typename IndexSequence>
+        struct reverse_integer_sequence;
+
+        template <typename Ty, Ty... Values, size_t... Indices>
+        struct reverse_integer_sequence<std::integer_sequence<Ty, Values...>, std::index_sequence<Indices...>>
+        {
+            using seq_type = std::integer_sequence<Ty, Values...>;
+            using type = std::integer_sequence<
+                Ty,
+                integer_sequence_get<seq_type, (sizeof...(Values) - Indices - 1)>::value...>;
+        };
+    }
+
+    template <typename Ty, Ty... Values>
+    struct reverse_integer_sequence<std::integer_sequence<Ty, Values...>>
+    {
+        using type = typename details::reverse_integer_sequence<
+            std::integer_sequence<Ty, Values...>,
+            std::make_index_sequence<sizeof...(Values)>>::type;
     };
 
     template <typename IntegerSequence>
     using reverse_integer_sequence_t = typename reverse_integer_sequence<IntegerSequence>::type;
+
+#pragma endregion
 
 #pragma endregion
 
