@@ -119,6 +119,7 @@
     <ClInclude Include="TestInterfaces.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AgileRefTests.cpp" />
     <ClCompile Include="AlgorithmTests.cpp" />
     <ClCompile Include="AllIncludeTest.cpp" />
     <ClCompile Include="AnimationManagerTests.cpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="CompressedPairTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ComTraitsTests.cpp" />
+    <ClCompile Include="ComUtilityTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
     <ClCompile Include="FunctionalTests.cpp" />

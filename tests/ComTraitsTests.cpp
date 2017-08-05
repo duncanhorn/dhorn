@@ -111,4 +111,14 @@ namespace dhorn::tests
             Assert::IsFalse(com::has_iid_v<NoUuid>);
         }
     };
+
+
+
+    TEST_CLASS(VariadicQueryInterfaceTests)
+    {
+        TEST_METHOD(A)
+        {
+
+        }
+    };
 }

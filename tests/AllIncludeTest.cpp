@@ -26,6 +26,7 @@
 // COM Includes
 #include <dhorn/com/com_ptr.h>
 #include <dhorn/com/com_traits.h>
+#include <dhorn/com/com_utility.h>
 #include <dhorn/com/hresult_error.h>
 
 // Windows Includes
@@ -33,4 +34,6 @@
 #include <dhorn/windows/tick_count_clock.h>
 
 // WinRT Includes
+#include <dhorn/winrt/agile_ref.h>
+#include <dhorn/winrt/weak_ref.h>
 #include <dhorn/winrt/winrt_traits.h>

@@ -207,5 +207,11 @@
     <ClInclude Include="include\dhorn\utility.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\winrt\agile_ref.h">
+      <Filter>include\winrt</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\com\com_utility.h">
+      <Filter>include\com</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

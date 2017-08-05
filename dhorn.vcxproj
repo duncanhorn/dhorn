@@ -169,6 +169,7 @@
     <ClInclude Include="include\dhorn\compressed_pair.h" />
     <ClInclude Include="include\dhorn\com\com_ptr.h" />
     <ClInclude Include="include\dhorn\com\com_traits.h" />
+    <ClInclude Include="include\dhorn\com\com_utility.h" />
     <ClInclude Include="include\dhorn\com\hresult_error.h" />
     <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\debug.h" />
@@ -219,6 +220,7 @@
     <ClInclude Include="include\dhorn\visitor.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
+    <ClInclude Include="include\dhorn\winrt\agile_ref.h" />
     <ClInclude Include="include\dhorn\winrt\weak_ref.h" />
     <ClInclude Include="include\dhorn\winrt\winrt_traits.h" />
   </ItemGroup>
