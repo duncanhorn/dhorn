@@ -13,6 +13,7 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <string_view>
 
 namespace dhorn::windows
 {
@@ -214,7 +215,8 @@ namespace dhorn::windows
     /*
      * guid
      *
-     * 
+     * An alternative to using the `GUID` type that provides additional useful functionality such as string formatting
+     * and comparison operators.
      */
 #pragma region guid
 
@@ -287,7 +289,27 @@ namespace dhorn::windows
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
+    constexpr bool operator==(const guid& lhs, const GUID& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) == 0;
+    }
+
+    constexpr bool operator==(const GUID& lhs, const guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) == 0;
+    }
+
     constexpr bool operator!=(const guid& lhs, const guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) != 0;
+    }
+
+    constexpr bool operator!=(const GUID& lhs, const guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) != 0;
+    }
+
+    constexpr bool operator!=(const guid& lhs, const GUID& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
@@ -297,7 +319,27 @@ namespace dhorn::windows
         return guid_compare(lhs, rhs) < 0;
     }
 
+    constexpr bool operator<(const GUID& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) < 0;
+    }
+
+    constexpr bool operator<(const guid& lhs, const GUID& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) < 0;
+    }
+
     constexpr bool operator<=(const guid& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) <= 0;
+    }
+
+    constexpr bool operator<=(const GUID& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) <= 0;
+    }
+
+    constexpr bool operator<=(const guid& lhs, const GUID& rhs) noexcept
     {
         return guid_compare(lhs, rhs) <= 0;
     }
@@ -307,7 +349,27 @@ namespace dhorn::windows
         return guid_compare(lhs, rhs) > 0;
     }
 
+    constexpr bool operator>(const GUID& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) > 0;
+    }
+
+    constexpr bool operator>(const guid& lhs, const GUID& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) > 0;
+    }
+
     constexpr bool operator>=(const guid& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) >= 0;
+    }
+
+    constexpr bool operator>=(const GUID& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) >= 0;
+    }
+
+    constexpr bool operator>=(const guid& lhs, const GUID& rhs) noexcept
     {
         return guid_compare(lhs, rhs) >= 0;
     }
@@ -323,6 +385,239 @@ namespace dhorn::windows
 
     template <typename CharTy, typename Traits>
     inline std::basic_ostream<CharTy, Traits>& operator<<(std::basic_ostream<CharTy, Traits>& stream, const guid& guid)
+    {
+        return stream << details::guid_to_string(guid).data();
+    }
+
+#pragma endregion
+
+#pragma endregion
+
+
+
+    /*
+     * ref_guid
+     *
+     * Intended to be used in place of `const GUID&` function arguments, providing additional functionality such as
+     * comparison operators, string conversion, etc.
+     */
+#pragma region ref_guid
+
+    class ref_guid
+    {
+    public:
+        /*
+         * Constructor(s)/Destructor
+         */
+        constexpr ref_guid(const GUID& value) noexcept :
+            _value(value)
+        {
+        }
+
+
+
+        /*
+         * Accessors
+         */
+        constexpr operator const GUID&() const noexcept
+        {
+            return this->_value;
+        }
+
+        explicit constexpr operator bool() const noexcept
+        {
+            auto ptr = reinterpret_cast<const std::uint64_t*>(&this->_value);
+            return (ptr[0] != 0) || (ptr[1] != 0);
+        }
+
+        constexpr const GUID& get() const noexcept
+        {
+            return this->_value;
+        }
+
+        std::string to_string() const
+        {
+            auto str = details::guid_to_string(this->_value);
+            return std::string(str.data(), str.size() - 1);
+        }
+
+
+
+    private:
+
+        const GUID& _value;
+    };
+
+
+
+    /*
+     * Comparison Operators
+     */
+#pragma region Comparison Operators
+
+    constexpr bool operator==(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) == 0;
+    }
+
+    constexpr bool operator==(const guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) == 0;
+    }
+
+    constexpr bool operator==(const ref_guid& lhs, const guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) == 0;
+    }
+
+    constexpr bool operator==(const GUID& lhs, const ref_guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) == 0;
+    }
+
+    constexpr bool operator==(const ref_guid& lhs, const GUID& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) == 0;
+    }
+
+    constexpr bool operator!=(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) != 0;
+    }
+
+    constexpr bool operator!=(const guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) != 0;
+    }
+
+    constexpr bool operator!=(const ref_guid& lhs, const guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) != 0;
+    }
+
+    constexpr bool operator!=(const GUID& lhs, const ref_guid& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) != 0;
+    }
+
+    constexpr bool operator!=(const ref_guid& lhs, const GUID& rhs) noexcept
+    {
+        return fast_guid_compare(lhs, rhs) != 0;
+    }
+
+    constexpr bool operator<(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) < 0;
+    }
+
+    constexpr bool operator<(const guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) < 0;
+    }
+
+    constexpr bool operator<(const ref_guid& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) < 0;
+    }
+
+    constexpr bool operator<(const GUID& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) < 0;
+    }
+
+    constexpr bool operator<(const ref_guid& lhs, const GUID& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) < 0;
+    }
+
+    constexpr bool operator<=(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) <= 0;
+    }
+
+    constexpr bool operator<=(const guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) <= 0;
+    }
+
+    constexpr bool operator<=(const ref_guid& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) <= 0;
+    }
+
+    constexpr bool operator<=(const GUID& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) <= 0;
+    }
+
+    constexpr bool operator<=(const ref_guid& lhs, const GUID& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) <= 0;
+    }
+
+    constexpr bool operator>(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) > 0;
+    }
+
+    constexpr bool operator>(const guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) > 0;
+    }
+
+    constexpr bool operator>(const ref_guid& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) > 0;
+    }
+
+    constexpr bool operator>(const GUID& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) > 0;
+    }
+
+    constexpr bool operator>(const ref_guid& lhs, const GUID& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) > 0;
+    }
+
+    constexpr bool operator>=(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) >= 0;
+    }
+
+    constexpr bool operator>=(const guid& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) >= 0;
+    }
+
+    constexpr bool operator>=(const ref_guid& lhs, const guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) >= 0;
+    }
+
+    constexpr bool operator>=(const GUID& lhs, const ref_guid& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) >= 0;
+    }
+
+    constexpr bool operator>=(const ref_guid& lhs, const GUID& rhs) noexcept
+    {
+        return guid_compare(lhs, rhs) >= 0;
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * Stream Operators
+     */
+#pragma region Stream Operators
+
+    template <typename CharTy, typename Traits>
+    inline std::basic_ostream<CharTy, Traits>& operator<<(
+        std::basic_ostream<CharTy, Traits>& stream,
+        const ref_guid& guid)
     {
         return stream << details::guid_to_string(guid).data();
     }
@@ -390,6 +685,35 @@ namespace std
 #pragma endregion
 
 #endif
+
+
+
+    /*
+     * Hash Specializations
+     */
+#pragma region Hash Function Object Specializations
+
+    template <>
+    struct hash<GUID>
+    {
+        constexpr size_t operator()(const GUID& guid)
+        {
+            static_assert(sizeof(GUID) % sizeof(size_t) == 0);
+            auto ptr = reinterpret_cast<const size_t*>(&guid);
+
+            // Piggy-back off of basic_string_view's has function
+            std::basic_string_view<size_t> str(ptr, sizeof(GUID) / sizeof(size_t));
+            return std::hash<std::basic_string_view<size_t>>()(str);
+        }
+    };
+
+    template <>
+    struct hash<dhorn::windows::guid> :
+        public hash<GUID>
+    {
+    };
+
+#pragma endregion
 }
 
 #endif

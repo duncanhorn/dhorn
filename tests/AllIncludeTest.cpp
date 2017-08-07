@@ -15,6 +15,7 @@
 #include <dhorn/console.h>
 #include <dhorn/debug.h>
 #include <dhorn/functional.h>
+#include <dhorn/iterator.h>
 #include <dhorn/scope_guard.h>
 #include <dhorn/string.h>
 #include <dhorn/thread_pool.h>
@@ -30,7 +31,9 @@
 
 // Windows Includes
 #include <dhorn/windows/file_time_clock.h>
+#include <dhorn/windows/guid.h>
 #include <dhorn/windows/tick_count_clock.h>
 
 // WinRT Includes
+#include <dhorn/winrt/weak_ref.h>
 #include <dhorn/winrt/winrt_traits.h>
