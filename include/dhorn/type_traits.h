@@ -233,8 +233,8 @@ namespace dhorn
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * struct my_struct
      * {
-     *     uint32_t member1;
-     *     uint32_t member2;
+     *     std::uint32_t member1;
+     *     std::uint32_t member2;
      * };
      *
      * std::cout << byte_offset(&mystruct::member1) << std::endl;
@@ -245,11 +245,11 @@ namespace dhorn
      * 4
      */
     template <typename Ty, typename Struct>
-    inline constexpr size_t byte_offset(Ty Struct::*member)
+    inline constexpr std::size_t byte_offset(Ty Struct::*member)
     {
         return
-            reinterpret_cast<uint8_t *>(&(reinterpret_cast<Struct *>(nullptr)->*member)) -
-            reinterpret_cast<uint8_t *>(nullptr);
+            reinterpret_cast<std::uint8_t *>(&(reinterpret_cast<Struct *>(nullptr)->*member)) -
+            reinterpret_cast<std::uint8_t *>(nullptr);
     }
 
 

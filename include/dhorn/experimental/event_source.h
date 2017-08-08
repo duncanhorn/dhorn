@@ -23,7 +23,7 @@ namespace dhorn
          */
 #pragma region Type Definitions
 
-        using event_cookie = size_t;
+        using event_cookie = std::size_t;
         static const event_cookie invalid_event_cookie = 0;
 
 #pragma endregion
@@ -101,8 +101,8 @@ namespace dhorn
 
             void invoke_one(Args ...args) const
             {
-                auto itr = std::begin(this->_eventTargets);
-                if (itr != std::end(this->_eventTargets))
+                auto itr = this->_eventTargets.begin();
+                if (itr != this->_eventTargets.end())
                 {
                     itr->second(args...);
                 }
@@ -112,8 +112,8 @@ namespace dhorn
             void invoke_one(Args ...args, const ResultFunc &func) const
             {
                 // Allow callers to handle failures
-                auto itr = std::begin(this->_eventTargets);
-                if (itr != std::end(this->_eventTargets))
+                auto itr = this->_eventTargets.begin();
+                if (itr != this->_eventTargets.end())
                 {
                     func(itr->second(args...));
                 }
@@ -155,7 +155,7 @@ namespace dhorn
             {
                 auto itr = this->_eventTargets.find(cookie);
 
-                if (itr == std::end(this->_eventTargets))
+                if (itr == this->_eventTargets.end())
                 {
                     throw std::out_of_range("Event does not exist");
                 }

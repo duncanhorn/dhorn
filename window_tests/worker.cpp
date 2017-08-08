@@ -51,7 +51,7 @@ void worker::start(void)
 
     // Finally, begin execution!
     this->_running = true;
-    for (uint32_t i = 0; i < this->_threadCount; ++i)
+    for (std::uint32_t i = 0; i < this->_threadCount; ++i)
     {
         this->_threads.emplace_back(dhorn::experimental::bind_member_function(&worker::thread_proc, this));
     }
@@ -68,11 +68,11 @@ void worker::exit(void)
     this->_threads.clear();
 }
 
-COLORREF DecideColor(size_t iterations)
+COLORREF DecideColor(std::size_t iterations)
 {
     if (iterations)
     {
-        static const size_t RESOLUTION = 50;
+        static const std::size_t RESOLUTION = 50;
         static const float PI = 3.14159f;
         float angle = (iterations * 2 * PI) / RESOLUTION;
         float r = cos(angle);
@@ -89,13 +89,13 @@ void worker::thread_proc(void)
 {
     while (this->_running)
     {
-        using PointType = std::pair<size_t, size_t>;
+        using PointType = std::pair<std::size_t, std::size_t>;
 
-        size_t row_index = ++this->_nextRow;
+        std::size_t row_index = ++this->_nextRow;
         for (; row_index < this->_data->size(); row_index = ++this->_nextRow)
         {
             auto &row = (*this->_data)[row_index];
-            for (size_t col_index = 0; col_index < row.size(); ++col_index)
+            for (std::size_t col_index = 0; col_index < row.size(); ++col_index)
             {
                 auto &entry = row[col_index];
 
@@ -105,7 +105,7 @@ void worker::thread_proc(void)
                     continue;
                 }
 
-                for (size_t i = 0; i < this->_iterationsPerUpdate; ++i)
+                for (std::size_t i = 0; i < this->_iterationsPerUpdate; ++i)
                 {
                     entry.value = (entry.value * entry.value) + entry.point;
                     if (dhorn::experimental::length_squared(entry.value.imag(), entry.value.real()) >= 4)
@@ -189,11 +189,11 @@ void worker::update_size(void)
 
     // We treat the indices as (row, column), so (x, y) is flipped
     this->_data = std::make_shared<DataType>(size.height);
-    for (size_t i = 0; i < size.height; ++i)
+    for (std::size_t i = 0; i < size.height; ++i)
     {
         auto &row = (*this->_data)[i];
         long double deltaY = (this->_topLeft.imag() - this->_bottomRight.imag()) * i / size.height;
-        for (size_t j = 0; j < size.width; ++j)
+        for (std::size_t j = 0; j < size.width; ++j)
         {
             long double deltaX = (this->_bottomRight.real() - this->_topLeft.real()) * j / size.width;
             ComplexType pt(this->_topLeft.real() + deltaX, this->_topLeft.imag() - deltaY);
@@ -211,7 +211,7 @@ void worker::update_size(void)
 
 }
 
-callback_handler::result_type worker::on_paint(window *pWindow, uintptr_t /*wparam*/, intptr_t /*lparam*/)
+callback_handler::result_type worker::on_paint(window *pWindow, std::uintptr_t /*wparam*/, std::intptr_t /*lparam*/)
 {
     pWindow;
     //auto ps = pWindow->begin_paint();
@@ -235,10 +235,10 @@ callback_handler::result_type worker::on_paint(window *pWindow, uintptr_t /*wpar
     //FillRect(dc, &rc, white);
 
     //// Fill in the data
-    //for (size_t i = 0; i < data->size(); ++i)
+    //for (std::size_t i = 0; i < data->size(); ++i)
     //{
     //    auto &list = (*data)[i];
-    //    for (size_t j = 0; j < list.size(); ++j)
+    //    for (std::size_t j = 0; j < list.size(); ++j)
     //    {
     //        auto &val = list[j];
     //        SetPixel(dc, j, i, DecideColor(val.color));
@@ -253,8 +253,8 @@ callback_handler::result_type worker::on_paint(window *pWindow, uintptr_t /*wpar
 
 callback_handler::result_type worker::on_resize(
     window * /*pWindow*/,
-    uintptr_t /*wparam*/,
-    intptr_t /*lparam*/)
+    std::uintptr_t /*wparam*/,
+    std::intptr_t /*lparam*/)
 {
     this->_sizeUpdatePending = true;
     return std::make_pair(true, 0);
@@ -262,8 +262,8 @@ callback_handler::result_type worker::on_resize(
 
 callback_handler::result_type worker::on_erase_background(
     window * /*pWindow*/,
-    uintptr_t /*wparam*/,
-    intptr_t /*lparam*/)
+    std::uintptr_t /*wparam*/,
+    std::intptr_t /*lparam*/)
 {
     // Return true so that the background will not get cleared
     return std::make_pair(true, 1);
@@ -271,25 +271,25 @@ callback_handler::result_type worker::on_erase_background(
 
 callback_handler::result_type worker::on_scrollwheel(
     window * /*pWindow*/,
-    uintptr_t wparam,
-    intptr_t lparam)
+    std::uintptr_t wparam,
+    std::intptr_t lparam)
 {
     POINT pt = { LOWORD(lparam), HIWORD(lparam) };
     ScreenToClient(globals::window.handle(), &pt);
 
     // Ignore if not in the client area
     auto data = this->_data;
-    dhorn::experimental::rect<size_t> size = { (*data)[0].size(), data->size() };
+    dhorn::experimental::rect<std::size_t> size = { (*data)[0].size(), data->size() };
     if ((pt.x < 0) || (pt.x >= (LONG)size.width) || (pt.y < 0) || (pt.y >= (LONG)size.height))
     {
         return std::make_pair(false, 0);
     }
 
     // Percentage of the current window
-    float amt = 1 / (1 + ((int16_t)HIWORD(wparam) / 120.0f));
+    float amt = 1 / (1 + ((std::int16_t)HIWORD(wparam) / 120.0f));
 
-    size_t new_width = static_cast<size_t>(size.width * amt);
-    size_t new_height = static_cast<size_t>(size.height * amt);
+    std::size_t new_width = static_cast<std::size_t>(size.width * amt);
+    std::size_t new_height = static_cast<std::size_t>(size.height * amt);
 
     int left = pt.x - new_width / 2;
     int top = pt.y - new_height / 2;

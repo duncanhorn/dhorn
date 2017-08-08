@@ -19,14 +19,14 @@
 namespace dhorn::windows
 {
     /*
-     * FILETIME <--> uint64_t conversion helpers
+     * FILETIME <--> std::uint64_t conversion helpers
      */
-    inline constexpr uint64_t filetime_to_uint(FILETIME value)
+    inline constexpr std::uint64_t filetime_to_uint(FILETIME value)
     {
-        return (static_cast<uint64_t>(value.dwHighDateTime) << 32) | value.dwLowDateTime;
+        return (static_cast<std::uint64_t>(value.dwHighDateTime) << 32) | value.dwLowDateTime;
     }
 
-    inline constexpr FILETIME uint_to_filetime(uint64_t value)
+    inline constexpr FILETIME uint_to_filetime(std::uint64_t value)
     {
         return
         {
@@ -42,7 +42,7 @@ namespace dhorn::windows
      */
     struct file_time_clock
     {
-        using rep = uint64_t;
+        using rep = std::uint64_t;
         using period = std::ratio_multiply<std::ratio<100, 1>, std::nano>;
 
         using duration = std::chrono::duration<rep, period>;

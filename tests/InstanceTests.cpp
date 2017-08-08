@@ -410,12 +410,12 @@ namespace dhorn
 
 #pragma region Concurrent Access Tests
 
-            static const size_t test_iterations = 100;
-            static const size_t test_threads = 12;
+            static const std::size_t test_iterations = 100;
+            static const std::size_t test_threads = 12;
 
             TEST_METHOD(LazyInitConcurrentAccessTest)
             {
-                for (size_t i = 0; i < test_iterations; ++i)
+                for (std::size_t i = 0; i < test_iterations; ++i)
                 {
                     // Reset state
                     test_class::instance_count = 0;
@@ -427,9 +427,9 @@ namespace dhorn
                     std::condition_variable sync;
                     std::mutex mutex;
 
-                    size_t running = 0;
+                    std::size_t running = 0;
                     std::vector<std::shared_ptr<test_class>> pointers(test_threads);
-                    for (size_t j = 0; j < test_threads; ++j)
+                    for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads.emplace_back([&, j]()
                         {
@@ -450,7 +450,7 @@ namespace dhorn
                         });
                     }
 
-                    for (size_t j = 0; j < test_threads; ++j)
+                    for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads[j].join();
                         Assert::IsTrue(pointers[0] == pointers[j]);
@@ -464,7 +464,7 @@ namespace dhorn
 
             TEST_METHOD(EagerInitConcurrentAccessTest)
             {
-                for (size_t i = 0; i < test_iterations; ++i)
+                for (std::size_t i = 0; i < test_iterations; ++i)
                 {
                     // Reset state
                     test_class::instance_count = 0;
@@ -476,9 +476,9 @@ namespace dhorn
                     std::condition_variable sync;
                     std::mutex mutex;
 
-                    size_t running = 0;
+                    std::size_t running = 0;
                     std::vector<std::shared_ptr<test_class>> pointers(test_threads);
-                    for (size_t j = 0; j < test_threads; ++j)
+                    for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads.emplace_back([&, j]()
                         {
@@ -499,7 +499,7 @@ namespace dhorn
                         });
                     }
 
-                    for (size_t j = 0; j < test_threads; ++j)
+                    for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads[j].join();
                         Assert::IsTrue(pointers[0] == pointers[j]);
@@ -515,7 +515,7 @@ namespace dhorn
             {
                 bool doubleAccess = false;
 
-                for (size_t i = 0; i < test_iterations; ++i)
+                for (std::size_t i = 0; i < test_iterations; ++i)
                 {
                     // Reset state
                     test_class::instance_count = 0;
@@ -527,9 +527,9 @@ namespace dhorn
                     std::condition_variable sync;
                     std::mutex mutex;
 
-                    size_t running = 0;
+                    std::size_t running = 0;
                     std::vector<std::shared_ptr<test_class>> pointers(test_threads);
-                    for (size_t j = 0; j < test_threads; ++j)
+                    for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads.emplace_back([&, j]()
                         {
@@ -550,7 +550,7 @@ namespace dhorn
                         });
                     }
 
-                    for (size_t j = 0; j < test_threads; ++j)
+                    for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads[j].join();
                         Assert::IsTrue(pointers[0] == pointers[j]);

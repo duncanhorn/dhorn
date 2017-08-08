@@ -122,8 +122,8 @@ namespace dhorn::tests
         {
             struct foo
             {
-                int32_t int32;
-                uint32_t uint32;
+                std::int32_t int32;
+                std::uint32_t uint32;
                 char ch;
             };
 

@@ -203,7 +203,8 @@ namespace dhorn::com
 
         void swap(com_ptr& other) noexcept
         {
-            std::swap(this->_ptr, other._ptr);
+            using std::swap;
+            swap(this->_ptr, other._ptr);
         }
 
         pointer* release_and_get_address_of() noexcept
@@ -501,19 +502,15 @@ namespace dhorn::com
     }
 
 #pragma endregion
-}
 
 
 
-#ifndef DHORN_NO_STD
-
-namespace std
-{
+    /*
+     * Swapping
+     */
     template <typename Ty>
-    inline void swap(dhorn::com::com_ptr<Ty>& lhs, dhorn::com::com_ptr<Ty>& rhs) noexcept
+    inline void swap(com_ptr<Ty>& lhs, com_ptr<Ty>& rhs) noexcept
     {
         lhs.swap(rhs);
     }
 }
-
-#endif

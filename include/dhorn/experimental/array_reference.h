@@ -26,7 +26,7 @@ namespace dhorn
         class array_reference_iterator
         {
         public:
-            /* 
+            /*
              * Iterator Types
              */
             using iterator_category = std::random_access_iterator_tag;
@@ -242,7 +242,7 @@ namespace dhorn
              * Types
              */
             using value_type = Ty;
-            using size_type = size_t;
+            using size_type = std::size_t;
             using difference_type = std::ptrdiff_t;
             using reference = Ty &;
             using const_reference = const Ty &;
@@ -270,7 +270,7 @@ namespace dhorn
             {
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             array_reference(Ty(&arr)[Size]) :
                 _ptr(arr),
                 _size(Size)
@@ -310,7 +310,7 @@ namespace dhorn
 
             array_reference &operator+=(difference_type delta)
             {
-                assert((delta < 0) || (static_cast<size_t>(delta) <= this->_size));
+                assert((delta < 0) || (static_cast<std::size_t>(delta) <= this->_size));
                 this->_ptr += delta;
                 this->_size -= delta;
 
@@ -319,7 +319,7 @@ namespace dhorn
 
             array_reference &operator-=(difference_type delta)
             {
-                assert((delta > 0) || (static_cast<size_t>(-delta) <= this->_size));
+                assert((delta > 0) || (static_cast<std::size_t>(-delta) <= this->_size));
                 this->_ptr -= delta;
                 this->_size += delta;
 
@@ -574,7 +574,7 @@ namespace dhorn
                 return false;
             }
 
-            return std::equal(std::begin(lhs), std::end(lhs), std::begin(rhs), std::end(rhs));
+            return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
         }
 
         template <
@@ -593,8 +593,8 @@ namespace dhorn
             inline bool operator<(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return std::lexicographical_compare(
-                std::begin(lhs), std::end(lhs),
-                std::begin(rhs), std::end(rhs),
+                lhs.begin(), lhs.end(),
+                rhs.begin(), rhs.end(),
                 std::less<const LhsTy>());
         }
 
@@ -605,8 +605,8 @@ namespace dhorn
             inline bool operator>(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return std::lexicographical_compare(
-                std::begin(rhs), std::end(rhs),
-                std::begin(lhs), std::end(lhs),
+                rhs.begin(), rhs.end(),
+                lhs.begin(), lhs.end(),
                 std::less<const LhsTy>());
         }
 

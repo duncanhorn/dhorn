@@ -32,7 +32,7 @@
  * element, stopping when the parent reaches the last element in the contiguous set of non-switch elements. This gives
  * the most ideal iterating experience:
  *
- *      for (auto itr = std::begin(cmd); itr != std::end(cmd); ++itr)
+ *      for (auto itr = cmd.begin(); itr != cmd.end(); ++itr)
  *      {
  *          if (is_command_line_switch(*itr))
  *          {
@@ -232,7 +232,7 @@ namespace dhorn
             using index_t = typename container::size_type;
 
         public:
-            /* 
+            /*
              * Iterator Types
              */
             using iterator_category = std::forward_iterator_tag;
@@ -344,7 +344,7 @@ namespace dhorn
             using index_t = typename container::size_type;
 
         public:
-            /* 
+            /*
              * Iterator Types
              */
             using iterator_category = std::forward_iterator_tag;

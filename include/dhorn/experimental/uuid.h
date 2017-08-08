@@ -38,15 +38,15 @@ namespace dhorn
             // Data can be publicly accessed. This is defined as a union for easier use as GUID, etc.
             union
             {
-                uint8_t  data[16];
-                uint32_t data32[4];
+                std::uint8_t  data[16];
+                std::uint32_t data32[4];
                 struct
                 {
                     // Same definition as Windows' GUID
-                    uint32_t Data1;
-                    uint16_t Data2;
-                    uint16_t Data3;
-                    uint8_t  Data4[8];
+                    std::uint32_t Data1;
+                    std::uint16_t Data2;
+                    std::uint16_t Data3;
+                    std::uint8_t  Data4[8];
                 };
             };
 
@@ -60,21 +60,21 @@ namespace dhorn
             {
             }
 
-            template <size_t N, typename = std::enable_if_t<N == 16>>
-            uuid(const uint8_t(&arr)[N])
+            template <std::size_t N, typename = std::enable_if_t<N == 16>>
+            uuid(const std::uint8_t(&arr)[N])
             {
-                const uint32_t *target = reinterpret_cast<const uint32_t *>(arr);
+                const std::uint32_t *target = reinterpret_cast<const std::uint32_t *>(arr);
 
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     this->data32[i] = target[i];
                 }
             }
 
-            template <size_t N, typename = std::enable_if_t<N == 4>>
-            uuid(const uint32_t(&arr)[N])
+            template <std::size_t N, typename = std::enable_if_t<N == 4>>
+            uuid(const std::uint32_t(&arr)[N])
             {
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     this->data32[i] = arr[i];
                 }
@@ -82,27 +82,27 @@ namespace dhorn
 
             // We can't use std::initializer_list because we accept two separate types that can't easily be differentiated
             // in client code, and we are very strict on the size of the initialization list we accept
-            uuid(uint8_t val0, uint8_t val1, uint8_t val2, uint8_t val3,
-                uint8_t val4, uint8_t val5, uint8_t val6, uint8_t val7,
-                uint8_t val8, uint8_t val9, uint8_t val10, uint8_t val11,
-                uint8_t val12, uint8_t val13, uint8_t val14, uint8_t val15) :
+            uuid(std::uint8_t val0, std::uint8_t val1, std::uint8_t val2, std::uint8_t val3,
+                std::uint8_t val4, std::uint8_t val5, std::uint8_t val6, std::uint8_t val7,
+                std::uint8_t val8, std::uint8_t val9, std::uint8_t val10, std::uint8_t val11,
+                std::uint8_t val12, std::uint8_t val13, std::uint8_t val14, std::uint8_t val15) :
                 data{ val0, val1, val2,  val3,  val4,  val5,  val6,  val7,
                       val8, val9, val10, val11, val12, val13, val14, val15 }
             {
             }
 
-            uuid(uint32_t val0, uint32_t val1, uint32_t val2, uint32_t val3) :
+            uuid(std::uint32_t val0, std::uint32_t val1, std::uint32_t val2, std::uint32_t val3) :
                 data32{ val0, val1, val2, val3 }
             {
             }
 
             //template <int N, typename = std::enable_if<N == 8>::type>
-            uuid(uint32_t val0, uint16_t val1, uint16_t val2, const std::array<uint8_t, 8> &val3) :
+            uuid(std::uint32_t val0, std::uint16_t val1, std::uint16_t val2, const std::array<std::uint8_t, 8> &val3) :
                 Data1(val0),
                 Data2(val1),
                 Data3(val2)
             {
-                for (size_t i = 0; i < 8; i++)
+                for (std::size_t i = 0; i < 8; i++)
                 {
                     this->Data4[i] = val3[i];
                 }
@@ -116,8 +116,8 @@ namespace dhorn
                 Data3(guid.Data3)
             {
                 // Copy Data4 using a 64-bit integer for performance
-                auto &to = reinterpret_cast<uint64_t &>(*this->Data4);
-                auto &from = reinterpret_cast<const uint64_t &>(*guid.Data4);
+                auto &to = reinterpret_cast<std::uint64_t &>(*this->Data4);
+                auto &from = reinterpret_cast<const std::uint64_t &>(*guid.Data4);
 
                 to = from;
             }
@@ -164,11 +164,11 @@ namespace dhorn
             /*
              * Provide an easy to use hash function for use with hash tables, etc.
              */
-            size_t hash(void) const
+            std::size_t hash(void) const
             {
-                size_t hash = 0;
+                std::size_t hash = 0;
 
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     // Mulitply previous value by 31 (a prime number)
                     hash = (hash << 5) - hash;
@@ -184,7 +184,7 @@ namespace dhorn
 
             inline int Compare(const uuid &other) const
             {
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     int diff = this->data32[i] - other.data32[i];
                     if (diff)
@@ -213,9 +213,9 @@ namespace std
     struct hash<dhorn::experimental::uuid>
     {
         using argument_type = dhorn::experimental::uuid;
-        using result_type = size_t;
+        using result_type = std::size_t;
 
-        size_t operator()(const dhorn::experimental::uuid &obj)
+        std::size_t operator()(const dhorn::experimental::uuid &obj)
         {
             return obj.hash();
         }

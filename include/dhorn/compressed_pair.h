@@ -37,7 +37,7 @@ namespace dhorn
          * otherwise be unable to un-ambiguously differentiate them). The alternate is `tag_base` where you change the
          * direct type you are deriving from by "tagging" it with an integer.
          */
-        template <size_t tag, typename Ty>
+        template <std::size_t tag, typename Ty>
         struct tag_base :
             public Ty
         {
@@ -520,18 +520,36 @@ namespace dhorn
 
 
     /*
+     * swap
+     */
+    template <
+        typename First,
+        typename Second,
+        std::enable_if_t<std::conjunction<
+            std::is_swappable<First>,
+            std::is_swappable<Second>
+        >::value, int> = 0>
+    inline void swap(compressed_pair<First, Second>& lhs, compressed_pair<First, Second>& rhs)
+        noexcept(noexcept(lhs.swap(rhs)))
+    {
+        lhs.swap(rhs);
+    }
+
+
+
+    /*
      * Helpers
      */
     namespace details
     {
         template <typename PairTy>
-        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 0>) noexcept
+        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<std::size_t, 0>) noexcept
         {
             return pair.first();
         }
 
         template <typename PairTy>
-        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<size_t, 1>) noexcept
+        inline constexpr decltype(auto) compressed_pair_get(PairTy& pair, std::integral_constant<std::size_t, 1>) noexcept
         {
             return pair.second();
         }
@@ -545,29 +563,11 @@ namespace dhorn
 namespace std
 {
     /*
-     * swap
-     */
-    template <
-        typename First,
-        typename Second,
-        std::enable_if_t<std::conjunction<
-            std::is_swappable<First>,
-            std::is_swappable<Second>
-        >::value, int> = 0>
-    inline void swap(dhorn::compressed_pair<First, Second>& lhs, dhorn::compressed_pair<First, Second>& rhs)
-        noexcept(noexcept(lhs.swap(rhs)))
-    {
-        lhs.swap(rhs);
-    }
-
-
-
-    /*
      * tuple_size
      */
     template <typename First, typename Second>
     struct tuple_size<dhorn::compressed_pair<First, Second>> :
-        public std::integral_constant<size_t, 2>
+        public std::integral_constant<std::size_t, 2>
     {
     };
 
@@ -600,28 +600,28 @@ namespace std
 #pragma region get
 
     // By Index
-    template <size_t Index, typename First, typename Second>
+    template <std::size_t Index, typename First, typename Second>
     inline constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
         dhorn::compressed_pair<First, Second>& pair) noexcept
     {
-        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+        return dhorn::details::compressed_pair_get(pair, integral_constant<std::size_t, Index>{});
     }
 
-    template <size_t Index, typename First, typename Second>
+    template <std::size_t Index, typename First, typename Second>
     inline constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>& get(
         const dhorn::compressed_pair<First, Second>& pair) noexcept
     {
-        return dhorn::details::compressed_pair_get(pair, integral_constant<size_t, Index>{});
+        return dhorn::details::compressed_pair_get(pair, integral_constant<std::size_t, Index>{});
     }
 
-    template <size_t Index, typename First, typename Second>
+    template <std::size_t Index, typename First, typename Second>
     inline constexpr tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
         dhorn::compressed_pair<First, Second>&& pair) noexcept
     {
         return std::forward<tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&&>(get<Index>(pair));
     }
 
-    template <size_t Index, typename First, typename Second>
+    template <std::size_t Index, typename First, typename Second>
     inline constexpr const tuple_element_t<Index, dhorn::compressed_pair<First, Second>>&& get(
         const dhorn::compressed_pair<First, Second>&& pair) noexcept
     {

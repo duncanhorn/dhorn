@@ -36,8 +36,8 @@ namespace dhorn
         template <
             typename CharT,
             typename CharTraits = std::char_traits<CharT>,
-            size_t ReceiveBufferSize = 2048,
-            size_t SendBufferSize = 2048,
+            std::size_t ReceiveBufferSize = 2048,
+            std::size_t SendBufferSize = 2048,
             typename SocketStorageType = tcp_socket *>
         class basic_socket_streambuf final :
             public std::basic_streambuf<CharT, CharTraits>
@@ -137,8 +137,8 @@ namespace dhorn
         template <
             typename CharT,
             typename CharTraits = std::char_traits<CharT>,
-            size_t ReceiveBufferSize = 2048,
-            size_t SendBufferSize = 2048,
+            std::size_t ReceiveBufferSize = 2048,
+            std::size_t SendBufferSize = 2048,
             typename SocketStorageType = tcp_socket *>
             class basic_socket_stream final :
             public std::basic_iostream<CharT, CharTraits>

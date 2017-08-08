@@ -15,7 +15,7 @@ namespace dhorn::tests
     IBase :
         public IUnknown
     {
-        STDMETHOD_(size_t, RefCount)(void);
+        STDMETHOD_(std::size_t, RefCount)(void);
     };
 
     __interface __declspec(uuid("{FAB826E0-BB52-4CD5-83B1-C401D5386568}"))

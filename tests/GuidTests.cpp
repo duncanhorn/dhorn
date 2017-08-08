@@ -13,8 +13,6 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace std::literals;
 
-using std::size;
-
 namespace dhorn::tests
 {
     TEST_CLASS(GuidTests)
@@ -43,11 +41,11 @@ namespace dhorn::tests
                 { 0xFFFFFFFF, 0xFFFF, 0xFFFF,{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } },
             };
 
-            for (size_t i = 0; i < size(guids); ++i)
+            for (std::size_t i = 0; i < std::size(guids); ++i)
             {
                 Assert::IsTrue(windows::guid_compare(guids[i], guids[i]) == 0);
 
-                for (size_t j = i + 1; j < size(guids); ++j)
+                for (std::size_t j = i + 1; j < std::size(guids); ++j)
                 {
                     Assert::IsTrue(windows::guid_compare(guids[i], guids[j]) < 0);
                     Assert::IsTrue(windows::guid_compare(guids[j], guids[i]) > 0);
@@ -79,12 +77,12 @@ namespace dhorn::tests
                 { 0xFFFFFFFF, 0xFFFF, 0xFFFF,{ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } },
             };
 
-            for (size_t i = 0; i < size(guids); ++i)
+            for (std::size_t i = 0; i < std::size(guids); ++i)
             {
                 // Equal GUIDs should always compare equal
                 Assert::IsTrue(windows::fast_guid_compare(guids[i], guids[i]) == 0);
 
-                for (size_t j = i + 1; j < size(guids); ++j)
+                for (std::size_t j = i + 1; j < std::size(guids); ++j)
                 {
                     // The comparison result shouldn't be predictable, but it should be consistent
                     auto result1 = windows::fast_guid_compare(guids[i], guids[j]);
@@ -96,14 +94,14 @@ namespace dhorn::tests
             }
 
             // Transitivity should hold
-            for (size_t i = 0; i < size(guids); ++i)
+            for (std::size_t i = 0; i < std::size(guids); ++i)
             {
-                for (size_t j = 0; j < size(guids); ++j)
+                for (std::size_t j = 0; j < std::size(guids); ++j)
                 {
                     if (i == j) continue;
                     auto result1 = windows::fast_guid_compare(guids[i], guids[j]);
 
-                    for (size_t k = 0; k < size(guids); ++k)
+                    for (std::size_t k = 0; k < std::size(guids); ++k)
                     {
                         if (k == i || k == j) continue;
                         auto result2 = windows::fast_guid_compare(guids[j], guids[k]);

@@ -16,9 +16,9 @@ namespace dhorn::tests
     __interface __declspec(uuid("{56C9CB0F-534C-42D5-B297-9D77E71D908C}"))
     IBase : public IUnknown
     {
-        STDMETHOD_(size_t, RefCount)();
-        STDMETHOD_(size_t, AddRefCount)();
-        STDMETHOD_(size_t, QueryCount)();
+        STDMETHOD_(std::size_t, RefCount)();
+        STDMETHOD_(std::size_t, AddRefCount)();
+        STDMETHOD_(std::size_t, QueryCount)();
     };
 
     __interface __declspec(uuid("{FAB826E0-BB52-4CD5-83B1-C401D5386568}"))
@@ -84,19 +84,19 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(size_t, RefCount)()
+        STDMETHOD_(std::size_t, RefCount)()
         {
             return count;
         }
 
-        STDMETHOD_(size_t, AddRefCount)()
+        STDMETHOD_(std::size_t, AddRefCount)()
         {
             return addRefCount;
         }
 
         // Tests run on single thread, so no need to synchronize
-        size_t count = 1;
-        size_t addRefCount = 0;
+        std::size_t count = 1;
+        std::size_t addRefCount = 0;
     };
 
     class Foo :
@@ -130,24 +130,24 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(size_t, RefCount)()
+        STDMETHOD_(std::size_t, RefCount)()
         {
             return Base::RefCount();
         }
 
-        STDMETHOD_(size_t, AddRefCount)()
+        STDMETHOD_(std::size_t, AddRefCount)()
         {
             return Base::AddRefCount();
         }
 
-        STDMETHOD_(size_t, QueryCount)()
+        STDMETHOD_(std::size_t, QueryCount)()
         {
             return this->_queryCount;
         }
 
     private:
 
-        size_t _queryCount = 0;
+        std::size_t _queryCount = 0;
     };
 
     class Bar :
@@ -182,24 +182,24 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(size_t, RefCount)()
+        STDMETHOD_(std::size_t, RefCount)()
         {
             return Base::RefCount();
         }
 
-        STDMETHOD_(size_t, AddRefCount)()
+        STDMETHOD_(std::size_t, AddRefCount)()
         {
             return Base::AddRefCount();
         }
 
-        STDMETHOD_(size_t, QueryCount)()
+        STDMETHOD_(std::size_t, QueryCount)()
         {
             return this->_queryCount;
         }
 
     private:
 
-        size_t _queryCount = 0;
+        std::size_t _queryCount = 0;
     };
 
     class FooBar :
@@ -241,24 +241,24 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(size_t, RefCount)()
+        STDMETHOD_(std::size_t, RefCount)()
         {
             return Base::RefCount();
         }
 
-        STDMETHOD_(size_t, AddRefCount)()
+        STDMETHOD_(std::size_t, AddRefCount)()
         {
             return Base::AddRefCount();
         }
 
-        STDMETHOD_(size_t, QueryCount)()
+        STDMETHOD_(std::size_t, QueryCount)()
         {
             return this->_queryCount;
         }
 
     private:
 
-        size_t _queryCount = 0;
+        std::size_t _queryCount = 0;
     };
 
     TEST_CLASS(ComPtrTests)
