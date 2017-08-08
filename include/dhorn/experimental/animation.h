@@ -151,8 +151,8 @@ namespace dhorn
             /*
              * key_frame_animation. This maintains a set of (time, value) ordered based off 'time.' The key_frame_animation
              * class works based off of a 'next' iterator that describes the next key frame that will be encountered. For
-             * example, if the animation has not yet begun, then next will be equal to begin(_keyFrames), and if the
-             * animation has completed, then next will be equal to end(_keyFrames). Note that there is no concept of
+             * example, if the animation has not yet begun, then next will be equal to _keyFrames.begin(), and if the
+             * animation has completed, then next will be equal to _keyFrames.end(). Note that there is no concept of
              * 'current' iterator since one may not exist (e.g. _keyFrames is empty, or the first key frame has not yet
              * been encountered). Derived classes should use the begun() and completed() functions appropriately.
              */

@@ -22,7 +22,7 @@ namespace dhorn
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      *  auto str = "foo bar  foobar "s;
      *  std::vector<std::string> words;
-     *  split(begin(str), end(str), ' ', std::back_inserter(words));
+     *  split(str.begin(), str.end(), ' ', std::back_inserter(words));
      *  // words = { "foo", "bar", "", "foobar", "" }
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * Values are written to the output range via assignment with an initializer_list. I.e. via `*itr = { begin, end }`.

@@ -32,7 +32,7 @@
  * element, stopping when the parent reaches the last element in the contiguous set of non-switch elements. This gives
  * the most ideal iterating experience:
  *
- *      for (auto itr = begin(cmd); itr != end(cmd); ++itr)
+ *      for (auto itr = cmd.begin(); itr != cmd.end(); ++itr)
  *      {
  *          if (is_command_line_switch(*itr))
  *          {
