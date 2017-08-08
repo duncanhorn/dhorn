@@ -15,6 +15,8 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
+using std::swap;
+
 #define TEST_COUNT      100
 
 #pragma warning(push)
@@ -689,12 +691,12 @@ namespace dhorn
 
             TEST_METHOD(CreateTypeConstructorTest)
             {
-                uint8_t val[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                std::uint8_t val[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                                   0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 
                 dhorn::experimental::ipv6_address ip(val);
 
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::AreEqual(val[i], ip.addr().s6_addr[i]);
                 }
@@ -920,13 +922,13 @@ namespace dhorn
 
             TEST_METHOD(CreateTypeAssignmentTest)
             {
-                uint8_t val[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                std::uint8_t val[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                                   0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 
                 dhorn::experimental::ipv6_address ip;
                 ip = val;
 
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::AreEqual(val[i], ip.addr().s6_addr[i]);
                 }
@@ -1885,20 +1887,19 @@ namespace dhorn
             TEST_METHOD(CapacityTest)
             {
                 dhorn::experimental::udp_packet<int> packet(100);
-                Assert::AreEqual(static_cast<size_t>(100), packet.capacity());
+                Assert::AreEqual(static_cast<std::size_t>(100), packet.capacity());
             }
 
             TEST_METHOD(InitialSizeTest)
             {
                 // Size is tested more completely in the SetDataTest
                 dhorn::experimental::udp_packet<int> packet(100);
-                Assert::AreEqual(static_cast<size_t>(0), packet.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), packet.size());
             }
 
             TEST_METHOD(SetDataTest)
             {
                 dhorn::experimental::udp_packet<char> packet(100);
-
                 char vals[101];
                 for (char i = 0; i < 101; ++i)
                 {
@@ -1907,19 +1908,13 @@ namespace dhorn
 
                 // Test setting with the maximum amount
                 packet.set_data(std::begin(vals), std::begin(vals) + 100);
-                Assert::AreEqual(static_cast<size_t>(100), packet.size());
-                Assert::IsTrue(std::equal(
-                    std::begin(vals),
-                    std::begin(vals) + 100,
-                    packet.buffer().get()));
+                Assert::AreEqual(static_cast<std::size_t>(100), packet.size());
+                Assert::IsTrue(std::equal(std::begin(vals), std::begin(vals) + 100, packet.buffer().get()));
 
                 // Now set with half the amount
                 packet.set_data(std::begin(vals) + 50, std::begin(vals) + 100);
-                Assert::AreEqual(static_cast<size_t>(50), packet.size());
-                Assert::IsTrue(std::equal(
-                    std::begin(vals) + 50,
-                    std::begin(vals) + 100,
-                    packet.buffer().get()));
+                Assert::AreEqual(static_cast<std::size_t>(50), packet.size());
+                Assert::IsTrue(std::equal(std::begin(vals) + 50, std::begin(vals) + 100, packet.buffer().get()));
 
                 // Setting with more than the maximum amount should throw
                 try
@@ -1940,24 +1935,18 @@ namespace dhorn
                 std::vector<int> vals1 = { 0, 1, 2, 3, 4 };
                 std::vector<int> vals2 = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-                packet1.set_data(std::begin(vals1), std::end(vals1));
-                packet2.set_data(std::begin(vals2), std::end(vals2));
+                packet1.set_data(vals1.begin(), vals1.end());
+                packet2.set_data(vals2.begin(), vals2.end());
 
                 auto checkFunc = [&](const dhorn::experimental::udp_packet<int> &p1, const dhorn::experimental::udp_packet<int> &p2)
                 {
-                    Assert::AreEqual(static_cast<size_t>(5), p1.size());
-                    Assert::AreEqual(static_cast<size_t>(10), p1.capacity());
-                    Assert::IsTrue(std::equal(
-                        std::begin(vals1),
-                        std::end(vals1),
-                        p1.buffer().get()));
+                    Assert::AreEqual(static_cast<std::size_t>(5), p1.size());
+                    Assert::AreEqual(static_cast<std::size_t>(10), p1.capacity());
+                    Assert::IsTrue(std::equal(vals1.begin(), vals1.end(), p1.buffer().get()));
 
-                    Assert::AreEqual(static_cast<size_t>(10), p2.size());
-                    Assert::AreEqual(static_cast<size_t>(20), p2.capacity());
-                    Assert::IsTrue(std::equal(
-                        std::begin(vals2),
-                        std::end(vals2),
-                        p2.buffer().get()));
+                    Assert::AreEqual(static_cast<std::size_t>(10), p2.size());
+                    Assert::AreEqual(static_cast<std::size_t>(20), p2.capacity());
+                    Assert::IsTrue(std::equal(vals2.begin(), vals2.end(), p2.buffer().get()));
                 };
 
                 checkFunc(packet1, packet2);
@@ -1967,7 +1956,7 @@ namespace dhorn
                 checkFunc(packet2, packet1);
 
                 // Check using std::swap
-                std::swap(packet1, packet2);
+                swap(packet1, packet2);
                 checkFunc(packet1, packet2);
             }
         };
@@ -2008,14 +1997,14 @@ namespace dhorn
                 sock1.send(packet1);
                 dhorn::experimental::udp_packet<char> packet2(4);
                 sock2.receive(packet2);
-                Assert::AreEqual(static_cast<size_t>(4), packet2.size());
+                Assert::AreEqual(static_cast<std::size_t>(4), packet2.size());
                 Assert::AreEqual(0, strcmp("foo", packet2.buffer().get()));
 
                 // Send the next udp_packet re-using the socket_address information from the receive
                 packet2.set_data("bar", 4);
                 sock2.send(packet2);
                 sock1.receive(packet1);
-                Assert::AreEqual(static_cast<size_t>(4), packet1.size());
+                Assert::AreEqual(static_cast<std::size_t>(4), packet1.size());
                 Assert::AreEqual(0, strcmp("bar", packet1.buffer().get()));
 
                 sock1.close();
@@ -2060,10 +2049,10 @@ namespace dhorn
 
                     // On connection, we let the server send us the data first
                     std::vector<int> recData(data.size() * 2);
-                    auto itr = client.receive(std::begin(recData), std::end(recData));
-                    recData.erase(itr, std::end(recData));
+                    auto itr = client.receive(recData.begin(), recData.end());
+                    recData.erase(itr, recData.end());
                     Assert::AreEqual(data.size(), recData.size());
-                    Assert::IsTrue(std::equal(std::begin(data), std::end(data), std::begin(recData)));
+                    Assert::IsTrue(std::equal(data.begin(), data.end(), recData.begin()));
 
                     // Send the data back (in reverse order)
                     client.send(data.rbegin(), data.rend());
@@ -2075,14 +2064,14 @@ namespace dhorn
                 // Accept the incoming socket and send the data
                 dhorn::experimental::socket_address clientAddr;
                 auto sock = server.accept(clientAddr);
-                sock.send(std::begin(data), std::end(data));
+                sock.send(data.begin(), data.end());
 
                 // Now receive the data back (in reverse order)
                 std::vector<int> recData(data.size());
-                auto itr = sock.receive(std::begin(recData), std::end(recData));
-                recData.erase(itr, std::end(recData));
+                auto itr = sock.receive(recData.begin(), recData.end());
+                recData.erase(itr, recData.end());
                 Assert::AreEqual(data.size(), recData.size());
-                for (size_t i = 0; i < data.size(); ++i)
+                for (std::size_t i = 0; i < data.size(); ++i)
                 {
                     Assert::AreEqual(recData[recData.size() - i - 1], data[i]);
                 }

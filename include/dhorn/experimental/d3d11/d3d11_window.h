@@ -3,7 +3,7 @@
  *
  * d3d11_window.h
  *
- * 
+ *
  */
 #pragma once
 
@@ -50,7 +50,7 @@ namespace dhorn
                 using QualityFunc = std::function<UINT(ID3D11Device *, UINT *)>;
                 using UpdateFunc = std::function<void(void)>;
                 using DrawFunc = std::function<void(ID3D11Device *, ID3D11DeviceContext *)>;
-                using SizeChangeFunc = std::function<void(const rect<size_t> &)>;
+                using SizeChangeFunc = std::function<void(const rect<std::size_t> &)>;
 
             public:
                 /*
@@ -196,7 +196,7 @@ namespace dhorn
                     }
                 }
 
-                virtual void create_swap_chain(const rect<size_t> &size)
+                virtual void create_swap_chain(const rect<std::size_t> &size)
                 {
                     assert(this->_device);
                     assert(!this->_swapChain);
@@ -231,7 +231,7 @@ namespace dhorn
                         &this->_renderTargetView));
                 }
 
-                virtual void create_depth_stencil(const rect<size_t> &size)
+                virtual void create_depth_stencil(const rect<std::size_t> &size)
                 {
                     assert(!this->_depthStencilBuffer);
 
@@ -258,14 +258,14 @@ namespace dhorn
                         &this->_depthStencilView));
                 }
 
-                virtual void set_viewports(const rect<size_t> &size)
+                virtual void set_viewports(const rect<std::size_t> &size)
                 {
                     // By default, create one view port that is the size of the window
                     D3D11_VIEWPORT viewPort = view_port(static_cast<float>(size.width), static_cast<float>(size.height));
                     this->_deviceContext->RSSetViewports(1, &viewPort);
                 }
 
-                virtual void resize(const rect<size_t> &clientArea)
+                virtual void resize(const rect<std::size_t> &clientArea)
                 {
                     // We don't care if only the coordinates change
                     if ((this->_previousClientArea.width == clientArea.width) &&
@@ -343,7 +343,7 @@ namespace dhorn
                 /*
                  * Custom Message Pump
                  */
-                virtual uintptr_t message_pump()
+                virtual std::uintptr_t message_pump()
                 {
                     // We use peek_message so that we can update/draw the world when not handling messages
                     MSG msg{};
@@ -371,8 +371,8 @@ namespace dhorn
                  */
                 virtual win32::callback_handler::result_type on_enter_size_move(
                     win32::window * /*sender*/,
-                    uintptr_t /*wparam*/,
-                    intptr_t /*lparam*/)
+                    std::uintptr_t /*wparam*/,
+                    std::intptr_t /*lparam*/)
                 {
                     this->_resizing = true;
                     return std::make_pair(true, 0);
@@ -380,8 +380,8 @@ namespace dhorn
 
                 virtual win32::callback_handler::result_type on_exit_size_move(
                     win32::window * /*sender*/,
-                    uintptr_t /*wparam*/,
-                    intptr_t /*lparam*/)
+                    std::uintptr_t /*wparam*/,
+                    std::intptr_t /*lparam*/)
                 {
                     this->_resizing = false;
                     this->resize(this->client_rect());
@@ -391,10 +391,10 @@ namespace dhorn
 
                 virtual win32::callback_handler::result_type on_size_change(
                     win32::window * /*sender*/,
-                    uintptr_t wparam,
-                    intptr_t lparam)
+                    std::uintptr_t wparam,
+                    std::intptr_t lparam)
                 {
-                    rect<size_t> clientArea = { 0, 0, LOWORD(lparam), HIWORD(lparam) };
+                    rect<std::size_t> clientArea = { 0, 0, LOWORD(lparam), HIWORD(lparam) };
 
                     if (this->_device)
                     {
@@ -439,7 +439,7 @@ namespace dhorn
                 DirectX::XMFLOAT4 _backgroundColor;
 
                 // Window state information
-                rect<size_t> _previousClientArea;
+                rect<std::size_t> _previousClientArea;
                 bool _resizing;
             };
 

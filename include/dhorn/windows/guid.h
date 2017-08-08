@@ -23,7 +23,7 @@ namespace dhorn::windows
     namespace details
     {
         // {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
-        constexpr size_t guid_string_length = 38;
+        constexpr std::size_t guid_string_length = 38;
         constexpr const char* guid_fmt = "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}";
 
         // TODO: Need to be able to handle wchar_t for operator<<
@@ -64,8 +64,7 @@ namespace dhorn::windows
             return (lhs.Data3 < rhs.Data3) ? -1 : 1;
         }
 
-        using std::size;
-        for (std::size_t i = 0; i < size(lhs.Data4); ++i)
+        for (std::size_t i = 0; i < std::size(lhs.Data4); ++i)
         {
             if (lhs.Data4[i] != rhs.Data4[i])
             {
@@ -85,8 +84,8 @@ namespace dhorn::windows
     constexpr int fast_guid_compare(const GUID& lhs, const GUID& rhs) noexcept
     {
         // GUIDs are 128 bits
-        auto lhs64 = reinterpret_cast<const int64_t*>(&lhs);
-        auto rhs64 = reinterpret_cast<const int64_t*>(&rhs);
+        auto lhs64 = reinterpret_cast<const std::int64_t*>(&lhs);
+        auto rhs64 = reinterpret_cast<const std::int64_t*>(&rhs);
 
         if (auto cmp = lhs64[0] - rhs64[0])
         {
@@ -696,14 +695,14 @@ namespace std
     template <>
     struct hash<GUID>
     {
-        constexpr size_t operator()(const GUID& guid)
+        constexpr std::size_t operator()(const GUID& guid)
         {
-            static_assert(sizeof(GUID) % sizeof(size_t) == 0);
-            auto ptr = reinterpret_cast<const size_t*>(&guid);
+            static_assert(sizeof(GUID) % sizeof(std::size_t) == 0);
+            auto ptr = reinterpret_cast<const std::size_t*>(&guid);
 
             // Piggy-back off of basic_string_view's has function
-            std::basic_string_view<size_t> str(ptr, sizeof(GUID) / sizeof(size_t));
-            return std::hash<std::basic_string_view<size_t>>()(str);
+            std::basic_string_view<std::size_t> str(ptr, sizeof(GUID) / sizeof(std::size_t));
+            return std::hash<std::basic_string_view<std::size_t>>()(str);
         }
     };
 

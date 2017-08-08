@@ -43,17 +43,17 @@ namespace dhorn
                 return *this;
             }
 
-            size_t copies() const
+            std::size_t copies() const
             {
                 return this->_copies;
             }
 
         private:
 
-            size_t _copies;
+            std::size_t _copies;
         };
 
-        template <typename Ty, size_t Size>
+        template <typename Ty, std::size_t Size>
         class dynamically_allocated_array
         {
         public:
@@ -78,12 +78,12 @@ namespace dhorn
                 return *this;
             }
 
-            Ty &operator[](size_t index)
+            Ty &operator[](std::size_t index)
             {
                 return this->_vals[index];
             }
 
-            const Ty &operator[](size_t index) const
+            const Ty &operator[](std::size_t index) const
             {
                 return this->_vals[index];
             }
@@ -124,19 +124,19 @@ namespace dhorn
         {
             TEST_METHOD(BasicLockingTest)
             {
-                dhorn::experimental::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<std::size_t> val = 0;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
-                static const size_t num_iterations = 10000;
+                static const std::size_t num_threads = 12;
+                static const std::size_t num_iterations = 10000;
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < num_iterations; ++j)
+                        for (std::size_t j = 0; j < num_iterations; ++j)
                         {
-                            val.execute_with_lock([](size_t &value, const auto &)
+                            val.execute_with_lock([](std::size_t &value, const auto &)
                             {
                                 ++value;
                             });
@@ -155,19 +155,19 @@ namespace dhorn
             /*****
             TEST_METHOD(BasicIncorrectLockingTest)
             {
-                dhorn::experimental::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<std::size_t> val = 0;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
-                static const size_t num_iterations = 10000;
+                static const std::size_t num_threads = 12;
+                static const std::size_t num_iterations = 10000;
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < num_iterations; ++j)
+                        for (std::size_t j = 0; j < num_iterations; ++j)
                         {
-                            val.execute_without_lock([](size_t &value)
+                            val.execute_without_lock([](std::size_t &value)
                             {
                                 ++value;
                             });
@@ -188,17 +188,17 @@ namespace dhorn
 
             TEST_METHOD(BasicMonitorTest)
             {
-                dhorn::experimental::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<std::size_t> val = 0;
                 std::condition_variable cond;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
+                static const std::size_t num_threads = 12;
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&, index = i]()
                     {
-                        val.execute_with_lock([&](size_t &value, std::unique_lock<std::mutex> &lock)
+                        val.execute_with_lock([&](std::size_t &value, std::unique_lock<std::mutex> &lock)
                         {
                             // Threads wait in the "reverse" order. I.e. "early" threads wait on "later" threads
                             cond.wait(lock, [&]() -> bool
@@ -223,7 +223,7 @@ namespace dhorn
 
             TEST_METHOD(RecursiveMutexTest)
             {
-                dhorn::experimental::synchronized_object<size_t, std::recursive_mutex> val = 0;
+                dhorn::experimental::synchronized_object<std::size_t, std::recursive_mutex> val = 0;
                 val.execute_with_lock([&](auto &, auto &)
                 {
                     // Shouldn't deadlock
@@ -241,15 +241,15 @@ namespace dhorn
                 dhorn::experimental::synchronized_object<copy_count> val;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
-                static const size_t num_iterations = 1000;
-                std::vector<size_t> check_vector(num_threads * num_iterations);
+                static const std::size_t num_threads = 12;
+                static const std::size_t num_iterations = 1000;
+                std::vector<std::size_t> check_vector(num_threads * num_iterations);
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < num_iterations; ++j)
+                        for (std::size_t j = 0; j < num_iterations; ++j)
                         {
                             // The copy count of each copy should be unique when we lock
                             ++check_vector[val.copy_locked().copies() - 1];
@@ -274,15 +274,15 @@ namespace dhorn
                 dhorn::experimental::synchronized_object<copy_count> val;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
-                static const size_t num_iterations = 10000;
-                std::vector<size_t> check_vector(num_threads * num_iterations);
+                static const std::size_t num_threads = 12;
+                static const std::size_t num_iterations = 10000;
+                std::vector<std::size_t> check_vector(num_threads * num_iterations);
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < num_iterations; ++j)
+                        for (std::size_t j = 0; j < num_iterations; ++j)
                         {
                             // The copy count of each copy should be unique when we lock
                             ++check_vector[val.copy_unlocked().copies() - 1];
@@ -313,23 +313,23 @@ namespace dhorn
 
             TEST_METHOD(SetLockedTest)
             {
-                using array_type = dynamically_allocated_array<size_t, 1000>;
+                using array_type = dynamically_allocated_array<std::size_t, 1000>;
                 dhorn::experimental::synchronized_object<array_type> val;
                 std::vector<std::thread> threads;
                 std::vector<array_type> thread_vals;
 
-                static const size_t num_threads = 12;
+                static const std::size_t num_threads = 12;
 
                 // Fill each array with the thread's index
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     thread_vals.emplace_back();
                 }
 
                 std::mutex mutex;
                 std::condition_variable cond;
-                size_t running = 0;
-                for (size_t i = 0; i < num_threads; ++i)
+                std::size_t running = 0;
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&, index = i]()
                     {
@@ -366,23 +366,23 @@ namespace dhorn
 
             TEST_METHOD(SetUnlockedTest)
             {
-                using array_type = dynamically_allocated_array<size_t, 1000>;
+                using array_type = dynamically_allocated_array<std::size_t, 1000>;
                 dhorn::experimental::synchronized_object<array_type> val;
                 std::vector<std::thread> threads;
                 std::vector<array_type> thread_vals;
 
-                static const size_t num_threads = 12;
+                static const std::size_t num_threads = 12;
 
                 // Fill each array with the thread's index
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     thread_vals.emplace_back();
                 }
 
                 std::mutex mutex;
                 std::condition_variable cond;
-                size_t running = 0;
-                for (size_t i = 0; i < num_threads; ++i)
+                std::size_t running = 0;
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&, index = i]()
                     {
@@ -429,17 +429,17 @@ namespace dhorn
 
             TEST_METHOD(LockNormalTest)
             {
-                dhorn::experimental::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<std::size_t> val = 0;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
-                static const size_t num_iterations = 10000;
+                static const std::size_t num_threads = 12;
+                static const std::size_t num_iterations = 10000;
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < num_iterations; ++j)
+                        for (std::size_t j = 0; j < num_iterations; ++j)
                         {
                             auto lock = val.lock();
                             val.set_unlocked(val.copy_unlocked() + 1);
@@ -457,17 +457,17 @@ namespace dhorn
 
             TEST_METHOD(TryToLockTest)
             {
-                dhorn::experimental::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<std::size_t> val = 0;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
-                static const size_t num_iterations = 10000;
+                static const std::size_t num_threads = 12;
+                static const std::size_t num_iterations = 10000;
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < num_iterations; ++j)
+                        for (std::size_t j = 0; j < num_iterations; ++j)
                         {
                             auto lock = val.lock(std::try_to_lock);
                             if (lock.owns_lock())
@@ -490,17 +490,17 @@ namespace dhorn
 
             TEST_METHOD(DeferLockTest)
             {
-                dhorn::experimental::synchronized_object<size_t> val = 0;
+                dhorn::experimental::synchronized_object<std::size_t> val = 0;
                 std::vector<std::thread> threads;
 
-                static const size_t num_threads = 12;
-                static const size_t num_iterations = 10000;
+                static const std::size_t num_threads = 12;
+                static const std::size_t num_iterations = 10000;
 
-                for (size_t i = 0; i < num_threads; ++i)
+                for (std::size_t i = 0; i < num_threads; ++i)
                 {
                     threads.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < num_iterations; ++j)
+                        for (std::size_t j = 0; j < num_iterations; ++j)
                         {
                             auto lock = val.lock(std::defer_lock);
                             lock.lock(); // Shouldn't deadlock

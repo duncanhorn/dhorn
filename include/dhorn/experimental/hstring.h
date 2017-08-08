@@ -34,7 +34,7 @@ namespace dhorn
                 Assign(other);
             }
 
-            hstring_reference(const wchar_t *str, size_t length)
+            hstring_reference(const wchar_t *str, std::size_t length)
             {
                 Assign(str, length);
             }
@@ -45,13 +45,13 @@ namespace dhorn
                 Assign(str);
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring_reference(const wchar_t (&str)[Size])
             {
                 Assign(str);
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring_reference(wchar_t (&str)[Size])
             {
                 Assign(str);
@@ -80,14 +80,14 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring_reference &operator=(const wchar_t (&str)[Size])
             {
                 Assign(str);
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring_reference &operator=(wchar_t (&str)[Size])
             {
                 Assign(str);
@@ -116,7 +116,7 @@ namespace dhorn
                 return *this;
             }
 
-            hstring_reference &assign(const wchar_t *str, size_t length)
+            hstring_reference &assign(const wchar_t *str, std::size_t length)
             {
                 Assign(str, length);
                 return *this;
@@ -129,14 +129,14 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring_reference &assign(const wchar_t (&str)[Size])
             {
                 Assign(str);
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring_reference &assign(wchar_t (&str)[Size])
             {
                 Assign(str);
@@ -179,7 +179,7 @@ namespace dhorn
                 return this->_hstr;
             }
 
-            size_t length(void) const noexcept
+            std::size_t length(void) const noexcept
             {
                 return ::WindowsGetStringLen(this->_hstr);
             }
@@ -189,7 +189,7 @@ namespace dhorn
                 clear();
             }
 
-            size_t size(void) const noexcept
+            std::size_t size(void) const noexcept
             {
                 return length();
             }
@@ -217,7 +217,7 @@ namespace dhorn
                 }
             }
 
-            void Assign(const wchar_t *str, size_t length)
+            void Assign(const wchar_t *str, std::size_t length)
             {
                 com::check_hresult(::WindowsCreateStringReference(str, length, &this->_header, &this->_hstr));
             }
@@ -228,13 +228,13 @@ namespace dhorn
                 Assign(str, wcslen(str));
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             void Assign(const wchar_t (&str)[Size])
             {
                 Assign(str, Size - 1);
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             void Assign(wchar_t (&str)[Size])
             {
                 Assign(static_cast<const wchar_t *>(str));
@@ -279,7 +279,7 @@ namespace dhorn
                 Assign(str);
             }
 
-            hstring(const wchar_t *str, size_t length)
+            hstring(const wchar_t *str, std::size_t length)
             {
                 Assign(str, length);
             }
@@ -290,13 +290,13 @@ namespace dhorn
                 Assign(str);
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring(const wchar_t (&str)[Size])
             {
                 Assign(str);
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring(wchar_t (&str)[Size])
             {
                 Assign(str);
@@ -355,7 +355,7 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &operator=(const wchar_t (&str)[Size])
             {
                 Destroy();
@@ -363,7 +363,7 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &operator=(wchar_t (&str)[Size])
             {
                 Destroy();
@@ -397,14 +397,14 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &operator+=(const wchar_t (&str)[Size])
             {
                 Append(str);
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &operator+=(wchar_t (&str)[Size])
             {
                 Append(str);
@@ -445,7 +445,7 @@ namespace dhorn
                 return *this;
             }
 
-            hstring &append(const wchar_t *str, size_t length)
+            hstring &append(const wchar_t *str, std::size_t length)
             {
                 Append(str, length);
                 return *this;
@@ -458,14 +458,14 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &append(const wchar_t (&str)[Size])
             {
                 Append(str);
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &append(wchar_t (&str)[Size])
             {
                 Append(str);
@@ -502,7 +502,7 @@ namespace dhorn
                 return *this;
             }
 
-            hstring &assign(const wchar_t *str, size_t length)
+            hstring &assign(const wchar_t *str, std::size_t length)
             {
                 Destroy();
                 Assign(str, length);
@@ -517,7 +517,7 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &assign(const wchar_t (&str)[Size])
             {
                 Destroy();
@@ -525,7 +525,7 @@ namespace dhorn
                 return *this;
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             hstring &assign(wchar_t (&str)[Size])
             {
                 Destroy();
@@ -590,7 +590,7 @@ namespace dhorn
                 return this->_hstr;
             }
 
-            size_t length(void) const noexcept
+            std::size_t length(void) const noexcept
             {
                 return ::WindowsGetStringLen(this->_hstr);
             }
@@ -605,14 +605,15 @@ namespace dhorn
                 Destroy();
             }
 
-            size_t size(void) const noexcept
+            std::size_t size(void) const noexcept
             {
                 return length();
             }
 
             void swap(hstring &other) noexcept
             {
-                std::swap(this->_hstr, other._hstr);
+                using std::swap;
+                swap(this->_hstr, other._hstr);
             }
 
 
@@ -625,7 +626,7 @@ namespace dhorn
                 com::check_hresult(::WindowsDuplicateString(str, &this->_hstr));
             }
 
-            void Assign(const wchar_t *str, size_t length)
+            void Assign(const wchar_t *str, std::size_t length)
             {
                 assert(!this->_hstr);
                 com::check_hresult(::WindowsCreateString(str, length, &this->_hstr));
@@ -637,13 +638,13 @@ namespace dhorn
                 Assign(str, wcslen(str));
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             void Assign(const wchar_t (&str)[Size])
             {
                 Assign(str, Size - 1);
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             void Assign(wchar_t (&str)[Size])
             {
                 Assign(static_cast<const wchar_t *>(str));
@@ -681,7 +682,7 @@ namespace dhorn
                 Attach(result);
             }
 
-            void Append(const wchar_t *str, size_t length)
+            void Append(const wchar_t *str, std::size_t length)
             {
                 Append(hstring_reference(str, length).get());
             }
@@ -692,13 +693,13 @@ namespace dhorn
                 Append(hstring_reference(str).get());
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             void Append(const wchar_t (&str)[Size])
             {
                 Append(hstring_reference(str).get());
             }
 
-            template <size_t Size>
+            template <std::size_t Size>
             void Append(wchar_t (&str)[Size])
             {
                 Append(hstring_reference(str).get());
@@ -818,13 +819,13 @@ namespace dhorn
                     return hstring_reference(str);
                 }
 
-                template <size_t Size, typename = std::enable_if_t<!InhibitArrayReferences>>
+                template <std::size_t Size, typename = std::enable_if_t<!InhibitArrayReferences>>
                 static hstring_reference as_hstring(const wchar_t (&str)[Size])
                 {
                     return hstring_reference(str);
                 }
 
-                template <size_t Size, typename = std::enable_if_t<!InhibitArrayReferences>>
+                template <std::size_t Size, typename = std::enable_if_t<!InhibitArrayReferences>>
                 static hstring_reference as_hstring(wchar_t (&str)[Size])
                 {
                     return hstring_reference(str);

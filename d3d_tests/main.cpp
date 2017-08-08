@@ -38,7 +38,6 @@ bool globals::right = false;
 #define OUTPUT_PATH "Release\\"
 #endif
 
-
 struct object_data
 {
     DirectX::XMFLOAT4X4 viewProjectionMatrix;
@@ -47,7 +46,7 @@ struct object_data
 
 static void load_shaders(void)
 {
-    std::vector<uint8_t> vertexShaderBytecode;
+    std::vector<std::uint8_t> vertexShaderBytecode;
     globals::vertex_shader = dhorn::experimental::d3d11::load_vertex_shader(
         globals::window.device(),
         OUTPUT_PATH "VertexShader.cso",
@@ -98,10 +97,10 @@ static void load_geometry(void)
 }
 
 
-static std::pair<bool, intptr_t> key_press_handler(
+static std::pair<bool, std::intptr_t> key_press_handler(
     dhorn::experimental::win32::window * /*sender*/,
-    uintptr_t wparam,
-    intptr_t lparam)
+    std::uintptr_t wparam,
+    std::intptr_t lparam)
 {
     bool handled = false;
     bool key_down = (lparam & 0x80000000) == 0;
@@ -157,14 +156,14 @@ static void move_cursor(void)
 }
 
 
-static std::pair<bool, intptr_t> mouse_move_handler(
+static std::pair<bool, std::intptr_t> mouse_move_handler(
     dhorn::experimental::win32::window * /*sender*/,
-    uintptr_t /*wparam*/,
-    intptr_t lparam)
+    std::uintptr_t /*wparam*/,
+    std::intptr_t lparam)
 {
     bool handled = false;
-    size_t x = static_cast<uint16_t>(LOWORD(lparam));
-    size_t y = static_cast<uint16_t>(HIWORD(lparam));
+    std::size_t x = static_cast<std::uint16_t>(LOWORD(lparam));
+    std::size_t y = static_cast<std::uint16_t>(HIWORD(lparam));
 
     float delta_x = static_cast<float>(x) - 300;
     if (delta_x != 0)
@@ -264,7 +263,7 @@ int WINAPI wWinMain(
         context->DrawIndexed(36, 0, 0);
     });
 
-    globals::window.on_resize([&](const dhorn::experimental::rect<size_t> &clientArea)
+    globals::window.on_resize([&](const dhorn::experimental::rect<std::size_t> &clientArea)
     {
         float ratio = static_cast<float>(clientArea.width) / static_cast<float>(clientArea.height);
         globals::camera.configure_frustum(0.1f, 100.0f, DirectX::XM_PIDIV2, ratio);
