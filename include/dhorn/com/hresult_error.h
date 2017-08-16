@@ -14,7 +14,7 @@
 
 namespace dhorn::com
 {
-    /* 
+    /*
      * hresult_category
      */
 #pragma region hresult_category
@@ -85,9 +85,9 @@ namespace dhorn::com
                 char errorString[256];
 
                 sprintf_s(errorString, "HRESULT 0x%08X: ", err);
-                const size_t offset = 20;
+                const std::size_t offset = 20;
 
-                auto size = ::FormatMessageA(
+                auto msgSize = ::FormatMessageA(
                     FORMAT_MESSAGE_FROM_SYSTEM,
                     nullptr, // Source
                     err, // MessageId
@@ -96,18 +96,18 @@ namespace dhorn::com
                     std::size(errorString) - offset,
                     nullptr); // Args
 
-                if (!size)
+                if (!msgSize)
                 {
                     sprintf_s(errorString + offset, std::size(errorString) - offset, "UNKNOWN FAILURE CODE");
-                    size = 20;
+                    msgSize = 20;
                 }
-                else if (size >= 2)
+                else if (msgSize >= 2)
                 {
                     // FormatMessage adds a "\r\n" to the end...
-                    size -= 2;
+                    msgSize -= 2;
                 }
 
-                return std::string(errorString, offset + size);
+                return std::string(errorString, offset + msgSize);
             }
         };
     }

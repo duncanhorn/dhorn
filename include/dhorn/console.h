@@ -31,7 +31,7 @@ namespace dhorn
      *
      * Represents a console device (input, output, or error) that is required for several of the console functions.
      */
-    enum class console_device : uint32_t
+    enum class console_device : std::uint32_t
     {
         input = STD_INPUT_HANDLE,
         output = STD_OUTPUT_HANDLE,
@@ -45,7 +45,7 @@ namespace dhorn
      *
      * Represents a foreground or background color within the console.
      */
-    enum class console_color : uint8_t
+    enum class console_color : std::uint8_t
     {
         black = 0x00,
         dark_gray = FOREGROUND_INTENSITY,
@@ -79,10 +79,10 @@ namespace dhorn
      */
     struct console_bounds
     {
-        int16_t x;
-        int16_t y;
-        int16_t width;
-        int16_t height;
+        std::int16_t x;
+        std::int16_t y;
+        std::int16_t width;
+        std::int16_t height;
     };
 
 
@@ -92,8 +92,8 @@ namespace dhorn
      */
     struct console_buffer_size
     {
-        int16_t width;
-        int16_t height;
+        std::int16_t width;
+        std::int16_t height;
     };
 
 
@@ -103,8 +103,8 @@ namespace dhorn
      */
     struct console_cursor_position
     {
-        int16_t x;
-        int16_t y;
+        std::int16_t x;
+        std::int16_t y;
     };
 
 
@@ -237,7 +237,7 @@ namespace dhorn
             });
 
             info.wAttributes = clear_flag(info.wAttributes, 0x0F);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint8_t>(color));
+            info.wAttributes = set_flag(info.wAttributes, static_cast<std::uint8_t>(color));
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();
@@ -290,7 +290,7 @@ namespace dhorn
             });
 
             info.wAttributes = clear_flag(info.wAttributes, 0x00F0);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint16_t>(static_cast<uint16_t>(color) << 4));
+            info.wAttributes = set_flag(info.wAttributes, static_cast<std::uint16_t>(static_cast<std::uint16_t>(color) << 4));
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();
@@ -303,7 +303,7 @@ namespace dhorn
         /*
          * console::set_colors
          *
-         * Sets both the foreground text color as well as the background color of the console. 
+         * Sets both the foreground text color as well as the background color of the console.
          */
         inline auto set_colors(console_color foregroundColor, console_color backgroundColor)
         {
@@ -315,8 +315,8 @@ namespace dhorn
             });
 
             info.wAttributes = clear_flag(info.wAttributes, 0x00FF);
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint16_t>(foregroundColor));
-            info.wAttributes = set_flag(info.wAttributes, static_cast<uint16_t>(static_cast<uint16_t>(backgroundColor) << 4));
+            info.wAttributes = set_flag(info.wAttributes, static_cast<std::uint16_t>(foregroundColor));
+            info.wAttributes = set_flag(info.wAttributes, static_cast<std::uint16_t>(static_cast<std::uint16_t>(backgroundColor) << 4));
             if (!::SetConsoleTextAttribute(handle, info.wAttributes))
             {
                 result.cancel();

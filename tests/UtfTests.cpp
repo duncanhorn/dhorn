@@ -249,10 +249,10 @@ namespace dhorn
                 CharTy result[Traits::max_code_point_size];
                 auto ptr = Traits::write(result, ch);
 
-                size_t len = ptr - result;
+                std::size_t len = ptr - result;
                 Assert::AreEqual(Traits::code_point_size(ch), len);
 
-                for (size_t i = 0; i < len; ++i)
+                for (std::size_t i = 0; i < len; ++i)
                 {
                     Assert::IsTrue(expected[i] == result[i]);
                 }
@@ -435,7 +435,7 @@ namespace dhorn
                 utf8_iterator begin{ std::begin(test8) };
                 utf8_iterator end{ std::end(test8) - 1 };
 
-                size_t index = 0;
+                std::size_t index = 0;
                 std::for_each(begin, end, [&](char32_t value)
                 {
                     Assert::IsTrue(test32[index++] == value);
@@ -448,7 +448,7 @@ namespace dhorn
                 utf16_iterator begin{ std::begin(test16) };
                 utf16_iterator end{ std::end(test16) - 1 };
 
-                size_t index = 0;
+                std::size_t index = 0;
                 std::for_each(begin, end, [&](char32_t value)
                 {
                     Assert::IsTrue(test32[index++] == value);
@@ -461,7 +461,7 @@ namespace dhorn
                 utf32_iterator begin{ std::begin(test32) };
                 utf32_iterator end{ std::end(test32) - 1 };
 
-                size_t index = 0;
+                std::size_t index = 0;
                 std::for_each(begin, end, [&](char32_t value)
                 {
                     Assert::IsTrue(test32[index++] == value);
@@ -472,10 +472,10 @@ namespace dhorn
             TEST_METHOD(StdStringForwardIterationTest)
             {
                 std::string str = test8;
-                auto begin = make_utf_iterator(std::begin(str));
-                auto end = make_utf_iterator(std::end(str));
+                auto begin = make_utf_iterator(str.begin());
+                auto end = make_utf_iterator(str.end());
 
-                size_t index = 0;
+                std::size_t index = 0;
                 std::for_each(begin, end, [&](char32_t value)
                 {
                     Assert::IsTrue(test32[index++] == value);
@@ -486,10 +486,10 @@ namespace dhorn
             TEST_METHOD(StdListForwardIterationTest)
             {
                 std::list<char> list(std::begin(test8), std::end(test8) - 1);
-                auto begin = make_utf_iterator(std::begin(list));
-                auto end = make_utf_iterator(std::end(list));
+                auto begin = make_utf_iterator(list.begin());
+                auto end = make_utf_iterator(list.end());
 
-                size_t index = 0;
+                std::size_t index = 0;
                 std::for_each(begin, end, [&](char32_t value)
                 {
                     Assert::IsTrue(test32[index++] == value);
@@ -500,10 +500,10 @@ namespace dhorn
             TEST_METHOD(StdForwardListForwardIterationTest)
             {
                 std::forward_list<char> list(std::begin(test8), std::end(test8) - 1);
-                auto begin = make_utf_iterator(std::begin(list));
-                auto end = make_utf_iterator(std::end(list));
+                auto begin = make_utf_iterator(list.begin());
+                auto end = make_utf_iterator(list.end());
 
-                size_t index = 0;
+                std::size_t index = 0;
                 std::for_each(begin, end, [&](char32_t value)
                 {
                     Assert::IsTrue(test32[index++] == value);
@@ -522,7 +522,7 @@ namespace dhorn
                 utf8_iterator begin{ std::begin(test8) };
                 utf8_iterator end{ std::end(test8) - 1 };
 
-                size_t index = std::size(test32) - 1;
+                std::size_t index = std::size(test32) - 1;
                 do
                 {
                     Assert::IsTrue(test32[index--] == *end--);
@@ -536,7 +536,7 @@ namespace dhorn
                 utf16_iterator begin{ std::begin(test16) };
                 utf16_iterator end{ std::end(test16) - 1 };
 
-                size_t index = std::size(test32) - 1;
+                std::size_t index = std::size(test32) - 1;
                 do
                 {
                     Assert::IsTrue(test32[index--] == *end--);
@@ -550,7 +550,7 @@ namespace dhorn
                 utf32_iterator begin{ std::begin(test32) };
                 utf32_iterator end{ std::end(test32) - 1 };
 
-                size_t index = std::size(test32) - 1;
+                std::size_t index = std::size(test32) - 1;
                 do
                 {
                     Assert::IsTrue(test32[index--] == *end--);
@@ -578,7 +578,7 @@ namespace dhorn
                 }
 
                 Assert::AreEqual(std::size(test8) - 1, result.size());
-                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test8));
+                Assert::IsTrue(std::equal(result.begin(), result.end(), test8));
             }
 
             TEST_METHOD(Utf16OutputIteratorTest)
@@ -594,7 +594,7 @@ namespace dhorn
                 }
 
                 Assert::AreEqual(std::size(test16) - 1, result.size());
-                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test16));
+                Assert::IsTrue(std::equal(result.begin(), result.end(), test16));
             }
 
             TEST_METHOD(Utf32OutputIteratorTest)
@@ -610,7 +610,7 @@ namespace dhorn
                 }
 
                 Assert::AreEqual(std::size(test32) - 1, result.size());
-                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test32));
+                Assert::IsTrue(std::equal(result.begin(), result.end(), test32));
             }
 
             TEST_METHOD(UtfOutputIteratorPreIncrementTest)
@@ -627,7 +627,7 @@ namespace dhorn
                 }
 
                 Assert::AreEqual(std::size(test8) - 1, result.size());
-                Assert::IsTrue(std::equal(std::begin(result), std::end(result), test8));
+                Assert::IsTrue(std::equal(result.begin(), result.end(), test8));
             }
 
 #pragma endregion

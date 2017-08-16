@@ -113,21 +113,21 @@ namespace dhorn
                 std::string foo = "foo";
                 std::string bar = "bar";
 
-                Assert::IsTrue(starts_with(std::begin(str), std::end(str), std::begin(foo), std::end(foo)));
-                Assert::IsFalse(starts_with(std::begin(str), std::end(str), std::begin(bar), std::end(bar)));
+                Assert::IsTrue(starts_with(str.begin(), str.end(), foo.begin(), foo.end()));
+                Assert::IsFalse(starts_with(str.begin(), str.end(), bar.begin(), bar.end()));
 
-                Assert::IsTrue(starts_with(std::begin(str), std::end(str), std::begin(str), std::end(str)));
-                Assert::IsFalse(starts_with(std::begin(foo), std::end(foo), std::begin(str), std::end(str)));
+                Assert::IsTrue(starts_with(str.begin(), str.end(), str.begin(), str.end()));
+                Assert::IsFalse(starts_with(foo.begin(), foo.end(), str.begin(), str.end()));
 
                 std::string abc = "abc";
                 std::string abd = "abd";
-                Assert::IsFalse(starts_with(std::begin(abc), std::end(abc), std::begin(abd), std::end(abd)));
-                Assert::IsFalse(starts_with(std::begin(abd), std::end(abd), std::begin(abc), std::end(abc)));
+                Assert::IsFalse(starts_with(abc.begin(), abc.end(), abd.begin(), abd.end()));
+                Assert::IsFalse(starts_with(abd.begin(), abd.end(), abc.begin(), abc.end()));
 
                 std::string empty;
-                Assert::IsTrue(starts_with(std::begin(str), std::end(str), std::begin(empty), std::end(empty)));
-                Assert::IsFalse(starts_with(std::begin(empty), std::end(empty), std::begin(str), std::end(str)));
-                Assert::IsTrue(starts_with(std::begin(empty), std::end(empty), std::begin(empty), std::end(empty)));
+                Assert::IsTrue(starts_with(str.begin(), str.end(), empty.begin(), empty.end()));
+                Assert::IsFalse(starts_with(empty.begin(), empty.end(), str.begin(), str.end()));
+                Assert::IsTrue(starts_with(empty.begin(), empty.end(), empty.begin(), empty.end()));
             }
 
             TEST_METHOD(StartsWithStringIteratorTest)
@@ -136,20 +136,20 @@ namespace dhorn
                 std::string foo = "foo";
                 std::string bar = "bar";
 
-                Assert::IsTrue(starts_with(str, std::begin(foo), std::end(foo)));
-                Assert::IsFalse(starts_with(str, std::begin(bar), std::end(bar)));
-                Assert::IsTrue(starts_with(str, std::begin(str), std::end(str)));
-                Assert::IsFalse(starts_with(foo, std::begin(str), std::end(str)));
+                Assert::IsTrue(starts_with(str, foo.begin(), foo.end()));
+                Assert::IsFalse(starts_with(str, bar.begin(), bar.end()));
+                Assert::IsTrue(starts_with(str, str.begin(), str.end()));
+                Assert::IsFalse(starts_with(foo, str.begin(), str.end()));
 
                 std::string_view strView = "foobar";
-                Assert::IsTrue(starts_with(strView, std::begin(foo), std::end(foo)));
-                Assert::IsFalse(starts_with(strView, std::begin(bar), std::end(bar)));
-                Assert::IsTrue(starts_with(strView, std::begin(str), std::end(str)));
+                Assert::IsTrue(starts_with(strView, foo.begin(), foo.end()));
+                Assert::IsFalse(starts_with(strView, bar.begin(), bar.end()));
+                Assert::IsTrue(starts_with(strView, str.begin(), str.end()));
 
                 const_null_terminated_string nullStr = "foobar";
-                Assert::IsTrue(starts_with(nullStr, std::begin(foo), std::end(foo)));
-                Assert::IsFalse(starts_with(nullStr, std::begin(bar), std::end(bar)));
-                Assert::IsTrue(starts_with(nullStr, std::begin(str), std::end(str)));
+                Assert::IsTrue(starts_with(nullStr, foo.begin(), foo.end()));
+                Assert::IsFalse(starts_with(nullStr, bar.begin(), bar.end()));
+                Assert::IsTrue(starts_with(nullStr, str.begin(), str.end()));
             }
 
             TEST_METHOD(StartsWithStringTest)
@@ -204,13 +204,13 @@ namespace dhorn
                 std::string bar = "bar";
                 std::string foobar = "foobar";
 
-                Assert::IsTrue(starts_with(str, std::begin(foo), std::end(foo)));
-                Assert::IsFalse(starts_with(str, std::begin(bar), std::end(bar)));
-                Assert::IsTrue(starts_with(str, std::begin(foobar), std::end(foobar)));
+                Assert::IsTrue(starts_with(str, foo.begin(), foo.end()));
+                Assert::IsFalse(starts_with(str, bar.begin(), bar.end()));
+                Assert::IsTrue(starts_with(str, foobar.begin(), foobar.end()));
 
-                Assert::IsTrue(starts_with(constStr, std::begin(foo), std::end(foo)));
-                Assert::IsFalse(starts_with(constStr, std::begin(bar), std::end(bar)));
-                Assert::IsTrue(starts_with(constStr, std::begin(foobar), std::end(foobar)));
+                Assert::IsTrue(starts_with(constStr, foo.begin(), foo.end()));
+                Assert::IsFalse(starts_with(constStr, bar.begin(), bar.end()));
+                Assert::IsTrue(starts_with(constStr, foobar.begin(), foobar.end()));
             }
 
             TEST_METHOD(StartsWithStringLiteralStringTest)

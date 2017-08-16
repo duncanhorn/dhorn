@@ -40,7 +40,7 @@ namespace dhorn
         friend class compressed_base;
 
         // Tuple Construction Helper
-        template <typename... Types, size_t... Indices>
+        template <typename... Types, std::size_t... Indices>
         compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
             noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
             _value(std::get<Indices>(std::move(args))...)
@@ -178,9 +178,10 @@ namespace dhorn
         template <typename Type = Ty, std::enable_if_t<std::is_swappable<Type>::value, int> = 0>
         void swap(compressed_base& other) noexcept(std::is_nothrow_swappable<Ty>::value)
         {
+            using std::swap;
             if (this != std::addressof(other))
             {
-                std::swap(this->_value, other._value);
+                swap(this->_value, other._value);
             }
         }
 
@@ -204,7 +205,7 @@ namespace dhorn
         friend class compressed_base;
 
         // Tuple Construction Helper
-        template <typename... Types, size_t... Indices>
+        template <typename... Types, std::size_t... Indices>
         compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
             noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
             Ty(std::get<Indices>(std::move(args))...)

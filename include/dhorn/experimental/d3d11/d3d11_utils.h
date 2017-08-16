@@ -147,7 +147,7 @@ namespace dhorn
             com::com_ptr<ID3D11VertexShader> load_vertex_shader(
                 ID3D11Device *device,
                 const CharT *path,
-                std::vector<uint8_t> &bytecode)
+                std::vector<std::uint8_t> &bytecode)
             {
                 bytecode = d3d::read_shader_file(path);
 
@@ -164,7 +164,7 @@ namespace dhorn
             template <typename CharT>
             com::com_ptr<ID3D11VertexShader> load_vertex_shader(ID3D11Device *device, const CharT *path)
             {
-                std::vector<uint8_t> bytecode;
+                std::vector<std::uint8_t> bytecode;
                 return load_vertex_shader(device, path, bytecode);
             }
 
@@ -196,7 +196,7 @@ namespace dhorn
             inline com::com_ptr<ID3D11Buffer> create_buffer(
                 ID3D11Device *device,
                 const Ty *bufferData,
-                size_t length,
+                std::size_t length,
                 UINT bindFlags)
             {
                 D3D11_BUFFER_DESC desc = buffer_desc(length * sizeof(Ty), bindFlags);
@@ -214,7 +214,7 @@ namespace dhorn
                 return create_buffer(device, data.data(), data.size(), bindFlags);
             }
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             inline com::com_ptr<ID3D11Buffer> create_buffer(ID3D11Device *device, const Ty(&data)[Size], UINT bindFlags)
             {
                 return create_buffer(device, data, Size, bindFlags);

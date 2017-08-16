@@ -80,19 +80,19 @@ namespace dhorn
         using creation_behavior = default_thread_creation_behavior;
 
         // Allow an "infinite" number of threads by default
-        static constexpr size_t initial_max_threads()
+        static constexpr std::size_t initial_max_threads()
         {
-            return std::numeric_limits<size_t>::max();
+            return std::numeric_limits<std::size_t>::max();
         }
 
         // Don't force thread creation on construction
-        static constexpr size_t initial_min_threads()
+        static constexpr std::size_t initial_min_threads()
         {
             return 0;
         }
 
         // By default, don't let the number of non-running threads add up too much
-        static size_t initial_max_available_threads()
+        static std::size_t initial_max_available_threads()
         {
             return std::max(4u, std::thread::hardware_concurrency());
         }
@@ -113,19 +113,19 @@ namespace dhorn
         using creation_behavior = default_thread_creation_behavior;
 
         // We always want one thread
-        static constexpr size_t initial_max_threads()
+        static constexpr std::size_t initial_max_threads()
         {
             return 1;
         }
 
         // We always want one thread, even on creation
-        static constexpr size_t initial_min_threads()
+        static constexpr std::size_t initial_min_threads()
         {
             return 1;
         }
 
         // Since min == max, this value doesn't really matter. One is technically the truth
-        static constexpr size_t initial_max_available_threads()
+        static constexpr std::size_t initial_max_available_threads()
         {
             return 1;
         }
@@ -239,7 +239,7 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            thread_pool_impl(size_t minThreads, size_t maxThreads, size_t maxWaiting) :
+            thread_pool_impl(std::size_t minThreads, std::size_t maxThreads, std::size_t maxWaiting) :
                 _minThreads(minThreads),
                 _maxThreads(maxThreads),
                 _maxWaitingThreads(maxWaiting)
@@ -262,7 +262,7 @@ namespace dhorn
             /*
              * Information
              */
-            size_t count() const
+            std::size_t count() const
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 return this->_threadCount;
@@ -338,13 +338,13 @@ namespace dhorn
              */
 #pragma region Thread Pool Configuration
 
-            size_t get_max_waiting_threads() const
+            std::size_t get_max_waiting_threads() const
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 return this->_maxWaitingThreads;
             }
 
-            void change_max_waiting_threads(size_t value)
+            void change_max_waiting_threads(std::size_t value)
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 validate_running();
@@ -353,13 +353,13 @@ namespace dhorn
                 ensure_thread_count();
             }
 
-            size_t get_max_threads() const
+            std::size_t get_max_threads() const
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 return this->_maxThreads;
             }
 
-            void change_max_threads(size_t value)
+            void change_max_threads(std::size_t value)
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 validate_running();
@@ -373,13 +373,13 @@ namespace dhorn
                 ensure_thread_count();
             }
 
-            size_t get_min_threads() const
+            std::size_t get_min_threads() const
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 return this->_minThreads;
             }
 
-            void change_min_threads(size_t value)
+            void change_min_threads(std::size_t value)
             {
                 std::lock_guard<std::mutex> guard(this->_mutex);
                 validate_running();
@@ -420,7 +420,7 @@ namespace dhorn
                         std::lock_guard<std::mutex> guard(sharedThis->_mutex);
 
                         auto itr = sharedThis->_threads.find(std::this_thread::get_id());
-                        if (itr != std::end(sharedThis->_threads))
+                        if (itr != sharedThis->_threads.end())
                         {
                             // We won't be calling join, so we need to let the std::thread destruct nicely
                             itr->second.detach();
@@ -503,7 +503,7 @@ namespace dhorn
                     // we may have waiting threads which are immediately eiligible for termination, so notify them if
                     // possible.
                     auto notifyCount = std::min(std::max(excessThreads, excessWaiting), this->_waitingThreads);
-                    for (size_t i = 0; i < notifyCount; ++i)
+                    for (std::size_t i = 0; i < notifyCount; ++i)
                     {
                         this->_taskAvailable.notify_one();
                     }
@@ -599,11 +599,11 @@ namespace dhorn
 
                 // If there are no high or normal priority tasks in the queue, make sure that their end iterators remain
                 // valid since we are about to remove the first element
-                if (this->_highPriorityEnd == std::begin(this->_taskList))
+                if (this->_highPriorityEnd == this->_taskList.begin())
                 {
                     ++this->_highPriorityEnd;
                 }
-                if (this->_normalPriorityEnd == std::begin(this->_taskList))
+                if (this->_normalPriorityEnd == this->_taskList.begin())
                 {
                     ++this->_normalPriorityEnd;
                 }
@@ -632,7 +632,7 @@ namespace dhorn
 
                 case thread_pool_priority::low:
                 default:
-                    insertPos = std::end(this->_taskList);
+                    insertPos = this->_taskList.end();
                     break;
                 }
 
@@ -676,17 +676,17 @@ namespace dhorn
             bool _running = true;
 
             std::unordered_map<std::thread::id, std::thread> _threads;
-            size_t _threadCount = 0;
+            std::size_t _threadCount = 0;
 
             // Min/max number of threads allowed
-            size_t _minThreads;
-            size_t _maxThreads;
+            std::size_t _minThreads;
+            std::size_t _maxThreads;
 
             // Indicates the maximum number of threads that can be waiting for a task. If this value is reached, then
             // waiting threads are sent 'shutdown' events until the number of waiting threads is less than or equal to
             // this value
-            size_t _maxWaitingThreads;
-            size_t _waitingThreads = 0;
+            std::size_t _maxWaitingThreads;
+            std::size_t _waitingThreads = 0;
 
             // List of all tasks waiting to be claimed, sorted by priority. New tasks are added after all other tasks
             // with the same priority
@@ -694,8 +694,8 @@ namespace dhorn
             task_list _taskList;
 
             // For quicker insertion/removal, we maintain knowledge of where priority changes occur in the task list
-            task_list::iterator _highPriorityEnd = std::end(_taskList);
-            task_list::iterator _normalPriorityEnd = std::end(_taskList);
+            task_list::iterator _highPriorityEnd = _taskList.end();
+            task_list::iterator _normalPriorityEnd = _taskList.end();
 
             CreationBehavior _creationBehavior;
         };
@@ -765,7 +765,7 @@ namespace dhorn
         /*
          * Information
          */
-        size_t count() const
+        std::size_t count() const
         {
             return this->_impl->count();
         }
@@ -880,32 +880,32 @@ namespace dhorn
          */
 #pragma region Thread Pool Configuration
 
-        size_t max_available_threads() const
+        std::size_t max_available_threads() const
         {
             return this->_impl->get_max_waiting_threads();
         }
 
-        void set_max_available_threads(size_t value)
+        void set_max_available_threads(std::size_t value)
         {
             this->_impl->change_max_waiting_threads(value);
         }
 
-        size_t max_threads() const
+        std::size_t max_threads() const
         {
             return this->_impl->get_max_threads();
         }
 
-        void set_max_threads(size_t value)
+        void set_max_threads(std::size_t value)
         {
             this->_impl->change_max_threads(value);
         }
 
-        size_t min_threads() const
+        std::size_t min_threads() const
         {
             return this->_impl->get_min_threads();
         }
 
-        void set_min_threads(size_t value)
+        void set_min_threads(std::size_t value)
         {
             this->_impl->change_min_threads(value);
         }
