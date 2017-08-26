@@ -10,9 +10,9 @@
  *                      "act like" this type. For example, a template argument of `int*` means that the object "acts
  *                      like" a pointer to a single integer. Similarly, a type of `int(*)[]` "acts like" a pointer to an
  *                      array of integers. Unlike `std::unique_ptr`, a type of `T[]` for some `T` does _not_ "act like"
- *                      a pointer to an array of `T`s.
+ *                      a pointer to an array of `T`s and, in fact, is not valid C++.
  *      `Traits`        Describes how the underlying resource type is managed. The full functionality of this type is
- *                      decribed later, but in general this type described how the type is stored, how the resource's
+ *                      decribed later, but in general this type describes how the type is stored, how the resource's
  *                      lifetime is managed, and properties of this type such as validity and default construction.
  *
  * Each `unique` object provides several type aliases that are summarized as follows
@@ -22,13 +22,11 @@
  *                      argument type. Additionally, accessor functions return objects of `value_type` (or l/r-value
  *                      references to `value_type`). This is an alias for `Traits::value_type` if it exists. Otherwise
  *                      it is an alias for `Ty`.
- *      semantic_type   An alias for `Ty`. This type is primarily used for overload resolution purposes for construction
- *                      or assignment to the underlying resource member variable.
- *      traits_type     An alias for `Traits`.
  *
  * The traits type is expected has a number of required and optional functions/type aliases:
  *
- *      value_type      An optional type alias. If present, is used as the `unique::value_type` alias.
+ *      value_type      An optional type alias. If present, is used as the `unique::value_type` alias. This is primarily
+ *                      used in "decay"-like scenarios (e.g. decay arrays types to pointer types).
  *      is_valid        A static member function that takes an argument of type `const unique::value_type&` and returns
  *                      a `bool` indicating whether or not the resource is valid. I.e. whether or not the resource is
  *                      something that needs to be cleaned up.
@@ -37,7 +35,7 @@
  *                      is used for operations such as default construction and resetting the value. Note that values
  *                      returned by this function need not be considered "invalid" by the `is_valid` function.
  *      operator()      A non-static member function that takes in arguments of type `unique::value_type&` and is
- *                      expected to destroy/release that resource.
+ *                      expected to destroy/release that resource. TODO: must the value be valid?
  */
 #pragma once
 
@@ -60,6 +58,8 @@ namespace dhorn
     {
         /*
          * unique_value_type_from_deleter
+         *
+         * Used by `unique_ptr` to determine the type of `value_type` from the `Deleter` template argument.
          */
         template <typename Deleter, typename Ty, typename = void>
         struct unique_value_type_from_deleter
@@ -245,8 +245,10 @@ namespace dhorn
         /*
          * value_type_from_unique_traits
          *
-         * TraitsTy::value_type if it exists, else Ty
+         * `TraitsTy::value_type` if it exists, else `Ty`
          */
+#pragma region value_type_from_unique_traits
+
         template <typename TraitsTy, typename Ty, typename = void>
         struct value_type_from_unique_traits
         {
@@ -263,13 +265,17 @@ namespace dhorn
         template <typename TraitsTy, typename Ty>
         using value_type_from_unique_traits_t = typename value_type_from_unique_traits<TraitsTy, Ty>::type;
 
+#pragma endregion
+
 
 
         /*
          * is_unique_constructible
          *
-         * TraitsTy::is_constructible<ArgTy> if it exists, else std::is_constructible<ValueTy, ArgTy>
+         * `TraitsTy::is_constructible<ArgTy>` if it exists, else `std::is_constructible<ValueTy, ArgTy>`
          */
+#pragma region is_unique_constructible
+
         template <typename TraitsTy, typename ValueTy, typename ArgTy, typename = void>
         struct is_unique_constructible :
             public std::is_constructible<ValueTy, ArgTy> // Fallback case
@@ -277,7 +283,11 @@ namespace dhorn
         };
 
         template <typename TraitsTy, typename ValueTy, typename ArgTy>
-        struct is_unique_constructible<TraitsTy, ValueTy, ArgTy, std::void_t<typename TraitsTy::template is_constructible<ArgTy>>> :
+        struct is_unique_constructible<
+            TraitsTy,
+            ValueTy,
+            ArgTy,
+            std::void_t<typename TraitsTy::template is_constructible<ArgTy>>> :
             public TraitsTy::template is_constructible<ArgTy>
         {
         };
@@ -285,13 +295,17 @@ namespace dhorn
         template <typename TraitsTy, typename ValueTy, typename ArgTy>
         constexpr bool is_unique_constructible_v = is_unique_constructible<TraitsTy, ValueTy, ArgTy>::value;
 
+#pragma endregion
+
 
 
         /*
          * has_default_value
          *
-         * Helper to determine if TraitsTy::default_value() exists
+         * Helper to determine if `TraitsTy::default_value()` exists
          */
+#pragma region unique_traits_has_default_value
+
         template <typename TraitsTy>
         struct unique_traits_has_default_value
         {
@@ -307,24 +321,37 @@ namespace dhorn
         template <typename TraitsTy>
         constexpr bool unique_traits_has_default_value_v = unique_traits_has_default_value<TraitsTy>::value;
 
+#pragma endregion
+
 
 
         /*
          * unique_default_value
          *
-         * TraitsTy::default_value() if it exists, else value_type_from_unique_traits_t<TraitsTy>{}
+         * `TraitsTy::default_value()` if it exists, else `value_type_from_unique_traits_t<TraitsTy>{}`
          */
-        template <typename TraitsTy, std::enable_if_t<unique_traits_has_default_value<TraitsTy>::value, int> = 0>
-        inline constexpr auto unique_default_value()
+#pragma region unique_default_value
+
+        template <
+            typename TraitsTy,
+            typename Ty,
+            std::enable_if_t<unique_traits_has_default_value<TraitsTy>::value, int> = 0>
+        inline constexpr decltype(auto) unique_default_value() noexcept(noexcept(TraitsTy::default_value()))
         {
             return TraitsTy::default_value();
         }
 
-        template <typename TraitsTy, std::enable_if_t<!unique_traits_has_default_value<TraitsTy>::value, int> = 0>
+        template <
+            typename TraitsTy,
+            typename Ty,
+            std::enable_if_t<!unique_traits_has_default_value<TraitsTy>::value, int> = 0>
         inline constexpr auto unique_default_value()
+            noexcept(std::is_nothrow_default_constructible<value_type_from_unique_traits_t<TraitsTy, Ty>>::value)
         {
-            return value_type_from_unique_traits_t<TraitsTy>{};
+            return value_type_from_unique_traits_t<TraitsTy, Ty>{};
         }
+
+#pragma endregion
     }
 
 
@@ -341,28 +368,48 @@ namespace dhorn
         // We need to invoke static functions/type traits on the traits type, but we allow references
         using traits_type = std::remove_reference_t<std::remove_pointer_t<Traits>>;
 
+        // We need the type of the default value expression for multiple `noexcept`, etc. tests
+        using default_value_type = decltype(details::unique_default_value<traits_type, Ty>());
+
     public:
         /*
          * Public Types
          */
         using value_type = details::value_type_from_unique_traits_t<Traits, Ty>;
-        using semantic_type = Ty;
+
+        static_assert(std::is_constructible_v<value_type, default_value_type&&>,
+            "Must be able to construct a unique's value type with the result of default_value");
+
+        static_assert(std::is_assignable_v<value_type&, default_value_type&&>,
+            "Must be able to assign to a unique's value type with the result of default_value");
 
 
 
         /*
          * Constructor(s)/Destructor
          */
-        template <typename Type = Ty, std::enable_if_t<std::is_default_constructible<Type>::value, int> = 0>
-        constexpr unique() noexcept :
-            _data(details::unique_default_value<traits_type>(), Traits{})
+        template <
+            typename TraitsType = Traits,
+            std::enable_if_t<std::is_default_constructible<TraitsType>::value, int> = 0>
+        constexpr unique()
+            noexcept(
+                noexcept(details::unique_default_value<traits_type, Ty>()) &&
+                std::is_nothrow_default_constructible<Traits>::value
+            ) :
+            _data(details::unique_default_value<traits_type, Ty>(), Traits{})
         {
         }
 
         template <
             typename ArgTy,
-            std::enable_if_t<details::is_unique_constructible<traits_type, value_type, ArgTy&&>::value, int> = 0>
-        explicit unique(ArgTy&& value) :
+            typename TraitsType = Traits,
+            std::enable_if_t<details::is_unique_constructible<traits_type, value_type, ArgTy&&>::value, int> = 0,
+            std::enable_if_t<std::is_default_constructible<TraitsType>::value, int> = 0>
+        explicit unique(ArgTy&& value)
+            noexcept(std::conjunction<
+                std::is_nothrow_constructible<value_type, ArgTy&&>,
+                std::is_nothrow_default_constructible<TraitsType>
+            >::value):
             _data(std::forward<ArgTy>(value), Traits{})
         {
         }
@@ -371,6 +418,7 @@ namespace dhorn
             typename ArgTy,
             std::enable_if_t<details::is_unique_constructible<traits_type, value_type, ArgTy&&>::value, int> = 0>
         unique(ArgTy&& value, std::conditional_t<std::is_reference<Traits>::value, Traits, const Traits&> traits) :
+            // TODO: noexcept
             _data(std::forward<ArgTy>(value), traits)
         {
         }
@@ -380,12 +428,14 @@ namespace dhorn
             typename TraitsTy = Traits,
             std::enable_if_t<details::is_unique_constructible<traits_type, value_type, ArgTy&&>::value, int> = 0,
             std::enable_if_t<!std::is_reference<TraitsTy>::value, int> = 0>
-        unique(ArgTy&& value, Traits&& traits) :
+        unique(ArgTy&& value, Traits&& traits) : // TODO: noexcept
             _data(std::forward<ArgTy>(value), std::move(traits))
         {
         }
 
-        unique(unique&& other) :
+        unique(const unique&) = delete;
+
+        unique(unique&& other) : // TODO: noexcept
             _data(other.release(), std::forward<Traits>(other.my_traits()))
         {
         }
@@ -395,7 +445,7 @@ namespace dhorn
             typename OtherTraits,
             std::enable_if_t<details::is_unique_constructible<traits_type, value_type, OtherTy&&>::value, int> = 0,
             std::enable_if_t<std::is_convertible<OtherTraits, Traits>::value, int> = 0>
-        unique(unique<OtherTy, OtherTraits>&& other) :
+        unique(unique<OtherTy, OtherTraits>&& other) : // TODO: noexcept
             _data(other.release(), std::forward<Traits>(other.my_traits()))
         {
         }
@@ -412,14 +462,14 @@ namespace dhorn
          */
         value_type release() noexcept // <-- TOOD: Should this be conditional?
         {
-            value_type result = details::unique_default_value<traits_type>();
+            value_type result = details::unique_default_value<traits_type, Ty>();
             std::swap(result, my_value());
             return result;
         }
 
         void reset() noexcept // <-- TODO: Should this be conditional
         {
-            value_type value = details::unique_default_value<traits_type>();
+            value_type value = details::unique_default_value<traits_type, Ty>();
             std::swap(value, my_value());
             my_traits()(value);
         }

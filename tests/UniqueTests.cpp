@@ -40,7 +40,10 @@ namespace dhorn::tests
             using value_type = std::decay_t<Ty>;
 
             static constexpr bool is_valid(const value_type&) { return true; }
-            static constexpr value_type default_value() { return value_type{}; }
+            static constexpr value_type default_value() noexcept(std::is_nothrow_default_constructible_v<value_type>)
+            {
+                return value_type{};
+            }
 
             constexpr void operator()(const value_type&) {}
         };
@@ -54,13 +57,58 @@ namespace dhorn::tests
 
 
         template <typename Ty>
+        struct throwing_traits
+        {
+            throwing_traits() {}
+            throwing_traits(const throwing_traits&) {}
+            throwing_traits(throwing_traits&&) {}
+
+            // Decay arrays to pointers
+            using value_type = std::decay_t<Ty>;
+
+            static constexpr bool is_valid(const value_type&) { return true; }
+            static constexpr value_type default_value() noexcept(std::is_nothrow_default_constructible_v<value_type>)
+            {
+                return value_type{};
+            }
+
+            constexpr void operator()(const value_type&) {}
+        };
+
+
+
+        template <typename Ty>
+        struct non_constructible_traits
+        {
+            non_constructible_traits() = delete;
+            non_constructible_traits(const non_constructible_traits&) = delete;
+            non_constructible_traits(non_constructible_traits&&) = delete;
+
+            // Decay arrays to pointers
+            using value_type = std::decay_t<Ty>;
+
+            static constexpr bool is_valid(const value_type&) { return true; }
+            static constexpr value_type default_value() noexcept(std::is_nothrow_default_constructible_v<value_type>)
+            {
+                return value_type{};
+            }
+
+            constexpr void operator()(const value_type&) {}
+        };
+
+
+
+        template <typename Ty>
         struct non_empty_traits
         {
             // Decay arrays to pointers
             using value_type = std::decay_t<Ty>;
 
             static constexpr bool is_valid(const value_type&) { return true; }
-            static constexpr value_type default_value() { return value_type{}; }
+            static constexpr value_type default_value() noexcept(std::is_nothrow_default_constructible_v<value_type>)
+            {
+                return value_type{};
+            }
 
             constexpr void operator()(const value_type&) {}
 
@@ -84,23 +132,23 @@ namespace dhorn::tests
                 return !value.empty();
             }
 
-            static constexpr value_type default_value() noexcept
+            static constexpr value_type default_value() noexcept(std::is_nothrow_default_constructible_v<value_type>)
             {
                 return value_type{};
             }
 
-            static void destroy(value_type&) noexcept
+            void operator()(value_type&) noexcept
             {
                 // Strings delete themselves
             }
         };
 
         template <typename CharT>
-        using unique_basic_string = unique < std::basic_string<CharT>, unique_basic_string_traits<CharT>>;
+        using unique_basic_string = unique<std::basic_string<CharT>, unique_basic_string_traits<CharT>>;
 
 
 
-        template <typename Ty, size_t Size, Ty Value = Ty{}>
+        template <typename Ty, std::size_t Size, Ty Value = Ty{}>
         struct clear_buffer_unique_traits
         {
             using value_type = Ty*;
@@ -116,17 +164,69 @@ namespace dhorn::tests
                 Assert::Fail("Did not expect default construction");
             }
 
-            static void destroy(value_type value)
+            void operator()(value_type value)
             {
-                for (size_t i = 0; i < Size; ++i)
+                for (std::size_t i = 0; i < Size; ++i)
                 {
                     value[i] = Value;
                 }
             }
         };
 
-        template <typename Ty, size_t Size, Ty Value = Ty{}>
+        template <typename Ty, std::size_t Size, Ty Value = Ty{}>
         using unique_buffer = unique<Ty, clear_buffer_unique_traits<Ty, Size, Value>>;
+
+
+
+        class binary_value
+        {
+        public:
+
+            constexpr bool is_valid() const noexcept
+            {
+                return this->_valid;
+            }
+
+            static constexpr binary_value valid() noexcept
+            {
+                return binary_value(true);
+            }
+
+            static constexpr binary_value invalid() noexcept
+            {
+                return binary_value(false);
+            }
+
+        private:
+
+            constexpr binary_value(bool valid) :
+                _valid(valid)
+            {
+            }
+
+            bool _valid;
+        };
+
+        struct binary_value_traits
+        {
+            using value_type = binary_value;
+
+            static constexpr bool valid(value_type value)
+            {
+                return value.is_valid();
+            }
+
+            static constexpr value_type default_value()
+            {
+                return binary_value::invalid();
+            }
+
+            void operator()(value_type /*value*/)
+            {
+            }
+        };
+
+        using unique_binary_value = unique<binary_value, binary_value_traits>;
 
 #pragma endregion
 
@@ -158,6 +258,7 @@ namespace dhorn::tests
             Assert::AreEqual(sizeof(void*), sizeof(unique_ptr<std::string>));
 
             Assert::AreEqual(sizeof(void*), sizeof(unique_ptr<int[]>));
+            Assert::AreEqual(sizeof(void*), sizeof(unique_ptr<std::string[]>));
         }
 
 #pragma endregion
@@ -208,8 +309,10 @@ namespace dhorn::tests
             Assert::IsTrue(std::is_default_constructible_v<unique_ptr<int>>);
             Assert::IsTrue(std::is_default_constructible_v<unique_ptr<int[]>>);
 
-            struct no_default { no_default() = delete; };
-            Assert::IsFalse(std::is_default_constructible_v<unique_empty<no_default>>);
+            Assert::IsTrue(std::is_default_constructible_v<unique_binary_value>);
+
+            // TODO: Comment on why the traits is SFINAE'd
+            Assert::IsFalse(std::is_default_constructible_v<unique<int, non_constructible_traits<int>>>);
 
             // We can't test with std::is_default_constructible_v since SFINAE is not involved (it only fails when
             // trying to instantiate the function template), but the following should fail to compile:
@@ -218,6 +321,23 @@ namespace dhorn::tests
             unique_empty<int> uniqueInt;
             unique_ptr<int> intPtr;
             unique_ptr<int[]> intArray;
+            unique_binary_value uniqueBinaryValue;
+        }
+
+        TEST_METHOD(DefaultConstructorNoExceptTest)
+        {
+            Assert::IsTrue(std::is_nothrow_default_constructible_v<unique_empty<int>>);
+            Assert::IsTrue(std::is_nothrow_default_constructible_v<unique_empty<std::string>>);
+            Assert::IsTrue(std::is_nothrow_default_constructible_v<unique_ptr<int>>);
+            Assert::IsTrue(std::is_nothrow_default_constructible_v<unique_ptr<int[]>>);
+
+            struct throwing_type
+            {
+                throwing_type() {}
+            };
+
+            Assert::IsFalse(std::is_nothrow_default_constructible_v<unique_empty<throwing_type>>);
+            Assert::IsFalse(std::is_nothrow_default_constructible_v<unique<int, throwing_traits<int>>>);
         }
 
         TEST_METHOD(ValueConstructionTest)
@@ -246,18 +366,20 @@ namespace dhorn::tests
             unique_empty<std::string> uniqueString("foo");
 
             // Constructing a unique_ptr should follow the same construction rules as std::unique_ptr
-            Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, std::nullptr_t>);
-
             Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, int*>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, int* const>);
             Assert::IsFalse(std::is_constructible_v<unique_ptr<int>, const int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int>, std::nullptr_t>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const int>, int*>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const int>, const int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const int>, std::nullptr_t>);
 
             Assert::IsTrue(std::is_constructible_v<unique_ptr<base>, derived*>);
             Assert::IsFalse(std::is_constructible_v<unique_ptr<base>, const derived*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<base>, std::nullptr_t>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const base>, derived*>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const base>, const derived*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const base>, std::nullptr_t>);
 
             Assert::IsFalse(std::is_constructible_v<unique_ptr<derived>, base*>);
 
@@ -266,17 +388,19 @@ namespace dhorn::tests
             unique_ptr<base> uniqueBasePtr(new derived());
 
             // Constructing a unique_ptr<T[]> should follow the same construction rules as std::unique_ptr<T[]>
-            Assert::IsTrue(std::is_constructible_v<unique_ptr<int[]>, std::nullptr_t>);
-
             Assert::IsTrue(std::is_constructible_v<unique_ptr<int[]>, int*>);
             Assert::IsFalse(std::is_constructible_v<unique_ptr<int[]>, const int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<int[]>, std::nullptr_t>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const int[]>, int*>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const int[]>, const int*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const int[]>, std::nullptr_t>);
 
             Assert::IsTrue(std::is_constructible_v<unique_ptr<base[]>, base*>);
             Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, const base*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<base[]>, std::nullptr_t>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const base[]>, base*>);
             Assert::IsTrue(std::is_constructible_v<unique_ptr<const base[]>, const base*>);
+            Assert::IsTrue(std::is_constructible_v<unique_ptr<const base[]>, std::nullptr_t>);
 
             Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, derived*>);
             Assert::IsFalse(std::is_constructible_v<unique_ptr<base[]>, const derived*>);
