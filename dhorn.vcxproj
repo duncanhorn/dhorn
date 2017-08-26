@@ -196,6 +196,7 @@
     <ClInclude Include="include\dhorn\experimental\math.h" />
     <ClInclude Include="include\dhorn\experimental\message_queue.h" />
     <ClInclude Include="include\dhorn\experimental\numeric.h" />
+    <ClInclude Include="include\dhorn\experimental\relative_ptr.h" />
     <ClInclude Include="include\dhorn\experimental\service_container.h" />
     <ClInclude Include="include\dhorn\experimental\sockets.h" />
     <ClInclude Include="include\dhorn\experimental\socket_stream.h" />

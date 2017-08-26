@@ -210,5 +210,8 @@
     <ClInclude Include="include\dhorn\windows\guid.h">
       <Filter>include\windows</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\relative_ptr.h">
+      <Filter>include\experimental</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

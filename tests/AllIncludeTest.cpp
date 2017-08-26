@@ -16,6 +16,7 @@
 #include <dhorn/debug.h>
 #include <dhorn/functional.h>
 #include <dhorn/iterator.h>
+#include <dhorn/experimental/relative_ptr.h>
 #include <dhorn/scope_guard.h>
 #include <dhorn/string.h>
 #include <dhorn/thread_pool.h>
