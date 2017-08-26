@@ -11,6 +11,10 @@
 static_assert(false, "Cannot include dhorn/windows/windows.h on a non-Windows machine")
 #endif  /* WIN32 */
 
+#ifndef NOMINMAX
+static_assert(false, "dhorn/windows/windows.h requires that std::min/std::max be usable");
+#endif
+
 #include <algorithm>
 #include <cstdint>
 #include <functional>
