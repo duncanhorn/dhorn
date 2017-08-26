@@ -9,7 +9,6 @@
 
 #include <atomic>
 #include <dhorn/winrt/weak_ref.h>
-#include <wrl/client.h>
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
