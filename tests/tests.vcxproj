@@ -142,6 +142,7 @@
     <ClCompile Include="JsonTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="NumericTests.cpp" />
+    <ClCompile Include="RelativePtrTests.cpp" />
     <ClCompile Include="ScopeGuardTests.cpp" />
     <ClCompile Include="ServiceContainerTests.cpp" />
     <ClCompile Include="InstanceTests.cpp" />
