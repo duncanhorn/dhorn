@@ -24,7 +24,7 @@ namespace dhorn
             template <typename ServerFunc, typename ClientFunc>
             void RunServerTest(const ServerFunc &serverFunc, const ClientFunc &clientFunc)
             {
-                static const uint16_t port = 1337;
+                static const std::uint16_t port = 1337;
 
                 // Create the server first to avoid any race conditions
                 dhorn::experimental::server_socket server;
@@ -60,7 +60,7 @@ namespace dhorn
                     clientSocket.shutdown(dhorn::experimental::shutdown_options::send);
                     clientSocket.close();
                 },
-                    [&](uint16_t port)
+                    [&](std::uint16_t port)
                 {
                     dhorn::experimental::socket_address addr(dhorn::experimental::ipv4_address(dhorn::experimental::local_host), port);
                     dhorn::experimental::tcp_socket sock;
@@ -81,7 +81,7 @@ namespace dhorn
                 RunSingleClientServerTest([&](dhorn::experimental::tcp_socket &server)
                 {
                     // Since this is a simple/basic test, we're not going to bother with sending partial strings yet
-                    server.send(std::begin(str), std::end(str));
+                    server.send(str.begin(), str.end());
                 },
                     [&](dhorn::experimental::tcp_socket &client)
                 {
@@ -96,7 +96,7 @@ namespace dhorn
                     }
 
                     Assert::AreEqual(data.size(), words.size());
-                    for (size_t i = 0; i < data.size(); ++i)
+                    for (std::size_t i = 0; i < data.size(); ++i)
                     {
                         Assert::IsTrue(data[i] == words[i]);
                     }
@@ -146,7 +146,7 @@ namespace dhorn
                 RunSingleClientServerTest([&](dhorn::experimental::tcp_socket &server)
                 {
                     // Since this is a simple/basic test, we're not going to bother with sending partial strings yet
-                    server.send(std::begin(str), std::end(str));
+                    server.send(str.begin(), str.end());
                 },
                     [&](dhorn::experimental::tcp_socket &client)
                 {
@@ -161,7 +161,7 @@ namespace dhorn
                     }
 
                     Assert::AreEqual(data.size(), values.size());
-                    for (size_t i = 0; i < data.size(); ++i)
+                    for (std::size_t i = 0; i < data.size(); ++i)
                     {
                         Assert::IsTrue(data[i] == values[i]);
                     }
@@ -212,7 +212,7 @@ namespace dhorn
             template <typename ServerFunc, typename ClientFunc>
             void RunServerTest(const ServerFunc &serverFunc, const ClientFunc &clientFunc)
             {
-                static const uint16_t port = 1337;
+                static const std::uint16_t port = 1337;
 
                 // Create the server first to avoid any race conditions
                 dhorn::experimental::server_socket server;
@@ -248,7 +248,7 @@ namespace dhorn
                     clientSocket.shutdown(dhorn::experimental::shutdown_options::send);
                     clientSocket.close();
                 },
-                    [&](uint16_t port)
+                    [&](std::uint16_t port)
                 {
                     dhorn::experimental::socket_address addr(dhorn::experimental::ipv4_address(dhorn::experimental::local_host), port);
                     dhorn::experimental::tcp_socket sock;
@@ -269,7 +269,7 @@ namespace dhorn
                 RunSingleClientServerTest([&](dhorn::experimental::tcp_socket &server)
                 {
                     // Since this is a simple/basic test, we're not going to bother with sending partial strings yet
-                    server.send(std::begin(str), std::end(str));
+                    server.send(str.begin(), str.end());
                 },
                     [&](dhorn::experimental::tcp_socket &client)
                 {
@@ -283,7 +283,7 @@ namespace dhorn
                     }
 
                     Assert::AreEqual(data.size(), words.size());
-                    for (size_t i = 0; i < data.size(); ++i)
+                    for (std::size_t i = 0; i < data.size(); ++i)
                     {
                         Assert::IsTrue(data[i] == words[i]);
                     }
@@ -332,7 +332,7 @@ namespace dhorn
                 RunSingleClientServerTest([&](dhorn::experimental::tcp_socket &server)
                 {
                     // Since this is a simple/basic test, we're not going to bother with sending partial strings yet
-                    server.send(std::begin(str), std::end(str));
+                    server.send(str.begin(), str.end());
                 },
                     [&](dhorn::experimental::tcp_socket &client)
                 {
@@ -346,7 +346,7 @@ namespace dhorn
                     }
 
                     Assert::AreEqual(data.size(), values.size());
-                    for (size_t i = 0; i < data.size(); ++i)
+                    for (std::size_t i = 0; i < data.size(); ++i)
                     {
                         Assert::IsTrue(data[i] == values[i]);
                     }

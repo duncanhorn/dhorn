@@ -59,7 +59,7 @@ namespace dhorn
                  * Fill in the vertices
                  */
                 vertices.resize(24);
-                size_t i = 0;
+                std::size_t i = 0;
 
                 // Front face
                 DirectX::XMFLOAT3 normal = { 0, 0, -1 };
@@ -110,9 +110,9 @@ namespace dhorn
                 indices.resize(36);
                 i = 0;
 
-                for (size_t j = 0; j < 6; ++j)
+                for (std::size_t j = 0; j < 6; ++j)
                 {
-                    size_t offset = j * 4;
+                    std::size_t offset = j * 4;
 
                     // The vertices should be ordered in a clockwise fashion
                     indices[i++] = offset;

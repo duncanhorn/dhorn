@@ -34,7 +34,7 @@ namespace dhorn
      *
      * // Overload 3
      * char arr[] = { ' ', '\r', '\t' };
-     * auto str3 = trim(str, std::begin(arr), std::end(arr));
+     * auto str3 = trim(str, begin(arr), end(arr));
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * The above example results in the following:
      *      str1: "foo bar  \r\n\t"
@@ -49,7 +49,7 @@ namespace dhorn
         const Func &fn)
     {
         auto back = std::find_if(str.rbegin(), str.rend(), fn).base();
-        auto front = std::find_if(std::begin(str), back, fn);
+        auto front = std::find_if(str.begin(), back, fn);
         return { front, back };
     }
 
@@ -226,7 +226,7 @@ namespace dhorn
          * Types
          */
         using value_type = CharT;
-        using size_type = size_t;
+        using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
         using reference = CharT&;
         using const_reference = const CharT&;
@@ -387,13 +387,17 @@ namespace dhorn
     template <typename StringTy, typename CompareItr>
     inline bool starts_with(const StringTy& string, CompareItr compareBegin, CompareItr compareEnd)
     {
-        return starts_with(std::begin(string), std::end(string), compareBegin, compareEnd);
+        using std::begin;
+        using std::end;
+        return starts_with(begin(string), end(string), compareBegin, compareEnd);
     }
 
     template <typename StringTy, typename CompareStringTy>
     inline bool starts_with(const StringTy& string, const CompareStringTy& compareString)
     {
-        return starts_with(std::begin(string), std::end(string), std::begin(compareString), std::end(compareString));
+        using std::begin;
+        using std::end;
+        return starts_with(begin(string), end(string), begin(compareString), end(compareString));
     }
 
     template <typename StringTy, typename CharT>

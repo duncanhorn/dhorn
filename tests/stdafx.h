@@ -19,3 +19,10 @@
 #pragma warning(pop)
 
 #include "object_counter.h"
+
+namespace Microsoft::VisualStudio::CppUnitTestFramework
+{
+    template<> inline std::wstring ToString<unsigned short>(const unsigned short& t) { RETURN_WIDE_STRING(t); }
+    template<> inline std::wstring ToString<unsigned short>(const unsigned short* t) { RETURN_WIDE_STRING(t); }
+    template<> inline std::wstring ToString<unsigned short>(unsigned short* t) { RETURN_WIDE_STRING(t); }
+}

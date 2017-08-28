@@ -25,7 +25,7 @@ namespace dhorn
 
                 auto cookie = source.add([&]() { ++x; });
                 Assert::AreNotEqual(dhorn::experimental::invalid_event_cookie, cookie);
-                Assert::AreEqual(static_cast<size_t>(1), source.size());
+                Assert::AreEqual(static_cast<std::size_t>(1), source.size());
 
                 source.invoke_all();
                 Assert::AreEqual(1, x);
@@ -38,7 +38,7 @@ namespace dhorn
 
                 auto cookie = source.add([&]() { ++x; });
                 source.remove(cookie);
-                Assert::AreEqual(static_cast<size_t>(0), source.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), source.size());
 
                 // Should throw if we try and remove again
                 try
@@ -137,11 +137,11 @@ namespace dhorn
                         source.add([]() {}),
                         std::bind(&source_type::remove, &source, std::placeholders::_1));
 
-                    Assert::AreEqual(static_cast<size_t>(1), source.size());
+                    Assert::AreEqual(static_cast<std::size_t>(1), source.size());
                 }
 
                 // Destructor should have removed
-                Assert::AreEqual(static_cast<size_t>(0), source.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), source.size());
             }
 
             TEST_METHOD(EventCookieMoveConstructionTest)
@@ -151,14 +151,14 @@ namespace dhorn
                     dhorn::experimental::unique_event_cookie cookie(
                         source.add([]() {}),
                         std::bind(&source_type::remove, &source, std::placeholders::_1));
-                    Assert::AreEqual(static_cast<size_t>(1), source.size());
+                    Assert::AreEqual(static_cast<std::size_t>(1), source.size());
 
                     dhorn::experimental::unique_event_cookie cookie2(std::move(cookie));
                     Assert::AreEqual(dhorn::experimental::invalid_event_cookie, static_cast<dhorn::experimental::event_cookie>(cookie));
                 }
 
                 // Destructor should have removed
-                Assert::AreEqual(static_cast<size_t>(0), source.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), source.size());
             }
         };
     }

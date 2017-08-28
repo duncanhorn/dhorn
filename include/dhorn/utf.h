@@ -33,7 +33,7 @@ namespace dhorn
 
         static const std::size_t max_code_point_size = 4;
 
-        static constexpr size_t code_point_size(char_type ch)
+        static constexpr std::size_t code_point_size(char_type ch)
         {
             return
                 ((ch & 0x80) == 0x00) ? 1 :
@@ -41,7 +41,7 @@ namespace dhorn
                 ((ch & 0xF0) == 0xE0) ? 3 : 4;
         }
 
-        static constexpr size_t code_point_size(char32_t ch)
+        static constexpr std::size_t code_point_size(char32_t ch)
         {
             return
                 (ch <= 0x00007F) ? 1 :
@@ -97,13 +97,13 @@ namespace dhorn
             // The only thing "special" that we need to worry about is the initial character since the masks and bit
             // count are different. After that we can optimize more
             static constexpr unsigned char prefixes[] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0 };
-            static constexpr size_t bitCounts[] = { 0, 7, 5, 4, 3 };
+            static constexpr std::size_t bitCounts[] = { 0, 7, 5, 4, 3 };
             static constexpr unsigned char masks[] = { 0x00, 0x7F, 0x1F, 0x0F, 0x07 };
 
             const auto size = code_point_size(ch);
             auto prefix = prefixes[size];
             auto mask = masks[size];
-            size_t shift = 6 * (size - 1);
+            std::size_t shift = 6 * (size - 1);
 
             *pos = static_cast<char_type>(((ch >> shift) & mask) | prefix);
             ++pos;
@@ -144,12 +144,12 @@ namespace dhorn
 
         static const std::size_t max_code_point_size = 2;
 
-        static constexpr size_t code_point_size(char_type ch)
+        static constexpr std::size_t code_point_size(char_type ch)
         {
             return ((ch & 0xF800) != 0xD800) ? 1 : 2;
         }
 
-        static constexpr size_t code_point_size(char32_t ch)
+        static constexpr std::size_t code_point_size(char32_t ch)
         {
             // Code points U+D800 through U+DFFF are reserved and unassigned, meaning that we don't need to worry about
             // representation of surrogates
@@ -222,7 +222,7 @@ namespace dhorn
 
         static const std::size_t max_code_point_size = 1;
 
-        static constexpr size_t code_point_size(char_type /*ch*/)
+        static constexpr std::size_t code_point_size(char_type /*ch*/)
         {
             return 1;
         }

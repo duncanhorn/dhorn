@@ -219,6 +219,7 @@
     <ClInclude Include="include\dhorn\utility.h" />
     <ClInclude Include="include\dhorn\visitor.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
+    <ClInclude Include="include\dhorn\windows\guid.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
     <ClInclude Include="include\dhorn\winrt\weak_ref.h" />
     <ClInclude Include="include\dhorn\winrt\winrt_traits.h" />

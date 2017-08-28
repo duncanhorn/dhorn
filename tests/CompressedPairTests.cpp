@@ -15,6 +15,8 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace std::literals;
 
+using std::swap;
+
 namespace dhorn::tests
 {
     TEST_CLASS(CompressedPairTests)
@@ -1129,7 +1131,7 @@ namespace dhorn::tests
             Assert::AreEqual(2, p2.second().value);
             Assert::AreEqual(3, p1.first().value);
             Assert::AreEqual(4, p1.second().value);
-            std::swap(p1, p2);
+            swap(p1, p2);
             Assert::AreEqual(1, p1.first().value);
             Assert::AreEqual(2, p1.second().value);
             Assert::AreEqual(3, p2.first().value);
@@ -1140,7 +1142,7 @@ namespace dhorn::tests
             p3.swap(p4);
             Assert::AreEqual(1, p4.second().value);
             Assert::AreEqual(2, p3.second().value);
-            std::swap(p3, p4);
+            swap(p3, p4);
             Assert::AreEqual(1, p3.second().value);
             Assert::AreEqual(2, p4.second().value);
 
@@ -1149,7 +1151,7 @@ namespace dhorn::tests
             p5.swap(p6);
             Assert::AreEqual(1, p6.first().value);
             Assert::AreEqual(2, p5.first().value);
-            std::swap(p5, p6);
+            swap(p5, p6);
             Assert::AreEqual(1, p5.first().value);
             Assert::AreEqual(2, p6.first().value);
         }

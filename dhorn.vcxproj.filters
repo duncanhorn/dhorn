@@ -210,5 +210,8 @@
     <ClInclude Include="include\dhorn\net.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\windows\guid.h">
+      <Filter>include\windows</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

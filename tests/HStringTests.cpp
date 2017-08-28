@@ -35,7 +35,7 @@ namespace dhorn
 
 #pragma region constructor tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoConstructorTest(Ty&& value, const wchar_t (&expected)[Size])
             {
                 dhorn::experimental::hstring_reference str(std::forward<Ty>(value));
@@ -106,7 +106,7 @@ namespace dhorn
 
 #pragma region assignment operator tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoAssignmentOperatorTest(Ty&& value, const wchar_t (&expected)[Size])
             {
                 dhorn::experimental::hstring_reference str(L"initvalue");
@@ -160,7 +160,7 @@ namespace dhorn
 
 #pragma region assign tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoAssignTest(Ty&& value, const wchar_t(&expected)[Size])
             {
                 dhorn::experimental::hstring_reference str(L"initvalue");
@@ -320,7 +320,7 @@ namespace dhorn
 
 #pragma region constructor tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoConstructorTest(Ty&& value, const wchar_t(&expected)[Size])
             {
                 dhorn::experimental::hstring str(std::forward<Ty>(value));
@@ -389,7 +389,7 @@ namespace dhorn
             {
                 std::wstring wstr(L"foo\0bar", 7);
 
-                dhorn::experimental::hstring str(std::begin(wstr), std::end(wstr));
+                dhorn::experimental::hstring str(wstr.begin(), wstr.end());
                 Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
 
                 int result;
@@ -426,7 +426,7 @@ namespace dhorn
 
 #pragma region assignment operator tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoAssignmentOperatorTest(Ty&& value, const wchar_t(&expected)[Size])
             {
                 dhorn::experimental::hstring str(L"initvalue");
@@ -507,7 +507,7 @@ namespace dhorn
 
 #pragma region assign tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoAssignTest(Ty&& value, const wchar_t(&expected)[Size])
             {
                 dhorn::experimental::hstring str(L"initvalue");
@@ -572,7 +572,7 @@ namespace dhorn
 
 #pragma region append operator tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoAppendOperatorTest(Ty&& value, const wchar_t(&expected)[Size])
             {
                 dhorn::experimental::hstring str(L"foo");
@@ -633,7 +633,7 @@ namespace dhorn
 
 #pragma region append tests
 
-            template <typename Ty, size_t Size>
+            template <typename Ty, std::size_t Size>
             void DoAppendTest(Ty&& value, const wchar_t(&expected)[Size])
             {
                 dhorn::experimental::hstring str(L"foo");

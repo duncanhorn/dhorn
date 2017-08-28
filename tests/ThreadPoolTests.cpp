@@ -67,13 +67,13 @@ namespace dhorn::tests
         {
             thread_pool pool;
             std::mutex mutex;
-            size_t value = 0;
+            std::size_t value = 0;
 
-            const size_t loop_count = 100;
+            const std::size_t loop_count = 100;
             {
                 std::lock_guard<std::mutex> guard(mutex);
 
-                for (size_t i = 0; i < loop_count; ++i)
+                for (std::size_t i = 0; i < loop_count; ++i)
                 {
                     pool.submit([&]()
                     {
@@ -97,11 +97,11 @@ namespace dhorn::tests
             std::mutex mutex;
             std::condition_variable cond;
 
-            const size_t loop_count = 100;
+            const std::size_t loop_count = 100;
             {
                 std::unique_lock<std::mutex> lock(mutex);
 
-                for (size_t i = 0; i < loop_count; ++i)
+                for (std::size_t i = 0; i < loop_count; ++i)
                 {
                     pool.submit([&]()
                     {
@@ -125,13 +125,13 @@ namespace dhorn::tests
             thread_pool pool;
             std::mutex mutex;
             std::condition_variable cond;
-            size_t count = 0;
+            std::size_t count = 0;
 
             // For the first test, set before submitting tasks
             pool.set_max_available_threads(1);
 
-            const size_t loop_count = 100;
-            for (size_t i = 0; i < loop_count; ++i)
+            const std::size_t loop_count = 100;
+            for (std::size_t i = 0; i < loop_count; ++i)
             {
                 pool.submit([&]()
                 {
@@ -149,7 +149,7 @@ namespace dhorn::tests
                 });
             }
 
-            for (size_t i = 0; i < loop_count; ++i)
+            for (std::size_t i = 0; i < loop_count; ++i)
             {
                 if (pool.count() <= 1)
                 {
@@ -166,7 +166,7 @@ namespace dhorn::tests
             pool.set_max_available_threads(100);
             count = 0;
 
-            for (size_t i = 0; i < loop_count; ++i)
+            for (std::size_t i = 0; i < loop_count; ++i)
             {
                 pool.submit([&]()
                 {
@@ -186,7 +186,7 @@ namespace dhorn::tests
                 });
             }
 
-            for (size_t i = 0; i < loop_count; ++i)
+            for (std::size_t i = 0; i < loop_count; ++i)
             {
                 if (pool.count() <= 1)
                 {
@@ -205,12 +205,12 @@ namespace dhorn::tests
         TEST_METHOD(MaxThreadsTest)
         {
             thread_pool pool;
-            size_t count = 0;
+            std::size_t count = 0;
 
             pool.set_max_threads(1);
 
-            const size_t loop_count = 100;
-            for (size_t i = 0; i < loop_count; ++i)
+            const std::size_t loop_count = 100;
+            for (std::size_t i = 0; i < loop_count; ++i)
             {
                 pool.submit([&]()
                 {
@@ -228,7 +228,7 @@ namespace dhorn::tests
             pool = thread_pool();
             pool.set_max_threads(2);
 
-            for (size_t i = 0; i < loop_count; ++i)
+            for (std::size_t i = 0; i < loop_count; ++i)
             {
                 pool.submit([&]()
                 {
@@ -241,7 +241,7 @@ namespace dhorn::tests
 
             // Setting max back down to one should terminate a thread
             pool.set_max_threads(1);
-            for (size_t i = 0; i < 10; ++i)
+            for (std::size_t i = 0; i < 10; ++i)
             {
                 if (pool.count() == 1)
                 {
@@ -277,12 +277,12 @@ namespace dhorn::tests
             thread_pool pool;
             pool.set_max_threads(1);
 
-            std::array<size_t, 6> array;
-            size_t index = 0;
+            std::array<std::size_t, 6> array;
+            std::size_t index = 0;
             {
                 // We need to submit a dummy task to ensure that we don't accidentally start processing a lower priority
                 // task before we submit the higher priority ones
-                size_t stage = 0;
+                std::size_t stage = 0;
 
                 std::mutex mutex;
                 std::condition_variable cond;
@@ -363,13 +363,13 @@ namespace dhorn::tests
         TEST_METHOD(JoinTest)
         {
             single_thread_thread_pool pool;
-            size_t count = 0;
+            std::size_t count = 0;
             std::mutex mutex;
 
-            const size_t loop_count = 100;
+            const std::size_t loop_count = 100;
             {
                 std::lock_guard<std::mutex> guard(mutex);
-                for (size_t i = 0; i < loop_count; ++i)
+                for (std::size_t i = 0; i < loop_count; ++i)
                 {
                     pool.submit([&]()
                     {
@@ -469,7 +469,7 @@ namespace dhorn::tests
             std::mutex mutex;
 
             int value = 0;
-            std::future<size_t> future;
+            std::future<std::size_t> future;
             {
                 std::lock_guard<std::mutex> guard(mutex);
 
@@ -506,7 +506,7 @@ namespace dhorn::tests
                 std::lock_guard<std::mutex> guard(mutex);
 
                 // Queue up a bunch of work while we hold the lock to guarantee that they won't complete
-                for (size_t i = 0; i < 1000; ++i)
+                for (std::size_t i = 0; i < 1000; ++i)
                 {
                     pool.submit([&]()
                     {

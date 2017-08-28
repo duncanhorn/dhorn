@@ -151,8 +151,8 @@ namespace dhorn
             /*
              * key_frame_animation. This maintains a set of (time, value) ordered based off 'time.' The key_frame_animation
              * class works based off of a 'next' iterator that describes the next key frame that will be encountered. For
-             * example, if the animation has not yet begun, then next will be equal to std::begin(_keyFrames), and if the
-             * animation has completed, then next will be equal to std::end(_keyFrames). Note that there is no concept of
+             * example, if the animation has not yet begun, then next will be equal to _keyFrames.begin(), and if the
+             * animation has completed, then next will be equal to _keyFrames.end(). Note that there is no concept of
              * 'current' iterator since one may not exist (e.g. _keyFrames is empty, or the first key frame has not yet
              * been encountered). Derived classes should use the begun() and completed() functions appropriately.
              */
@@ -176,7 +176,7 @@ namespace dhorn
                  * Constructor(s)/Destructor
                  */
                 key_frame_animation(void) :
-                    _next(std::begin(this->_keyFrames))
+                    _next(this->_keyFrames.begin())
                 {
                 }
 
@@ -212,7 +212,7 @@ namespace dhorn
                 {
                     this->_keyFrames.emplace(time, value);
 
-                    if (this->_next != std::begin(this->_keyFrames))
+                    if (this->_next != this->_keyFrames.begin())
                     {
                         // We may need to update our _next iterator. This can at most move back by one, so just go ahead
                         // and do that since we force the update of the _next iterator
@@ -226,7 +226,7 @@ namespace dhorn
                 {
                     this->_keyFrames.emplace(time, std::move(value));
 
-                    if (this->_next != std::begin(this->_keyFrames))
+                    if (this->_next != this->_keyFrames.begin())
                     {
                         // We may need to update our _next iterator. This can at most move back by one, so just go ahead
                         // and do that since we force the update of the _next iterator
@@ -242,7 +242,7 @@ namespace dhorn
 
                 const iterator_type &next(void)
                 {
-                    while ((this->_next != std::end(this->_keyFrames)) && (this->_next->first <= this->_totalElapsedTime))
+                    while ((this->_next != this->_keyFrames.end()) && (this->_next->first <= this->_totalElapsedTime))
                     {
                         ++this->_next;
                     }
@@ -252,12 +252,12 @@ namespace dhorn
 
                 bool begun(void) const
                 {
-                    return this->_next != std::begin(this->_keyFrames);
+                    return this->_next != this->_keyFrames.begin();
                 }
 
                 bool completed(void) const
                 {
-                    return this->_next == std::end(this->_keyFrames);
+                    return this->_next == this->_keyFrames.end();
                 }
 
                 duration elapsed_time(void) const

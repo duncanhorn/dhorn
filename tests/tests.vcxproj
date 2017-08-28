@@ -74,7 +74,9 @@
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>$(VCInstallDir)UnitTest\include;..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/permissive- %(AdditionalOptions)</AdditionalOptions>
+      <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpplatest</LanguageStandard>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -85,6 +87,7 @@
       <UseFullPaths>true</UseFullPaths>
       <EnablePREfast>false</EnablePREfast>
       <DisableSpecificWarnings>4505;4127;6326</DisableSpecificWarnings>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,6 +105,7 @@
       <UseFullPaths>true</UseFullPaths>
       <EnablePREfast>false</EnablePREfast>
       <DisableSpecificWarnings>4505;4127</DisableSpecificWarnings>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,6 +137,7 @@
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
     <ClCompile Include="FunctionalTests.cpp" />
+    <ClCompile Include="GuidTests.cpp" />
     <ClCompile Include="HStringTests.cpp" />
     <ClCompile Include="JsonTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />

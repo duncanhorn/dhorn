@@ -74,10 +74,10 @@ namespace dhorn::tests
 
 
 
-        static size_t instance_count;
-        static size_t constructed_count;
-        static size_t destructed_count;
-        static size_t copy_count;
-        static size_t move_count;
+        static std::size_t instance_count;
+        static std::size_t constructed_count;
+        static std::size_t destructed_count;
+        static std::size_t copy_count;
+        static std::size_t move_count;
     };
 }

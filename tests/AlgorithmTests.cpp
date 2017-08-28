@@ -26,7 +26,7 @@ namespace dhorn
                 std::vector<std::string> result;
 
                 // Splitting an empty string results in an empty string
-                split(std::begin(empty), std::end(empty), std::back_inserter(result), ' ');
+                split(empty.begin(), empty.end(), std::back_inserter(result), ' ');
                 Assert::AreEqual(1u, result.size());
                 Assert::IsTrue(result[0].empty());
             }
@@ -37,7 +37,7 @@ namespace dhorn
                 std::vector<std::string> result;
 
                 // Splitting the target character results in two empty strings
-                split(std::begin(str), std::end(str), std::back_inserter(result), ' ');
+                split(str.begin(), str.end(), std::back_inserter(result), ' ');
                 Assert::AreEqual(2u, result.size());
                 Assert::IsTrue(result[0].empty());
                 Assert::IsTrue(result[1].empty());
@@ -50,7 +50,7 @@ namespace dhorn
                 std::vector<std::string> result;
 
                 // Splitting at something other than the target character should result in the same string
-                split(std::begin(str), std::end(str), std::back_inserter(result), '-');
+                split(str.begin(), str.end(), std::back_inserter(result), '-');
                 Assert::AreEqual(1u, result.size());
                 Assert::AreEqual(str, result[0]);
             }
@@ -61,9 +61,9 @@ namespace dhorn
                 std::vector<std::string> result;
 
                 // Splitting a string of N target characters results in N + 1 empty strings
-                split(std::begin(str), std::end(str), std::back_inserter(result), ' ');
+                split(str.begin(), str.end(), std::back_inserter(result), ' ');
                 Assert::AreEqual(str.length() + 1, result.size());
-                Assert::IsTrue(std::all_of(std::begin(result), std::end(result), [](const std::string& s)
+                Assert::IsTrue(std::all_of(result.begin(), result.end(), [](const std::string& s)
                 {
                     return s.empty();
                 }));
@@ -75,7 +75,7 @@ namespace dhorn
                 std::vector<std::string> result;
 
                 // Splitting at something other than the target character should result in the same string
-                split(std::begin(str), std::end(str), std::back_inserter(result), '-');
+                split(str.begin(), str.end(), std::back_inserter(result), '-');
                 Assert::AreEqual(1u, result.size());
                 Assert::AreEqual(str, result[0]);
             }
@@ -85,7 +85,7 @@ namespace dhorn
                 auto str = "foo,bar,,foobar,"s;
                 std::vector<std::string> result;
 
-                split(std::begin(str), std::end(str), std::back_inserter(result), ',');
+                split(str.begin(), str.end(), std::back_inserter(result), ',');
                 Assert::AreEqual(5u, result.size());
                 Assert::AreEqual("foo"s, result[0]);
                 Assert::AreEqual("bar"s, result[1]);
@@ -99,7 +99,7 @@ namespace dhorn
                 std::vector<int> vector = { 0, 1, 2, 3, 0, 4, 5, 0, 6 };
                 std::vector<std::vector<int>> result;
 
-                split(std::begin(vector), std::end(vector), std::back_inserter(result), 0);
+                split(vector.begin(), vector.end(), std::back_inserter(result), 0);
                 Assert::AreEqual(4u, result.size());
                 Assert::AreEqual(0u, result[0].size());
                 Assert::AreEqual(3u, result[1].size());
@@ -113,7 +113,7 @@ namespace dhorn
                 std::vector<std::string> result;
 
                 int pos = 0;
-                split_if(std::begin(str), std::end(str), std::back_inserter(result), [&](char)
+                split_if(str.begin(), str.end(), std::back_inserter(result), [&](char)
                 {
                     return ++pos % 4 == 0;
                 });

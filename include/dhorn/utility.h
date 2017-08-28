@@ -19,7 +19,7 @@ namespace dhorn
      *
      * concats the values of two `std::integer_sequence`-s
      */
-#pragma region 
+#pragma region
 
     template <typename FirstIntegerSequence, typename SecondIntegerSequence>
     struct concat_integer_sequence;
@@ -59,12 +59,12 @@ namespace dhorn
         };
     }
 
-    template <typename Ty, size_t N>
+    template <typename Ty, std::size_t N>
     using make_reverse_integer_sequence =
         typename details::make_reverse_integer_sequence<std::make_integer_sequence<Ty, N>>::type;
 
-    template <size_t N>
-    using make_reverse_index_sequence = make_reverse_integer_sequence<size_t, N>;
+    template <std::size_t N>
+    using make_reverse_index_sequence = make_reverse_integer_sequence<std::size_t, N>;
 
 #pragma endregion
 
@@ -155,14 +155,14 @@ namespace dhorn
      */
 #pragma region get_byte
 
-    template <size_t Index, typename Integer>
-    inline constexpr uint8_t get_byte(Integer value)
+    template <std::size_t Index, typename Integer>
+    inline constexpr std::uint8_t get_byte(Integer value)
     {
         static_assert(Index < sizeof(Integer), "Attempting to access a byte outside the bounds of the type");
         using UnsignedInteger = std::make_unsigned_t<Integer>;
 
-        constexpr size_t shift = 8 * Index;
-        return static_cast<uint8_t>((value >> shift) & static_cast<UnsignedInteger>(0xFF));
+        constexpr std::size_t shift = 8 * Index;
+        return static_cast<std::uint8_t>((value >> shift) & static_cast<UnsignedInteger>(0xFF));
     }
 
 #pragma endregion

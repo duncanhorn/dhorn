@@ -18,7 +18,7 @@ class worker final
     {
         ComplexType point;
         ComplexType value;
-        size_t iterations;
+        std::size_t iterations;
         COLORREF color;
 
         StorageType(ComplexType point) :
@@ -51,23 +51,23 @@ private:
 
     dhorn::experimental::win32::callback_handler::result_type on_paint(
         dhorn::experimental::win32::window *pWindow,
-        uintptr_t wparam,
-        intptr_t lparam);
+        std::uintptr_t wparam,
+        std::intptr_t lparam);
 
     dhorn::experimental::win32::callback_handler::result_type on_resize(
         dhorn::experimental::win32::window *pWindow,
-        uintptr_t wparam,
-        intptr_t lparam);
+        std::uintptr_t wparam,
+        std::intptr_t lparam);
 
     dhorn::experimental::win32::callback_handler::result_type on_erase_background(
         dhorn::experimental::win32::window *pWindow,
-        uintptr_t wparam,
-        intptr_t lparam);
+        std::uintptr_t wparam,
+        std::intptr_t lparam);
 
     dhorn::experimental::win32::callback_handler::result_type on_scrollwheel(
         dhorn::experimental::win32::window *pWindow,
-        uintptr_t wparam,
-        intptr_t lparam);
+        std::uintptr_t wparam,
+        std::intptr_t lparam);
 
     // Internal data that keeps track of each current value. We use a std::shared_ptr on our data since it is possible
     // for us to post a paint request, receive a size update, and clear our buffer information before - or worse,
@@ -76,16 +76,16 @@ private:
     ComplexType _bottomRight;
     std::shared_ptr<DataType> _data;
     std::atomic_size_t _nextRow;
-    size_t _iterations;
-    size_t _iterationsPerUpdate;
+    std::size_t _iterations;
+    std::size_t _iterationsPerUpdate;
 
     // Thread pooling information
-    uint32_t _threadCount;
+    std::uint32_t _threadCount;
     std::vector<std::thread> _threads;
 
     // Thread synchronization
     std::mutex _monitor;
-    size_t _threadsExecuting;
+    std::size_t _threadsExecuting;
     std::condition_variable _updateReady;
     std::condition_variable _updateCompleted;
     bool _sizeUpdatePending;

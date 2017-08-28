@@ -278,8 +278,10 @@ namespace dhorn::winrt
 
             void swap(weak_ref_storage& other) noexcept
             {
+                using std::swap;
+
                 this->_weakRef.swap(other._weakRef);
-                std::swap(this->_ptr, other._ptr);
+                swap(this->_ptr, other._ptr);
             }
 
             com::com_ptr<IWeakReference> detach() noexcept
@@ -411,7 +413,7 @@ namespace dhorn::winrt
             this->_data.reset(ref._data);
             return *this;
         }
-        
+
         template <
             typename OtherTy,
             std::enable_if_t<std::disjunction<
