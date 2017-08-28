@@ -292,6 +292,124 @@ namespace dhorn::tests
 
 
 
+#pragma region Reset Tests
+
+        TEST_METHOD(ResetEmptyTest)
+        {
+            int value = 42;
+            relative_ptr8<int> ptr(&value);
+
+            ptr.reset();
+            Assert::IsFalse(static_cast<bool>(ptr));
+            Assert::IsNull(ptr.get());
+        }
+
+        TEST_METHOD(ResetNullPtrTest)
+        {
+            int value = 42;
+            relative_ptr8<int> ptr(&value);
+
+            ptr.reset(nullptr);
+            Assert::IsFalse(static_cast<bool>(ptr));
+            Assert::IsNull(ptr.get());
+        }
+
+        TEST_METHOD(ResetPointerTest)
+        {
+            relative_ptr8<int> ptr;
+
+            int value = 42;
+            ptr.reset(&value);
+            Assert::IsTrue(static_cast<bool>(ptr));
+            Assert::IsNotNull(ptr.get());
+            Assert::AreEqual(&value, ptr.get());
+            Assert::AreEqual(42, *ptr.get());
+        }
+
+        TEST_METHOD(ResetPointerOutOfRangeTest)
+        {
+            relative_ptr8<int> ptr;
+            try
+            {
+                int values[256];
+                ptr.reset(&values[127]);
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
+        TEST_METHOD(ResetConversionTest)
+        {
+            relative_ptr8<base> ptr;
+
+            derived d;
+            ptr.reset(&d);
+            Assert::IsTrue(static_cast<bool>(ptr));
+            Assert::IsNotNull(ptr.get());
+            Assert::IsTrue(&d == ptr.get());
+        }
+
+#pragma endregion
+
+
+
+#pragma region TODO
+
+        TEST_METHOD(SwapTest)
+        {
+            int values[] = { 8, 42 };
+            relative_ptr8<int> ptr0(&values[0]);
+            relative_ptr8<int> ptr1(&values[1]);
+
+            ptr0.swap(ptr1);
+            Assert::IsTrue(static_cast<bool>(ptr0));
+            Assert::IsTrue(static_cast<bool>(ptr1));
+            Assert::AreEqual(values[0], *ptr1.get());
+            Assert::AreEqual(&values[0], ptr1.get());
+            Assert::AreEqual(values[1], *ptr0.get());
+            Assert::AreEqual(&values[1], ptr0.get());
+        }
+
+        TEST_METHOD(SwapConversionTest)
+        {
+            int values[] = { 8, 42 };
+            relative_ptr8<int> ptr0(&values[0]);
+            relative_ptr16<int> ptr1(&values[1]);
+
+            ptr0.swap(ptr1);
+            Assert::IsTrue(static_cast<bool>(ptr0));
+            Assert::IsTrue(static_cast<bool>(ptr1));
+            Assert::AreEqual(values[0], *ptr1.get());
+            Assert::AreEqual(&values[0], ptr1.get());
+            Assert::AreEqual(values[1], *ptr0.get());
+            Assert::AreEqual(&values[1], ptr0.get());
+        }
+
+        TEST_METHOD(SwapOutOfRangeTest)
+        {
+            int local = 42;
+            static int global = 8;
+
+            // 64-bit pointer should be able to reach global no matter what
+            relative_ptr8<int> ptr8(&local);
+            relative_ptr64<int> ptr64(&global);
+
+            try
+            {
+                ptr8.swap(ptr64);
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
+#pragma endregion
+
+
+
 #pragma region Arithmetic Tests
 
         TEST_METHOD(AdditionAssignmentTest)
@@ -311,6 +429,54 @@ namespace dhorn::tests
             Assert::AreEqual(values[2], *ptr.get());
         }
 
+        TEST_METHOD(AdditionAssignmentOutOfRangeTest)
+        {
+            int value = 42;
+            relative_ptr8<int> ptr(&value);
+            try
+            {
+                // 7 bits of "forward" space = 128 bytes, or 32 ints
+                ptr += 34;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
+        TEST_METHOD(SubtractionAssignmentTest)
+        {
+            int values[] = { 0, 1, 2, 3 };
+            relative_ptr8<int> ptr = values + 3;
+
+            Assert::AreEqual(values[3], *ptr.get());
+
+            ptr -= 1;
+            Assert::AreEqual(values[2], *ptr.get());
+
+            ptr -= 2;
+            Assert::AreEqual(values[0], *ptr.get());
+
+            ptr -= -1;
+            Assert::AreEqual(values[1], *ptr.get());
+        }
+
+        TEST_METHOD(SubtractionAssignmentOutOfRangeTest)
+        {
+            int value = 42;
+            relative_ptr8<int> ptr(&value);
+            try
+            {
+                // 7 bits of "forward" space = 128 bytes, or 32 ints
+                ptr -= 35;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
 #pragma endregion
+
     };
 }

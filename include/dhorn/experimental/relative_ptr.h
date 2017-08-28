@@ -25,6 +25,9 @@ namespace dhorn::experimental
     {
         static_assert(std::is_integral_v<OffsetTy>);
 
+        template <typename, typename>
+        friend class relative_ptr;
+
     public:
         /*
          * std::iterator_traits Type Alias Support
