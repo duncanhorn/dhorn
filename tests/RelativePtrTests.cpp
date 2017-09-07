@@ -324,6 +324,11 @@ namespace dhorn::tests
             Assert::IsNotNull(ptr.get());
             Assert::AreEqual(&value, ptr.get());
             Assert::AreEqual(42, *ptr.get());
+
+            int* intPtr = nullptr;
+            ptr.reset(intPtr);
+            Assert::IsFalse(static_cast<bool>(ptr));
+            Assert::IsNull(ptr.get());
         }
 
         TEST_METHOD(ResetPointerOutOfRangeTest)
@@ -355,7 +360,7 @@ namespace dhorn::tests
 
 
 
-#pragma region TODO
+#pragma region Swap Tests
 
         TEST_METHOD(SwapTest)
         {
@@ -387,6 +392,19 @@ namespace dhorn::tests
             Assert::AreEqual(&values[1], ptr0.get());
         }
 
+        TEST_METHOD(SwapNullTest)
+        {
+            int value = 42;
+            relative_ptr8<int> ptr0(&value);
+            relative_ptr8<int> ptr1;
+
+            ptr0.swap(ptr1);
+            Assert::IsFalse(static_cast<bool>(ptr0));
+            Assert::IsTrue(static_cast<bool>(ptr1));
+            Assert::IsNull(ptr0.get());
+            Assert::IsTrue(ptr1.get() == &value);
+        }
+
         TEST_METHOD(SwapOutOfRangeTest)
         {
             int local = 42;
@@ -404,6 +422,57 @@ namespace dhorn::tests
             catch (std::range_error&)
             {
             }
+        }
+
+        TEST_METHOD(SelfSwapTest)
+        {
+            int value = 42;
+            relative_ptr8<int> ptr(&value);
+
+            ptr.swap(ptr);
+            Assert::IsTrue(static_cast<bool>(ptr));
+            Assert::IsTrue(ptr.get() == &value);
+
+            ptr.reset();
+            ptr.swap(ptr);
+            Assert::IsFalse(static_cast<bool>(ptr));
+            Assert::IsNull(ptr.get());
+        }
+
+#pragma endregion
+
+
+
+#pragma region Accessors Tests
+
+        TEST_METHOD(DereferenceTest)
+        {
+            int value = 42;
+            relative_ptr8<int> ptr(&value);
+
+            Assert::AreEqual(value, *ptr);
+        }
+
+        TEST_METHOD(ArrowOperatorTest)
+        {
+            std::string str = "foobar";
+            relative_ptr8<std::string> ptr(&str);
+
+            Assert::AreEqual(str.length(), ptr->length());
+        }
+
+        TEST_METHOD(IndexOperatorTest)
+        {
+            int values[] = { 0, 1, 2, 3, 4, 5, 6 };
+            relative_ptr8<int> ptr(&values[3]);
+
+            Assert::AreEqual(values[0], ptr[-3]);
+            Assert::AreEqual(values[1], ptr[-2]);
+            Assert::AreEqual(values[2], ptr[-1]);
+            Assert::AreEqual(values[3], ptr[0]);
+            Assert::AreEqual(values[4], ptr[1]);
+            Assert::AreEqual(values[5], ptr[2]);
+            Assert::AreEqual(values[6], ptr[3]);
         }
 
 #pragma endregion
@@ -442,6 +511,16 @@ namespace dhorn::tests
             catch (std::range_error&)
             {
             }
+
+            ptr.reset();
+            try
+            {
+                ptr += 42;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
         }
 
         TEST_METHOD(SubtractionAssignmentTest)
@@ -469,6 +548,16 @@ namespace dhorn::tests
             {
                 // 7 bits of "forward" space = 128 bytes, or 32 ints
                 ptr -= 35;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+
+            ptr.reset();
+            try
+            {
+                ptr -= 42;
                 Assert::Fail(L"Expected an exception");
             }
             catch (std::range_error&)

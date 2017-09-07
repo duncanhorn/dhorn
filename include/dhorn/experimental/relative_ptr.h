@@ -31,12 +31,8 @@ namespace dhorn::experimental
     public:
         /*
          * std::iterator_traits Type Alias Support
-         *
-         * TODO: Currently `const` is treated as the _this_ pointer is const, not what we're pointing to. I.e. if we
-         * want to change to represent a `const` pointer we'd have to construct a `relative_ptr<const Ty>`. That is, the
-         * `const` does not propagate. We are considering this acceptable
          */
-        using difference_type = std::ptrdiff_t; // TODO: Relate to OffsetTy?
+        using difference_type = std::ptrdiff_t;
         using value_type = Ty;
         using pointer = Ty*;
         using reference = Ty&;
@@ -156,6 +152,9 @@ namespace dhorn::experimental
 
             this->_offset = thisOffset;
             other._offset = otherOffset;
+
+            assert(get() == otherPtr);
+            assert(other.get() == thisPtr);
         }
 
 
@@ -191,9 +190,9 @@ namespace dhorn::experimental
                 return nullptr;
             }
 
-            // The behavior of `relative_ptr` is intended to mimic raw pointers. That is, if `this` is `const`, then we
-            // should behave like a `const` pointer (i.e. `Ty* const`) as opposed to a pointer to `const` (i.e.
-            // `const Ty*`), hence the `const_cast`.
+            // The behavior of `relative_ptr` is intended to mimic raw pointers, where `const` does not propagate. That
+            // is, if `this` is `const`, then we should behave like a `const` pointer (i.e. `Ty* const`) as opposed to a
+            // pointer to `const` (i.e. `const Ty*`), hence the `const_cast`.
             auto bytePtr = const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(this));
             bytePtr += this->_offset;
             return reinterpret_cast<pointer>(bytePtr);
@@ -203,10 +202,11 @@ namespace dhorn::experimental
 
     private:
 
-        OffsetTy check_offset(std::ptrdiff_t offset) const
+        OffsetTy check_offset(difference_type offset) const
         {
+            assert(offset != 0);
             auto result = static_cast<OffsetTy>(offset);
-            if (offset != static_cast<std::ptrdiff_t>(result))
+            if (offset != static_cast<difference_type>(result))
             {
                 throw std::range_error("Pointer offset too large to be represented by relative_ptr");
             }
