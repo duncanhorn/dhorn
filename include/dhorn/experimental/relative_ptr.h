@@ -65,7 +65,7 @@ namespace dhorn::experimental
         {
         }
 
-        relative_ptr(pointer ptr) :
+        explicit relative_ptr(pointer ptr) :
             _offset(calculate_offset(ptr))
         {
             assert(get() == ptr);
@@ -96,6 +96,20 @@ namespace dhorn::experimental
             return *this;
         }
 
+        relative_ptr& operator++()
+        {
+            // Pre-increment
+            return (*this) += 1;
+        }
+
+        pointer operator++(int)
+        {
+            // Post-increment
+            auto result = get();
+            ++(*this);
+            return result;
+        }
+
         relative_ptr& operator+=(difference_type distance)
         {
 #if _DEBUG
@@ -107,6 +121,20 @@ namespace dhorn::experimental
             assert(get() == expected);
 
             return *this;
+        }
+
+        relative_ptr& operator--()
+        {
+            // Pre-decrement
+            return (*this) -= 1;
+        }
+
+        pointer operator--(int)
+        {
+            // Post-increment
+            auto result = get();
+            --(*this);
+            return result;
         }
 
         relative_ptr& operator-=(difference_type distance)
@@ -230,6 +258,62 @@ namespace dhorn::experimental
 
         OffsetTy _offset = 0;
     };
+
+
+
+    /*
+     * Arithmetic Operators
+     */
+#pragma region Arithmetic Operators
+
+
+
+#pragma endregion
+
+
+
+    /*
+     * Comparison Operators
+     */
+#pragma region Comparison Operators
+
+    template <typename Ty, typename LhsOffset, typename RhsOffset>
+    inline bool operator==(const relative_ptr<Ty, LhsOffset>& lhs, const relative_ptr<Ty, RhsOffset>& rhs) noexcept
+    {
+        return lhs.get() == rhs.get();
+    }
+
+    template <typename Ty, typename LhsOffset, typename RhsOffset>
+    inline bool operator!=(const relative_ptr<Ty, LhsOffset>& lhs, const relative_ptr<Ty, RhsOffset>& rhs) noexcept
+    {
+        return lhs.get() != rhs.get();
+    }
+
+    template <typename Ty, typename LhsOffset, typename RhsOffset>
+    inline bool operator<(const relative_ptr<Ty, LhsOffset>& lhs, const relative_ptr<Ty, RhsOffset>& rhs) noexcept
+    {
+        return lhs.get() < rhs.get();
+    }
+
+    template <typename Ty, typename LhsOffset, typename RhsOffset>
+    inline bool operator<=(const relative_ptr<Ty, LhsOffset>& lhs, const relative_ptr<Ty, RhsOffset>& rhs) noexcept
+    {
+        return lhs.get() <= rhs.get();
+    }
+
+    template <typename Ty, typename LhsOffset, typename RhsOffset>
+    inline bool operator>(const relative_ptr<Ty, LhsOffset>& lhs, const relative_ptr<Ty, RhsOffset>& rhs) noexcept
+    {
+        return lhs.get() > rhs.get();
+    }
+
+    template <typename Ty, typename LhsOffset, typename RhsOffset>
+    inline bool operator>=(const relative_ptr<Ty, LhsOffset>& lhs, const relative_ptr<Ty, RhsOffset>& rhs) noexcept
+    {
+        return lhs.get() >= rhs.get();
+    }
+
+#pragma endregion
 
 
 

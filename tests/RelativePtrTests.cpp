@@ -481,10 +481,66 @@ namespace dhorn::tests
 
 #pragma region Arithmetic Tests
 
+        TEST_METHOD(PreIncrementTest)
+        {
+            int values[] = { 0, 1, 2, 3 };
+            relative_ptr8<int> ptr(values);
+
+            Assert::AreEqual(values[1], *++ptr);
+            Assert::AreEqual(values[2], *++ptr);
+            Assert::AreEqual(values[3], *++ptr);
+        }
+
+        TEST_METHOD(PreIncrementOutOfRangeTest)
+        {
+            int value;
+            relative_ptr8<int> ptr(&value);
+
+            try
+            {
+                for (std::size_t i = 0; i <= 128; ++i)
+                {
+                    ++ptr;
+                }
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
+        TEST_METHOD(PostIncrementTest)
+        {
+            int values[] = { 0, 1, 2, 3 };
+            relative_ptr8<int> ptr(values);
+
+            Assert::AreEqual(values[0], *ptr++);
+            Assert::AreEqual(values[1], *ptr++);
+            Assert::AreEqual(values[2], *ptr++);
+        }
+
+        TEST_METHOD(PostIncrementOutOfRangeTest)
+        {
+            int value;
+            relative_ptr8<int> ptr(&value);
+
+            try
+            {
+                for (std::size_t i = 0; i <= 128; ++i)
+                {
+                    ptr++;
+                }
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
         TEST_METHOD(AdditionAssignmentTest)
         {
             int values[] = { 0, 1, 2, 3 };
-            relative_ptr8<int> ptr = values;
+            relative_ptr8<int> ptr(values);
 
             Assert::AreEqual(values[0], *ptr.get());
 
@@ -523,10 +579,66 @@ namespace dhorn::tests
             }
         }
 
+        TEST_METHOD(PreDecrementTest)
+        {
+            int values[] = { 0, 1, 2, 3 };
+            relative_ptr8<int> ptr(values + 3);
+
+            Assert::AreEqual(values[2], *--ptr);
+            Assert::AreEqual(values[1], *--ptr);
+            Assert::AreEqual(values[0], *--ptr);
+        }
+
+        TEST_METHOD(PreDecrementOutOfRangeTest)
+        {
+            int value;
+            relative_ptr8<int> ptr(&value);
+
+            try
+            {
+                for (std::size_t i = 0; i <= 128; ++i)
+                {
+                    --ptr;
+                }
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
+        TEST_METHOD(PostDecrementTest)
+        {
+            int values[] = { 0, 1, 2, 3 };
+            relative_ptr8<int> ptr(values + 3);
+
+            Assert::AreEqual(values[3], *ptr--);
+            Assert::AreEqual(values[2], *ptr--);
+            Assert::AreEqual(values[1], *ptr--);
+        }
+
+        TEST_METHOD(PostDecrementOutOfRangeTest)
+        {
+            int value;
+            relative_ptr8<int> ptr(&value);
+
+            try
+            {
+                for (std::size_t i = 0; i <= 128; ++i)
+                {
+                    ptr--;
+                }
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+        }
+
         TEST_METHOD(SubtractionAssignmentTest)
         {
             int values[] = { 0, 1, 2, 3 };
-            relative_ptr8<int> ptr = values + 3;
+            relative_ptr8<int> ptr(values + 3);
 
             Assert::AreEqual(values[3], *ptr.get());
 
@@ -567,5 +679,85 @@ namespace dhorn::tests
 
 #pragma endregion
 
+
+
+#pragma region Comparison Operators
+
+        template <typename Func>
+        void DoComparisonOperatorTest(Func&& func)
+        {
+            int values[2];
+            relative_ptr8<int> ptr0(values);
+            relative_ptr8<int> ptr1(values);
+
+            func(0, ptr0, ptr1);
+            func(0, ptr1, ptr0);
+
+            ++ptr1;
+            func(-1, ptr0, ptr1);
+            func(1, ptr1, ptr0);
+
+            ptr1.reset();
+            func(1, ptr0, ptr1);
+            func(-1, ptr1, ptr0);
+
+            // Comparison should not require any operation that could go out of bounds
+            auto heapPtr = std::make_unique<int>();
+            auto expect = (heapPtr.get() < values) ? 1 : -1;
+
+            relative_ptr64<int> ptr2(heapPtr.get());
+            func(expect, ptr0, ptr2);
+            func(-expect, ptr2, ptr0);
+        }
+
+        TEST_METHOD(EqualityOperatorTest)
+        {
+            DoComparisonOperatorTest([](int value, auto& lhs, auto& rhs)
+            {
+                Assert::AreEqual(value == 0, lhs == rhs);
+            });
+        }
+
+        TEST_METHOD(InequalityOperatorTest)
+        {
+            DoComparisonOperatorTest([](int value, auto& lhs, auto& rhs)
+            {
+                Assert::AreEqual(value != 0, lhs != rhs);
+            });
+        }
+
+        TEST_METHOD(LessThanOperatorTest)
+        {
+            DoComparisonOperatorTest([](int value, auto& lhs, auto& rhs)
+            {
+                Assert::AreEqual(value < 0, lhs < rhs);
+            });
+        }
+
+        TEST_METHOD(LessThanOrEqualOperatorTest)
+        {
+            DoComparisonOperatorTest([](int value, auto& lhs, auto& rhs)
+            {
+                Assert::AreEqual(value <= 0, lhs <= rhs);
+            });
+        }
+
+        TEST_METHOD(GreaterThanOperatorTest)
+        {
+            DoComparisonOperatorTest([](int value, auto& lhs, auto& rhs)
+            {
+                Assert::AreEqual(value > 0, lhs > rhs);
+            });
+        }
+
+        TEST_METHOD(GreaterThanOrEqualOperatorTest)
+        {
+            DoComparisonOperatorTest([](int value, auto& lhs, auto& rhs)
+            {
+                Assert::AreEqual(value >= 0, lhs >= rhs);
+            });
+        }
+
+#pragma endregion
     };
 }
