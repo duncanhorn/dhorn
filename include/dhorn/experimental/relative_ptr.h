@@ -32,11 +32,10 @@ namespace dhorn::experimental
         /*
          * std::iterator_traits Type Alias Support
          */
-        using difference_type = std::ptrdiff_t;
         using value_type = Ty;
         using pointer = Ty*;
         using reference = Ty&;
-        using iterator_category = std::random_access_iterator_tag;
+        using difference_type = std::ptrdiff_t;
 
 
 
@@ -96,7 +95,7 @@ namespace dhorn::experimental
             return *this;
         }
 
-        relative_ptr& operator=(std::nullptr_t)
+        relative_ptr& operator=(std::nullptr_t) noexcept
         {
             reset();
             return *this;
@@ -123,7 +122,7 @@ namespace dhorn::experimental
 #endif
 
             // NOTE: This is meant to mimic pointer arithmetic
-            this->_offset = check_offset(static_cast<difference_type>(this->_offset) + (distance * sizeof(Ty)));
+            reset(get() + distance);
             assert(get() == expected);
 
             return *this;
@@ -150,7 +149,7 @@ namespace dhorn::experimental
 #endif
 
             // NOTE: This is meant to mimic pointer arithmetic
-            this->_offset = check_offset(static_cast<difference_type>(this->_offset) - (distance * sizeof(Ty)));
+            reset(get() - distance);
             assert(get() == expected);
 
             return *this;
@@ -230,6 +229,23 @@ namespace dhorn::experimental
             auto bytePtr = const_cast<std::uint8_t*>(reinterpret_cast<const std::uint8_t*>(this));
             bytePtr += this->_offset;
             return reinterpret_cast<pointer>(bytePtr);
+        }
+
+        OffsetTy offset() const noexcept
+        {
+            return this->_offset;
+        }
+
+        bool can_reach(pointer ptr) const noexcept
+        {
+            if (ptr)
+            {
+                auto diff = reinterpret_cast<const std::uint8_t*>(ptr) - reinterpret_cast<const std::uint8_t*>(this);
+                return static_cast<difference_type>(static_cast<OffsetTy>(diff)) == diff;
+            }
+
+            // Can always reach null pointer
+            return true;
         }
 
 

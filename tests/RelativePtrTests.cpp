@@ -507,6 +507,16 @@ namespace dhorn::tests
             catch (std::range_error&)
             {
             }
+
+            ptr.reset();
+            try
+            {
+                ++ptr;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
         }
 
         TEST_METHOD(PostIncrementTest)
@@ -530,6 +540,16 @@ namespace dhorn::tests
                 {
                     ptr++;
                 }
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+
+            ptr.reset();
+            try
+            {
+                ptr++;
                 Assert::Fail(L"Expected an exception");
             }
             catch (std::range_error&)
@@ -572,6 +592,16 @@ namespace dhorn::tests
             try
             {
                 ptr += 42;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+
+            ptr.reset();
+            try
+            {
+                ptr += 8;
                 Assert::Fail(L"Expected an exception");
             }
             catch (std::range_error&)
@@ -621,6 +651,16 @@ namespace dhorn::tests
             catch (std::range_error&)
             {
             }
+
+            ptr.reset();
+            try
+            {
+                --ptr;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
         }
 
         TEST_METHOD(PostDecrementTest)
@@ -644,6 +684,16 @@ namespace dhorn::tests
                 {
                     ptr--;
                 }
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+
+            ptr.reset();
+            try
+            {
+                ptr--;
                 Assert::Fail(L"Expected an exception");
             }
             catch (std::range_error&)
@@ -686,6 +736,16 @@ namespace dhorn::tests
             try
             {
                 ptr -= 42;
+                Assert::Fail(L"Expected an exception");
+            }
+            catch (std::range_error&)
+            {
+            }
+
+            ptr.reset();
+            try
+            {
+                ptr -= 8;
                 Assert::Fail(L"Expected an exception");
             }
             catch (std::range_error&)
