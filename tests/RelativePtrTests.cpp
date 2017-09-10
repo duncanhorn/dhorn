@@ -579,6 +579,22 @@ namespace dhorn::tests
             }
         }
 
+        TEST_METHOD(AdditionTest)
+        {
+            int values[] = { 0, 1, 2, 3 };
+            relative_ptr8<int> ptr(values);
+            relative_ptr8<int> ptr2(values + 3);
+
+            Assert::AreEqual(values[3], *(ptr + 3));
+            Assert::AreEqual(values[0], *(ptr2 + -3));
+
+            Assert::AreEqual(values[3], *(3 + ptr));
+            Assert::AreEqual(values[0], *(-3 + ptr2));
+
+            // NOTE: operator+ doesn't construct a new relative_ptr, so it should never throw
+            ptr + 1024;
+        }
+
         TEST_METHOD(PreDecrementTest)
         {
             int values[] = { 0, 1, 2, 3 };
@@ -675,6 +691,31 @@ namespace dhorn::tests
             catch (std::range_error&)
             {
             }
+        }
+
+        TEST_METHOD(SubtractionTest)
+        {
+            int values[] = { 0, 1, 2, 3 };
+            relative_ptr8<int> ptr(values + 3);
+            relative_ptr8<int> ptr2(values);
+
+            Assert::AreEqual(values[0], *(ptr - 3));
+            Assert::AreEqual(values[3], *(ptr2 - -3));
+
+            // NOTE: operator- doesn't construct a new relative_ptr, so it should never throw
+            ptr - 1024;
+        }
+
+        TEST_METHOD(PointerSubtractionTest)
+        {
+            int values[] = { 0, 1 };
+            relative_ptr8<int> ptr(values);
+            relative_ptr8<int> ptr2(values + 1);
+
+            Assert::AreEqual(0, ptr - ptr);
+            Assert::AreEqual(0, ptr2 - ptr2);
+            Assert::AreEqual(1, ptr2 - ptr);
+            Assert::AreEqual(-1, ptr - ptr2);
         }
 
 #pragma endregion

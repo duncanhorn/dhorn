@@ -61,7 +61,7 @@ namespace dhorn::experimental
             assert(get() == ptr.get());
         }
 
-        relative_ptr(std::nullptr_t) noexcept
+        explicit relative_ptr(std::nullptr_t) noexcept
         {
         }
 
@@ -93,6 +93,12 @@ namespace dhorn::experimental
         relative_ptr& operator=(const relative_ptr<OtherTy, OtherOffsetTy>& ptr)
         {
             reset(ptr.get());
+            return *this;
+        }
+
+        relative_ptr& operator=(std::nullptr_t)
+        {
+            reset();
             return *this;
         }
 
@@ -266,7 +272,35 @@ namespace dhorn::experimental
      */
 #pragma region Arithmetic Operators
 
+    template <typename Ty, typename Offset>
+    inline Ty* operator+(
+        const relative_ptr<Ty, Offset>& lhs,
+        typename relative_ptr<Ty, Offset>::difference_type rhs) noexcept
+    {
+        return lhs.get() + rhs;
+    }
 
+    template <typename Ty, typename Offset>
+    inline Ty* operator+(
+        typename relative_ptr<Ty, Offset>::difference_type lhs,
+        const relative_ptr<Ty, Offset>& rhs) noexcept
+    {
+        return lhs + rhs.get();
+    }
+
+    template <typename Ty, typename Offset>
+    inline Ty* operator-(
+        const relative_ptr<Ty, Offset>& lhs,
+        typename relative_ptr<Ty, Offset>::difference_type rhs) noexcept
+    {
+        return lhs.get() - rhs;
+    }
+
+    template <typename Ty, typename LhsOffset, typename RhsOffset>
+    inline auto operator-(const relative_ptr<Ty, LhsOffset>& lhs, const relative_ptr<Ty, RhsOffset>& rhs) noexcept
+    {
+        return lhs.get() - rhs.get();
+    }
 
 #pragma endregion
 
