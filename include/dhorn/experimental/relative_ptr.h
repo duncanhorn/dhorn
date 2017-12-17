@@ -3,7 +3,7 @@
  *
  * relative_ptr.h
  *
- * 
+ * Describes a pointer 
  */
 #pragma once
 
@@ -17,13 +17,12 @@ namespace dhorn::experimental
     /*
      * relative_ptr
      *
-     * TODO: Make a decision about alignment
      * TODO: How should we handle arrays? Like `unique_ptr` with an extent?
      */
     template <typename Ty, typename OffsetTy>
     class relative_ptr
     {
-        static_assert(std::is_integral_v<OffsetTy>);
+        static_assert(std::is_integral_v<OffsetTy>, "Only integral types can be used as the relative_ptr offset type");
 
         template <typename, typename>
         friend class relative_ptr;
@@ -167,6 +166,7 @@ namespace dhorn::experimental
 
         void reset(pointer ptr)
         {
+            // NOTE: Exception guarantee is that 'this' is "null" on exception
             this->_offset = 0;
             this->_offset = calculate_offset(ptr);
             assert(get() == ptr);
@@ -178,8 +178,8 @@ namespace dhorn::experimental
             auto thisPtr = get();
             auto otherPtr = other.get();
 
-            // Calculate the offsets before doing the swap so that we have the strong exception guarantee that neither
-            // state is changed if an exception gets thrown
+            // NOTE: Exception guarantee is that neither object is modified if an exception is thrown, so calculate the
+            // offsets before doing the swap, which will throw if either can't hold the other
             auto thisOffset = calculate_offset(otherPtr);
             auto otherOffset = other.calculate_offset(thisPtr);
 
@@ -289,7 +289,7 @@ namespace dhorn::experimental
 #pragma region Arithmetic Operators
 
     template <typename Ty, typename Offset>
-    inline Ty* operator+(
+    inline typename relative_ptr<Ty, Offset>::pointer operator+(
         const relative_ptr<Ty, Offset>& lhs,
         typename relative_ptr<Ty, Offset>::difference_type rhs) noexcept
     {
@@ -297,7 +297,7 @@ namespace dhorn::experimental
     }
 
     template <typename Ty, typename Offset>
-    inline Ty* operator+(
+    inline typename relative_ptr<Ty, Offset>::pointer operator+(
         typename relative_ptr<Ty, Offset>::difference_type lhs,
         const relative_ptr<Ty, Offset>& rhs) noexcept
     {
@@ -305,7 +305,7 @@ namespace dhorn::experimental
     }
 
     template <typename Ty, typename Offset>
-    inline Ty* operator-(
+    inline typename relative_ptr<Ty, Offset>::pointer operator-(
         const relative_ptr<Ty, Offset>& lhs,
         typename relative_ptr<Ty, Offset>::difference_type rhs) noexcept
     {
@@ -374,13 +374,25 @@ namespace dhorn::experimental
     using relative_ptr8 = relative_ptr<Ty, std::int8_t>;
 
     template <typename Ty>
+    using relative_ptru8 = relative_ptr<Ty, std::uint8_t>;
+
+    template <typename Ty>
     using relative_ptr16 = relative_ptr<Ty, std::int16_t>;
+
+    template <typename Ty>
+    using relative_ptru16 = relative_ptr<Ty, std::uint16_t>;
 
     template <typename Ty>
     using relative_ptr32 = relative_ptr<Ty, std::int32_t>;
 
     template <typename Ty>
+    using relative_ptru32 = relative_ptr<Ty, std::uint32_t>;
+
+    template <typename Ty>
     using relative_ptr64 = relative_ptr<Ty, std::int64_t>;
+
+    template <typename Ty>
+    using relative_ptru64 = relative_ptr<Ty, std::uint64_t>;
 
 
 

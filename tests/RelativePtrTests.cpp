@@ -29,14 +29,46 @@ namespace dhorn::tests
 
 
 
+    /*
+     * A more controlled memory layout since we're working with offsets
+     */
+    template <typename OffsetTy>
+    struct test_type
+    {
+        int before[256];
+        relative_ptr<int, OffsetTy> ptr;
+        int after[256];
+
+        test_type() = default;
+        test_type(std::ptrdiff_t offset) :
+            ptr((offset >= 0) ? (after + offset - 1) : (before + std::size(before) + offset))
+        {
+        }
+    };
+
+    using test_type8 = test_type<std::int8_t>;
+    using test_typeu8 = test_type<std::uint8_t>;
+    using test_type16 = test_type<std::int16_t>;
+    using test_typeu16 = test_type<std::uint16_t>;
+    using test_type32 = test_type<std::int32_t>;
+    using test_typeu32 = test_type<std::uint32_t>;
+    using test_type64 = test_type<std::int64_t>;
+    using test_typeu64 = test_type<std::uint64_t>;
+
+
+
     TEST_CLASS(RelativePtrTests)
     {
         TEST_METHOD(SizeTest)
         {
             Assert::AreEqual(1u, sizeof(relative_ptr8<int>));
+            Assert::AreEqual(1u, sizeof(relative_ptru8<int>));
             Assert::AreEqual(2u, sizeof(relative_ptr16<int>));
+            Assert::AreEqual(2u, sizeof(relative_ptru16<int>));
             Assert::AreEqual(4u, sizeof(relative_ptr32<int>));
+            Assert::AreEqual(4u, sizeof(relative_ptru32<int>));
             Assert::AreEqual(8u, sizeof(relative_ptr64<int>));
+            Assert::AreEqual(8u, sizeof(relative_ptru64<int>));
         }
 
 
@@ -59,30 +91,55 @@ namespace dhorn::tests
 
         TEST_METHOD(PointerConstructorTest)
         {
-            int value = 42;
-            relative_ptr8<int> ptr(&value);
-            Assert::IsTrue(static_cast<bool>(ptr));
-            Assert::IsNotNull(ptr.get());
-            Assert::AreEqual(&value, ptr.get());
-            Assert::AreEqual(42, *ptr.get());
+            // NOTE: 8-bit integer can reach at most 127 addresses away, or 31 ints
+            test_type8 test0(31);
+            test0.after[30] = 42;
+
+            Assert::IsTrue(static_cast<bool>(test0.ptr));
+            Assert::IsNotNull(test0.ptr.get());
+            Assert::AreEqual(&test0.after[30], test0.ptr.get());
+            Assert::AreEqual(42, *test0.ptr.get());
+
+            // 8-bit integer can reach at most 128 addresses away in the negative direction, or 32 ints
+            test_type8 test1(-32);
+            test1.before[std::size(test1.before) - 32] = 42;
+
+            Assert::IsTrue(static_cast<bool>(test1.ptr));
+            Assert::IsNotNull(test1.ptr.get());
+            Assert::AreEqual(&test1.before[std::size(test1.before) - 32], test1.ptr.get());
+            Assert::AreEqual(42, *test1.ptr.get());
+
+            // 8-bit unsigned integer can reach at most 255 addresses away, or 63 ints
+            test_typeu8 test2(63);
+            test2.after[62] = 42;
+
+            Assert::IsTrue(static_cast<bool>(test2.ptr));
+            Assert::IsNotNull(test2.ptr.get());
+            Assert::AreEqual(&test2.after[62], test2.ptr.get());
+            Assert::AreEqual(42, *test2.ptr.get());
 
             int* intPtr = nullptr;
-            relative_ptr8<int> ptr2(intPtr);
-            Assert::IsFalse(static_cast<bool>(ptr2));
-            Assert::IsNull(ptr2.get());
+            relative_ptr8<int> ptr(intPtr);
+            Assert::IsFalse(static_cast<bool>(ptr));
+            Assert::IsNull(ptr.get());
         }
 
         TEST_METHOD(PointerConstructorOutOfRangeTest)
         {
-            try
+            Assert::ExpectException<std::range_error>([]()
             {
-                int values[256];
-                relative_ptr8<int> ptr(&values[127]);
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
+                test_type8 test(32);
+            });
+
+            Assert::ExpectException<std::range_error>([]()
             {
-            }
+                test_type8 test(-33);
+            });
+
+            Assert::ExpectException<std::range_error>([]()
+            {
+                test_typeu8 test(64);
+            });
         }
 
         TEST_METHOD(CopyConstructorTest)
@@ -105,15 +162,11 @@ namespace dhorn::tests
         {
             int value = 42;
             relative_ptr8<int> ptr(&value);
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 // The heap should be far enough away from the stack...
                 std::make_unique<relative_ptr8<int>>(ptr);
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(MoveConstructorTest)
@@ -162,14 +215,10 @@ namespace dhorn::tests
         {
             int array[256];
             relative_ptr16<int> ptr16(&array[127]);
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 relative_ptr8<int> ptr8(ptr16);
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
 #pragma endregion
@@ -212,16 +261,12 @@ namespace dhorn::tests
         {
             int value = 42;
             relative_ptr8<int> ptr(&value);
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 // The heap should be far enough away from the stack...
                 auto heapPtr = std::make_unique<relative_ptr8<int>>();
                 *heapPtr = ptr;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(MoveAssignmentTest)
@@ -277,15 +322,11 @@ namespace dhorn::tests
         {
             int array[256];
             relative_ptr16<int> ptr16(&array[127]);
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 relative_ptr8<int> ptr8;
                 ptr8 = ptr16;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
 #pragma endregion
@@ -334,15 +375,11 @@ namespace dhorn::tests
         TEST_METHOD(ResetPointerOutOfRangeTest)
         {
             relative_ptr8<int> ptr;
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 int values[256];
                 ptr.reset(&values[127]);
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(ResetConversionTest)
@@ -414,14 +451,10 @@ namespace dhorn::tests
             relative_ptr8<int> ptr8(&local);
             relative_ptr64<int> ptr64(&global);
 
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ptr8.swap(ptr64);
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(SelfSwapTest)
@@ -496,27 +529,19 @@ namespace dhorn::tests
             int value;
             relative_ptr8<int> ptr(&value);
 
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 for (std::size_t i = 0; i <= 128; ++i)
                 {
                     ++ptr;
                 }
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ++ptr;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(PostIncrementTest)
@@ -534,27 +559,19 @@ namespace dhorn::tests
             int value;
             relative_ptr8<int> ptr(&value);
 
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 for (std::size_t i = 0; i <= 128; ++i)
                 {
                     ptr++;
                 }
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ptr++;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(AdditionAssignmentTest)
@@ -578,35 +595,23 @@ namespace dhorn::tests
         {
             int value = 42;
             relative_ptr8<int> ptr(&value);
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 // 7 bits of "forward" space = 128 bytes, or 32 ints
                 ptr += 34;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ptr += 42;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ptr += 8;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(AdditionTest)
@@ -640,27 +645,19 @@ namespace dhorn::tests
             int value;
             relative_ptr8<int> ptr(&value);
 
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 for (std::size_t i = 0; i <= 128; ++i)
                 {
                     --ptr;
                 }
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 --ptr;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(PostDecrementTest)
@@ -678,27 +675,19 @@ namespace dhorn::tests
             int value;
             relative_ptr8<int> ptr(&value);
 
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 for (std::size_t i = 0; i <= 128; ++i)
                 {
                     ptr--;
                 }
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ptr--;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(SubtractionAssignmentTest)
@@ -722,35 +711,23 @@ namespace dhorn::tests
         {
             int value = 42;
             relative_ptr8<int> ptr(&value);
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 // 7 bits of "forward" space = 128 bytes, or 32 ints
                 ptr -= 35;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ptr -= 42;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
 
             ptr.reset();
-            try
+            Assert::ExpectException<std::range_error>([&]()
             {
                 ptr -= 8;
-                Assert::Fail(L"Expected an exception");
-            }
-            catch (std::range_error&)
-            {
-            }
+            });
         }
 
         TEST_METHOD(SubtractionTest)
