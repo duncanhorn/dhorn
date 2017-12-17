@@ -129,6 +129,7 @@
     <ClCompile Include="AnimationTests.cpp" />
     <ClCompile Include="ArrayReferenceTests.cpp" />
     <ClCompile Include="BitmaskTests.cpp" />
+    <ClCompile Include="CircularBufferTests.cpp" />
     <ClCompile Include="CommandLineTests.cpp" />
     <ClCompile Include="CompressedBaseTests.cpp" />
     <ClCompile Include="CompressedPairTests.cpp" />
