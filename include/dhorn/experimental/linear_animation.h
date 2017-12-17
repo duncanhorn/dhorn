@@ -104,8 +104,8 @@ namespace dhorn
 
             inline constexpr double seconds_fraction(typename MyBase::duration duration) const
             {
-                return static_cast<double>(duration.count() * typename MyBase::duration::period::num) /
-                    typename MyBase::duration::period::den;
+                return static_cast<double>(duration.count() * MyBase::duration::period::num) /
+                    MyBase::duration::period::den;
             }
 
             typename MyBase::iterator_type _left;
