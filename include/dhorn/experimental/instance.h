@@ -89,7 +89,7 @@ namespace dhorn
                     auto ptr = this->_alloc.allocate(1);
                     try
                     {
-                        this->_alloc.construct(ptr);
+                        std::allocator_traits<Alloc>::construct(this->_alloc, ptr);
                     }
                     catch (...)
                     {
@@ -108,7 +108,7 @@ namespace dhorn
                         this->_alloc.deallocate(ptr, 1);
                     });
 
-                    this->_alloc.destroy(ptr);
+                    std::allocator_traits<Alloc>::destroy(this->_alloc, ptr);
                 }
 
             private:

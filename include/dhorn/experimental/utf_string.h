@@ -432,6 +432,17 @@ namespace dhorn
 
         public:
             /*
+             * Iterator Types
+             */
+            using value_type = char32_t;
+            using reference = char32_t;
+            using pointer = CharT*;
+            using difference_type = std::ptrdiff_t;
+            using iterator_category = std::bidirectional_iterator_tag;
+
+
+
+            /*
              * Constructor(s)/Destructor
              */
             utf_string_iterator(const CharT *ptr) :
