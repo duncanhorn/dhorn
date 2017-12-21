@@ -317,6 +317,9 @@ namespace dhorn::experimental
         circular_buffer& operator=(circular_buffer&& other)
         {
             assert(this != &other);
+            // TODO
+
+            return *this;
         }
 
         void assign(size_type count, const Ty& value)
