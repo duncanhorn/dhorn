@@ -30,6 +30,25 @@ namespace dhorn::tests
 
     TEST_CLASS(TypeTraitsTests)
     {
+        template <typename Ty>
+        struct dummy
+        {
+            template <
+                typename Type = Ty,
+                std::enable_if_t<std::is_same_v<first_t<Ty, Type>, int>, int> = 0,
+                std::enable_if_t<std::is_same_v<first_t<Ty, Type>, Ty>, int> = 0>
+            void doit() {}
+        };
+
+        TEST_METHOD(FirstTypeTest)
+        {
+            Assert::IsTrue(std::is_same_v<int, first_t<int>>);
+            Assert::IsTrue(std::is_same_v<int, first_t<int, float>>);
+            Assert::IsTrue(std::is_same_v<int, first_t<int, float, double>>);
+
+            [[maybe_unused]] dummy<float> di;
+        }
+
         TEST_METHOD(EqualityComparableTest)
         {
             Assert::IsTrue(dhorn::is_comparable_v<comp1, comp2>);

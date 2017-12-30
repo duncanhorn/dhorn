@@ -14,6 +14,64 @@
 namespace dhorn
 {
     /*
+     * first_t
+     *
+     * Always selects the first template type argument. Useful when trying to SFINAE away member functions based off the
+     * type's template argument(s). E.g. the following will fail to compile:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *  template <typename Ty>
+     *  struct foo
+     *  {
+     *      template <std::enable_if_t<std::is_same_v<Ty, int>, int> = 0>
+     *      void do_only_if_int() {}
+     *  };
+     *  foo<float> f;
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * Even though `f.do_only_if_int` is never called, instantiation of the class template will fail since the template
+     * only depends on the class template type. One way to work around this is to introduce a new type. E.g.:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *      template <typename Type = Ty, std::enable_if_t<std::is_same_v<Type, int>, int> = 0>
+     *      void do_only_if_int() {}
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * This will now compile, but can be avoided via something like `f.do_only_if_int<int>()` which will successfully
+     * compile. Although doing something like that would be similar to shooting oneself in the foot, we can, and
+     * therefore should, do better. With `first_t`, this would then look like:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *      template <typename Type = Ty, std::enable_if_t<std::is_same_v<first_t<Ty, Type>, int>, int> = 0>
+     *      void do_only_if_int() {}
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * The compiler won't outright reject this since `first_t` could be specialized. E.g. one could work around this by:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *  template <>
+     *  struct first<float, float> // NOTE: Assume this is in the namespace dhorn::details
+     *  {
+     *      using type = int;
+     *  };
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * In this case, `f.do_only_if_int()` will compile successfully, but the requirements for doing so require shooting
+     * oneself int the foot, amputating it, then shooting oneself in the head. That said, it is worth noting that one
+     * could get this to work _without_ the ability to work around it by adding another condition on
+     * `std::is_same_v<first_t<Ty, Type>, Ty>`.
+     */
+#pragma region
+
+    namespace details
+    {
+        template <typename Ty, typename...>
+        struct first
+        {
+            using type = Ty;
+        };
+    }
+
+    template <typename... Types>
+    using first_t = typename details::first<Types...>::type;
+
+#pragma endregion
+
+
+
+    /*
      * is_comparable
      *
      * Type trait for determining if operator== is well formed for the two specified types
