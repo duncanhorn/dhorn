@@ -49,9 +49,7 @@ namespace dhorn
      *  };
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * In this case, `f.do_only_if_int()` will compile successfully, but the requirements for doing so require shooting
-     * oneself int the foot, amputating it, then shooting oneself in the head. That said, it is worth noting that one
-     * could get this to work _without_ the ability to work around it by adding another condition on
-     * `std::is_same_v<first_t<Ty, Type>, Ty>`.
+     * oneself int the foot, amputating it, then shooting oneself in the head.
      */
 #pragma region
 

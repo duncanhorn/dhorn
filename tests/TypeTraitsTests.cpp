@@ -33,10 +33,7 @@ namespace dhorn::tests
         template <typename Ty>
         struct dummy
         {
-            template <
-                typename Type = Ty,
-                std::enable_if_t<std::is_same_v<first_t<Ty, Type>, int>, int> = 0,
-                std::enable_if_t<std::is_same_v<first_t<Ty, Type>, Ty>, int> = 0>
+            template <typename Type = Ty, std::enable_if_t<std::is_same_v<first_t<Ty, Type>, int>, int> = 0>
             void doit() {}
         };
 
