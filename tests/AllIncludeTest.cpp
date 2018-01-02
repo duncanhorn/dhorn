@@ -13,6 +13,7 @@
 #include <dhorn/compressed_base.h>
 #include <dhorn/compressed_pair.h>
 #include <dhorn/console.h>
+#include <dhorn/crtp_base.h>
 #include <dhorn/debug.h>
 #include <dhorn/functional.h>
 #include <dhorn/iterator.h>
