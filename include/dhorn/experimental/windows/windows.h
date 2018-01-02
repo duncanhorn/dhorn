@@ -11,13 +11,17 @@
 static_assert(false, "Cannot include dhorn/windows/windows.h on a non-Windows machine")
 #endif  /* WIN32 */
 
+#ifndef NOMINMAX
+static_assert(false, "dhorn/windows/windows.h requires that std::min/std::max be usable");
+#endif
+
 #include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <memory>
 #include <vector>
 
-#include "../windows_exception.h"
+#include "../../com/hresult_error.h"
 
 namespace dhorn
 {
@@ -30,14 +34,14 @@ namespace dhorn
              */
 #pragma region Type Declarations
 
-            static_assert(sizeof(DWORD) == sizeof(uint32_t), "DWORD must be 32 bits");
-            static_assert(sizeof(WPARAM) == sizeof(uintptr_t), "WPARAM must be the size of a pointer");
-            static_assert(sizeof(LPARAM) == sizeof(intptr_t), "LPARAM must be the size of a pointer");
+            static_assert(sizeof(DWORD) == sizeof(std::uint32_t), "DWORD must be 32 bits");
+            static_assert(sizeof(WPARAM) == sizeof(std::uintptr_t), "WPARAM must be the size of a pointer");
+            static_assert(sizeof(LPARAM) == sizeof(std::intptr_t), "LPARAM must be the size of a pointer");
 
             using tstring = std::basic_string<TCHAR>;
 
-            using pid_t = uint32_t;
-            using tid_t = uint32_t;
+            using pid_t = std::uint32_t;
+            using tid_t = std::uint32_t;
 
             using handle_t = HANDLE;
             using bitmap_handle = HBITMAP;
@@ -67,14 +71,14 @@ namespace dhorn
                 {
                     if (!func(std::forward<Args>(args)...))
                     {
-                        throw_last_error();
+                        throw std::system_error(::GetLastError(), std::system_category());
                     }
                 }
 
                 template <typename Func, typename... Args>
                 inline void make_hresult_call(Func &func, Args&&... args)
                 {
-                    throw_if_failed(func(std::forward<Args>(args)...));
+                    com::check_hresult(func(std::forward<Args>(args)...));
                 }
 
                 template <typename ResultType, ResultType Failure = ResultType{}, typename Func, typename... Args >
@@ -83,7 +87,7 @@ namespace dhorn
                     auto result = func(std::forward<Args>(args)...);
                     if (result == Failure)
                     {
-                        throw_last_error();
+                        throw std::system_error(::GetLastError(), std::system_category());
                     }
 
                     return result;
@@ -207,11 +211,11 @@ namespace dhorn
 
             inline handle_t create_file(
                 const tstring &fileName,
-                uint32_t desiredAccess,
-                uint32_t shareMode,
+                std::uint32_t desiredAccess,
+                std::uint32_t shareMode,
                 LPSECURITY_ATTRIBUTES securityAttributes,
-                uint32_t creationDisposition,
-                uint32_t flagsAndAttributes,
+                std::uint32_t creationDisposition,
+                std::uint32_t flagsAndAttributes,
                 handle_t templateFile = nullptr)
             {
                 return details::make_call_fail_on_value<handle_t, invalid_handle_value>(
@@ -243,9 +247,9 @@ namespace dhorn
                 handle_t sourceProcess,
                 handle_t sourceHandle,
                 handle_t targetProcess,
-                uint32_t desiredAccess,
+                std::uint32_t desiredAccess,
                 bool inheritHandle,
-                uint32_t options)
+                std::uint32_t options)
             {
                 handle_t result;
                 details::make_boolean_call(
@@ -261,7 +265,7 @@ namespace dhorn
                 return result;
             }
 
-            inline uint32_t get_handle_information(handle_t handle)
+            inline std::uint32_t get_handle_information(handle_t handle)
             {
                 DWORD flags;
                 details::make_boolean_call(GetHandleInformation, handle, &flags);
@@ -269,7 +273,7 @@ namespace dhorn
                 return flags;
             }
 
-            inline void set_handle_information(handle_t handle, uint32_t mask, uint32_t flags)
+            inline void set_handle_information(handle_t handle, std::uint32_t mask, std::uint32_t flags)
             {
                 details::make_boolean_call(SetHandleInformation, handle, mask, flags);
             }
@@ -311,7 +315,7 @@ namespace dhorn
              */
 #pragma region Message Functions
 
-            inline intptr_t dispatch_message(const MSG &msg)
+            inline std::intptr_t dispatch_message(const MSG &msg)
             {
                 return DispatchMessage(&msg);
             }
@@ -335,7 +339,7 @@ namespace dhorn
                 return !!PeekMessage(result, window, filterMin, filterMax, remove);
             }
 
-            inline void post_message(window_handle window, unsigned msg, uintptr_t wparam, intptr_t lparam)
+            inline void post_message(window_handle window, unsigned msg, std::uintptr_t wparam, std::intptr_t lparam)
             {
                 details::make_boolean_call(PostMessage, window, msg, wparam, lparam);
             }
@@ -402,21 +406,36 @@ namespace dhorn
                 std::vector<SLPI> result;
 
                 // First attempt. This should fail
-                throw_hr_if_true(!!::GetLogicalProcessorInformation(result.data(), &length), E_UNEXPECTED);
-                expect_error(ERROR_INSUFFICIENT_BUFFER);
+                if (!::GetLogicalProcessorInformation(result.data(), &length))
+                {
+                    com::throw_hresult(E_UNEXPECTED);
+                }
+
+                auto error = ::GetLastError();
+                if (error && (error != ERROR_INSUFFICIENT_BUFFER))
+                {
+                    throw std::system_error(error, std::system_category());
+                }
 
                 // Now that we know the expected length, we can allocate what we need
                 result.reserve(length / sizeof(SLPI));
-                throw_hr_if_false(result.size() * sizeof(SLPI) == length, E_UNEXPECTED);
+                if (result.size() * sizeof(SLPI) != length)
+                {
+                    com::throw_hresult(E_UNEXPECTED);
+                }
+
                 details::make_boolean_call(GetLogicalProcessorInformation, result.data(), &length);
-                throw_hr_if_false(result.size() * sizeof(SLPI) == length, E_UNEXPECTED);
+                if (result.size() * sizeof(SLPI) != length)
+                {
+                    com::throw_hresult(E_UNEXPECTED);
+                }
 
                 return result;
             }
 
-            inline uint32_t get_maximum_processor_count(uint16_t groupNumber = ALL_PROCESSOR_GROUPS)
+            inline std::uint32_t get_maximum_processor_count(std::uint16_t groupNumber = ALL_PROCESSOR_GROUPS)
             {
-                return details::make_call_fail_on_value<uint32_t>(GetMaximumProcessorCount, groupNumber);
+                return details::make_call_fail_on_value<std::uint32_t>(GetMaximumProcessorCount, groupNumber);
             }
 
 #pragma endregion
@@ -444,28 +463,29 @@ namespace dhorn
                 return result;
             }
 
-            inline uint32_t get_class_long(window_handle window, int index)
+            inline std::uint32_t get_class_long(window_handle window, int index)
             {
-                return details::make_call_fail_on_value<uint32_t>(GetClassLong, window, index);
+                return details::make_call_fail_on_value<std::uint32_t>(GetClassLong, window, index);
             }
 
-            inline uintptr_t get_class_long_ptr(window_handle window, int index)
+            inline std::uintptr_t get_class_long_ptr(window_handle window, int index)
             {
-                return details::make_call_fail_on_value<uintptr_t>(GetClassLongPtr, window, index);
+                return details::make_call_fail_on_value<std::uintptr_t>(GetClassLongPtr, window, index);
             }
 
             inline tstring get_class_name(window_handle window)
             {
                 // maximum class name is 256 characters (as per MSDN)
                 TCHAR buffer[257];
-                details::make_call_fail_on_value<int>(GetClassName, window, buffer, 257);
+                auto pos = details::make_call_fail_on_value<int>(GetClassName, window, buffer, 257);
+                buffer[pos] = '\0';
 
                 return buffer;
             }
 
-            inline uint16_t get_class_word(window_handle window, int index)
+            inline std::uint16_t get_class_word(window_handle window, int index)
             {
-                return details::make_call_fail_on_value<uint16_t>(GetClassWord, window, index);
+                return details::make_call_fail_on_value<std::uint16_t>(GetClassWord, window, index);
             }
 
             inline long get_window_long(window_handle window, int index)
@@ -473,9 +493,9 @@ namespace dhorn
                 return details::make_call_fail_on_value<long>(GetWindowLong, window, index);
             }
 
-            inline uintptr_t get_window_long_ptr(window_handle window, int index)
+            inline std::uintptr_t get_window_long_ptr(window_handle window, int index)
             {
-                return details::make_call_fail_on_value<uintptr_t>(GetWindowLongPtr, window, index);
+                return details::make_call_fail_on_value<std::uintptr_t>(GetWindowLongPtr, window, index);
             }
 
             inline ATOM register_class(const WNDCLASS &wndClass)
@@ -488,19 +508,19 @@ namespace dhorn
                 return details::make_call_fail_on_value<ATOM>(RegisterClassEx, &wndClass);
             }
 
-            inline uint32_t set_class_long(window_handle window, int index, long value)
+            inline std::uint32_t set_class_long(window_handle window, int index, long value)
             {
-                return details::make_call_fail_on_value<uint32_t>(SetClassLong, window, index, value);
+                return details::make_call_fail_on_value<std::uint32_t>(SetClassLong, window, index, value);
             }
 
-            inline uintptr_t set_class_long_ptr(window_handle window, int index, uintptr_t value)
+            inline std::uintptr_t set_class_long_ptr(window_handle window, int index, std::uintptr_t value)
             {
-                return details::make_call_fail_on_value<uintptr_t>(SetClassLongPtr, window, index, value);
+                return details::make_call_fail_on_value<std::uintptr_t>(SetClassLongPtr, window, index, value);
             }
 
-            inline uint16_t set_class_word(window_handle window, int index, uint16_t value)
+            inline std::uint16_t set_class_word(window_handle window, int index, std::uint16_t value)
             {
-                return details::make_call_fail_on_value<uint16_t>(SetClassWord, window, index, value);
+                return details::make_call_fail_on_value<std::uint16_t>(SetClassWord, window, index, value);
             }
 
             inline long set_window_long(window_handle window, int index, long value)
@@ -508,10 +528,10 @@ namespace dhorn
                 return details::make_call_fail_on_value<long>(SetWindowLong, window, index, value);
             }
 
-            inline uintptr_t set_window_long_ptr(window_handle window, int index, uintptr_t value)
+            inline std::uintptr_t set_window_long_ptr(window_handle window, int index, std::uintptr_t value)
             {
                 ::SetLastError(0);
-                return details::make_call_fail_on_value<uintptr_t>(SetWindowLongPtr, window, index, value);
+                return details::make_call_fail_on_value<std::uintptr_t>(SetWindowLongPtr, window, index, value);
             }
 
             inline void unregister_class(const tstring &className, instance_handle instance = nullptr)
@@ -528,7 +548,7 @@ namespace dhorn
              */
 #pragma region Window Functions
 
-            inline RECT adjust_window_rect(const RECT &inputRect, uint32_t style, bool hasMenu)
+            inline RECT adjust_window_rect(const RECT &inputRect, std::uint32_t style, bool hasMenu)
             {
                 RECT result = inputRect;
                 details::make_boolean_call(AdjustWindowRect, &result, style, hasMenu);
@@ -536,7 +556,7 @@ namespace dhorn
                 return result;
             }
 
-            inline RECT adjust_window_rect(const RECT &inputRect, uint32_t style, bool hasMenu, uint32_t extendedStyle)
+            inline RECT adjust_window_rect(const RECT &inputRect, std::uint32_t style, bool hasMenu, std::uint32_t extendedStyle)
             {
                 RECT result = inputRect;
                 details::make_boolean_call(AdjustWindowRectEx, &result, style, hasMenu, extendedStyle);
@@ -549,7 +569,7 @@ namespace dhorn
                 details::make_boolean_call(AllowSetForegroundWindow, processId);
             }
 
-            inline void animate_window(window_handle window, uint32_t duration, uint32_t flags)
+            inline void animate_window(window_handle window, std::uint32_t duration, std::uint32_t flags)
             {
                 details::make_boolean_call(AnimateWindow, window, duration, flags);
             }
@@ -609,7 +629,7 @@ namespace dhorn
             inline window_handle create_window(
                 const tstring &className,
                 const tstring &windowName,
-                uint32_t style,
+                std::uint32_t style,
                 int x = CW_USEDEFAULT,
                 int y = CW_USEDEFAULT,
                 int width = CW_USEDEFAULT,
@@ -639,10 +659,10 @@ namespace dhorn
             }
 
             inline window_handle create_window(
-                uint32_t extendedStyle,
+                std::uint32_t extendedStyle,
                 const tstring &className,
                 const tstring &windowName,
-                uint32_t style,
+                std::uint32_t style,
                 int x = CW_USEDEFAULT,
                 int y = CW_USEDEFAULT,
                 int width = CW_USEDEFAULT,
@@ -674,17 +694,17 @@ namespace dhorn
                 details::make_boolean_call(DestroyWindow, window);
             }
 
-            inline void enum_child_windows(window_handle parentWindow, WNDENUMPROC func, intptr_t param)
+            inline void enum_child_windows(window_handle parentWindow, WNDENUMPROC func, std::intptr_t param)
             {
                 details::make_boolean_call(EnumChildWindows, parentWindow, func, param);
             }
 
-            inline void enum_thread_windows(tid_t threadId, WNDENUMPROC func, intptr_t param)
+            inline void enum_thread_windows(tid_t threadId, WNDENUMPROC func, std::intptr_t param)
             {
                 details::make_boolean_call(EnumThreadWindows, threadId, func, param);
             }
 
-            inline void enum_windows(WNDENUMPROC func, intptr_t param)
+            inline void enum_windows(WNDENUMPROC func, std::intptr_t param)
             {
                 details::make_boolean_call(EnumWindows, func, param);
             }
@@ -777,7 +797,7 @@ namespace dhorn
                 return details::make_call_fail_on_value<HWND>(GetParent, child);
             }
 
-            inline uint32_t get_process_default_layout(void)
+            inline std::uint32_t get_process_default_layout(void)
             {
                 DWORD result;
                 details::make_boolean_call(GetProcessDefaultLayout, &result);
@@ -790,7 +810,7 @@ namespace dhorn
                 return details::make_call_fail_on_value<HWND>(GetShellWindow);
             }
 
-            inline uint32_t get_sys_color(int index)
+            inline std::uint32_t get_sys_color(int index)
             {
                 return GetSysColor(index);
             }
@@ -818,7 +838,7 @@ namespace dhorn
                 GetWindowText(window, text, len);
             }
 
-            template <size_t size>
+            template <std::size_t size>
             inline void get_window_text(window_handle window, TCHAR text[size])
             {
                 GetWindowText(window, text, size);
@@ -828,7 +848,7 @@ namespace dhorn
             inline tstring get_window_text(window_handle window)
             {
                 // Get the estimated size
-                size_t size = std::min(GetWindowTextLength(window), max_length) + 1;
+                std::size_t size = std::min(GetWindowTextLength(window), max_length) + 1;
                 std::unique_ptr<TCHAR> str(new TCHAR[size]);
                 GetWindowText(window, str.get(), size);
 
@@ -836,11 +856,11 @@ namespace dhorn
                 return result;
             }
 
-            inline uint32_t get_window_thread_process_id(window_handle window, uint32_t *processId = nullptr)
+            inline std::uint32_t get_window_thread_process_id(window_handle window, std::uint32_t *processId = nullptr)
             {
-                // uint32_t* is not implicitly castable to DWORD* even though they will be the same
+                // std::uint32_t* is not implicitly castable to DWORD* even though they will be the same
                 // size, so we must reinterpret_cast here
-                return details::make_call_fail_on_value<uint32_t, 0>(
+                return details::make_call_fail_on_value<std::uint32_t, 0>(
                     GetWindowThreadProcessId,
                     window,
                     reinterpret_cast<DWORD *>(processId));
@@ -868,11 +888,11 @@ namespace dhorn
              */
 #pragma region Window Procedure Functions
 
-            inline intptr_t default_window_procedure(
+            inline std::intptr_t default_window_procedure(
                 window_handle window,
                 unsigned message,
-                uintptr_t wparam,
-                intptr_t lparam)
+                std::uintptr_t wparam,
+                std::intptr_t lparam)
             {
                 return DefWindowProc(window, message, wparam, lparam);
             }

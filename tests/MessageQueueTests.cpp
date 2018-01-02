@@ -24,12 +24,12 @@ namespace dhorn
         {
             TEST_METHOD(SingleThreadTest)
             {
-                const size_t testCount = 100;
+                const std::size_t testCount = 100;
                 dhorn::experimental::message_queue<int(int, int)> msgQueue;
                 int x = 0;
 
                 // Insert data
-                for (size_t i = 0; i < testCount; ++i)
+                for (std::size_t i = 0; i < testCount; ++i)
                 {
                     msgQueue.push_back([&](int a, int b) -> int
                     {
@@ -42,7 +42,7 @@ namespace dhorn
 
                 // Remove data
                 int localCount = 0;
-                for (size_t i = 0; i < testCount; ++i)
+                for (std::size_t i = 0; i < testCount; ++i)
                 {
                     Assert::IsTrue(msgQueue.pop_front()(i, 1) == static_cast<int>(i + 1));
                     Assert::IsTrue(x == ++localCount);
@@ -51,13 +51,13 @@ namespace dhorn
 
             TEST_METHOD(SingleProducerSingleConsumerTest)
             {
-                const size_t testCount = 100;
+                const std::size_t testCount = 100;
                 dhorn::experimental::message_queue<void(void)> msgQueue;
                 int x = 0;
 
                 std::thread producer([&]()
                 {
-                    for (size_t i = 0; i < testCount; ++i)
+                    for (std::size_t i = 0; i < testCount; ++i)
                     {
                         msgQueue.push_back([&]()
                         {
@@ -68,7 +68,7 @@ namespace dhorn
 
                 // The test thread is the consumer
                 int localCount = 0;
-                for (size_t i = 0; i < testCount; ++i)
+                for (std::size_t i = 0; i < testCount; ++i)
                 {
                     msgQueue.pop_front()();
                     Assert::IsTrue(x == ++localCount);
@@ -79,17 +79,17 @@ namespace dhorn
 
             TEST_METHOD(MultipleProducersSingleConsumerTest)
             {
-                const size_t testCount = 1000;
-                const size_t producerCount = 20;
+                const std::size_t testCount = 1000;
+                const std::size_t producerCount = 20;
                 dhorn::experimental::message_queue<void(void)> msgQueue;
                 int counts[producerCount] = {};
 
                 std::vector<std::thread> producers;
-                for (size_t i = 0; i < producerCount; ++i)
+                for (std::size_t i = 0; i < producerCount; ++i)
                 {
                     producers.emplace_back([i, testCount, &msgQueue, &counts]()
                     {
-                        for (size_t j = 0; j < testCount; ++j)
+                        for (std::size_t j = 0; j < testCount; ++j)
                         {
                             msgQueue.push_back([&counts, i]()
                             {
@@ -100,7 +100,7 @@ namespace dhorn
                 }
 
                 int localCount = 0;
-                for (size_t i = 0; i < testCount * producerCount; ++i)
+                for (std::size_t i = 0; i < testCount * producerCount; ++i)
                 {
                     msgQueue.pop_front()();
 
@@ -118,8 +118,8 @@ namespace dhorn
 
             TEST_METHOD(SingleProducerMultipleConsumersTest)
             {
-                const size_t testCount = 5000;
-                const size_t consumerCount = 20;
+                const std::size_t testCount = 5000;
+                const std::size_t consumerCount = 20;
                 static_assert(testCount % consumerCount == 0, "Must be divisible");
                 dhorn::experimental::message_queue<void(void)> msgQueue;
                 std::atomic_int x{};
@@ -129,14 +129,14 @@ namespace dhorn
                 {
                     consumers.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < testCount / consumerCount; ++j)
+                        for (std::size_t j = 0; j < testCount / consumerCount; ++j)
                         {
                             msgQueue.pop_front()();
                         }
                     });
                 }
 
-                for (size_t i = 0; i < testCount; ++i)
+                for (std::size_t i = 0; i < testCount; ++i)
                 {
                     msgQueue.push_back([&]()
                     {
@@ -148,24 +148,24 @@ namespace dhorn
                 {
                     thread.join();
                 }
-                Assert::IsTrue(static_cast<size_t>(x) == testCount);
+                Assert::IsTrue(static_cast<std::size_t>(x) == testCount);
             }
 
             TEST_METHOD(MultipleProducersMultipleConsumersTest)
             {
-                const size_t testCount = 1000;
-                const size_t producerCount = 20;
-                const size_t consumerCount = 20;
+                const std::size_t testCount = 1000;
+                const std::size_t producerCount = 20;
+                const std::size_t consumerCount = 20;
                 dhorn::experimental::message_queue<void(void)> msgQueue;
                 std::atomic_int counts[producerCount] = {};
                 std::atomic_int x{};
 
                 std::vector<std::thread> producers;
-                for (size_t i = 0; i < producerCount; ++i)
+                for (std::size_t i = 0; i < producerCount; ++i)
                 {
                     producers.emplace_back([i, testCount, &msgQueue, &counts, &x]()
                     {
-                        for (size_t j = 0; j < testCount; ++j)
+                        for (std::size_t j = 0; j < testCount; ++j)
                         {
                             msgQueue.push_back([&counts, &x, i]()
                             {
@@ -181,7 +181,7 @@ namespace dhorn
                 {
                     consumers.emplace_back([&]()
                     {
-                        for (size_t j = 0; j < testCount; ++j)
+                        for (std::size_t j = 0; j < testCount; ++j)
                         {
                             msgQueue.pop_front()();
                         }
@@ -197,7 +197,7 @@ namespace dhorn
                 for (auto &thread : producers)
                 {
                     thread.join();
-                    Assert::IsTrue(static_cast<size_t>(counts[index++]) == testCount);
+                    Assert::IsTrue(static_cast<std::size_t>(counts[index++]) == testCount);
                 }
 
                 Assert::IsTrue(x == (testCount * producerCount));
@@ -205,12 +205,12 @@ namespace dhorn
 
             TEST_METHOD(TryPopFrontTest)
             {
-                const size_t testCount = 100;
+                const std::size_t testCount = 100;
                 dhorn::experimental::message_queue<void(void)> msgQueue;
                 int x = 0;
 
                 // Insert data
-                for (size_t i = 0; i < testCount; ++i)
+                for (std::size_t i = 0; i < testCount; ++i)
                 {
                     msgQueue.push_back([&]()
                     {

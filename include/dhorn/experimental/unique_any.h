@@ -73,7 +73,7 @@ namespace dhorn
             std::default_delete<typename std::remove_pointer<Ty>::type>, // Use operator delete if it's a pointer
             details::no_op<Ty>>::type, // Just nop if it's a non-pointer type (i.e. has destructor)
             typename Traits = details::unique_any_traits<typename details::unique_storage<Ty>::type>>
-            class unique_any
+        class unique_any
         {
             using storage_type = typename details::unique_storage<Ty>::type;
 
@@ -173,7 +173,8 @@ namespace dhorn
 
             void swap(unique_any &other)
             {
-                std::swap(this->_value, other._value);
+                using std::swap;
+                swap(this->_value, other._value);
             }
 
 
@@ -191,6 +192,12 @@ namespace dhorn
 
             storage_type _value;
         };
+
+        template <typename Ty, typename DestroyType, typename Traits>
+        void swap(unique_any<Ty, DestroyType, Traits> &lhs, unique_any<Ty, DestroyType, Traits> &rhs)
+        {
+            lhs.swap(rhs);
+        }
 
 #pragma endregion
 
@@ -351,18 +358,3 @@ namespace dhorn
 #pragma endregion
     }
 }
-
-
-
-#ifndef DHORN_NO_STD
-
-namespace std
-{
-    template <typename Ty, typename DestroyType, typename Traits>
-    void swap(dhorn::experimental::unique_any<Ty, DestroyType, Traits> &lhs, dhorn::experimental::unique_any<Ty, DestroyType, Traits> &rhs)
-    {
-        lhs.swap(rhs);
-    }
-}
-
-#endif

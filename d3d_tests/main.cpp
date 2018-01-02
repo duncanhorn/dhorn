@@ -6,6 +6,7 @@
  * Functional tests for the dhorn::experimental::d3d namespace. Namely the d3d_window class
  */
 
+#include <dhorn/com/hresult_error.h>
 #include <dhorn/experimental/d3d11/d3d11_utils.h>
 #include <dhorn/experimental/d3d11/d3d11_window.h>
 #include <dhorn/experimental/d3d/colors.h>
@@ -17,12 +18,12 @@
 // Define the globals
 dhorn::experimental::d3d::camera globals::camera;
 dhorn::experimental::d3d11::d3d11_window globals::window;
-dhorn::experimental::com_ptr<ID3D11VertexShader> globals::vertex_shader;
-dhorn::experimental::com_ptr<ID3D11PixelShader> globals::pixel_shader;
-dhorn::experimental::com_ptr<ID3D11InputLayout> globals::input_layout;
-dhorn::experimental::com_ptr<ID3D11Buffer> globals::cuboid_vertices;
-dhorn::experimental::com_ptr<ID3D11Buffer> globals::cuboid_indices;
-dhorn::experimental::com_ptr<ID3D11Buffer> globals::object_data;
+dhorn::com::com_ptr<ID3D11VertexShader> globals::vertex_shader;
+dhorn::com::com_ptr<ID3D11PixelShader> globals::pixel_shader;
+dhorn::com::com_ptr<ID3D11InputLayout> globals::input_layout;
+dhorn::com::com_ptr<ID3D11Buffer> globals::cuboid_vertices;
+dhorn::com::com_ptr<ID3D11Buffer> globals::cuboid_indices;
+dhorn::com::com_ptr<ID3D11Buffer> globals::object_data;
 
 bool globals::forward = false;
 bool globals::backward = false;
@@ -37,7 +38,6 @@ bool globals::right = false;
 #define OUTPUT_PATH "Release\\"
 #endif
 
-
 struct object_data
 {
     DirectX::XMFLOAT4X4 viewProjectionMatrix;
@@ -46,7 +46,7 @@ struct object_data
 
 static void load_shaders(void)
 {
-    std::vector<uint8_t> vertexShaderBytecode;
+    std::vector<std::uint8_t> vertexShaderBytecode;
     globals::vertex_shader = dhorn::experimental::d3d11::load_vertex_shader(
         globals::window.device(),
         OUTPUT_PATH "VertexShader.cso",
@@ -58,7 +58,7 @@ static void load_shaders(void)
         dhorn::experimental::d3d11::input_element_desc(&vertex::normal, DXGI_FORMAT_R32G32B32_FLOAT, "NORMAL"),
         dhorn::experimental::d3d11::input_element_desc(&vertex::color, DXGI_FORMAT_R32G32B32A32_FLOAT, "COLOR")
     };
-    dhorn::experimental::throw_if_failed(globals::window.device()->CreateInputLayout(
+    dhorn::com::check_hresult(globals::window.device()->CreateInputLayout(
         inputDesc, std::size(inputDesc),
         vertexShaderBytecode.data(), vertexShaderBytecode.size(),
         &globals::input_layout));
@@ -97,10 +97,10 @@ static void load_geometry(void)
 }
 
 
-static std::pair<bool, intptr_t> key_press_handler(
+static std::pair<bool, std::intptr_t> key_press_handler(
     dhorn::experimental::win32::window * /*sender*/,
-    uintptr_t wparam,
-    intptr_t lparam)
+    std::uintptr_t wparam,
+    std::intptr_t lparam)
 {
     bool handled = false;
     bool key_down = (lparam & 0x80000000) == 0;
@@ -156,14 +156,14 @@ static void move_cursor(void)
 }
 
 
-static std::pair<bool, intptr_t> mouse_move_handler(
+static std::pair<bool, std::intptr_t> mouse_move_handler(
     dhorn::experimental::win32::window * /*sender*/,
-    uintptr_t /*wparam*/,
-    intptr_t lparam)
+    std::uintptr_t /*wparam*/,
+    std::intptr_t lparam)
 {
     bool handled = false;
-    size_t x = static_cast<uint16_t>(LOWORD(lparam));
-    size_t y = static_cast<uint16_t>(HIWORD(lparam));
+    std::size_t x = static_cast<std::uint16_t>(LOWORD(lparam));
+    std::size_t y = static_cast<std::uint16_t>(HIWORD(lparam));
 
     float delta_x = static_cast<float>(x) - 300;
     if (delta_x != 0)
@@ -242,28 +242,28 @@ int WINAPI wWinMain(
     globals::window.on_draw([&](ID3D11Device * /*device*/, ID3D11DeviceContext *context)
     {
         context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        context->IASetInputLayout(globals::input_layout);
-        context->VSSetShader(globals::vertex_shader, nullptr, 0);
-        context->PSSetShader(globals::pixel_shader, nullptr, 0);
+        context->IASetInputLayout(globals::input_layout.get());
+        context->VSSetShader(globals::vertex_shader.get(), nullptr, 0);
+        context->PSSetShader(globals::pixel_shader.get(), nullptr, 0);
 
         UINT stride = sizeof(vertex);
         UINT offset = 0;
-        context->IASetVertexBuffers(0, 1, globals::cuboid_vertices.get_address_of(), &stride, &offset);
-        context->IASetIndexBuffer(globals::cuboid_indices, DXGI_FORMAT_R32_UINT, 0);
+        context->IASetVertexBuffers(0, 1, globals::cuboid_vertices.address_of(), &stride, &offset);
+        context->IASetIndexBuffer(globals::cuboid_indices.get(), DXGI_FORMAT_R32_UINT, 0);
 
         // Update the constant buffer
         object_data objData;
         DirectX::XMStoreFloat4x4(
             &objData.viewProjectionMatrix,
             DirectX::XMMatrixTranspose(globals::camera.view_projection_matrix()));
-        context->UpdateSubresource(globals::object_data, 0, nullptr, &objData, 0, 0);
-        context->VSSetConstantBuffers(0, 1, globals::object_data.get_address_of());
+        context->UpdateSubresource(globals::object_data.get(), 0, nullptr, &objData, 0, 0);
+        context->VSSetConstantBuffers(0, 1, globals::object_data.address_of());
 
         // Draw the geometry!
         context->DrawIndexed(36, 0, 0);
     });
 
-    globals::window.on_resize([&](const dhorn::experimental::rect<size_t> &clientArea)
+    globals::window.on_resize([&](const dhorn::experimental::rect<std::size_t> &clientArea)
     {
         float ratio = static_cast<float>(clientArea.width) / static_cast<float>(clientArea.height);
         globals::camera.configure_frustum(0.1f, 100.0f, DirectX::XM_PIDIV2, ratio);

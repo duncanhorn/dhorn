@@ -1,13 +1,13 @@
 /*
  * Duncan Horn
  *
- * ComPtrTests.cpp
+ * ComTraitsTests.cpp
  *
- * Tests for the com_utility.h header
+ * Tests for the com_traits.h header
  */
 #include "stdafx.h"
 
-#include <dhorn/com/com_utility.h>
+#include <dhorn/com/com_traits.h>
 
 #include "TestInterfaces.h"
 
@@ -92,6 +92,23 @@ namespace dhorn::tests
             Assert::IsFalse(dhorn::com::all_unknown<IFoo, std::string, IFoo>::value);
             Assert::IsFalse(dhorn::com::all_unknown<IFoo, IBar, std::string>::value);
             Assert::IsFalse(dhorn::com::all_unknown<std::string, std::wstring, int>::value);
+        }
+    };
+
+
+
+    TEST_CLASS(ComTraitsTests)
+    {
+        TEST_METHOD(HasIidTest)
+        {
+            Assert::IsFalse(com::has_iid_v<std::string>);
+            Assert::IsTrue(com::has_iid_v<IUnknown>);
+
+            struct __declspec(uuid("7D7C05B6-75ED-4B8E-8631-DFBD3084CFED")) HasUuid : public IUnknown {};
+            struct NoUuid : public IUnknown {};
+
+            Assert::IsTrue(com::has_iid_v<HasUuid>);
+            Assert::IsFalse(com::has_iid_v<NoUuid>);
         }
     };
 }

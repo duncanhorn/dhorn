@@ -7,11 +7,11 @@
  */
 #pragma once
 
-#include <dhorn/experimental/console.h>
+#include <dhorn/console.h>
 
-inline std::ostream& operator<<(std::ostream& stream, dhorn::experimental::console_color color)
+inline std::ostream& operator<<(std::ostream& stream, dhorn::console_color color)
 {
-    using namespace dhorn::experimental;
+    using namespace dhorn;
     switch (color)
     {
     case console_color::black:
@@ -109,7 +109,7 @@ private:
 
     void test_foreground_colors()
     {
-        using namespace dhorn::experimental;
+        using namespace dhorn;
 
         auto black = console::set_foreground(console_color::black);
         std::cout << "black" << std::endl;
@@ -162,7 +162,7 @@ private:
 
     void test_background_colors()
     {
-        using namespace dhorn::experimental;
+        using namespace dhorn;
 
         auto black = console::set_background(console_color::black);
         std::cout << "black" << std::endl;
@@ -215,17 +215,20 @@ private:
 
     void test_console_info()
     {
-        auto bounds = dhorn::experimental::console::bounds();
+        auto bounds = dhorn::console::bounds();
         std::cout << "Console position: (" << bounds.x << ", " << bounds.y << ")" << std::endl;
         std::cout << "Console size: " << bounds.width << "x" << bounds.height << std::endl;
 
-        auto size = dhorn::experimental::console::buffer_size();
+        auto size = dhorn::console::buffer_size();
         std::cout << "Console buffer size: " << size.width << "x" << size.height << std::endl;
 
-        auto pos = dhorn::experimental::console::cursor_position();
+        auto pos = dhorn::console::cursor_position();
         std::cout << "Console cursor position: (" << pos.x << ", " << pos.y << ")" << std::endl;
 
-        std::cout << "Console foreground color: " << dhorn::experimental::console::foreground() << std::endl;
-        std::cout << "Console background color: " << dhorn::experimental::console::background() << std::endl;
+        std::cout << "Console foreground color: " << dhorn::console::foreground() << std::endl;
+        std::cout << "Console background color: " << dhorn::console::background() << std::endl;
+
+        std::cout << "Setting console title to \"foobar\"" << std::endl;
+        dhorn::console::set_title(L"foobar");
     }
 };

@@ -200,13 +200,7 @@ namespace dhorn
         namespace details
         {
             template <typename MapItr>
-            class json_object_iterator_base :
-                public std::iterator<
-                    typename MapItr::iterator_category,
-                    typename MapItr::value_type,
-                    typename MapItr::difference_type,
-                    typename MapItr::pointer,
-                    typename MapItr::reference>
+            class json_object_iterator_base
             {
             protected:
                 friend class json_object;
@@ -214,6 +208,17 @@ namespace dhorn
                 using internal_iterator = MapItr;
 
             public:
+                /*
+                 * Iterator Types
+                 */
+                using iterator_category = typename MapItr::iterator_category;
+                using value_type = typename MapItr::value_type;
+                using difference_type = typename MapItr::difference_type;
+                using pointer = typename MapItr::pointer;
+                using reference = typename MapItr::reference;
+
+
+
                 /*
                  * Constructor(s)/Destructor
                  */
@@ -364,7 +369,7 @@ namespace dhorn
             {
                 auto itr = this->_map.find(str);
 
-                if (itr != std::end(this->_map))
+                if (itr != this->_map.end())
                 {
                     return itr->second;
                 }
@@ -380,7 +385,7 @@ namespace dhorn
              */
             iterator begin(void)
             {
-                return iterator(std::begin(this->_map));
+                return iterator(this->_map.begin());
             }
 
             const_iterator begin(void) const
@@ -390,12 +395,12 @@ namespace dhorn
 
             const_iterator cbegin(void) const
             {
-                return const_iterator(std::begin(this->_map));
+                return const_iterator(this->_map.begin());
             }
 
             reverse_iterator rbegin(void)
             {
-                return reverse_iterator(std::end(this->_map));
+                return reverse_iterator(this->_map.end());
             }
 
             const_reverse_iterator rbegin(void) const
@@ -405,12 +410,12 @@ namespace dhorn
 
             const_reverse_iterator crbegin(void) const
             {
-                return const_reverse_iterator(std::end(this->_map));
+                return const_reverse_iterator(this->_map.end());
             }
 
             iterator end(void)
             {
-                return iterator(std::end(this->_map));
+                return iterator(this->_map.end());
             }
 
             const_iterator end(void) const
@@ -420,12 +425,12 @@ namespace dhorn
 
             const_iterator cend(void) const
             {
-                return const_iterator(std::end(this->_map));
+                return const_iterator(this->_map.end());
             }
 
             reverse_iterator rend(void)
             {
-                return reverse_iterator(std::begin(this->_map));
+                return reverse_iterator(this->_map.begin());
             }
 
             const_reverse_iterator rend(void) const
@@ -435,7 +440,7 @@ namespace dhorn
 
             const_reverse_iterator crend(void) const
             {
-                return const_reverse_iterator(std::begin(this->_map));
+                return const_reverse_iterator(this->_map.begin());
             }
 
 
@@ -1091,7 +1096,7 @@ namespace dhorn
                 inline value_type operator()(const json_value *value) const
                 {
                     value_type result;
-                    constexpr size_t size = result.size();
+                    constexpr std::size_t size = result.size();
 
                     auto jsonArray = value->as<json_array>();
                     auto &array = jsonArray->array();
@@ -1100,7 +1105,7 @@ namespace dhorn
                         throw json_exception("Unexpected array size");
                     }
 
-                    for (size_t i = 0; i < size; ++i)
+                    for (std::size_t i = 0; i < size; ++i)
                     {
                         result[i] = json_cast<typename value_type::value_type>(array[i].get());
                     }
@@ -1219,13 +1224,13 @@ namespace dhorn
          */
 #pragma region std::array Casting
 
-        template <typename Ty, size_t Size>
+        template <typename Ty, std::size_t Size>
         struct json_cast_t<std::array<Ty, Size>> :
             public details::random_access_json_cast_t<std::array<Ty, Size>>
         {
         };
 
-        template <typename Ty, size_t Size>
+        template <typename Ty, std::size_t Size>
         struct make_json_t<std::array<Ty, Size>> :
             public details::sequence_container_make_json_t<std::array<Ty, Size>>
         {
@@ -1407,7 +1412,7 @@ namespace dhorn
 
                         auto key = json_cast<KeyTy>(pairVector[0].get());
                         auto itr = result.find(key);
-                        if (itr != std::end(result))
+                        if (itr != result.end())
                         {
                             throw json_exception("Keys are not unique");
                         }

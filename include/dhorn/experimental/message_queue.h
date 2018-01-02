@@ -3,7 +3,7 @@
  *
  * message_queue.h
  *
- * 
+ *
  */
 #pragma once
 
@@ -99,7 +99,7 @@ namespace dhorn
                 return this->_size == 0;
             }
 
-            size_t size(void) const
+            std::size_t size(void) const
             {
                 return this->_size;
             }
@@ -203,7 +203,7 @@ namespace dhorn
 
             details::message_queue_node<MyTypes> _front;
             details::message_queue_node<MyTypes> *_back;
-            size_t _size;
+            std::size_t _size;
 
             std::mutex _frontMutex;
             std::mutex _backMutex;

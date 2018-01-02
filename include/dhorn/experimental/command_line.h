@@ -32,7 +32,7 @@
  * element, stopping when the parent reaches the last element in the contiguous set of non-switch elements. This gives
  * the most ideal iterating experience:
  *
- *      for (auto itr = std::begin(cmd); itr != std::end(cmd); ++itr)
+ *      for (auto itr = cmd.begin(); itr != cmd.end(); ++itr)
  *      {
  *          if (is_command_line_switch(*itr))
  *          {
@@ -222,8 +222,7 @@ namespace dhorn
 #pragma region Iterator Types
 
         template <typename CmdLine, typename IsSwitch>
-        class command_line_switch_iterator :
-            public std::iterator<std::forward_iterator_tag, typename const CmdLine::value_type>
+        class command_line_switch_iterator
         {
             /*
              * Private types
@@ -233,6 +232,17 @@ namespace dhorn
             using index_t = typename container::size_type;
 
         public:
+            /*
+             * Iterator Types
+             */
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = typename const CmdLine::value_type;
+            using difference_type = std::ptrdiff_t;
+            using reference = value_type&;
+            using pointer = value_type*;
+
+
+
             /*
              * Constructor(s)/Destructor
              */
@@ -325,8 +335,7 @@ namespace dhorn
 
 
         template <typename CmdLine, typename IsSwitch>
-        class command_line_iterator :
-            public std::iterator<std::forward_iterator_tag, typename const CmdLine::value_type>
+        class command_line_iterator
         {
             /*
              * Private types
@@ -335,6 +344,17 @@ namespace dhorn
             using index_t = typename container::size_type;
 
         public:
+            /*
+             * Iterator Types
+             */
+            using iterator_category = std::forward_iterator_tag;
+            using value_type = typename const CmdLine::value_type;
+            using difference_type = std::ptrdiff_t;
+            using reference = value_type&;
+            using pointer = value_type*;
+
+
+
             /*
              * Public Types
              */

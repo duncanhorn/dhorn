@@ -7,11 +7,10 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <string>
 #include <memory>
-
-#include "algorithm.h"
 
 namespace dhorn
 {
@@ -92,7 +91,7 @@ namespace dhorn
 
 #pragma region utf-8
 
-            inline constexpr size_t size_utf8(char ch) noexcept
+            inline constexpr std::size_t size_utf8(char ch) noexcept
             {
                 // UTF-8 character widths are defined as:
                 // 0xxx xxxx    - 1 byte wide
@@ -106,7 +105,7 @@ namespace dhorn
                     ((ch & 0xF8) == 0xF0) ? 4 : 0;
             }
 
-            inline constexpr size_t size_utf8(char32_t val) noexcept
+            inline constexpr std::size_t size_utf8(char32_t val) noexcept
             {
                 // The format of a utf-8 character is (A is first byte, B is second, etc.):
                 // 1 byte:  0000 0000 0000 0000 0000 0000 0AAA AAAA
@@ -122,7 +121,7 @@ namespace dhorn
 
             inline char32_t read_utf8(const char *str, const char **result)
             {
-                size_t size = size_utf8(*str);
+                std::size_t size = size_utf8(*str);
                 unsigned char mask = 0xFF >> size;
                 char32_t val = 0;
 
@@ -132,7 +131,7 @@ namespace dhorn
                 }
 
                 // TODO: Figure out how much of a performance benefit there is to hard-code this
-                for (size_t i = 0; i < size; ++i)
+                for (std::size_t i = 0; i < size; ++i)
                 {
                     if ((i > 0) && ((*str & 0xC0) != 0x80))
                     {
@@ -156,18 +155,18 @@ namespace dhorn
 
 #pragma region utf-16
 
-            inline constexpr size_t size_utf16(char16_t ch) noexcept
+            inline constexpr std::size_t size_utf16(char16_t ch) noexcept
             {
                 // UTF-16 character widths are defined as:
                 // 1101 10xx xxxx xxxx  - 2 characters (4 bytes)
                 // 1101 11xx xxxx xxxx  - INVALID
                 // Else: 1 character (2 bytes)
                 return
-                    ((static_cast<uint16_t>(ch) & 0xFC00) == 0xD800) ? 2 :
-                    ((static_cast<uint16_t>(ch) & 0xFC00) == 0xDC00) ? 0 : 1;
+                    ((static_cast<std::uint16_t>(ch) & 0xFC00) == 0xD800) ? 2 :
+                    ((static_cast<std::uint16_t>(ch) & 0xFC00) == 0xDC00) ? 0 : 1;
             }
 
-            inline constexpr size_t size_utf16(char32_t ch) noexcept
+            inline constexpr std::size_t size_utf16(char32_t ch) noexcept
             {
                 // 0x000000 to 0x00D7FF:    1 character (2 bytes)
                 // 0x00D800 to 0x00DFFF:    INVALID
@@ -237,7 +236,7 @@ namespace dhorn
                 static const utf_encoding encoding = utf_encoding::utf_8;
                 using value_type = char;
 
-                static inline constexpr size_t size(value_type val) noexcept
+                static inline constexpr std::size_t size(value_type val) noexcept
                 {
                     return size_utf8(val);
                 }
@@ -261,16 +260,16 @@ namespace dhorn
 
                 static inline value_type *write(char32_t val, value_type *pos)
                 {
-                    size_t bytes = size_utf8(val);
+                    std::size_t bytes = size_utf8(val);
                     verify_character(utf_encoding::utf_8, val);
 
                     static const unsigned char masks[] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0 };
                     auto mask = masks[bytes];
 
                     // All bytes past the first one are six bits of data long
-                    size_t shift = (bytes - 1) * 6;
+                    std::size_t shift = (bytes - 1) * 6;
 
-                    for (size_t i = 0; i < bytes; ++i)
+                    for (std::size_t i = 0; i < bytes; ++i)
                     {
                         // All masks start with all 1s followed by a single 0. We use that knowledge to our advantage
                         *pos = ((val >> shift) & (~mask >> 1)) | mask;
@@ -292,7 +291,7 @@ namespace dhorn
                 static const utf_encoding encoding = utf_encoding::utf_16;
                 using value_type = char16_t;
 
-                static inline constexpr size_t size(value_type val) noexcept
+                static inline constexpr std::size_t size(value_type val) noexcept
                 {
                     return size_utf16(val);
                 }
@@ -312,7 +311,7 @@ namespace dhorn
 
                 static inline value_type *write(char32_t val, value_type *pos)
                 {
-                    size_t bytes = size_utf16(val);
+                    std::size_t bytes = size_utf16(val);
                     verify_character(utf_encoding::utf_16, val);
 
                     if (bytes == 1)
@@ -339,7 +338,7 @@ namespace dhorn
                 static const utf_encoding encoding = utf_encoding::utf_32;
                 using value_type = char32_t;
 
-                static inline constexpr size_t size(value_type /*val*/) noexcept
+                static inline constexpr std::size_t size(value_type /*val*/) noexcept
                 {
                     return 1;
                 }
@@ -432,6 +431,17 @@ namespace dhorn
             using Traits = typename details::utf_encoding_from_char<CharT>::traits_type;
 
         public:
+            /*
+             * Iterator Types
+             */
+            using value_type = char32_t;
+            using reference = char32_t;
+            using pointer = CharT*;
+            using difference_type = std::ptrdiff_t;
+            using iterator_category = std::bidirectional_iterator_tag;
+
+
+
             /*
              * Constructor(s)/Destructor
              */
@@ -540,7 +550,7 @@ namespace dhorn
              * Public Type and Constants Definitions
              */
             using value_type = typename Traits::value_type;
-            using size_type = size_t;
+            using size_type = std::size_t;
             using iterator = utf_string_iterator<CharT>;
             using const_iterator = utf_string_iterator<CharT>;
             using reverse_iterator = std::reverse_iterator<iterator>;
@@ -754,25 +764,25 @@ namespace dhorn
                 return (this->_length == 0);
             }
 
-            size_t length(void) const noexcept
+            std::size_t length(void) const noexcept
             {
                 // Length of the string
                 return this->_length;
             }
 
-            size_t size(void) const noexcept
+            std::size_t size(void) const noexcept
             {
                 // Size of the string buffer (minus the null character)
                 return this->BufferSize();
             }
 
-            size_t capacity(void) const noexcept
+            std::size_t capacity(void) const noexcept
             {
                 // Size of the complete string buffer available minus the null character
                 return this->Capacity() - 1;
             }
 
-            void reserve(size_t desiredSize)
+            void reserve(std::size_t desiredSize)
             {
                 this->Resize(desiredSize);
             }
@@ -828,26 +838,27 @@ namespace dhorn
              */
             void swap(utf_string &other)
             {
-                std::swap(this->_front, other._front);
-                std::swap(this->_back, other._back);
-                std::swap(this->_bounds, other._bounds);
-                std::swap(this->_length, other._length);
+                using std::swap;
+                swap(this->_front, other._front);
+                swap(this->_back, other._back);
+                swap(this->_bounds, other._bounds);
+                swap(this->_length, other._length);
             }
 
 
 
         private:
 
-            static const size_t max_char_size = sizeof(char32_t) / sizeof(value_type);
+            static const std::size_t max_char_size = sizeof(char32_t) / sizeof(value_type);
 
             // Returns pair (length, buffer size)
             template <typename CharType>
-            static std::pair<size_t, size_t> BufferSizeFromStringLiteral(const CharType *str)
+            static std::pair<std::size_t, std::size_t> BufferSizeFromStringLiteral(const CharType *str)
             {
                 using their_traits = typename details::utf_encoding_from_char<CharType>::traits_type;
 
                 auto end = str;
-                size_t length = 0;
+                std::size_t length = 0;
                 while (*end)
                 {
                     ++length;
@@ -880,7 +891,7 @@ namespace dhorn
                 *this->_back = '\0';
             }
 
-            inline void Copy(const CharT *str, size_t length, size_t bufferSize)
+            inline void Copy(const CharT *str, std::size_t length, std::size_t bufferSize)
             {
                 assert(this->_back + bufferSize < this->_bounds);
                 memcpy(this->_back, str, bufferSize * sizeof(value_type));
@@ -1111,11 +1122,11 @@ namespace dhorn
                 assert(this->_back < this->_bounds);
             }
 
-            inline void Resize(size_t desiredCapacity)
+            inline void Resize(std::size_t desiredCapacity)
             {
-                size_t currentCapacity = this->Capacity();
-                size_t bufferSize = this->BufferSize();
-                size_t capacity = max(currentCapacity, max_char_size + 1, desiredCapacity + 1);
+                std::size_t currentCapacity = this->Capacity();
+                std::size_t bufferSize = this->BufferSize();
+                std::size_t capacity = std::max(max_char_size + 1, std::max(currentCapacity, desiredCapacity + 1));
                 assert(capacity >= (bufferSize + max_char_size + 1));
 
                 // Don't resize if we don't need to
@@ -1133,14 +1144,14 @@ namespace dhorn
                 }
             }
 
-            inline size_t BufferSize(void) const noexcept
+            inline std::size_t BufferSize(void) const noexcept
             {
                 // Size (in units of value_type) of the string *NOT* inluding the null character. I.e. the size that we
                 // need to copy on resize
                 return (this->_back - this->_front);
             }
 
-            inline size_t Capacity(void) const noexcept
+            inline std::size_t Capacity(void) const noexcept
             {
                 // Size of our internal buffer (includes the null character)
                 return (this->_bounds - this->_front);
@@ -1151,7 +1162,7 @@ namespace dhorn
                 return (itr._ptr >= this->_front) && (itr._ptr <= this->_back);
             }
 
-            size_t _length;
+            std::size_t _length;
             value_type *_front;     // Always points at first character
             value_type *_back;      // Always points at the null character
             value_type *_bounds;    // Always points one past the last location we can write to
@@ -1239,7 +1250,7 @@ namespace dhorn
             }
 
             // There's not much optimization we can do here; we must go character-by-character
-            auto lhsItr = std::begin(lhs);
+            auto lhsItr = lhs.begin();
             for (auto ch : rhs)
             {
                 if (ch != *lhsItr)
@@ -1359,12 +1370,12 @@ namespace dhorn
         template <typename LhsCharT, typename RhsCharT>
         bool operator<(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
         {
-            auto litr = std::begin(lhs);
-            auto ritr = std::begin(rhs);
+            auto litr = lhs.begin();
+            auto ritr = rhs.begin();
 
-            for (; litr != std::end(lhs); ++litr, ++ritr)
+            for (; litr != lhs.end(); ++litr, ++ritr)
             {
-                if (ritr == std::end(rhs))
+                if (ritr == rhs.end())
                 {
                     // rhs substring of lhs
                     return false;
@@ -1376,7 +1387,7 @@ namespace dhorn
                 }
             }
 
-            if (ritr != std::end(rhs))
+            if (ritr != rhs.end())
             {
                 // lhs substring of rhs
                 return true;
@@ -1389,12 +1400,12 @@ namespace dhorn
         template <typename LhsCharT, typename RhsCharT>
         bool operator<=(const utf_string<LhsCharT> &lhs, const utf_string<RhsCharT> &rhs)
         {
-            auto litr = std::begin(lhs);
-            auto ritr = std::begin(rhs);
+            auto litr = lhs.begin();
+            auto ritr = rhs.begin();
 
-            for (; litr != std::end(lhs); ++litr, ++ritr)
+            for (; litr != lhs.end(); ++litr, ++ritr)
             {
-                if (ritr == std::end(rhs))
+                if (ritr == rhs.end())
                 {
                     // rhs substring of lhs
                     return false;
@@ -1646,7 +1657,7 @@ namespace std
     template <typename CharT>
     struct hash<dhorn::experimental::utf_string<CharT>>
     {
-        inline size_t operator()(const dhorn::experimental::utf_string<CharT> &str) const
+        inline std::size_t operator()(const dhorn::experimental::utf_string<CharT> &str) const
         {
             // TODO: Make this better. It's not good to create a string just for hashing
             // TODO: This won't be unique across CharT types. Does it need to be?

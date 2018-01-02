@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -22,31 +22,32 @@
     <ProjectGuid>{F7242374-40D8-40D5-ABB5-FF54E43276F8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>dhorn</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -68,27 +69,46 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableCppCoreCheck>true</EnableCppCoreCheck>
+    <EnableExperimentalCppCoreCheck>true</EnableExperimentalCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableCppCoreCheck>true</EnableCppCoreCheck>
+    <EnableExperimentalCppCoreCheck>true</EnableExperimentalCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableCppCoreCheck>true</EnableCppCoreCheck>
+    <EnableExperimentalCppCoreCheck>true</EnableExperimentalCppCoreCheck>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <EnableCppCoreCheck>true</EnableCppCoreCheck>
+    <EnableExperimentalCppCoreCheck>true</EnableExperimentalCppCoreCheck>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -99,9 +119,9 @@
     <ClCompile>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -110,14 +130,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,14 +147,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <EnablePREfast>true</EnablePREfast>
+      <EnablePREfast>false</EnablePREfast>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -145,17 +163,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\dhorn\algorithm.h" />
     <ClInclude Include="include\dhorn\bitmask.h" />
-    <ClInclude Include="include\dhorn\com\com_utility.h" />
+    <ClInclude Include="include\dhorn\compressed_base.h" />
+    <ClInclude Include="include\dhorn\compressed_pair.h" />
+    <ClInclude Include="include\dhorn\com\com_ptr.h" />
+    <ClInclude Include="include\dhorn\com\com_traits.h" />
+    <ClInclude Include="include\dhorn\com\hresult_error.h" />
+    <ClInclude Include="include\dhorn\console.h" />
     <ClInclude Include="include\dhorn\crtp_base.h" />
-    <ClInclude Include="include\dhorn\experimental\algorithm.h" />
+    <ClInclude Include="include\dhorn\debug.h" />
     <ClInclude Include="include\dhorn\experimental\animation.h" />
     <ClInclude Include="include\dhorn\experimental\animation_manager.h" />
     <ClInclude Include="include\dhorn\experimental\array_reference.h" />
     <ClInclude Include="include\dhorn\experimental\command_line.h" />
-    <ClInclude Include="include\dhorn\experimental\com_ptr.h" />
     <ClInclude Include="include\dhorn\experimental\com_utility.h" />
-    <ClInclude Include="include\dhorn\experimental\console.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_window.h" />
     <ClInclude Include="include\dhorn\experimental\d3d\camera.h" />
@@ -174,30 +196,33 @@
     <ClInclude Include="include\dhorn\experimental\linear_animation.h" />
     <ClInclude Include="include\dhorn\experimental\math.h" />
     <ClInclude Include="include\dhorn\experimental\message_queue.h" />
-    <ClInclude Include="include\dhorn\experimental\nullable_value.h" />
     <ClInclude Include="include\dhorn\experimental\numeric.h" />
     <ClInclude Include="include\dhorn\experimental\service_container.h" />
     <ClInclude Include="include\dhorn\experimental\sockets.h" />
     <ClInclude Include="include\dhorn\experimental\socket_stream.h" />
     <ClInclude Include="include\dhorn\experimental\synchronized_object.h" />
-    <ClInclude Include="include\dhorn\experimental\task_pool.h" />
-    <ClInclude Include="include\dhorn\experimental\tree.h" />
     <ClInclude Include="include\dhorn\experimental\unique_any.h" />
     <ClInclude Include="include\dhorn\experimental\unique_event_cookie.h" />
     <ClInclude Include="include\dhorn\experimental\units.h" />
-    <ClInclude Include="include\dhorn\experimental\utf_iterator.h" />
     <ClInclude Include="include\dhorn\experimental\utf_string.h" />
     <ClInclude Include="include\dhorn\experimental\uuid.h" />
     <ClInclude Include="include\dhorn\experimental\windows\window.h" />
     <ClInclude Include="include\dhorn\experimental\windows\windows.h" />
-    <ClInclude Include="include\dhorn\experimental\windows_exception.h" />
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h" />
+    <ClInclude Include="include\dhorn\functional.h" />
+    <ClInclude Include="include\dhorn\iterator.h" />
     <ClInclude Include="include\dhorn\scope_guard.h" />
     <ClInclude Include="include\dhorn\string.h" />
+    <ClInclude Include="include\dhorn\thread_pool.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
+    <ClInclude Include="include\dhorn\utf.h" />
+    <ClInclude Include="include\dhorn\utility.h" />
+    <ClInclude Include="include\dhorn\visitor.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />
+    <ClInclude Include="include\dhorn\windows\guid.h" />
     <ClInclude Include="include\dhorn\windows\tick_count_clock.h" />
-    <ClInclude Include="include\dhorn\winrt\winrt_utility.h" />
+    <ClInclude Include="include\dhorn\winrt\weak_ref.h" />
+    <ClInclude Include="include\dhorn\winrt\winrt_traits.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

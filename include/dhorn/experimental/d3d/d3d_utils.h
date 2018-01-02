@@ -141,21 +141,21 @@ namespace dhorn
 #pragma region Shaders
 
             template <typename CharT>
-            std::vector<uint8_t> read_shader_file(const CharT *path)
+            std::vector<std::uint8_t> read_shader_file(const CharT *path)
             {
                 std::fstream fileStream(path, std::ios::in | std::ios::binary);
                 if (fileStream.fail() || fileStream.bad())
                 {
-                    throw hresult_exception(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
+                    com::throw_hresult(HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND));
                 }
 
                 // Get the size of the file
                 fileStream.seekg(0, std::ios_base::end);
-                size_t bufferSize = static_cast<size_t>(fileStream.tellg());
+                std::size_t bufferSize = static_cast<std::size_t>(fileStream.tellg());
                 fileStream.seekg(0, std::ios_base::beg);
 
                 // Read the data
-                std::vector<uint8_t> buffer(bufferSize);
+                std::vector<std::uint8_t> buffer(bufferSize);
                 fileStream.read(reinterpret_cast<char *>(buffer.data()), bufferSize);
                 fileStream.close();
 

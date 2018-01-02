@@ -148,7 +148,7 @@ namespace dhorn
                 std::vector<std::string> outSwitches;
                 std::vector<std::string> outArgs;
 
-                dhorn::experimental::command_line cmdLine(std::begin(input), std::end(input));
+                dhorn::experimental::command_line cmdLine(input.begin(), input.end());
                 for (auto itr = cmdLine.begin(); itr != cmdLine.end(); ++itr)
                 {
                     output.push_back(*itr);

@@ -94,8 +94,9 @@ namespace dhorn
 
             void swap(basic_unique_event_cookie &other)
             {
-                std::swap(this->_cookie, other._cookie);
-                std::swap(this->_destroyFunc, other._destroyFunc);
+                using std::swap;
+                swap(this->_cookie, other._cookie);
+                swap(this->_destroyFunc, other._destroyFunc);
             }
 
 
@@ -116,11 +117,17 @@ namespace dhorn
         };
 
         template <typename DestroyFuncType>
-        basic_unique_event_cookie<DestroyFuncType> make_event_cookie(
+        inline basic_unique_event_cookie<DestroyFuncType> make_event_cookie(
             event_cookie cookie,
             const std::function<DestroyFuncType> &destroyFunc)
         {
             return basic_unique_event_cookie<DestroyFuncType>(cookie, destroyFunc);
+        }
+
+        template <typename DestroyFuncType>
+        inline void swap(basic_unique_event_cookie<DestroyFuncType> &lhs, basic_unique_event_cookie<DestroyFuncType> &rhs)
+        {
+            lhs.swap(rhs);
         }
 
 
@@ -132,20 +139,3 @@ namespace dhorn
 #pragma endregion
     }
 }
-
-
-
-#ifndef DHORN_NO_STD
-
-namespace std
-{
-    template <typename DestroyFuncType>
-    void swap(
-        dhorn::experimental::basic_unique_event_cookie<DestroyFuncType> &lhs,
-        dhorn::experimental::basic_unique_event_cookie<DestroyFuncType> &rhs)
-    {
-        lhs.swap(rhs);
-    }
-}
-
-#endif

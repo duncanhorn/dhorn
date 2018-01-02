@@ -3,7 +3,7 @@
  *
  * sockets.h
  *
- * 
+ *
  */
 #pragma once
 
@@ -47,18 +47,18 @@ namespace dhorn
         static const socket_t invalid_socket = INVALID_SOCKET;
         static const socket_error_t socket_error = SOCKET_ERROR;
 
-        static const size_t max_message_size = SO_MAX_MSG_SIZE;
+        static const std::size_t max_message_size = SO_MAX_MSG_SIZE;
 
         // Not defined using htonl since all values exposed to client code should be in host-byte-order. We do the
         // translation to network-byte-order when these values are used by the implementation.
-        static const uint32_t any_address = INADDR_ANY;
-        static const uint32_t loopback_address = INADDR_LOOPBACK;
-        static const uint32_t local_host = INADDR_LOOPBACK;
-        static const uint32_t broadcast_address = INADDR_BROADCAST;
-        static const uint32_t invalid_address = INADDR_NONE;
+        static const std::uint32_t any_address = INADDR_ANY;
+        static const std::uint32_t loopback_address = INADDR_LOOPBACK;
+        static const std::uint32_t local_host = INADDR_LOOPBACK;
+        static const std::uint32_t broadcast_address = INADDR_BROADCAST;
+        static const std::uint32_t invalid_address = INADDR_NONE;
 #endif  /*WIN32*/
 
-        enum class address_family : uint16_t
+        enum class address_family : std::uint16_t
         {
             unspecified                     = AF_UNSPEC,
             unix                            = AF_UNIX,
@@ -328,7 +328,7 @@ namespace dhorn
             {
                 using ip_addr = in6_addr;
                 using sock_addr = sockaddr_in6;
-                using create_type = uint8_t[16];
+                using create_type = std::uint8_t[16];
                 static const address_family family = address_family::internetwork_version_6;
                 static const int max_string_len = 46;
 
@@ -575,12 +575,12 @@ namespace dhorn
             {
             }
 
-            socket_address(const ipv4_address &addr, uint16_t port)
+            socket_address(const ipv4_address &addr, std::uint16_t port)
             {
                 this->assign(addr, port);
             }
 
-            socket_address(const ipv6_address &addr, uint16_t port, uint32_t flowInfo, uint32_t scopeId)
+            socket_address(const ipv6_address &addr, std::uint16_t port, std::uint32_t flowInfo, std::uint32_t scopeId)
             {
                 this->assign(addr, port, flowInfo, scopeId);
             }
@@ -650,7 +650,7 @@ namespace dhorn
             /*
              * Public Functions
              */
-            void assign(const ipv4_address &addr, uint16_t port)
+            void assign(const ipv4_address &addr, std::uint16_t port)
             {
                 this->_ipv4Addr =
                 {
@@ -662,7 +662,7 @@ namespace dhorn
                 this->_size = sizeof(this->_ipv4Addr);
             }
 
-            void assign(const ipv6_address &addr, uint16_t port, uint32_t flowInfo, uint32_t scopeId)
+            void assign(const ipv6_address &addr, std::uint16_t port, std::uint32_t flowInfo, std::uint32_t scopeId)
             {
                 this->_ipv6Addr =
                 {
@@ -676,12 +676,12 @@ namespace dhorn
                 this->_size = sizeof(this->_ipv6Addr);
             }
 
-            size_t size(void) const
+            std::size_t size(void) const
             {
                 return this->_size;
             }
 
-            size_t reset_size(void)
+            std::size_t reset_size(void)
             {
                 switch (static_cast<address_family>(this->_ipv4Addr.sin_family))
                 {
@@ -730,7 +730,7 @@ namespace dhorn
                 sockaddr_in6 _ipv6Addr;
             };
 
-            size_t _size;
+            std::size_t _size;
         };
 
 #pragma endregion
@@ -891,7 +891,7 @@ namespace dhorn
 
                 // Reset the socket_address size and assert that its size is the expected size
                 result.reset_size();
-                assert(result.size() == static_cast<size_t>(size));
+                assert(result.size() == static_cast<std::size_t>(size));
 
                 return result;
             }
@@ -906,7 +906,7 @@ namespace dhorn
 
                 // Reset the socket_address size and assert that its size is the expected size
                 result.reset_size();
-                assert(result.size() == static_cast<size_t>(size));
+                assert(result.size() == static_cast<std::size_t>(size));
 
                 return result;
             }
@@ -978,7 +978,7 @@ namespace dhorn
                 return itr;
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t receive(Ty (&buffer)[len], message_flags flags = message_flags::none)
             {
                 return this->receive(static_cast<void *>(buffer), len * sizeof(Ty), flags);
@@ -1000,7 +1000,7 @@ namespace dhorn
 
                 // Reset the socket_address size and assert that its size is the expected size
                 addr.reset_size();
-                assert(addr.size() == static_cast<size_t>(size));
+                assert(addr.size() == static_cast<std::size_t>(size));
 
                 return result;
             }
@@ -1029,13 +1029,13 @@ namespace dhorn
                 return itr;
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t receive_from(Ty (&buffer)[len], message_flags flags, socket_address &addr)
             {
                 return this->receive_from(static_cast<void *>(buffer), len * sizeof(Ty), flags, addr);
             }
 
-            socket_error_t send(const void *buffer, size_t length, message_flags flags = message_flags::none)
+            socket_error_t send(const void *buffer, std::size_t length, message_flags flags = message_flags::none)
             {
                 auto buff = static_cast<const char *>(buffer);
                 return this->InvokeThrowOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
@@ -1052,13 +1052,13 @@ namespace dhorn
                 return this->send(static_cast<const void *>(&buffer[0]), buffer.size() * sizeof(value_type), flags);
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t send(const Ty (&buffer)[len], message_flags flags = message_flags::none)
             {
                 return this->send(static_cast<const void *>(buffer), len * sizeof(Ty), flags);
             }
 
-            socket_error_t send_to(const void *buffer, size_t length, message_flags flags, const socket_address &addr)
+            socket_error_t send_to(const void *buffer, std::size_t length, message_flags flags, const socket_address &addr)
             {
                 return this->InvokeThrowOnError(
                     ::sendto,
@@ -1085,7 +1085,7 @@ namespace dhorn
                     addr);
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t send_to(const Ty(&buffer)[len], message_flags flags, const socket_address &addr)
             {
                 return this->send_to(static_cast<const void *>(buffer), len * sizeof(Ty), flags, addr);
@@ -1161,6 +1161,11 @@ namespace dhorn
             socket_t _socket;
         };
 
+        inline void swap(socket_base &lhs, socket_base &rhs)
+        {
+            lhs.swap(rhs);
+        }
+
 #pragma endregion
 
 
@@ -1177,7 +1182,7 @@ namespace dhorn
             /*
              * Constructor(s)/Destructor
              */
-            udp_packet(size_t capacity)
+            udp_packet(std::size_t capacity)
             {
                 this->reset(capacity);
             }
@@ -1195,19 +1200,19 @@ namespace dhorn
             /*
              * Public Functions
              */
-            void reset(size_t capacity)
+            void reset(std::size_t capacity)
             {
                 this->_dataLength = 0;
                 this->_bufferLength = capacity;
                 this->_buffer.reset(new Ty[this->_bufferLength]);
             }
 
-            size_t capacity(void) const
+            std::size_t capacity(void) const
             {
                 return this->_bufferLength;
             }
 
-            size_t size(void) const
+            std::size_t size(void) const
             {
                 return this->_dataLength;
             }
@@ -1227,7 +1232,7 @@ namespace dhorn
                 this->_addr = addr;
             }
 
-            void set_data(Ty *buffer, size_t size)
+            void set_data(const Ty *buffer, std::size_t size)
             {
                 this->set_data(buffer, buffer + size);
             }
@@ -1236,13 +1241,13 @@ namespace dhorn
             void set_data(Itr front, Itr back)
             {
                 this->_dataLength = 0; // Expect the worst
-                size_t size = std::distance(front, back);
+                std::size_t size = std::distance(front, back);
                 if (size > this->_bufferLength)
                 {
                     throw std::out_of_range("Cannot assign data to udp_socket with a length longer than the buffer");
                 }
 
-                for (size_t i = 0; front != back; ++front, ++i)
+                for (std::size_t i = 0; front != back; ++front, ++i)
                 {
                     this->_buffer[i] = *front;
                 }
@@ -1252,13 +1257,15 @@ namespace dhorn
 
             void swap(udp_packet &other)
             {
+                using std::swap;
+
                 // Swap the buffers
                 this->_buffer.swap(other._buffer);
 
                 // Swap the remaining data
-                std::swap(this->_bufferLength, other._bufferLength);
-                std::swap(this->_dataLength, other._dataLength);
-                std::swap(this->_addr, other._addr);
+                swap(this->_bufferLength, other._bufferLength);
+                swap(this->_dataLength, other._dataLength);
+                swap(this->_addr, other._addr);
             }
 
 
@@ -1266,12 +1273,18 @@ namespace dhorn
         private:
 
             std::unique_ptr<Ty[]> _buffer;
-            size_t _bufferLength;
-            size_t _dataLength;
+            std::size_t _bufferLength;
+            std::size_t _dataLength;
             socket_address _addr;
 
             friend class udp_socket;
         };
+
+        template <typename Ty>
+        inline void swap(udp_packet<Ty> &lhs, udp_packet<Ty> &rhs)
+        {
+            lhs.swap(rhs);
+        }
 
         class udp_socket
         {
@@ -1351,7 +1364,7 @@ namespace dhorn
                 return this->_baseSocket.receive_from<Itr>(front, back, flags, addr);
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t receive(Ty(&buffer)[len], message_flags flags, socket_address &addr)
             {
                 return this->_baseSocket.receive_from<Ty, len>(buffer, flags, addr);
@@ -1370,7 +1383,7 @@ namespace dhorn
                 packet._dataLength = length / sizeof(Ty);
             }
 
-            socket_error_t send(const void *buffer, size_t length, message_flags flags, const socket_address &addr)
+            socket_error_t send(const void *buffer, std::size_t length, message_flags flags, const socket_address &addr)
             {
                 return this->_baseSocket.send_to(buffer, length, flags, addr);
             }
@@ -1381,7 +1394,7 @@ namespace dhorn
                 return this->_baseSocket.send_to<Itr>(front, back, flags, addr);
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t send(const Ty(&buffer)[len], message_flags flags, const socket_address &addr)
             {
                 return this->_baseSocket.send_to<Ty, len>(buffer, flags, addr);
@@ -1392,7 +1405,7 @@ namespace dhorn
             {
                 // TODO: Fail if we don't send all bytes? The design is that most callers shouldn't need to check this...
                 return this->_baseSocket.send_to(
-                    reinterpret_cast<void *>(packet._buffer.get()),
+                    reinterpret_cast<const void *>(packet._buffer.get()),
                     packet._dataLength,
                     flags,
                     packet._addr);
@@ -1420,6 +1433,11 @@ namespace dhorn
 
             socket_base _baseSocket;
         };
+
+        inline void swap(udp_socket &lhs, udp_socket &rhs)
+        {
+            lhs.swap(rhs);
+        }
 
 #pragma endregion
 
@@ -1511,13 +1529,13 @@ namespace dhorn
                 return this->_baseSocket.receive<Itr>(front, back, flags);
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t receive(Ty (&buffer)[len], message_flags flags = message_flags::none)
             {
                 return this->_baseSocket.receive<Ty, len>(buffer, flags);
             }
 
-            socket_error_t send(const void *buffer, size_t length, message_flags flags = message_flags::none)
+            socket_error_t send(const void *buffer, std::size_t length, message_flags flags = message_flags::none)
             {
                 return this->_baseSocket.send(buffer, length, flags);
             }
@@ -1528,7 +1546,7 @@ namespace dhorn
                 return this->_baseSocket.send<Itr>(front, back, flags);
             }
 
-            template <typename Ty, size_t len>
+            template <typename Ty, std::size_t len>
             socket_error_t send(const Ty (&buffer)[len], message_flags flags = message_flags::none)
             {
                 return this->_baseSocket.send<Ty, len>(buffer, flags);
@@ -1561,6 +1579,11 @@ namespace dhorn
 
             socket_base _baseSocket;
         };
+
+        inline void swap(tcp_socket &lhs, tcp_socket &rhs)
+        {
+            lhs.swap(rhs);
+        }
 
 #pragma endregion
 
@@ -1675,6 +1698,11 @@ namespace dhorn
             socket_base _baseSocket;
         };
 
+        inline void swap(server_socket &lhs, server_socket &rhs)
+        {
+            lhs.swap(rhs);
+        }
+
 #pragma endregion
 
 
@@ -1693,7 +1721,7 @@ namespace dhorn
 #ifdef WIN32
                 wsa_throw_if_false(sockets.size() <= FD_SETSIZE, WSAEINVAL);
 
-                size_t i = 0;
+                std::size_t i = 0;
                 fdSet.fd_count = sockets.size();
 #else
                 static_assert(false, "Don't know how to get the size of fd_set with your compiler");
@@ -1715,39 +1743,3 @@ namespace dhorn
 #pragma endregion
     }
 }
-
-
-
-#ifndef DHORN_NO_STD
-
-namespace std
-{
-    // Overload of std::swap for the socket types
-    inline void swap(dhorn::experimental::socket_base &lhs, dhorn::experimental::socket_base &rhs)
-    {
-        lhs.swap(rhs);
-    }
-
-    template <typename Ty>
-    inline void swap(dhorn::experimental::udp_packet<Ty> &lhs, dhorn::experimental::udp_packet<Ty> &rhs)
-    {
-        lhs.swap(rhs);
-    }
-
-    inline void swap(dhorn::experimental::udp_socket &lhs, dhorn::experimental::udp_socket &rhs)
-    {
-        lhs.swap(rhs);
-    }
-
-    inline void swap(dhorn::experimental::tcp_socket &lhs, dhorn::experimental::tcp_socket &rhs)
-    {
-        lhs.swap(rhs);
-    }
-
-    inline void swap(dhorn::experimental::server_socket &lhs, dhorn::experimental::server_socket &rhs)
-    {
-        lhs.swap(rhs);
-    }
-}
-
-#endif

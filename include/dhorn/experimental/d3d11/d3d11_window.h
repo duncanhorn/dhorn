@@ -3,13 +3,14 @@
  *
  * d3d11_window.h
  *
- * 
+ *
  */
 #pragma once
 
 #pragma comment(lib, "d3d11.lib")
 
-#include "../com_ptr.h"
+#include "../../com/com_ptr.h"
+
 #include "../functional.h"
 #include "../unique_any.h"
 #include "../windows/window.h"
@@ -49,7 +50,7 @@ namespace dhorn
                 using QualityFunc = std::function<UINT(ID3D11Device *, UINT *)>;
                 using UpdateFunc = std::function<void(void)>;
                 using DrawFunc = std::function<void(ID3D11Device *, ID3D11DeviceContext *)>;
-                using SizeChangeFunc = std::function<void(const rect<size_t> &)>;
+                using SizeChangeFunc = std::function<void(const rect<std::size_t> &)>;
 
             public:
                 /*
@@ -95,7 +96,7 @@ namespace dhorn
                     // Note to callers: this does not AddRef. Therefore, if you call this function, you must have a strong
                     // reference to this d3d11_window instance to ensure that the object is not destroyed as the result of
                     // a call to the destructor.
-                    return this->_device;
+                    return this->_device.get();
                 }
 
                 ID3D11DeviceContext *context(void) const
@@ -103,7 +104,7 @@ namespace dhorn
                     // Note to callers: this does not AddRef. Therefore, if you call this function, you must have a strong
                     // reference to this d3d11_window instance to ensure that the object is not destroyed as the result of
                     // a call to the destructor.
-                    return this->_deviceContext;
+                    return this->_deviceContext.get();
                 }
 
 
@@ -154,15 +155,18 @@ namespace dhorn
                     // Check MSAA support
                     if (this->_qualityFunc)
                     {
-                        this->_sampleQuality = this->_qualityFunc(this->_device, &this->_sampleCount);
+                        this->_sampleQuality = this->_qualityFunc(this->_device.get(), &this->_sampleCount);
                     }
                     else
                     {
-                        throw_if_failed(this->_device->CheckMultisampleQualityLevels(
+                        com::check_hresult(this->_device->CheckMultisampleQualityLevels(
                             Traits::swap_chain_format,
                             this->_sampleCount,
                             &this->_sampleQuality));
-                        throw_hr_if_false(this->_sampleQuality > 0, E_INVALIDARG);
+                        if (this->_sampleQuality <= 0)
+                        {
+                            com::throw_hresult(E_INVALIDARG);
+                        }
 
                         --this->_sampleQuality;
                     }
@@ -174,7 +178,7 @@ namespace dhorn
 
                 virtual void create_device(void)
                 {
-                    throw_if_failed(::D3D11CreateDevice(
+                    com::check_hresult(::D3D11CreateDevice(
                         nullptr,                    // IDXGIAdapter
                         D3D_DRIVER_TYPE_HARDWARE,
                         nullptr,                    // HMODULE
@@ -186,10 +190,13 @@ namespace dhorn
                         &this->_deviceContext));
 
                     // D3D11 not supported
-                    throw_hr_if_false(this->_featureLevel == D3D_FEATURE_LEVEL_11_0, E_NOTIMPL);
+                    if (this->_featureLevel != D3D_FEATURE_LEVEL_11_0)
+                    {
+                        com::throw_hresult(E_NOTIMPL);
+                    }
                 }
 
-                virtual void create_swap_chain(const rect<size_t> &size)
+                virtual void create_swap_chain(const rect<std::size_t> &size)
                 {
                     assert(this->_device);
                     assert(!this->_swapChain);
@@ -204,27 +211,27 @@ namespace dhorn
                         Traits::swap_chain_format,
                         Traits::back_buffer_count);
 
-                    com_ptr<IDXGIDevice> device = this->_device;
-                    com_ptr<IDXGIAdapter> adapter;
-                    com_ptr<IDXGIFactory> factory;
-                    throw_if_failed(device->GetParent(IID_PPV_ARGS(&adapter)));
-                    throw_if_failed(adapter->GetParent(IID_PPV_ARGS(&factory)));
-                    throw_if_failed(factory->CreateSwapChain(this->_device, &desc, &this->_swapChain));
+                    auto device = this->_device.as<IDXGIDevice>();
+                    com::com_ptr<IDXGIAdapter> adapter;
+                    com::com_ptr<IDXGIFactory> factory;
+                    com::check_hresult(device->GetParent(IID_PPV_ARGS(&adapter)));
+                    com::check_hresult(adapter->GetParent(IID_PPV_ARGS(&factory)));
+                    com::check_hresult(factory->CreateSwapChain(this->_device.get(), &desc, &this->_swapChain));
                 }
 
                 virtual void create_render_target_view()
                 {
                     assert(!this->_renderTargetView);
 
-                    com_ptr<ID3D11Texture2D> backBuffer;
-                    throw_if_failed(this->_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
-                    throw_if_failed(this->_device->CreateRenderTargetView(
-                        backBuffer,
+                    com::com_ptr<ID3D11Texture2D> backBuffer;
+                    com::check_hresult(this->_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
+                    com::check_hresult(this->_device->CreateRenderTargetView(
+                        backBuffer.get(),
                         nullptr,                    // D3D11_RENDER_TARGET_VIEW_DESC
                         &this->_renderTargetView));
                 }
 
-                virtual void create_depth_stencil(const rect<size_t> &size)
+                virtual void create_depth_stencil(const rect<std::size_t> &size)
                 {
                     assert(!this->_depthStencilBuffer);
 
@@ -235,7 +242,7 @@ namespace dhorn
                         this->_sampleQuality,
                         Traits::depth_stencil_format);
 
-                    throw_if_failed(this->_device->CreateTexture2D(
+                    com::check_hresult(this->_device->CreateTexture2D(
                         &desc,
                         nullptr,                    // D3D11_SUBRESOURCE_DATA
                         &this->_depthStencilBuffer));
@@ -245,20 +252,20 @@ namespace dhorn
                 {
                     assert(this->_depthStencilBuffer);
                     assert(!this->_depthStencilView);
-                    throw_if_failed(this->_device->CreateDepthStencilView(
-                        this->_depthStencilBuffer,
+                    com::check_hresult(this->_device->CreateDepthStencilView(
+                        this->_depthStencilBuffer.get(),
                         nullptr,                    // D3D11_DEPTH_STENCIL_VIEW_DESC
                         &this->_depthStencilView));
                 }
 
-                virtual void set_viewports(const rect<size_t> &size)
+                virtual void set_viewports(const rect<std::size_t> &size)
                 {
                     // By default, create one view port that is the size of the window
                     D3D11_VIEWPORT viewPort = view_port(static_cast<float>(size.width), static_cast<float>(size.height));
                     this->_deviceContext->RSSetViewports(1, &viewPort);
                 }
 
-                virtual void resize(const rect<size_t> &clientArea)
+                virtual void resize(const rect<std::size_t> &clientArea)
                 {
                     // We don't care if only the coordinates change
                     if ((this->_previousClientArea.width == clientArea.width) &&
@@ -287,8 +294,8 @@ namespace dhorn
                     // Bind the views
                     this->_deviceContext->OMSetRenderTargets(
                         1, // Number of render target views
-                        this->_renderTargetView.get_address_of(),
-                        this->_depthStencilView);
+                        this->_renderTargetView.address_of(),
+                        this->_depthStencilView.get());
 
                     this->set_viewports(clientArea);
 
@@ -314,19 +321,21 @@ namespace dhorn
 
                 virtual void render(void)
                 {
-                    this->_deviceContext->ClearRenderTargetView(this->_renderTargetView, &this->_backgroundColor.x);
+                    this->_deviceContext->ClearRenderTargetView(
+                        this->_renderTargetView.get(),
+                        &this->_backgroundColor.x);
                     this->_deviceContext->ClearDepthStencilView(
-                        this->_depthStencilView,
+                        this->_depthStencilView.get(),
                         D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
                         1.0f,
                         0);
 
                     if (this->_drawFunc)
                     {
-                        this->_drawFunc(this->_device, this->_deviceContext);
+                        this->_drawFunc(this->_device.get(), this->_deviceContext.get());
                     }
 
-                    throw_if_failed(this->_swapChain->Present(0, 0));
+                    com::check_hresult(this->_swapChain->Present(0, 0));
                 }
 
 
@@ -334,7 +343,7 @@ namespace dhorn
                 /*
                  * Custom Message Pump
                  */
-                virtual uintptr_t message_pump()
+                virtual std::uintptr_t message_pump()
                 {
                     // We use peek_message so that we can update/draw the world when not handling messages
                     MSG msg{};
@@ -362,8 +371,8 @@ namespace dhorn
                  */
                 virtual win32::callback_handler::result_type on_enter_size_move(
                     win32::window * /*sender*/,
-                    uintptr_t /*wparam*/,
-                    intptr_t /*lparam*/)
+                    std::uintptr_t /*wparam*/,
+                    std::intptr_t /*lparam*/)
                 {
                     this->_resizing = true;
                     return std::make_pair(true, 0);
@@ -371,8 +380,8 @@ namespace dhorn
 
                 virtual win32::callback_handler::result_type on_exit_size_move(
                     win32::window * /*sender*/,
-                    uintptr_t /*wparam*/,
-                    intptr_t /*lparam*/)
+                    std::uintptr_t /*wparam*/,
+                    std::intptr_t /*lparam*/)
                 {
                     this->_resizing = false;
                     this->resize(this->client_rect());
@@ -382,10 +391,10 @@ namespace dhorn
 
                 virtual win32::callback_handler::result_type on_size_change(
                     win32::window * /*sender*/,
-                    uintptr_t wparam,
-                    intptr_t lparam)
+                    std::uintptr_t wparam,
+                    std::intptr_t lparam)
                 {
-                    rect<size_t> clientArea = { 0, 0, LOWORD(lparam), HIWORD(lparam) };
+                    rect<std::size_t> clientArea = { 0, 0, LOWORD(lparam), HIWORD(lparam) };
 
                     if (this->_device)
                     {
@@ -412,12 +421,12 @@ namespace dhorn
 
                  // DirectX Interface Pointers
                 D3D_FEATURE_LEVEL _featureLevel;
-                com_ptr<ID3D11Device> _device;
-                com_ptr<ID3D11DeviceContext> _deviceContext;
-                com_ptr<IDXGISwapChain> _swapChain;
-                com_ptr<ID3D11RenderTargetView> _renderTargetView;
-                com_ptr<ID3D11Texture2D> _depthStencilBuffer;
-                com_ptr<ID3D11DepthStencilView> _depthStencilView;
+                com::com_ptr<ID3D11Device> _device;
+                com::com_ptr<ID3D11DeviceContext> _deviceContext;
+                com::com_ptr<IDXGISwapChain> _swapChain;
+                com::com_ptr<ID3D11RenderTargetView> _renderTargetView;
+                com::com_ptr<ID3D11Texture2D> _depthStencilBuffer;
+                com::com_ptr<ID3D11DepthStencilView> _depthStencilView;
 
                 // Data that can be set so that clients need not derive from this class unless actually needed
                 QualityFunc _qualityFunc;
@@ -430,7 +439,7 @@ namespace dhorn
                 DirectX::XMFLOAT4 _backgroundColor;
 
                 // Window state information
-                rect<size_t> _previousClientArea;
+                rect<std::size_t> _previousClientArea;
                 bool _resizing;
             };
 

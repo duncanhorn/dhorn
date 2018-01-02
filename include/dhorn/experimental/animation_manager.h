@@ -65,7 +65,7 @@ namespace dhorn
         /*
          * Types
          */
-        using animation_cookie = size_t;
+        using animation_cookie = std::size_t;
         static const animation_cookie invalid_animation_cookie = 0;
 
 
@@ -190,7 +190,7 @@ namespace dhorn
 
             ~animation_manager(void)
             {
-                for (auto &pair : this->_animationInfo)
+                for (const auto &pair : this->_animationInfo)
                 {
                     pair.second.notify_destroyed();
                 }
@@ -205,7 +205,7 @@ namespace dhorn
             {
                 auto now = clock::now();
 
-                for (auto itr = std::begin(this->_animationInfo); itr != std::end(this->_animationInfo); )
+                for (auto itr = this->_animationInfo.begin(); itr != this->_animationInfo.end(); )
                 {
                     // Force info to fall out of scope before calling TryRemove to help prevent logic errors
                     {
@@ -309,7 +309,7 @@ namespace dhorn
             animation_cookie NextCookie(void)
             {
                 while ((this->_nextCookie == invalid_animation_cookie) ||
-                    (this->_animationInfo.find(this->_nextCookie) != std::end(this->_animationInfo)))
+                    (this->_animationInfo.find(this->_nextCookie) != this->_animationInfo.end()))
                 {
                     ++this->_nextCookie;
                 }
@@ -320,7 +320,7 @@ namespace dhorn
             AnimationMap::iterator FindInfo(animation_cookie cookie)
             {
                 auto itr = this->_animationInfo.find(cookie);
-                if (itr == std::end(this->_animationInfo))
+                if (itr == this->_animationInfo.end())
                 {
                     throw std::out_of_range("animation not found");
                 }
@@ -331,7 +331,7 @@ namespace dhorn
             AnimationMap::const_iterator FindInfo(animation_cookie cookie) const
             {
                 auto itr = this->_animationInfo.find(cookie);
-                if (itr == std::end(this->_animationInfo))
+                if (itr == this->_animationInfo.end())
                 {
                     throw std::out_of_range("animation not found");
                 }
@@ -353,7 +353,7 @@ namespace dhorn
 
             bool TryRemove(const AnimationMap::iterator &pos)
             {
-                auto &info = pos->second;
+                const auto &info = pos->second;
                 if (!info.has_references && details::is_complete(info.state))
                 {
                     this->_animationInfo.erase(pos);

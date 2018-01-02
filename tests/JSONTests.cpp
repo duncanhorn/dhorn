@@ -24,7 +24,7 @@ namespace dhorn
                  dhorn::experimental::utf8_string str = u8"-42";
 
                 auto value = std::make_shared<dhorn::experimental::json_number>(str);
-                auto num = dhorn::experimental::json_cast<int32_t>(value.get());
+                auto num = dhorn::experimental::json_cast<std::int32_t>(value.get());
                 Assert::AreEqual(-42, num);
             }
 
@@ -33,7 +33,7 @@ namespace dhorn
                  dhorn::experimental::utf8_string str = u8"42";
 
                 auto value = std::make_shared<dhorn::experimental::json_number>(str);
-                auto num = dhorn::experimental::json_cast<uint32_t>(value.get());
+                auto num = dhorn::experimental::json_cast<std::uint32_t>(value.get());
                 Assert::AreEqual(42u, num);
             }
 
@@ -191,9 +191,9 @@ namespace dhorn
                 auto arr = dhorn::experimental::json_cast<std::set< dhorn::experimental::utf8_string>>(value.get());
                 Assert::AreEqual(3u, arr.size());
 
-                Assert::IsTrue(arr.find(str1) != std::end(arr));
-                Assert::IsTrue(arr.find(str2) != std::end(arr));
-                Assert::IsTrue(arr.find(str3) != std::end(arr));
+                Assert::IsTrue(arr.find(str1) != arr.end());
+                Assert::IsTrue(arr.find(str2) != arr.end());
+                Assert::IsTrue(arr.find(str3) != arr.end());
 
                 // set does not allow duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
@@ -217,9 +217,9 @@ namespace dhorn
                 auto arr = dhorn::experimental::json_cast<std::multiset< dhorn::experimental::utf8_string>>(value.get());
                 Assert::AreEqual(3u, arr.size());
 
-                Assert::IsTrue(arr.find(str1) != std::end(arr));
-                Assert::IsTrue(arr.find(str2) != std::end(arr));
-                Assert::IsTrue(arr.find(str3) != std::end(arr));
+                Assert::IsTrue(arr.find(str1) != arr.end());
+                Assert::IsTrue(arr.find(str2) != arr.end());
+                Assert::IsTrue(arr.find(str3) != arr.end());
 
                 // multiset allows duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
@@ -243,9 +243,9 @@ namespace dhorn
                 auto arr = dhorn::experimental::json_cast<std::unordered_set< dhorn::experimental::utf8_string>>(value.get());
                 Assert::AreEqual(3u, arr.size());
 
-                Assert::IsTrue(arr.find(str1) != std::end(arr));
-                Assert::IsTrue(arr.find(str2) != std::end(arr));
-                Assert::IsTrue(arr.find(str3) != std::end(arr));
+                Assert::IsTrue(arr.find(str1) != arr.end());
+                Assert::IsTrue(arr.find(str2) != arr.end());
+                Assert::IsTrue(arr.find(str3) != arr.end());
 
                 // unordered_set does not allow duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
@@ -269,9 +269,9 @@ namespace dhorn
                 auto arr = dhorn::experimental::json_cast<std::unordered_multiset< dhorn::experimental::utf8_string>>(value.get());
                 Assert::AreEqual(3u, arr.size());
 
-                Assert::IsTrue(arr.find(str1) != std::end(arr));
-                Assert::IsTrue(arr.find(str2) != std::end(arr));
-                Assert::IsTrue(arr.find(str3) != std::end(arr));
+                Assert::IsTrue(arr.find(str1) != arr.end());
+                Assert::IsTrue(arr.find(str2) != arr.end());
+                Assert::IsTrue(arr.find(str3) != arr.end());
 
                 // unordered_multiset allows duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));

@@ -12,9 +12,9 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 
-static const uint8_t byte_array[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-                                      0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-static const uint32_t int_array[] = { 0x00112233, 0x44556677, 0x8899AABB, 0xCCDDEEFF };
+static const std::uint8_t byte_array[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+                                           0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+static const std::uint32_t int_array[] = { 0x00112233, 0x44556677, 0x8899AABB, 0xCCDDEEFF };
 
 namespace dhorn
 {
@@ -27,11 +27,11 @@ namespace dhorn
                 dhorn::experimental::uuid id;
 
                 // Make sure all fields are zero
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::IsTrue(id.data[i] == 0);
                 }
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     Assert::IsTrue(id.data32[i] == 0);
                 }
@@ -39,15 +39,15 @@ namespace dhorn
 
             TEST_METHOD(ByteArrayConstructorAssignmentTest)
             {
-                // Cannot construct with non-16-size uint8_t array
-                uint8_t invalid_array[] = { 1, 2, 3, 4 };
+                // Cannot construct with non-16-size std::uint8_t array
+                std::uint8_t invalid_array[] = { 1, 2, 3, 4 };
                 (void)invalid_array;
                 Assert::IsFalse(std::is_constructible<dhorn::experimental::uuid, decltype(invalid_array)>::value);
 
-                // Should be able to contruct with uint8_t[16]
+                // Should be able to contruct with std::uint8_t[16]
                 dhorn::experimental::uuid id(byte_array);
 
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::IsTrue(id.data[i] == byte_array[i]);
                 }
@@ -56,7 +56,7 @@ namespace dhorn
                 id = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
                     0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
 
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::IsTrue(id.data[i] == byte_array[i]);
                 }
@@ -64,15 +64,15 @@ namespace dhorn
 
             TEST_METHOD(IntegerArrayConstructorAssignmentTest)
             {
-                // Cannot construct with non-16-size uint8_t array
-                uint32_t invalid_array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+                // Cannot construct with non-16-size std::uint8_t array
+                std::uint32_t invalid_array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
                 (void)invalid_array;
                 Assert::IsFalse(std::is_constructible<dhorn::experimental::uuid, decltype(invalid_array)>::value);
 
-                // Should be able to contruct with uint8_t[16]
+                // Should be able to contruct with std::uint8_t[16]
                 dhorn::experimental::uuid id(int_array);
 
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     Assert::IsTrue(id.data32[i] == int_array[i]);
                 }
@@ -80,7 +80,7 @@ namespace dhorn
                 // Should be able to use initializer list syntax
                 id = { 0x00112233, 0x44556677, 0x8899AABB, 0xCCDDEEFF };
 
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     Assert::IsTrue(id.data32[i] == int_array[i]);
                 }
@@ -92,7 +92,7 @@ namespace dhorn
                 dhorn::experimental::uuid id = { 0x33221100, 0x5544, 0x7766,
                     { 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF } };
 
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::IsTrue(id.data[i] == byte_array[i]);
                 }
@@ -105,7 +105,7 @@ namespace dhorn
                 Assert::IsTrue(guid.Data1 == id.Data1);
                 Assert::IsTrue(guid.Data2 == id.Data2);
                 Assert::IsTrue(guid.Data3 == id.Data3);
-                for (size_t i = 0; i < 8; i++)
+                for (std::size_t i = 0; i < 8; i++)
                 {
                     Assert::IsTrue(guid.Data4[i] == id.Data4[i]);
                 }
@@ -116,7 +116,7 @@ namespace dhorn
                 dhorn::experimental::uuid id(byte_array);
                 dhorn::experimental::uuid id2 = id;
 
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::IsTrue(id2.data[i] == byte_array[i]);
                 }
@@ -163,11 +163,11 @@ namespace dhorn
                 // the patern 0xCC...
                 id.~uuid();
 
-                for (size_t i = 0; i < 16; i++)
+                for (std::size_t i = 0; i < 16; i++)
                 {
                     Assert::IsTrue(id.data[i] == 0xCC);
                 }
-                for (size_t i = 0; i < 4; i++)
+                for (std::size_t i = 0; i < 4; i++)
                 {
                     Assert::IsTrue(id.data32[i] == 0xCCCCCCCC);
                 }

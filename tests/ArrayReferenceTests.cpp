@@ -62,7 +62,7 @@ namespace dhorn
 
                 Assert::AreEqual(std::size(vals), arr.size());
 
-                for (size_t i = 0; i < std::size(vals); ++i)
+                for (std::size_t i = 0; i < std::size(vals); ++i)
                 {
                     Assert::AreEqual(vals[i], arr.at(i));
                     Assert::AreEqual(vals[i], arr[i]);
@@ -76,7 +76,7 @@ namespace dhorn
 
                 Assert::AreEqual(std::size(vals), arr.size());
 
-                for (size_t i = 0; i < std::size(vals); ++i)
+                for (std::size_t i = 0; i < std::size(vals); ++i)
                 {
                     Assert::AreEqual(vals[i], arr.at(i));
                 }
@@ -102,10 +102,9 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals);
 
-                // Using std::cend is deliberate here - we want to make sure that we can compare two iterators of
-                // different types
-                size_t i = 0;
-                for (auto itr = std::begin(arr); itr != std::cend(arr); ++itr)
+                // Using cend is deliberate here - we want to make sure that we can compare two iterators of different types
+                std::size_t i = 0;
+                for (auto itr = arr.begin(); itr != arr.cend(); ++itr)
                 {
                     auto value = vals[i++];
 
@@ -123,10 +122,9 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals);
 
-                // Using std::end is deliberate here - we want to make sure that we can compare two iterators of
-                // different types
-                size_t i = 0;
-                for (auto itr = std::cbegin(arr); itr != std::end(arr); ++itr)
+                // Using end is deliberate here - we want to make sure that we can compare two iterators of different types
+                std::size_t i = 0;
+                for (auto itr = arr.cbegin(); itr != arr.end(); ++itr)
                 {
                     auto value = vals[i++];
 
@@ -156,7 +154,7 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals);
 
-                size_t i = std::size(vals) - 1;
+                std::size_t i = std::size(vals) - 1;
                 for (auto itr = arr.rbegin(); itr != arr.crend(); ++itr)
                 {
                     auto value = vals[i--];
@@ -174,7 +172,7 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals);
 
-                size_t i = std::size(vals) - 1;
+                std::size_t i = std::size(vals) - 1;
                 for (auto itr = arr.crbegin(); itr != arr.rend(); ++itr)
                 {
                     auto value = vals[i--];
@@ -331,7 +329,7 @@ namespace dhorn
                 arr.resize(std::size(vals));
                 Assert::AreEqual(std::size(vals), arr.size());
 
-                size_t i = 0;
+                std::size_t i = 0;
                 for (auto &val : arr)
                 {
                     Assert::AreEqual(vals[i++], val);
@@ -341,18 +339,18 @@ namespace dhorn
 
             TEST_METHOD(CastToTest)
             {
-                uint32_t vals32[] = { 0, 1, 2, 3, 4 };
-                dhorn::experimental::array_reference<uint32_t> arr32(vals32);
+                std::uint32_t vals32[] = { 0, 1, 2, 3, 4 };
+                dhorn::experimental::array_reference<std::uint32_t> arr32(vals32);
 
-                auto arr8 = arr32.cast_to<uint8_t>();
+                auto arr8 = arr32.cast_to<std::uint8_t>();
                 Assert::AreEqual(std::size(vals32) * 4, arr8.size());
 
-                auto arr32_2 = arr8.cast_to<uint32_t>();
+                auto arr32_2 = arr8.cast_to<std::uint32_t>();
                 Assert::AreEqual(arr32.size(), arr32_2.size());
 
-                uint8_t vals8[] = { 0, 1, 2, 3, 4, 5, 6 };
-                arr8 = dhorn::experimental::array_reference<uint8_t>(vals8);
-                arr32 = arr8.cast_to<uint32_t>();
+                std::uint8_t vals8[] = { 0, 1, 2, 3, 4, 5, 6 };
+                arr8 = dhorn::experimental::array_reference<std::uint8_t>(vals8);
+                arr32 = arr8.cast_to<std::uint32_t>();
                 Assert::AreEqual(1u, arr32.size());
             }
 

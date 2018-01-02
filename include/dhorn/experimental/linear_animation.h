@@ -54,7 +54,7 @@ namespace dhorn
             /*
              * Overloaded animation functions
              */
-            virtual animation_state on_update(duration elapsedTime)
+            virtual animation_state on_update(typename MyBase::duration elapsedTime)
             {
                 auto state = MyBase::on_update(elapsedTime);
 
@@ -102,13 +102,14 @@ namespace dhorn
                 this->_offset = static_cast<Ty>(v_0 - this->_slope * t_0);
             }
 
-            inline constexpr double seconds_fraction(duration duration) const
+            inline constexpr double seconds_fraction(typename MyBase::duration duration) const
             {
-                return static_cast<double>(duration.count() * duration::period::num) / duration::period::den;
+                return static_cast<double>(duration.count() * MyBase::duration::period::num) /
+                    MyBase::duration::period::den;
             }
 
-            iterator_type _left;
-            iterator_type _right;
+            typename MyBase::iterator_type _left;
+            typename MyBase::iterator_type _right;
             Ty _slope;
             Ty _offset;
         };

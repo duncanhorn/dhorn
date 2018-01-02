@@ -18,7 +18,7 @@ namespace dhorn::windows
      */
     struct tick_count_clock
     {
-        using rep = uint64_t;
+        using rep = std::uint64_t;
         using period = std::milli;
 
         using duration = std::chrono::duration<rep, period>;

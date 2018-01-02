@@ -1,7 +1,7 @@
 /*
  * Duncan Horn
  *
- * winrt_utility.h
+ * winrt_traits.h
  *
  * Helpers and type traits for dealing with WinRt types and objects.
  */
@@ -38,6 +38,21 @@ namespace dhorn::winrt
 
     template <typename... IFaces>
     constexpr bool all_inspectable_v = all_inspectable<IFaces...>::value;
+
+#pragma endregion
+
+
+
+    /*
+     * is_inspectable
+     */
+#pragma region is_inspectable
+
+    template <typename IFace>
+    using is_inspectable = std::is_base_of<IInspectable, IFace>;
+
+    template <typename IFace>
+    constexpr bool is_inspectable_v = is_inspectable<IFace>::value;
 
 #pragma endregion
 }
