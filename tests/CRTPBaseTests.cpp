@@ -21,12 +21,12 @@ namespace dhorn::tests
         {
             void invoke()
             {
-                derived()->impl();
+                this->shim().impl();
             }
 
             void invoke() const
             {
-                derived()->impl();
+                this->shim().impl();
             }
         };
 
@@ -56,26 +56,22 @@ namespace dhorn::tests
 
         TEST_METHOD(InvokeTest)
         {
-            int x = 0;
             derived value([&](bool isConst)
             {
-                x = isConst ? 42 : 8;
+                Assert::IsFalse(isConst);
             });
 
             value.invoke();
-            Assert::AreEqual(x, 8);
         }
 
         TEST_METHOD(InvokeConstTest)
         {
-            int x = 0;
             const derived value([&](bool isConst)
             {
-                x = isConst ? 42 : 8;
+                Assert::IsTrue(isConst);
             });
 
             value.invoke();
-            Assert::AreEqual(x, 42);
         }
     };
 }
