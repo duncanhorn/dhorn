@@ -171,6 +171,7 @@
     <ClInclude Include="include\dhorn\com\com_traits.h" />
     <ClInclude Include="include\dhorn\com\hresult_error.h" />
     <ClInclude Include="include\dhorn\console.h" />
+    <ClInclude Include="include\dhorn\crtp_base.h" />
     <ClInclude Include="include\dhorn\debug.h" />
     <ClInclude Include="include\dhorn\experimental\animation.h" />
     <ClInclude Include="include\dhorn\experimental\animation_manager.h" />

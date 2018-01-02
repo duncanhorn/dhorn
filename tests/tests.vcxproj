@@ -134,6 +134,7 @@
     <ClCompile Include="CompressedPairTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ComTraitsTests.cpp" />
+    <ClCompile Include="CRTPBaseTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />
     <ClCompile Include="FunctionalTests.cpp" />
@@ -148,8 +149,7 @@
     <ClCompile Include="SocketsTests.cpp" />
     <ClCompile Include="SocketStreamTests.cpp" />
     <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="StringTests.cpp" />
     <ClCompile Include="SynchronizedObjectTests.cpp" />
