@@ -12,5 +12,11 @@
     <ClCompile Include="main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="vector_traits_tests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_tests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

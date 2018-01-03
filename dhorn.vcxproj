@@ -99,7 +99,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalOptions>/std:c++latest /permissive- %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/permissive- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -211,6 +211,8 @@
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h" />
     <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="include\dhorn\iterator.h" />
+    <ClInclude Include="include\dhorn\math\nointrin_traits.h" />
+    <ClInclude Include="include\dhorn\math\sse2_traits.h" />
     <ClInclude Include="include\dhorn\math\vector.h" />
     <ClInclude Include="include\dhorn\scope_guard.h" />
     <ClInclude Include="include\dhorn\string.h" />

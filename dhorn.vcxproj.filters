@@ -219,5 +219,11 @@
     <ClInclude Include="include\dhorn\math\vector.h">
       <Filter>include\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\math\sse2_traits.h">
+      <Filter>include\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\math\nointrin_traits.h">
+      <Filter>include\math</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
