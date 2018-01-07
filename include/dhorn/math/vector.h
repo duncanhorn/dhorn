@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -67,23 +68,34 @@ namespace dhorn::math
     class vector :
         public details::vector_common<vector<Ty, Dimensions>, Ty, Dimensions>
     {
-        using vector_type = typename Traits::vector_type;
-        static constexpr std::size_t vector_components = Traits::size;
-        static constexpr std::size_t array_size = (Dimensions + vector_components - 1) / vector_components;
-
     public:
         /*
          * Types/Constants
          */
+        using value_type = Ty;
+        using vector_type = typename Traits::vector_type;
+
+        static constexpr std::size_t dimensions = Dimensions;
+        static constexpr std::size_t vector_components = Traits::size;
+
+    private:
+
+        // Internal values for book-keeping/optimization
+        static constexpr std::size_t array_size = (Dimensions + vector_components - 1) / vector_components;
+        static constexpr std::size_t extra_space = (vector_components * array_size) - Dimensions;
 
 
 
+    public:
         /*
          * Constructor(s)/Destructors
          */
         vector() = default;
 
-        template <typename... Args, std::enable_if_t<Dimensions == sizeof...(Args), int> = 0>
+        template <
+            typename... Args,
+            std::enable_if_t<Dimensions == sizeof...(Args), int> = 0,
+            std::enable_if_t<std::conjunction_v<std::is_convertible<Args, Ty>...>, int> = 0>
         vector(Args... args) noexcept
         {
             Traits::fill(this->_values, args...);
@@ -96,12 +108,78 @@ namespace dhorn::math
          */
         static vector zero() noexcept
         {
+            // TODO: Poor code generation for MSVC here... Anything we can do to improve?
             vector result;
+            std::fill(begin(result._values), end(result._values), Traits::zero());
 
-            auto zero = Traits::zero();
-            for (auto& v : result._values)
+            return result;
+        }
+
+        static vector splat(Ty value) noexcept
+        {
+            vector result;
+            std::fill(begin(result._values), end(result._values), Traits::splat(value));
+
+            if constexpr (extra_space > 0)
             {
-                v = zero;
+                result._values.back() = Traits::low_mask<vector_components - extra_space>(result._values.back());
+            }
+
+            return result;
+        }
+
+
+
+        /*
+         * Properties
+         */
+        constexpr std::size_t size() const noexcept
+        {
+            return Dimensions;
+        }
+
+
+
+        /*
+         * Arithmetic Operations
+         */
+        vector& operator+=(vector other) noexcept
+        {
+            for (std::size_t i = 0; i < array_size; ++i)
+            {
+                this->_values[i] = Traits::add(this->_values[i], other._values[i]);
+            }
+
+            return *this;
+        }
+
+        friend vector operator+(vector lhs, vector rhs) noexcept
+        {
+            vector result;
+            for (std::size_t i = 0; i < array_size; ++i)
+            {
+                result._values[i] = Traits::add(lhs._values[i], rhs._values[i]);
+            }
+
+            return result;
+        }
+
+        vector& operator-=(vector other) noexcept
+        {
+            for (std::size_t i = 0; i < array_size; ++i)
+            {
+                this->_values[i] = Traits::subtract(this->_values[i], other._values[i]);
+            }
+
+            return *this;
+        }
+
+        friend vector operator-(vector lhs, vector rhs) noexcept
+        {
+            vector result;
+            for (std::size_t i = 0; i < array_size; ++i)
+            {
+                result._values[i] = Traits::subtract(lhs._values[i], rhs._values[i]);
             }
 
             return result;

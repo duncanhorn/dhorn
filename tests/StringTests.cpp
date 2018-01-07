@@ -23,12 +23,12 @@ namespace dhorn
                 std::string str;
                 str = dhorn::trim(str);
                 Assert::IsTrue(str.empty());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 std::wstring wstr;
                 wstr = dhorn::trim(wstr);
                 Assert::IsTrue(wstr.empty());
-                Assert::AreEqual(0u, wstr.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), wstr.size());
             }
 
             TEST_METHOD(TrimAllWhitespaceTest)
@@ -36,12 +36,12 @@ namespace dhorn
                 std::string str("    \t\n");
                 str = dhorn::trim(str);
                 Assert::IsTrue(str.empty());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 std::wstring wstr(L"    \t\n");
                 wstr = dhorn::trim(wstr);
                 Assert::IsTrue(wstr.empty());
-                Assert::AreEqual(0u, wstr.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), wstr.size());
             }
 
             TEST_METHOD(TrimSingleWordTest)

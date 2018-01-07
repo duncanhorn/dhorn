@@ -284,7 +284,7 @@ namespace dhorn::tests
 
         TEST_METHOD_CLEANUP(Cleanup)
         {
-            Assert::AreEqual(0u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
         }
 
 
@@ -312,8 +312,8 @@ namespace dhorn::tests
             Assert::AreEqual(42, nonEmptyFinal.value().value);
 
             compressed_base<object_counter> obj;
-            Assert::AreEqual(1u, object_counter::instance_count);
-            Assert::AreEqual(1u, object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::constructed_count);
         }
 
         TEST_METHOD(DefaultConstructionNoexceptTest)
@@ -347,9 +347,9 @@ namespace dhorn::tests
 
             object_counter cnt;
             compressed_base<object_counter> obj(cnt);
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
         }
 
         TEST_METHOD(ValueCopyConstructionNoexceptTest)
@@ -382,9 +382,9 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_constructible_v<compressed_base<cant_construct_non_empty_final>, cant_construct_non_empty_final&&>);
 
             compressed_base<object_counter> obj(object_counter{});
-            Assert::AreEqual(1u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
         TEST_METHOD(ValueMoveConstructionNoexceptTest)
@@ -418,9 +418,9 @@ namespace dhorn::tests
 
             compressed_base<object_counter> obj;
             compressed_base<object_counter> objCopy(obj);
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
         }
 
         TEST_METHOD(CopyConstructionNoexceptTest)
@@ -455,9 +455,9 @@ namespace dhorn::tests
             struct derived : public object_counter {};
             compressed_base<derived> d;
             compressed_base<object_counter> obj(d);
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
         }
 
         TEST_METHOD(CopyConversionConstructionNoexceptTest)
@@ -491,9 +491,9 @@ namespace dhorn::tests
 
             compressed_base<object_counter> obj;
             compressed_base<object_counter> objCopy(std::move(obj));
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
         TEST_METHOD(MoveConstructionNoexceptTest)
@@ -528,9 +528,9 @@ namespace dhorn::tests
             struct derived : public object_counter {};
             compressed_base<derived> d;
             compressed_base<object_counter> obj(std::move(d));
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
         TEST_METHOD(MoveConversionConstructionNoexceptTest)
@@ -577,9 +577,9 @@ namespace dhorn::tests
             object_counter o;
             compressed_base<test> a(object_counter{});
             compressed_base<test> b(o);
-            Assert::AreEqual(3u, object_counter::instance_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
         TEST_METHOD(EmplaceConstructionNoexceptTest)
@@ -625,9 +625,9 @@ namespace dhorn::tests
             object_counter o;
             compressed_base<test> a(std::make_tuple(object_counter{})); // move (twice)
             compressed_base<test> b(std::forward_as_tuple(o)); // copy
-            Assert::AreEqual(3u, object_counter::instance_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
-            Assert::AreEqual(2u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::move_count);
         }
 
         //TEST_METHOD(TupleConstructionNoexceptTest)
@@ -658,12 +658,12 @@ namespace dhorn::tests
 
             object_counter cnt;
             compressed_base<object_counter> obj;
-            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
 
             obj = cnt;
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
         }
 
         TEST_METHOD(ValueCopyAssignmentOperatorNoexceptTest)
@@ -696,12 +696,12 @@ namespace dhorn::tests
             Assert::IsFalse(std::is_assignable_v<compressed_base<cant_construct_non_empty_final>, cant_construct_non_empty_final&&>);
 
             compressed_base<object_counter> obj;
-            Assert::AreEqual(1u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::instance_count);
 
             obj = object_counter{};
-            Assert::AreEqual(1u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
         TEST_METHOD(ValueMoveAssignmentOperatorNoexceptTest)
@@ -735,12 +735,12 @@ namespace dhorn::tests
 
             compressed_base<object_counter> obj;
             compressed_base<object_counter> objCopy;
-            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
 
             objCopy = obj;
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
         }
 
         TEST_METHOD(CopyAssignmentOperatorNoexceptTest)
@@ -775,12 +775,12 @@ namespace dhorn::tests
             struct derived : public object_counter {};
             compressed_base<derived> d;
             compressed_base<object_counter> obj;
-            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
 
             obj = d;
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
         }
 
         TEST_METHOD(CopyConversionAssignmentOperatorNoexceptTest)
@@ -814,12 +814,12 @@ namespace dhorn::tests
 
             compressed_base<object_counter> obj;
             compressed_base<object_counter> objCopy;
-            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
 
             objCopy = std::move(obj);
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
         TEST_METHOD(MoveAssignmentOperatorNoexceptTest)
@@ -854,12 +854,12 @@ namespace dhorn::tests
             struct derived : public object_counter {};
             compressed_base<derived> d;
             compressed_base<object_counter> obj;
-            Assert::AreEqual(2u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
 
             obj = std::move(d);
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(2u, object_counter::constructed_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
         TEST_METHOD(MoveConversionAssignmentOperatorNoexceptTest)

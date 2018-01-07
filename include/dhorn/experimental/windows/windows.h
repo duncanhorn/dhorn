@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN64)
 static_assert(false, "Cannot include dhorn/windows/windows.h on a non-Windows machine")
 #endif  /* WIN32 */
 

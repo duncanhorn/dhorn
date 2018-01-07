@@ -28,10 +28,10 @@ namespace dhorn
 
             TEST_METHOD(SizeTest)
             {
-                Assert::AreEqual(1u, traits_type::size(*u8"\u007F"));
-                Assert::AreEqual(2u, traits_type::size(*u8"\u07FF"));
-                Assert::AreEqual(3u, traits_type::size(*u8"\uFFFF"));
-                Assert::AreEqual(4u, traits_type::size(*u8"\U0010FFFF"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*u8"\u007F"));
+                Assert::AreEqual(static_cast<std::size_t>(2), traits_type::size(*u8"\u07FF"));
+                Assert::AreEqual(static_cast<std::size_t>(3), traits_type::size(*u8"\uFFFF"));
+                Assert::AreEqual(static_cast<std::size_t>(4), traits_type::size(*u8"\U0010FFFF"));
             }
 
             TEST_METHOD(NextTest)
@@ -103,11 +103,11 @@ namespace dhorn
 
             TEST_METHOD(SizeTest)
             {
-                Assert::AreEqual(1u, traits_type::size(*u"\uD7FF"));
-                Assert::AreEqual(1u, traits_type::size(*u"\uE000"));
-                Assert::AreEqual(1u, traits_type::size(*u"\uFFFF"));
-                Assert::AreEqual(2u, traits_type::size(*u"\U00010000"));
-                Assert::AreEqual(2u, traits_type::size(*u"\U0010FFFF"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*u"\uD7FF"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*u"\uE000"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*u"\uFFFF"));
+                Assert::AreEqual(static_cast<std::size_t>(2), traits_type::size(*u"\U00010000"));
+                Assert::AreEqual(static_cast<std::size_t>(2), traits_type::size(*u"\U0010FFFF"));
             }
 
             TEST_METHOD(NextTest)
@@ -179,11 +179,11 @@ namespace dhorn
 
             TEST_METHOD(SizeTest)
             {
-                Assert::AreEqual(1u, traits_type::size(*U"\uD7FF"));
-                Assert::AreEqual(1u, traits_type::size(*U"\uE000"));
-                Assert::AreEqual(1u, traits_type::size(*U"\uFFFF"));
-                Assert::AreEqual(1u, traits_type::size(*U"\U00010000"));
-                Assert::AreEqual(1u, traits_type::size(*U"\U0010FFFF"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*U"\uD7FF"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*U"\uE000"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*U"\uFFFF"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*U"\U00010000"));
+                Assert::AreEqual(static_cast<std::size_t>(1), traits_type::size(*U"\U0010FFFF"));
             }
 
             TEST_METHOD(NextTest)
@@ -272,8 +272,8 @@ namespace dhorn
             {
                 string_type str;
 
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
             }
 
             TEST_METHOD(Utf8StringLiteralConstructorTest)
@@ -396,8 +396,8 @@ namespace dhorn
                 string_type str1 = test_string;
                 string_type str2(std::move(str1));
 
-                Assert::AreEqual(0u, str1.length());
-                Assert::AreEqual(0u, str1.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str1.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str1.size());
                 Assert::AreEqual(std::size(test_string) - 9, str2.length());
                 Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
@@ -432,7 +432,7 @@ namespace dhorn
             TEST_METHOD(CopyAssignmentTest)
             {
                 string_type str2 = u8"foo";
-                Assert::AreEqual(3u, str2.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str2.length()); // Prevent optimizations
 
                 string_type str1 = test_string;
                 str2 = str1;
@@ -459,7 +459,7 @@ namespace dhorn
             TEST_METHOD(MoveAssignmentTest)
             {
                 string_type str2 = u8"foo";
-                Assert::AreEqual(3u, str2.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str2.length()); // Prevent optimizations
 
                 {
                     string_type str1 = test_string;
@@ -475,7 +475,7 @@ namespace dhorn
             TEST_METHOD(ConvertAssignmentTest)
             {
                 string_type str = u8"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char buffer_utf8[] = u8"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
                 char16_t buffer_utf16[] = u"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
@@ -499,7 +499,7 @@ namespace dhorn
             TEST_METHOD(Utf8StringLiteralAssignmentTest)
             {
                 string_type str = u8"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char buff1[] = u8"This is a test";
                 str = buff1;
@@ -521,7 +521,7 @@ namespace dhorn
             TEST_METHOD(Utf16StringLiteralAssignmentTest)
             {
                 string_type str = u8"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char16_t buff1[] = u"This is a test";
                 char buff1_utf8[] = u8"This is a test";
@@ -545,7 +545,7 @@ namespace dhorn
             TEST_METHOD(Utf32StringLiteralAssignmentTest)
             {
                 string_type str = u8"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char32_t buff1[] = U"This is a test";
                 char buff1_utf8[] = u8"This is a test";
@@ -569,7 +569,7 @@ namespace dhorn
             TEST_METHOD(StdStringAssignmentTest)
             {
                 string_type str = u8"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 // NOTE: std::wstring is purposefully not tested since it purposefully is not supported
                 std::string s1 = u8"This is a test";
@@ -602,7 +602,7 @@ namespace dhorn
 
                 char expected[] = u8"\u1FE7\u09EA\U0010FE2B\u0080";
                 str = str.c_str() + 7;
-                Assert::AreEqual(4u, str.length());
+                Assert::AreEqual(static_cast<std::size_t>(4), str.length());
                 Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
@@ -1403,8 +1403,8 @@ namespace dhorn
             {
                 string_type str;
 
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
             }
 
             TEST_METHOD(Utf8StringLiteralConstructorTest)
@@ -1518,8 +1518,8 @@ namespace dhorn
                 string_type str1 = test_string;
                 string_type str2(std::move(str1));
 
-                Assert::AreEqual(0u, str1.length());
-                Assert::AreEqual(0u, str1.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str1.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str1.size());
                 Assert::AreEqual(std::size(test_string) - 2, str2.length());
                 Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
@@ -1554,7 +1554,7 @@ namespace dhorn
             TEST_METHOD(CopyAssignmentTest)
             {
                 string_type str2 = u"foo";
-                Assert::AreEqual(3u, str2.length()); // Prevent optimization
+                Assert::AreEqual(static_cast<std::size_t>(3), str2.length()); // Prevent optimization
 
                 string_type str1 = test_string;
                 str2 = str1;
@@ -1581,7 +1581,7 @@ namespace dhorn
             TEST_METHOD(MoveAssignmentTest)
             {
                 string_type str2 = u"foo";
-                Assert::AreEqual(3u, str2.length()); // Prevent optimization
+                Assert::AreEqual(static_cast<std::size_t>(3), str2.length()); // Prevent optimization
 
                 {
                     string_type str1 = test_string;
@@ -1597,7 +1597,7 @@ namespace dhorn
             TEST_METHOD(ConvertAssignmentTest)
             {
                 string_type str = u"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimization
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimization
 
                 char buffer_utf8[] = u8"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
                 char16_t buffer_utf16[] = u"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
@@ -1621,7 +1621,7 @@ namespace dhorn
             TEST_METHOD(Utf8StringLiteralAssignmentTest)
             {
                 string_type str = u"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimization
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimization
 
                 char buff1[] = u8"This is a test";
                 char16_t buff1_utf16[] = u"This is a test";
@@ -1643,7 +1643,7 @@ namespace dhorn
             TEST_METHOD(Utf16StringLiteralAssignmentTest)
             {
                 string_type str = u"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimization
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimization
 
                 char16_t buff1[] = u"This is a test";
                 str = buff1;
@@ -1663,7 +1663,7 @@ namespace dhorn
             TEST_METHOD(Utf32StringLiteralAssignmentTest)
             {
                 string_type str = u"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimization
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimization
 
                 char32_t buff1[] = U"This is a test";
                 char16_t buff1_utf16[] = u"This is a test";
@@ -1685,7 +1685,7 @@ namespace dhorn
             TEST_METHOD(StdStringAssignmentTest)
             {
                 string_type str = u"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimization
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimization
 
                 // NOTE: std::wstring is purposefully not tested since it purposefully is not supported
                 std::string s1 = u8"This is a test";
@@ -1715,7 +1715,7 @@ namespace dhorn
 
                 char16_t expected[] = u"\u1FE7\u09EA\U0010FE2B\u0080";
                 str = str.c_str() + 7;
-                Assert::AreEqual(4u, str.length());
+                Assert::AreEqual(static_cast<std::size_t>(4), str.length());
                 Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);
@@ -2516,8 +2516,8 @@ namespace dhorn
             {
                 string_type str;
 
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
             }
 
             TEST_METHOD(Utf8StringLiteralConstructorTest)
@@ -2631,8 +2631,8 @@ namespace dhorn
                 string_type str1 = test_string;
                 string_type str2(std::move(str1));
 
-                Assert::AreEqual(0u, str1.length());
-                Assert::AreEqual(0u, str1.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str1.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str1.size());
                 Assert::AreEqual(std::size(test_string) - 1, str2.length());
                 Assert::AreEqual(std::size(test_string) - 1, str2.size());
                 Assert::IsTrue(std::equal(std::begin(test_string), std::end(test_string), str2.c_str()));
@@ -2667,7 +2667,7 @@ namespace dhorn
             TEST_METHOD(CopyAssignmentTest)
             {
                 string_type str2 = U"foo";
-                Assert::AreEqual(3u, str2.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str2.length()); // Prevent optimizations
 
                 string_type str1 = test_string;
                 str2 = str1;
@@ -2694,7 +2694,7 @@ namespace dhorn
             TEST_METHOD(MoveAssignmentTest)
             {
                 string_type str2 = U"foo";
-                Assert::AreEqual(3u, str2.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str2.length()); // Prevent optimizations
 
                 {
                     string_type str1 = test_string;
@@ -2710,7 +2710,7 @@ namespace dhorn
             TEST_METHOD(ConvertAssignmentTest)
             {
                 string_type str = U"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char buffer_utf8[] = u8"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
                 char16_t buffer_utf16[] = u"Just a test - \u1FE7\u09EA\U0010FE2B\u0080";
@@ -2734,7 +2734,7 @@ namespace dhorn
             TEST_METHOD(Utf8StringLiteralAssignmentTest)
             {
                 string_type str = U"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char buff1[] = u8"This is a test";
                 char32_t buff1_utf32[] = U"This is a test";
@@ -2756,7 +2756,7 @@ namespace dhorn
             TEST_METHOD(Utf16StringLiteralAssignmentTest)
             {
                 string_type str = U"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char16_t buff1[] = u"This is a test";
                 char32_t buff1_utf32[] = U"This is a test";
@@ -2778,7 +2778,7 @@ namespace dhorn
             TEST_METHOD(Utf32StringLiteralAssignmentTest)
             {
                 string_type str = U"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 char32_t buff1[] = U"This is a test";
                 str = buff1;
@@ -2798,7 +2798,7 @@ namespace dhorn
             TEST_METHOD(StdStringAssignmentTest)
             {
                 string_type str = U"foo";
-                Assert::AreEqual(3u, str.length()); // Prevent optimizations
+                Assert::AreEqual(static_cast<std::size_t>(3), str.length()); // Prevent optimizations
 
                 // NOTE: std::wstring is purposefully not tested since it purposefully is not supported
                 std::string s1 = u8"This is a test";
@@ -2828,7 +2828,7 @@ namespace dhorn
 
                 char32_t expected[] = U"\u1FE7\u09EA\U0010FE2B\u0080";
                 str = str.c_str() + 7;
-                Assert::AreEqual(4u, str.length());
+                Assert::AreEqual(static_cast<std::size_t>(4), str.length());
                 Assert::AreEqual(std::size(expected) - 1, str.size());
                 Assert::IsTrue(std::equal(std::begin(expected), std::end(expected), str.c_str()));
                 EnsureCorrectString(str);

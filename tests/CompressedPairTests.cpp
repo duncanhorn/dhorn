@@ -222,7 +222,7 @@ namespace dhorn::tests
 
         TEST_METHOD_CLEANUP(TestCleanup)
         {
-            Assert::AreEqual(0u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
         }
 
 
@@ -421,7 +421,7 @@ namespace dhorn::tests
             Assert::AreEqual(42, p1.first().value);
 
             compressed_pair<object_counter, object_counter> p;
-            Assert::AreEqual(2u, object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::constructed_count);
         }
 
         TEST_METHOD(ExplicitDefaultConstructionTest)
@@ -474,8 +474,8 @@ namespace dhorn::tests
 
             object_counter obj;
             compressed_pair<object_counter, object_counter> p(obj, obj);
-            Assert::AreEqual(3u, object_counter::constructed_count);
-            Assert::AreEqual(2u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitValueConstructionTest)
@@ -532,13 +532,13 @@ namespace dhorn::tests
             object_counter counter;
 
             compressed_pair<object_counter, object_counter> p4 = { std::move(counter), std::move(counter) };
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<object_counter, non_empty> p5 = { std::move(counter), non_empty{} };
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<non_empty, object_counter> p6 = { non_empty{}, std::move(counter) };
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitValueMoveConstructionTest)
@@ -561,10 +561,10 @@ namespace dhorn::tests
             object_counter counter;
 
             compressed_pair<object_counter, non_empty_explicit> p4(std::move(counter), non_empty_explicit{});
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<non_empty_explicit, object_counter> p5(non_empty_explicit{}, std::move(counter));
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
         }
 
 #pragma endregion
@@ -593,16 +593,16 @@ namespace dhorn::tests
                 std::forward_as_tuple("foo"),
                 std::forward_as_tuple(8));
             Assert::AreEqual("foo"s, p3.first());
-            Assert::AreEqual(8u, p3.second().size());
+            Assert::AreEqual(static_cast<std::size_t>(8), p3.second().size());
 
             compressed_pair<object_counter, object_counter> p4(
                 std::piecewise_construct,
                 std::forward_as_tuple(),
                 std::forward_as_tuple(object_counter{}));
-            Assert::AreEqual(2u, object_counter::instance_count);
-            Assert::AreEqual(3u, object_counter::constructed_count);
-            Assert::AreEqual(0u, object_counter::copy_count);
-            Assert::AreEqual(1u, object_counter::move_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::constructed_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::move_count);
         }
 
 #pragma endregion
@@ -638,26 +638,26 @@ namespace dhorn::tests
 
             compressed_pair<object_counter, object_counter> p1 = {};
             compressed_pair<object_counter, object_counter> p2 = p1;
-            Assert::AreEqual(2u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::copy_count);
 
             compressed_pair<object_counter, non_empty> p3 = {};
             compressed_pair<object_counter, non_empty> p4 = p3;
-            Assert::AreEqual(3u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::copy_count);
 
             compressed_pair<non_empty, object_counter> p5 = {};
             compressed_pair<non_empty, object_counter> p6 = p5;
-            Assert::AreEqual(4u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(4), object_counter::copy_count);
 
             // Converting Copy
             using adapt = non_empty_adapter<object_counter>;
             compressed_pair<adapt, adapt> p7 = p1;
-            Assert::AreEqual(6u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(6), object_counter::copy_count);
 
             compressed_pair<adapt, empty_adapter<non_empty>> p8 = p3;
-            Assert::AreEqual(7u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(7), object_counter::copy_count);
 
             compressed_pair<empty_adapter<non_empty>, adapt> p9 = p5;
-            Assert::AreEqual(8u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(8), object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitCopyConstructionTest)
@@ -679,19 +679,19 @@ namespace dhorn::tests
 
             compressed_pair<object_counter, non_empty_explicit> p1;
             compressed_pair<object_counter, non_empty_explicit> p2 = p1;
-            Assert::AreEqual(1u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
 
             compressed_pair<non_empty_explicit, object_counter> p3;
             compressed_pair<non_empty_explicit, object_counter> p4 = p3;
-            Assert::AreEqual(2u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::copy_count);
 
             // Converting Copy
             using adapt = non_empty_explicit_adapter<object_counter>;
             compressed_pair<adapt, empty_explicit_adapter<non_empty_explicit>> p5(p1);
-            Assert::AreEqual(3u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::copy_count);
 
             compressed_pair< empty_explicit_adapter<non_empty_explicit>, adapt> p6(p3);
-            Assert::AreEqual(4u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(4), object_counter::copy_count);
         }
 
 #pragma endregion
@@ -727,27 +727,27 @@ namespace dhorn::tests
 
             compressed_pair<object_counter, object_counter> p1 = {};
             compressed_pair<object_counter, object_counter> p2 = std::move(p1);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<object_counter, non_empty> p3 = {};
             compressed_pair<object_counter, non_empty> p4 = std::move(p3);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<non_empty, object_counter> p5 = {};
             compressed_pair<non_empty, object_counter> p6 = std::move(p5);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             // Converting Move
             // NOTE: object_counter has no state, so moving it more than once is okay
             using adapt = non_empty_adapter<object_counter>;
             compressed_pair<adapt, adapt> p7 = std::move(p1);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<adapt, empty_adapter<non_empty>> p8 = std::move(p3);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<empty_adapter<non_empty>, adapt> p9 = std::move(p5);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
         }
 
         TEST_METHOD(ExplicitMoveConstructionTest)
@@ -769,20 +769,20 @@ namespace dhorn::tests
 
             compressed_pair<object_counter, non_empty_explicit> p1;
             compressed_pair<object_counter, non_empty_explicit> p2 = std::move(p1);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<non_empty_explicit, object_counter> p3;
             compressed_pair<non_empty_explicit, object_counter> p4 = std::move(p3);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             // Converting Move
             // NOTE: object_counter has no state, so moving it more than once is okay
             using adapt = non_empty_explicit_adapter<object_counter>;
             compressed_pair<adapt, empty_explicit_adapter<non_empty_explicit>> p5(std::move(p1));
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair< empty_explicit_adapter<non_empty_explicit>, adapt> p6(std::move(p3));
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
         }
 
 #pragma endregion
@@ -928,17 +928,17 @@ namespace dhorn::tests
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<object_counter, object_counter> p2;
             p2 = p1;
-            Assert::AreEqual(2u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::copy_count);
 
             compressed_pair<non_empty, object_counter> p3;
             compressed_pair<non_empty, object_counter> p4;
             p4 = p3;
-            Assert::AreEqual(3u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::copy_count);
 
             compressed_pair<object_counter, non_empty> p5;
             compressed_pair<object_counter, non_empty> p6;
             p6 = p5;
-            Assert::AreEqual(4u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(4), object_counter::copy_count);
         }
 
         TEST_METHOD(CopyConversionAssignmentTest)
@@ -970,17 +970,17 @@ namespace dhorn::tests
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<adapt, adapt> p2;
             p2 = p1;
-            Assert::AreEqual(2u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::copy_count);
 
             compressed_pair<empty, object_counter> p3;
             compressed_pair<empty, adapt> p4;
             p4 = p3;
-            Assert::AreEqual(3u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(3), object_counter::copy_count);
 
             compressed_pair<object_counter, empty> p5;
             compressed_pair<adapt, empty> p6;
             p6 = p5;
-            Assert::AreEqual(4u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(4), object_counter::copy_count);
         }
 
         struct MoveAssignmentTester
@@ -1019,17 +1019,17 @@ namespace dhorn::tests
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<object_counter, object_counter> p2;
             p2 = std::move(p1);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<non_empty, object_counter> p3;
             compressed_pair<non_empty, object_counter> p4;
             p4 = std::move(p3);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<object_counter, non_empty> p5;
             compressed_pair<object_counter, non_empty> p6;
             p6 = std::move(p5);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
         }
 
         TEST_METHOD(MoveConversionAssignmentTest)
@@ -1061,17 +1061,17 @@ namespace dhorn::tests
             compressed_pair<object_counter, object_counter> p1;
             compressed_pair<adapt, adapt> p2;
             p2 = std::move(p1);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<empty, object_counter> p3;
             compressed_pair<empty, adapt> p4;
             p4 = std::move(p3);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             compressed_pair<object_counter, empty> p5;
             compressed_pair<adapt, empty> p6;
             p6 = std::move(p5);
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
         }
 
 #pragma endregion
@@ -1292,7 +1292,7 @@ namespace dhorn::tests
 
         TEST_METHOD(TupleSizeTest)
         {
-            Assert::AreEqual(2u, std::tuple_size_v<compressed_pair<int, int>>);
+            Assert::AreEqual(static_cast<std::size_t>(2), std::tuple_size_v<compressed_pair<int, int>>);
         }
 
         TEST_METHOD(TupleElementTest)
@@ -1348,19 +1348,19 @@ namespace dhorn::tests
 
             auto obj = std::get<0>(pair);
             obj = std::get<1>(pair);
-            Assert::AreEqual(2u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(2), object_counter::copy_count);
 
             obj = std::get<0>(std::as_const(pair));
             obj = std::get<1>(std::as_const(pair));
-            Assert::AreEqual(4u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(4), object_counter::copy_count);
 
             obj = std::get<0>(std::move(pair));
             obj = std::get<1>(std::move(pair));
-            Assert::AreEqual(4u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(4), object_counter::copy_count);
 
             obj = std::get<0>(std::move(std::as_const(pair)));
             obj = std::get<1>(std::move(std::as_const(pair)));
-            Assert::AreEqual(4u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(4), object_counter::copy_count);
         }
 
 #pragma endregion

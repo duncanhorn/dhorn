@@ -91,11 +91,11 @@ void worker::thread_proc(void)
     {
         using PointType = std::pair<std::size_t, std::size_t>;
 
-        std::size_t row_index = ++this->_nextRow;
-        for (; row_index < this->_data->size(); row_index = ++this->_nextRow)
+        int row_index = ++this->_nextRow;
+        for (; row_index < static_cast<int>(this->_data->size()); row_index = ++this->_nextRow)
         {
             auto &row = (*this->_data)[row_index];
-            for (std::size_t col_index = 0; col_index < row.size(); ++col_index)
+            for (int col_index = 0; col_index < static_cast<int>(row.size()); ++col_index)
             {
                 auto &entry = row[col_index];
 
@@ -291,10 +291,10 @@ callback_handler::result_type worker::on_scrollwheel(
     std::size_t new_width = static_cast<std::size_t>(size.width * amt);
     std::size_t new_height = static_cast<std::size_t>(size.height * amt);
 
-    int left = pt.x - new_width / 2;
-    int top = pt.y - new_height / 2;
-    int right = left + new_width;
-    int bottom = top + new_height;
+    auto left = pt.x - new_width / 2;
+    auto top = pt.y - new_height / 2;
+    auto right = left + new_width;
+    auto bottom = top + new_height;
 
     // Convert these co-ords to complex values
     auto topLeftReal = this->_topLeft.real() + (this->_bottomRight.real() - this->_topLeft.real()) * left / size.width;

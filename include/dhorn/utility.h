@@ -72,22 +72,56 @@ namespace dhorn
     template <typename IntegerSequence>
     struct reverse_integer_sequence;
 
-    template <typename Ty>
-    struct reverse_integer_sequence<std::integer_sequence<Ty>>
+    template <typename Ty, Ty... Values>
+    struct reverse_integer_sequence<std::integer_sequence<Ty, Values...>>
     {
-        using type = std::integer_sequence<Ty>;
-    };
-
-    template <typename Ty, Ty First, Ty... Others>
-    struct reverse_integer_sequence<std::integer_sequence<Ty, First, Others...>>
-    {
-        using type = join_integer_sequence_t<
-            typename reverse_integer_sequence<std::integer_sequence<Ty, Others...>>::type,
-            std::integer_sequence<Ty, First>>;
+        using type = typename details::make_reverse_integer_sequence<std::integer_sequence<Ty, Values...>>::type;
     };
 
     template <typename IntegerSequence>
     using reverse_integer_sequence_t = typename reverse_integer_sequence<IntegerSequence>::type;
+
+#pragma endregion
+
+
+
+    /*
+     * increment_integer_sequence
+     */
+#pragma region 
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    struct increment_integer_sequence;
+
+    template <typename Ty, Ty... Values, Ty IncrementValue>
+    struct increment_integer_sequence<std::integer_sequence<Ty, Values...>, IncrementValue>
+    {
+        using type = std::integer_sequence<Ty, (Values + IncrementValue)...>;
+    };
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    using increment_integer_sequence_t = typename increment_integer_sequence<IntegerSequence, Value>::type;
+
+#pragma endregion
+
+
+
+    /*
+     * decrement_integer_sequence
+     */
+#pragma region 
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    struct decrement_integer_sequence;
+
+    template <typename Ty, Ty... Values, Ty DecrementValue>
+    struct decrement_integer_sequence<std::integer_sequence<Ty, Values...>, DecrementValue>
+    {
+        using type = std::integer_sequence<Ty, (Values - DecrementValue)...>;
+    };
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    using decrement_integer_sequence_t = typename decrement_integer_sequence<IntegerSequence, Value>::type;
 
 #pragma endregion
 

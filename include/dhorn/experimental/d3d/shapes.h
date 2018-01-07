@@ -110,9 +110,9 @@ namespace dhorn
                 indices.resize(36);
                 i = 0;
 
-                for (std::size_t j = 0; j < 6; ++j)
+                for (unsigned int j = 0; j < 6; ++j)
                 {
-                    std::size_t offset = j * 4;
+                    unsigned int offset = j * 4;
 
                     // The vertices should be ordered in a clockwise fashion
                     indices[i++] = offset;

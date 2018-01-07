@@ -108,7 +108,7 @@ namespace dhorn
             {
                 return input_element_desc(
                     format,
-                    byte_offset(member),
+                    static_cast<UINT>(byte_offset(member)),
                     semanticName,
                     semanticIndex,
                     inputClassification);
@@ -196,10 +196,10 @@ namespace dhorn
             inline com::com_ptr<ID3D11Buffer> create_buffer(
                 ID3D11Device *device,
                 const Ty *bufferData,
-                std::size_t length,
+                UINT length,
                 UINT bindFlags)
             {
-                D3D11_BUFFER_DESC desc = buffer_desc(length * sizeof(Ty), bindFlags);
+                D3D11_BUFFER_DESC desc = buffer_desc(static_cast<UINT>(length * sizeof(Ty)), bindFlags);
                 D3D11_SUBRESOURCE_DATA data = { bufferData };
 
                 com::com_ptr<ID3D11Buffer> buffer;
@@ -211,7 +211,7 @@ namespace dhorn
             template <typename Ty>
             inline com::com_ptr<ID3D11Buffer> create_buffer(ID3D11Device *device, const std::vector<Ty> &data, UINT bindFlags)
             {
-                return create_buffer(device, data.data(), data.size(), bindFlags);
+                return create_buffer(device, data.data(), static_cast<UINT>(data.size()), bindFlags);
             }
 
             template <typename Ty, std::size_t Size>

@@ -219,7 +219,11 @@ namespace dhorn
 
             void Assign(const wchar_t *str, std::size_t length)
             {
-                com::check_hresult(::WindowsCreateStringReference(str, length, &this->_header, &this->_hstr));
+                com::check_hresult(::WindowsCreateStringReference(
+                    str,
+                    static_cast<UINT32>(length),
+                    &this->_header,
+                    &this->_hstr));
             }
 
             template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>
@@ -629,7 +633,7 @@ namespace dhorn
             void Assign(const wchar_t *str, std::size_t length)
             {
                 assert(!this->_hstr);
-                com::check_hresult(::WindowsCreateString(str, length, &this->_hstr));
+                com::check_hresult(::WindowsCreateString(str, static_cast<UINT32>(length), &this->_hstr));
             }
 
             template <typename StringT, typename = std::enable_if_t<is_c_string<StringT>::value>>

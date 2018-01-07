@@ -27,7 +27,7 @@ namespace dhorn
 
                 // Splitting an empty string results in an empty string
                 split(empty.begin(), empty.end(), std::back_inserter(result), ' ');
-                Assert::AreEqual(1u, result.size());
+                Assert::AreEqual(static_cast<std::size_t>(1), result.size());
                 Assert::IsTrue(result[0].empty());
             }
 
@@ -38,7 +38,7 @@ namespace dhorn
 
                 // Splitting the target character results in two empty strings
                 split(str.begin(), str.end(), std::back_inserter(result), ' ');
-                Assert::AreEqual(2u, result.size());
+                Assert::AreEqual(static_cast<std::size_t>(2), result.size());
                 Assert::IsTrue(result[0].empty());
                 Assert::IsTrue(result[1].empty());
 
@@ -51,7 +51,7 @@ namespace dhorn
 
                 // Splitting at something other than the target character should result in the same string
                 split(str.begin(), str.end(), std::back_inserter(result), '-');
-                Assert::AreEqual(1u, result.size());
+                Assert::AreEqual(static_cast<std::size_t>(1), result.size());
                 Assert::AreEqual(str, result[0]);
             }
 
@@ -76,7 +76,7 @@ namespace dhorn
 
                 // Splitting at something other than the target character should result in the same string
                 split(str.begin(), str.end(), std::back_inserter(result), '-');
-                Assert::AreEqual(1u, result.size());
+                Assert::AreEqual(static_cast<std::size_t>(1), result.size());
                 Assert::AreEqual(str, result[0]);
             }
 
@@ -86,7 +86,7 @@ namespace dhorn
                 std::vector<std::string> result;
 
                 split(str.begin(), str.end(), std::back_inserter(result), ',');
-                Assert::AreEqual(5u, result.size());
+                Assert::AreEqual(static_cast<std::size_t>(5), result.size());
                 Assert::AreEqual("foo"s, result[0]);
                 Assert::AreEqual("bar"s, result[1]);
                 Assert::AreEqual(""s, result[2]);
@@ -100,11 +100,11 @@ namespace dhorn
                 std::vector<std::vector<int>> result;
 
                 split(vector.begin(), vector.end(), std::back_inserter(result), 0);
-                Assert::AreEqual(4u, result.size());
-                Assert::AreEqual(0u, result[0].size());
-                Assert::AreEqual(3u, result[1].size());
-                Assert::AreEqual(2u, result[2].size());
-                Assert::AreEqual(1u, result[3].size());
+                Assert::AreEqual(static_cast<std::size_t>(4), result.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), result[0].size());
+                Assert::AreEqual(static_cast<std::size_t>(3), result[1].size());
+                Assert::AreEqual(static_cast<std::size_t>(2), result[2].size());
+                Assert::AreEqual(static_cast<std::size_t>(1), result[3].size());
             }
 
             TEST_METHOD(ConditionalSplitTest)
@@ -118,7 +118,7 @@ namespace dhorn
                     return ++pos % 4 == 0;
                 });
 
-                Assert::AreEqual(4u, result.size());
+                Assert::AreEqual(static_cast<std::size_t>(4), result.size());
                 Assert::AreEqual("foo"s, result[0]);
                 Assert::AreEqual("bar"s, result[1]);
                 Assert::AreEqual("cat"s, result[2]);

@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
 #include <Windows.h>
 #endif
 
@@ -108,7 +108,7 @@ namespace dhorn
                 }
             }
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
 
             uuid(const GUID &guid) :
                 Data1(guid.Data1),
@@ -199,7 +199,7 @@ namespace dhorn
     }
 }
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
 static_assert(sizeof(dhorn::experimental::uuid) == sizeof(GUID), "dhorn::uuid must be same size as GUID");
 #endif
 

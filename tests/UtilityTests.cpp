@@ -106,6 +106,71 @@ namespace dhorn::tests
 
 
 
+    TEST_CLASS(IncrementDecrementIntegerSequenceTests)
+    {
+        TEST_METHOD(IncrementEmptySequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<>,
+                increment_integer_sequence_t<std::index_sequence<>, 0>>);
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<>,
+                increment_integer_sequence_t<std::index_sequence<>, 42>>);
+        }
+
+        TEST_METHOD(DecrementEmptySequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<>,
+                decrement_integer_sequence_t<std::index_sequence<>, 0>>);
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<>,
+                decrement_integer_sequence_t<std::index_sequence<>, 42>>);
+        }
+
+        TEST_METHOD(IncrementSingleElementSequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<42>,
+                increment_integer_sequence_t<std::index_sequence<42>, 0>>);
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<42>,
+                increment_integer_sequence_t<std::index_sequence<0>, 42>>);
+        }
+
+        TEST_METHOD(DecrementSingleElementSequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<42>,
+                decrement_integer_sequence_t<std::index_sequence<42>, 0>>);
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<0>,
+                decrement_integer_sequence_t<std::index_sequence<42>, 42>>);
+        }
+
+        TEST_METHOD(IncrementMultipleElementsSequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<10, 11, 12, 13, 14>,
+                increment_integer_sequence_t<std::make_index_sequence<5>, 10>>);
+            Assert::IsTrue(std::is_same_v<
+                std::integer_sequence<int, 0, 1, 2, 3, 4>,
+                increment_integer_sequence_t<std::integer_sequence<int, 10, 11, 12, 13, 14>, -10>>);
+        }
+
+        TEST_METHOD(DecrementMultipleElementsSequenceTest)
+        {
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<0, 1, 2, 3, 4>,
+                decrement_integer_sequence_t<std::index_sequence<10, 11, 12, 13, 14>, 10>>);
+            Assert::IsTrue(std::is_same_v<
+                std::integer_sequence<int, -10, -9, -8, -7, -6>,
+                decrement_integer_sequence_t<std::make_integer_sequence<int, 5>, 10>>);
+        }
+    };
+
+
+
     TEST_CLASS(GetByteTests)
     {
         TEST_METHOD(Unsigned32BitValueTest)
