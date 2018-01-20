@@ -253,7 +253,7 @@ namespace dhorn::tests
 
         TEST_METHOD_CLEANUP(TestCleanup)
         {
-            Assert::AreEqual(0u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
         }
 
         TEST_METHOD(DefaultConstructionTest)

@@ -31,6 +31,9 @@
     <Filter Include="include\winrt">
       <UniqueIdentifier>{760e045b-0536-4ada-8fe5-a3aefc9829da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\experimental\math">
+      <UniqueIdentifier>{db81493d-bc5c-4c6d-8f25-fb236a1f41fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\experimental\animation.h">
@@ -212,6 +215,15 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\windows\guid.h">
       <Filter>include\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\math\nointrin_traits.h">
+      <Filter>include\experimental\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\math\sse2_traits.h">
+      <Filter>include\experimental\math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\math\vector.h">
+      <Filter>include\experimental\math</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

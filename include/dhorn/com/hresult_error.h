@@ -93,7 +93,7 @@ namespace dhorn::com
                     err, // MessageId
                     0, // LanguageId
                     errorString + offset,
-                    std::size(errorString) - offset,
+                    static_cast<DWORD>(std::size(errorString) - offset),
                     nullptr); // Args
 
                 if (!msgSize)

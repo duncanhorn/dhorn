@@ -30,14 +30,14 @@ namespace dhorn::tests
 
         TEST_METHOD_CLEANUP(TestCleanup)
         {
-            Assert::AreEqual(0u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
         }
 
         TEST_METHOD(DefaultInitializeTest)
         {
             thread_pool pool;
 
-            Assert::AreEqual(0u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(0), pool.count());
             pool.join();
         }
 
@@ -55,7 +55,7 @@ namespace dhorn::tests
                     value = 42;
                 });
 
-                Assert::AreEqual(1u, pool.count());
+                Assert::AreEqual(static_cast<std::size_t>(1), pool.count());
                 Assert::AreEqual(0, value);
             }
 
@@ -84,7 +84,7 @@ namespace dhorn::tests
                 }
 
                 Assert::AreEqual(loop_count, pool.count());
-                Assert::AreEqual(0u, value);
+                Assert::AreEqual(static_cast<std::size_t>(0), value);
             }
 
             pool.join();
@@ -160,7 +160,7 @@ namespace dhorn::tests
                 std::this_thread::sleep_for(10ms);
             }
 
-            Assert::AreEqual(1u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(1), pool.count());
 
             // Now test when setting the max availble threads after submitting all tasks
             pool.set_max_available_threads(100);
@@ -197,7 +197,7 @@ namespace dhorn::tests
                 std::this_thread::sleep_for(10ms);
             }
 
-            Assert::AreEqual(1u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(1), pool.count());
 
             pool.join();
         }
@@ -218,7 +218,7 @@ namespace dhorn::tests
                     ++count;
                 });
 
-                Assert::AreEqual(1u, pool.count());
+                Assert::AreEqual(static_cast<std::size_t>(1), pool.count());
             }
 
             pool.join();
@@ -237,7 +237,7 @@ namespace dhorn::tests
                 Assert::IsTrue(pool.count() <= 2);
             }
 
-            Assert::AreEqual(2u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(2), pool.count());
 
             // Setting max back down to one should terminate a thread
             pool.set_max_threads(1);
@@ -251,7 +251,7 @@ namespace dhorn::tests
                 std::this_thread::sleep_for(10ms);
             }
 
-            Assert::AreEqual(1u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(1), pool.count());
             pool.join();
         }
 
@@ -260,14 +260,14 @@ namespace dhorn::tests
             thread_pool pool;
 
             pool.set_min_threads(1);
-            Assert::AreEqual(1u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(1), pool.count());
 
             pool.set_min_threads(2);
-            Assert::AreEqual(2u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(2), pool.count());
 
             // Setting back down to one shouldn't change the count
             pool.set_min_threads(1);
-            Assert::AreEqual(2u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(2), pool.count());
 
             pool.join();
         }
@@ -282,7 +282,7 @@ namespace dhorn::tests
             {
                 // We need to submit a dummy task to ensure that we don't accidentally start processing a lower priority
                 // task before we submit the higher priority ones
-                std::size_t stage = 0;
+                volatile std::size_t stage = 0;
 
                 std::mutex mutex;
                 std::condition_variable cond;
@@ -343,12 +343,12 @@ namespace dhorn::tests
                 std::this_thread::sleep_for(1ms);
             }
 
-            Assert::AreEqual(0u, array[0]);
-            Assert::AreEqual(1u, array[1]);
-            Assert::AreEqual(2u, array[2]);
-            Assert::AreEqual(3u, array[3]);
-            Assert::AreEqual(4u, array[4]);
-            Assert::AreEqual(5u, array[5]);
+            Assert::AreEqual(static_cast<std::size_t>(0), array[0]);
+            Assert::AreEqual(static_cast<std::size_t>(1), array[1]);
+            Assert::AreEqual(static_cast<std::size_t>(2), array[2]);
+            Assert::AreEqual(static_cast<std::size_t>(3), array[3]);
+            Assert::AreEqual(static_cast<std::size_t>(4), array[4]);
+            Assert::AreEqual(static_cast<std::size_t>(5), array[5]);
 
             pool.join();
         }
@@ -356,7 +356,7 @@ namespace dhorn::tests
         TEST_METHOD(SingleThreadThreadPoolConstructionTest)
         {
             single_thread_thread_pool pool;
-            Assert::AreEqual(1u, pool.count());
+            Assert::AreEqual(static_cast<std::size_t>(1), pool.count());
             pool.join();
         }
 
@@ -457,10 +457,10 @@ namespace dhorn::tests
 
             pool.join();
 
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             // All instances should be destroyed, too
-            Assert::AreEqual(0u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
         }
 
         TEST_METHOD(InvokeWithArgsTest)
@@ -479,7 +479,7 @@ namespace dhorn::tests
                 pool.submit([&mutex, &value](const std::string& str)
                 {
                     std::lock_guard<std::mutex> guard(mutex);
-                    value = str.length();
+                    value = static_cast<int>(str.length());
                 }, str);
 
                 future = pool.submit_for_result([&mutex](const std::string& str)
@@ -494,7 +494,7 @@ namespace dhorn::tests
             pool.join();
 
             Assert::AreEqual(6, value);
-            Assert::AreEqual(6u, future.get());
+            Assert::AreEqual(static_cast<std::size_t>(6), future.get());
         }
 
         TEST_METHOD(ManyThreadsTest)

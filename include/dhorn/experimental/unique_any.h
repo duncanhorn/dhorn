@@ -14,7 +14,7 @@
 #include <memory>
 #include <type_traits>
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
 #include "windows/windows.h"
 #endif
 
@@ -211,7 +211,7 @@ namespace dhorn
             /*
              * For Windows types
              */
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
 
             struct close_handle
             {
@@ -302,7 +302,7 @@ namespace dhorn
           * Windows Types
           */
 #pragma region Windows Types
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
 
         namespace details
         {

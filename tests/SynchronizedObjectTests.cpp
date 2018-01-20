@@ -233,7 +233,7 @@ namespace dhorn
                     });
                 });
 
-                Assert::AreEqual(42u, val.copy_unlocked());
+                Assert::AreEqual(static_cast<std::size_t>(42), val.copy_unlocked());
             }
 
             TEST_METHOD(CopyLockedLockedTest)
@@ -264,7 +264,7 @@ namespace dhorn
 
                 for (auto count : check_vector)
                 {
-                    Assert::AreEqual(1u, count);
+                    Assert::AreEqual(static_cast<std::size_t>(1), count);
                 }
             }
 
@@ -359,7 +359,7 @@ namespace dhorn
                 {
                     for (auto value : arr)
                     {
-                        Assert::AreEqual(1u, value);
+                        Assert::AreEqual(static_cast<std::size_t>(1), value);
                     }
                 });
             }
@@ -484,7 +484,7 @@ namespace dhorn
                 }
 
                 // At least one attempt to get the lock should have failed, but at least one should have succeeded
-                Assert::AreNotEqual(0u, val.copy_unlocked());
+                Assert::AreNotEqual(static_cast<std::size_t>(0), val.copy_unlocked());
                 Assert::AreNotEqual(num_threads * num_iterations, val.copy_unlocked());
             }
 

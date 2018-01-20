@@ -7,7 +7,7 @@
  */
 #pragma once
 
-#ifndef WIN32
+#if !defined(WIN32) && !defined(_WIN64)
 static_assert(false, "Cannot include dhorn/windows/windows.h on a non-Windows machine")
 #endif  /* WIN32 */
 
@@ -81,13 +81,14 @@ namespace dhorn
                     com::check_hresult(func(std::forward<Args>(args)...));
                 }
 
-                template <typename ResultType, ResultType Failure = ResultType{}, typename Func, typename... Args >
+                template <typename ResultType, ResultType Failure = ResultType{}, typename Func, typename... Args>
                 inline ResultType make_call_fail_on_value(Func &func, Args&&... args)
                 {
                     auto result = func(std::forward<Args>(args)...);
                     if (result == Failure)
                     {
-                        throw std::system_error(::GetLastError(), std::system_category());
+                        auto err = ::GetLastError();
+                        throw std::system_error(err, std::system_category());
                     }
 
                     return result;
@@ -531,7 +532,16 @@ namespace dhorn
             inline std::uintptr_t set_window_long_ptr(window_handle window, int index, std::uintptr_t value)
             {
                 ::SetLastError(0);
-                return details::make_call_fail_on_value<std::uintptr_t>(SetWindowLongPtr, window, index, value);
+                auto result = ::SetWindowLongPtr(window, index, value);
+                if (result == 0)
+                {
+                    if (auto err = ::GetLastError(); err != 0)
+                    {
+                        throw std::system_error(err, std::system_category());
+                    }
+                }
+
+                return result;
             }
 
             inline void unregister_class(const tstring &className, instance_handle instance = nullptr)
@@ -876,7 +886,7 @@ namespace dhorn
 
             inline void show_window(window_handle window, int cmdShow)
             {
-                details::make_boolean_call(ShowWindow, window, cmdShow);
+                ::ShowWindow(window, cmdShow);
             }
 
 #pragma endregion

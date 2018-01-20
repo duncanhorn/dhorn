@@ -21,7 +21,7 @@ namespace dhorn
             TEST_METHOD(EmptyArrayTest)
             {
                 dhorn::experimental::array_reference<int> arr;
-                Assert::AreEqual(0u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), arr.size());
             }
 
             TEST_METHOD(SingleElementArrayTest)
@@ -29,7 +29,7 @@ namespace dhorn
                 int val = 42;
                 dhorn::experimental::array_reference<int> arr(&val, 1);
 
-                Assert::AreEqual(1u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(1), arr.size());
                 Assert::AreEqual(42, arr.at(0));
                 Assert::AreEqual(42, arr.front());
                 Assert::AreEqual(42, arr.back());
@@ -48,7 +48,7 @@ namespace dhorn
                 int val = 42;
                 const dhorn::experimental::array_reference<int> arr(&val, 1);
 
-                Assert::AreEqual(1u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(1), arr.size());
                 Assert::AreEqual(42, arr.at(0));
                 Assert::AreEqual(42, arr.front());
                 Assert::AreEqual(42, arr.back());
@@ -324,7 +324,7 @@ namespace dhorn
                 int vals[] = { 0, 1, 2, 3, 4 };
                 dhorn::experimental::array_reference<int> arr(vals, 2);
 
-                Assert::AreEqual(2u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(2), arr.size());
 
                 arr.resize(std::size(vals));
                 Assert::AreEqual(std::size(vals), arr.size());
@@ -351,7 +351,7 @@ namespace dhorn
                 std::uint8_t vals8[] = { 0, 1, 2, 3, 4, 5, 6 };
                 arr8 = dhorn::experimental::array_reference<std::uint8_t>(vals8);
                 arr32 = arr8.cast_to<std::uint32_t>();
-                Assert::AreEqual(1u, arr32.size());
+                Assert::AreEqual(static_cast<std::size_t>(1), arr32.size());
             }
 
             TEST_METHOD(IncrementTest)
@@ -367,14 +367,14 @@ namespace dhorn
 
                 Assert::AreEqual(1, *(++arr));
                 Assert::AreEqual(1, *(arr++)); // arr now points to 2
-                Assert::AreEqual(3u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
 
                 arr += 2; // Now points to 4
                 Assert::AreEqual(4, *arr);
 
                 // Shouldn't assert if the size becomes zero
                 ++arr;
-                Assert::AreEqual(0u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), arr.size());
             }
 
             TEST_METHOD(DecrementTest)
@@ -386,11 +386,11 @@ namespace dhorn
                 Assert::AreEqual(4, *test);
 
                 test = test - -1;
-                Assert::AreEqual(0u, test.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), test.size());
 
                 Assert::AreEqual(4, *(--arr));
                 Assert::AreEqual(4, *(arr--)); // arr now points to 3
-                Assert::AreEqual(2u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(2), arr.size());
 
                 arr -= 2; // Now points to 4
                 Assert::AreEqual(1, *arr);

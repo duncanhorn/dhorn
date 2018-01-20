@@ -26,7 +26,7 @@ namespace dhorn::tests
 
         TEST_METHOD_CLEANUP(TestCleanup)
         {
-            Assert::AreEqual(0u, object_counter::instance_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
         }
 
         TEST_METHOD(MakeLambdaSharedInstanceTest)
@@ -37,7 +37,7 @@ namespace dhorn::tests
             });
 
             // Should not have made a copy
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
 
             auto moveCnt = object_counter::move_count;
             auto objCnt = object_counter::instance_count;
@@ -46,7 +46,7 @@ namespace dhorn::tests
             // Copying the new lambda should not affect object count
             auto lambdaCopy = lambda;
 
-            Assert::AreEqual(0u, object_counter::copy_count);
+            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
             Assert::AreEqual(moveCnt, object_counter::move_count);
             Assert::AreEqual(objCnt, object_counter::instance_count);
             Assert::AreEqual(constructCnt, object_counter::constructed_count);

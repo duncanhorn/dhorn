@@ -75,7 +75,7 @@ private:
     ComplexType _topLeft;
     ComplexType _bottomRight;
     std::shared_ptr<DataType> _data;
-    std::atomic_size_t _nextRow;
+    std::atomic_int _nextRow;
     std::size_t _iterations;
     std::size_t _iterationsPerUpdate;
 

@@ -2,6 +2,6 @@
  * Duncan Horn
  */
 
-int main(void)
-{
-}
+#include <benchmark/benchmark.h>
+
+BENCHMARK_MAIN();

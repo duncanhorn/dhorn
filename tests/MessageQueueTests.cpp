@@ -42,9 +42,9 @@ namespace dhorn
 
                 // Remove data
                 int localCount = 0;
-                for (std::size_t i = 0; i < testCount; ++i)
+                for (int i = 0; i < testCount; ++i)
                 {
-                    Assert::IsTrue(msgQueue.pop_front()(i, 1) == static_cast<int>(i + 1));
+                    Assert::IsTrue(msgQueue.pop_front()(i, 1) == (i + 1));
                     Assert::IsTrue(x == ++localCount);
                 }
             }

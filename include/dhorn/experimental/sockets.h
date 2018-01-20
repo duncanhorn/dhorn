@@ -15,7 +15,7 @@
 #include <string>
 #include <sstream>
 
-#ifdef  WIN32
+#if defined(WIN32) || defined(_WIN64)
 
 /* Force the project to link against the Windows Sockets library */
 #pragma comment(lib, "ws2_32.lib")
@@ -867,7 +867,7 @@ namespace dhorn
 
             void bind(const socket_address &addr)
             {
-                this->InvokeThrowOnError(::bind, this->_socket, addr, addr.size());
+                this->InvokeThrowOnError(::bind, this->_socket, addr, static_cast<int>(addr.size()));
             }
 
             void close(void)
@@ -878,7 +878,7 @@ namespace dhorn
 
             void connect(const socket_address &addr)
             {
-                this->InvokeThrowOnError(::connect, this->_socket, addr, addr.size());
+                this->InvokeThrowOnError(::connect, this->_socket, addr, static_cast<int>(addr.size()));
             }
 
             socket_address get_peer_name(void)
@@ -964,7 +964,10 @@ namespace dhorn
                 using value_type = typename std::iterator_traits<Itr>::value_type;
                 std::vector<value_type> buffer(std::distance(front, back));
 
-                auto len = this->receive(static_cast<void *>(buffer.data()), buffer.size() * sizeof(value_type), flags);
+                auto len = this->receive(
+                    static_cast<void *>(buffer.data()),
+                    static_cast<int>(buffer.size() * sizeof(value_type)),
+                    flags);
                 assert(len % sizeof(value_type) == 0);
                 len /= sizeof(value_type);
 
@@ -1015,7 +1018,7 @@ namespace dhorn
 
                 auto len = this->receive_from(
                     static_cast<void *>(buffer.data()),
-                    buffer.size() * sizeof(value_type),
+                    static_cast<int>(buffer.size() * sizeof(value_type)),
                     flags,
                     addr);
 
@@ -1029,13 +1032,13 @@ namespace dhorn
                 return itr;
             }
 
-            template <typename Ty, std::size_t len>
+            template <typename Ty, int len>
             socket_error_t receive_from(Ty (&buffer)[len], message_flags flags, socket_address &addr)
             {
                 return this->receive_from(static_cast<void *>(buffer), len * sizeof(Ty), flags, addr);
             }
 
-            socket_error_t send(const void *buffer, std::size_t length, message_flags flags = message_flags::none)
+            socket_error_t send(const void *buffer, int length, message_flags flags = message_flags::none)
             {
                 auto buff = static_cast<const char *>(buffer);
                 return this->InvokeThrowOnError(::send, this->_socket, buff, length, static_cast<int>(flags));
@@ -1049,16 +1052,19 @@ namespace dhorn
                 using value_type = typename std::iterator_traits<Itr>::value_type;
                 std::vector<value_type> buffer(front, back);
 
-                return this->send(static_cast<const void *>(&buffer[0]), buffer.size() * sizeof(value_type), flags);
+                return this->send(
+                    static_cast<const void *>(&buffer[0]),
+                    static_cast<int>(buffer.size() * sizeof(value_type)),
+                    flags);
             }
 
-            template <typename Ty, std::size_t len>
+            template <typename Ty, int len>
             socket_error_t send(const Ty (&buffer)[len], message_flags flags = message_flags::none)
             {
                 return this->send(static_cast<const void *>(buffer), len * sizeof(Ty), flags);
             }
 
-            socket_error_t send_to(const void *buffer, std::size_t length, message_flags flags, const socket_address &addr)
+            socket_error_t send_to(const void *buffer, int length, message_flags flags, const socket_address &addr)
             {
                 return this->InvokeThrowOnError(
                     ::sendto,
@@ -1067,7 +1073,7 @@ namespace dhorn
                     length,
                     static_cast<int>(flags),
                     addr,
-                    addr.size());
+                    static_cast<int>(addr.size()));
             }
 
             template <typename Itr>
@@ -1080,7 +1086,7 @@ namespace dhorn
 
                 return this->send_to(
                     static_cast<const void *>(&buffer[0]),
-                    buffer.size() * sizeof(value_type),
+                    static_cast<int>(buffer.size() * sizeof(value_type)),
                     flags,
                     addr);
             }
@@ -1100,7 +1106,7 @@ namespace dhorn
                     static_cast<int>(level),
                     static_cast<int>(opt),
                     reinterpret_cast<const char *>(&val),
-                    sizeof(val));
+                    static_cast<int>(sizeof(val)));
             }
 
             void shutdown(shutdown_options options = shutdown_options::both)
@@ -1375,7 +1381,7 @@ namespace dhorn
             {
                 auto length = this->_baseSocket.receive_from(
                     reinterpret_cast<void *>(packet._buffer.get()),
-                    packet._bufferLength * sizeof(Ty),
+                    static_cast<int>(packet._bufferLength * sizeof(Ty)),
                     flags,
                     packet._addr);
 
@@ -1383,7 +1389,7 @@ namespace dhorn
                 packet._dataLength = length / sizeof(Ty);
             }
 
-            socket_error_t send(const void *buffer, std::size_t length, message_flags flags, const socket_address &addr)
+            socket_error_t send(const void *buffer, int length, message_flags flags, const socket_address &addr)
             {
                 return this->_baseSocket.send_to(buffer, length, flags, addr);
             }
@@ -1406,7 +1412,7 @@ namespace dhorn
                 // TODO: Fail if we don't send all bytes? The design is that most callers shouldn't need to check this...
                 return this->_baseSocket.send_to(
                     reinterpret_cast<const void *>(packet._buffer.get()),
-                    packet._dataLength,
+                    static_cast<int>(packet._dataLength),
                     flags,
                     packet._addr);
             }
@@ -1535,7 +1541,7 @@ namespace dhorn
                 return this->_baseSocket.receive<Ty, len>(buffer, flags);
             }
 
-            socket_error_t send(const void *buffer, std::size_t length, message_flags flags = message_flags::none)
+            socket_error_t send(const void *buffer, int length, message_flags flags = message_flags::none)
             {
                 return this->_baseSocket.send(buffer, length, flags);
             }
@@ -1718,18 +1724,18 @@ namespace dhorn
             {
                 FD_ZERO(&fdSet);
 
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
                 wsa_throw_if_false(sockets.size() <= FD_SETSIZE, WSAEINVAL);
 
                 std::size_t i = 0;
-                fdSet.fd_count = sockets.size();
+                fdSet.fd_count = static_cast<u_int>(sockets.size());
 #else
                 static_assert(false, "Don't know how to get the size of fd_set with your compiler");
 #endif
 
                 for (auto sock : sockets)
                 {
-#ifdef WIN32
+#if defined(WIN32) || defined(_WIN64)
                     // For WinSock, we know that fd_set is simply just an array of sockets. Thus, we can optimize this
                     // operation since there are no duplicates in std::set
                     fdSet.fd_array[i++] = sock;

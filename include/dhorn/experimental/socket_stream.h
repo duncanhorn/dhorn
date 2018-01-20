@@ -107,7 +107,7 @@ namespace dhorn
 
             void Flush(void)
             {
-                auto len = this->pptr() - this->pbase();
+                auto len = static_cast<int>(this->pptr() - this->pbase());
                 this->_socket->send(this->pbase(), len);
                 this->setp(this->_sendBuffer.get(), this->_sendBuffer.get(), this->_sendBuffer.get() + SendBufferSize);
             }

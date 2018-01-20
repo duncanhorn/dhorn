@@ -24,7 +24,7 @@ namespace dhorn
 
             TEST_METHOD_CLEANUP(TestCleanup)
             {
-                Assert::AreEqual(0u, object_counter::instance_count);
+                Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
             }
 
             TEST_METHOD(RunOnExitTest)
@@ -74,7 +74,7 @@ namespace dhorn
                 }
 
                 // Only the initial constructed value should have been a non-move
-                Assert::AreEqual(0u, object_counter::copy_count);
+                Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
                 Assert::AreEqual(object_counter::constructed_count - 1, object_counter::move_count);
             }
 
@@ -87,7 +87,7 @@ namespace dhorn
                 }
 
                 // Should have been at least one copy
-                Assert::AreEqual(1u, object_counter::copy_count);
+                Assert::AreEqual(static_cast<std::size_t>(1), object_counter::copy_count);
             }
         };
     }

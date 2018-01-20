@@ -29,39 +29,39 @@ namespace dhorn
                 // Test the ASCII characters (requires one code unit)
                 for (int ch = 0x00; ch < 0x80; ++ch)
                 {
-                    Assert::AreEqual(1u, utf_traits<char>::code_point_size(static_cast<char>(ch)));
+                    Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char>::code_point_size(static_cast<char>(ch)));
                 }
 
                 // Test the characters that require two code units
                 for (int ch = 0xC0; ch < 0xE0; ++ch)
                 {
-                    Assert::AreEqual(2u, utf_traits<char>::code_point_size(static_cast<char>(ch)));
+                    Assert::AreEqual(static_cast<std::size_t>(2), utf_traits<char>::code_point_size(static_cast<char>(ch)));
                 }
 
                 // Test the characters that require three code units
                 for (int ch = 0xE0; ch < 0xF0; ++ch)
                 {
-                    Assert::AreEqual(3u, utf_traits<char>::code_point_size(static_cast<char>(ch)));
+                    Assert::AreEqual(static_cast<std::size_t>(3), utf_traits<char>::code_point_size(static_cast<char>(ch)));
                 }
 
                 // Test the characters that require four code units
                 for (int ch = 0xF0; ch < 0xF7; ++ch)
                 {
-                    Assert::AreEqual(4u, utf_traits<char>::code_point_size(static_cast<char>(ch)));
+                    Assert::AreEqual(static_cast<std::size_t>(4), utf_traits<char>::code_point_size(static_cast<char>(ch)));
                 }
 
                 // Test the char32_t overloads at the "boundaries"
-                Assert::AreEqual(1u, utf_traits<char>::code_point_size(U'\u0000'));
-                Assert::AreEqual(1u, utf_traits<char>::code_point_size(U'\u007F'));
+                Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char>::code_point_size(U'\u0000'));
+                Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char>::code_point_size(U'\u007F'));
 
-                Assert::AreEqual(2u, utf_traits<char>::code_point_size(U'\u0080'));
-                Assert::AreEqual(2u, utf_traits<char>::code_point_size(U'\u07FF'));
+                Assert::AreEqual(static_cast<std::size_t>(2), utf_traits<char>::code_point_size(U'\u0080'));
+                Assert::AreEqual(static_cast<std::size_t>(2), utf_traits<char>::code_point_size(U'\u07FF'));
 
-                Assert::AreEqual(3u, utf_traits<char>::code_point_size(U'\u0800'));
-                Assert::AreEqual(3u, utf_traits<char>::code_point_size(U'\uFFFF'));
+                Assert::AreEqual(static_cast<std::size_t>(3), utf_traits<char>::code_point_size(U'\u0800'));
+                Assert::AreEqual(static_cast<std::size_t>(3), utf_traits<char>::code_point_size(U'\uFFFF'));
 
-                Assert::AreEqual(4u, utf_traits<char>::code_point_size(U'\U00010000'));
-                Assert::AreEqual(4u, utf_traits<char>::code_point_size(U'\U0010FFFF'));
+                Assert::AreEqual(static_cast<std::size_t>(4), utf_traits<char>::code_point_size(U'\U00010000'));
+                Assert::AreEqual(static_cast<std::size_t>(4), utf_traits<char>::code_point_size(U'\U0010FFFF'));
             }
 
             TEST_METHOD(Utf16CodePointSizeTest)
@@ -69,29 +69,29 @@ namespace dhorn
                 // Test the characters that require only one code unit
                 for (int ch = 0; ch < 0xD800; ++ch)
                 {
-                    Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(static_cast<char16_t>(ch)));
+                    Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char16_t>::code_point_size(static_cast<char16_t>(ch)));
                 }
 
                 for (int ch = 0xE000; ch < 0xFFFF; ++ch)
                 {
-                    Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(static_cast<char16_t>(ch)));
+                    Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char16_t>::code_point_size(static_cast<char16_t>(ch)));
                 }
 
                 // Test the characters that require one code unit
                 for (int ch = 0xD800; ch < 0xDC00; ++ch)
                 {
-                    Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(static_cast<char16_t>(ch)));
+                    Assert::AreEqual(static_cast<std::size_t>(2), utf_traits<char16_t>::code_point_size(static_cast<char16_t>(ch)));
                 }
 
                 // Test the char32_t overloads at the "boundaries"
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\u0000'));
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uD7FF'));
+                Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char16_t>::code_point_size(U'\u0000'));
+                Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char16_t>::code_point_size(U'\uD7FF'));
 
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uE000'));
-                Assert::AreEqual(1u, utf_traits<char16_t>::code_point_size(U'\uFFFF'));
+                Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char16_t>::code_point_size(U'\uE000'));
+                Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char16_t>::code_point_size(U'\uFFFF'));
 
-                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U00010000'));
-                Assert::AreEqual(2u, utf_traits<char16_t>::code_point_size(U'\U0010FFFF'));
+                Assert::AreEqual(static_cast<std::size_t>(2), utf_traits<char16_t>::code_point_size(U'\U00010000'));
+                Assert::AreEqual(static_cast<std::size_t>(2), utf_traits<char16_t>::code_point_size(U'\U0010FFFF'));
             }
 
             TEST_METHOD(Utf32CodePointSizeTest)
@@ -99,7 +99,7 @@ namespace dhorn
                 // Test the ASCII characters
                 for (char32_t ch = 0; ch < 128; ++ch)
                 {
-                    Assert::AreEqual(1u, utf_traits<char32_t>::code_point_size(ch));
+                    Assert::AreEqual(static_cast<std::size_t>(1), utf_traits<char32_t>::code_point_size(ch));
                 }
 
                 // Always returns 1, so there's no real point in wasting our time testing...
@@ -528,7 +528,7 @@ namespace dhorn
                     Assert::IsTrue(test32[index--] == *end--);
                 }
                 while (begin != end);
-                Assert::AreEqual(0u, index);
+                Assert::AreEqual(static_cast<std::size_t>(0), index);
             }
 
             TEST_METHOD(Utf16ReverseIterationTest)
@@ -542,7 +542,7 @@ namespace dhorn
                     Assert::IsTrue(test32[index--] == *end--);
                 }
                 while (begin != end);
-                Assert::AreEqual(0u, index);
+                Assert::AreEqual(static_cast<std::size_t>(0), index);
             }
 
             TEST_METHOD(Utf32ReverseIterationTest)
@@ -556,7 +556,7 @@ namespace dhorn
                     Assert::IsTrue(test32[index--] == *end--);
                 }
                 while (begin != end);
-                Assert::AreEqual(0u, index);
+                Assert::AreEqual(static_cast<std::size_t>(0), index);
             }
 
 #pragma endregion

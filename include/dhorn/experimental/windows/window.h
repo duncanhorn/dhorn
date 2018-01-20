@@ -885,7 +885,7 @@ namespace dhorn
                     return paint_struct(this->_window);
                 }
 
-                void invalidate(bool eraseBackground = true, rect<std::size_t> *area = nullptr)
+                void invalidate(bool eraseBackground = true, rect<LONG> *area = nullptr)
                 {
                     EnsureWindowInitialized();
                     if (area)
@@ -1151,8 +1151,8 @@ namespace dhorn
                     if (msg == window_message::create)
                     {
                         CREATESTRUCT *vars = reinterpret_cast<CREATESTRUCT *>(lparam);
-                        set_window_long_ptr(window, GWL_USERDATA, reinterpret_cast<std::uintptr_t>(vars->lpCreateParams));
-                        set_window_long_ptr(window, GWL_WNDPROC, reinterpret_cast<std::uintptr_t>(initialized_window_procedure));
+                        set_window_long_ptr(window, GWLP_USERDATA, reinterpret_cast<std::uintptr_t>(vars->lpCreateParams));
+                        set_window_long_ptr(window, GWLP_WNDPROC, reinterpret_cast<std::uintptr_t>(initialized_window_procedure));
 
                         return initialized_window_procedure(window, message, wparam, lparam);
                     }
@@ -1168,7 +1168,7 @@ namespace dhorn
                     WPARAM wparam,
                     LPARAM lparam)
                 {
-                    window *ptr = reinterpret_cast<window *>(get_window_long_ptr(windowHandle, GWL_USERDATA));
+                    window *ptr = reinterpret_cast<window *>(get_window_long_ptr(windowHandle, GWLP_USERDATA));
                     assert(ptr);
 
                     return ptr->window_procedure(static_cast<window_message>(message), wparam, lparam);

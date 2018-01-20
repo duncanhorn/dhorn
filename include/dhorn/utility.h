@@ -94,6 +94,48 @@ namespace dhorn
 
 
     /*
+     * increment_integer_sequence
+     */
+#pragma region 
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    struct increment_integer_sequence;
+
+    template <typename Ty, Ty... Values, Ty IncrementValue>
+    struct increment_integer_sequence<std::integer_sequence<Ty, Values...>, IncrementValue>
+    {
+        using type = std::integer_sequence<Ty, (Values + IncrementValue)...>;
+    };
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    using increment_integer_sequence_t = typename increment_integer_sequence<IntegerSequence, Value>::type;
+
+#pragma endregion
+
+
+
+    /*
+     * decrement_integer_sequence
+     */
+#pragma region 
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    struct decrement_integer_sequence;
+
+    template <typename Ty, Ty... Values, Ty DecrementValue>
+    struct decrement_integer_sequence<std::integer_sequence<Ty, Values...>, DecrementValue>
+    {
+        using type = std::integer_sequence<Ty, (Values - DecrementValue)...>;
+    };
+
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    using decrement_integer_sequence_t = typename decrement_integer_sequence<IntegerSequence, Value>::type;
+
+#pragma endregion
+
+
+
+    /*
      * get_byte
      *
      * Returns the Nth byte in some integer type.

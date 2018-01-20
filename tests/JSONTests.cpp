@@ -189,7 +189,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
 
                 Assert::IsTrue(arr.find(str1) != arr.end());
                 Assert::IsTrue(arr.find(str2) != arr.end());
@@ -199,7 +199,7 @@ namespace dhorn
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
             }
 
             TEST_METHOD(StdMultiSetJsonCastTest)
@@ -215,7 +215,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
 
                 Assert::IsTrue(arr.find(str1) != arr.end());
                 Assert::IsTrue(arr.find(str2) != arr.end());
@@ -225,7 +225,7 @@ namespace dhorn
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(4u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(4), arr.size());
             }
 
             TEST_METHOD(StdUnorderedSetJsonCastTest)
@@ -241,7 +241,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::unordered_set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
 
                 Assert::IsTrue(arr.find(str1) != arr.end());
                 Assert::IsTrue(arr.find(str2) != arr.end());
@@ -251,7 +251,7 @@ namespace dhorn
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::unordered_set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
             }
 
             TEST_METHOD(StdUnorderedMultiSetJsonCastTest)
@@ -267,7 +267,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::unordered_multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
 
                 Assert::IsTrue(arr.find(str1) != arr.end());
                 Assert::IsTrue(arr.find(str2) != arr.end());
@@ -277,7 +277,7 @@ namespace dhorn
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::unordered_multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(4u, arr.size());
+                Assert::AreEqual(static_cast<std::size_t>(4), arr.size());
             }
 
             TEST_METHOD(StdStackJsonCastTest)
@@ -293,7 +293,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto stack = dhorn::experimental::json_cast<std::stack< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, stack.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), stack.size());
 
                 Assert::IsTrue(stack.top() == str3);
                 stack.pop();
@@ -316,7 +316,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto queue = dhorn::experimental::json_cast<std::queue< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(3u, queue.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), queue.size());
 
                 Assert::IsTrue(queue.front() == str1);
                 queue.pop();
@@ -335,7 +335,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto queue = dhorn::experimental::json_cast<std::priority_queue<int>>(value.get());
-                Assert::AreEqual(3u, queue.size());
+                Assert::AreEqual(static_cast<std::size_t>(3), queue.size());
 
                 // By default, priority_queue gives highest-value-first
                 Assert::AreEqual(3, queue.top());

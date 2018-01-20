@@ -16,9 +16,9 @@ namespace dhorn::tests
     __interface __declspec(uuid("{56C9CB0F-534C-42D5-B297-9D77E71D908C}"))
     IBase : public IUnknown
     {
-        STDMETHOD_(std::size_t, RefCount)();
-        STDMETHOD_(std::size_t, AddRefCount)();
-        STDMETHOD_(std::size_t, QueryCount)();
+        STDMETHOD_(ULONG, RefCount)();
+        STDMETHOD_(ULONG, AddRefCount)();
+        STDMETHOD_(ULONG, QueryCount)();
     };
 
     __interface __declspec(uuid("{FAB826E0-BB52-4CD5-83B1-C401D5386568}"))
@@ -84,19 +84,19 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(std::size_t, RefCount)()
+        STDMETHOD_(ULONG, RefCount)()
         {
             return count;
         }
 
-        STDMETHOD_(std::size_t, AddRefCount)()
+        STDMETHOD_(ULONG, AddRefCount)()
         {
             return addRefCount;
         }
 
         // Tests run on single thread, so no need to synchronize
-        std::size_t count = 1;
-        std::size_t addRefCount = 0;
+        ULONG count = 1;
+        ULONG addRefCount = 0;
     };
 
     class Foo :
@@ -130,24 +130,24 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(std::size_t, RefCount)()
+        STDMETHOD_(ULONG, RefCount)()
         {
             return Base::RefCount();
         }
 
-        STDMETHOD_(std::size_t, AddRefCount)()
+        STDMETHOD_(ULONG, AddRefCount)()
         {
             return Base::AddRefCount();
         }
 
-        STDMETHOD_(std::size_t, QueryCount)()
+        STDMETHOD_(ULONG, QueryCount)()
         {
             return this->_queryCount;
         }
 
     private:
 
-        std::size_t _queryCount = 0;
+        ULONG _queryCount = 0;
     };
 
     class Bar :
@@ -182,24 +182,24 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(std::size_t, RefCount)()
+        STDMETHOD_(ULONG, RefCount)()
         {
             return Base::RefCount();
         }
 
-        STDMETHOD_(std::size_t, AddRefCount)()
+        STDMETHOD_(ULONG, AddRefCount)()
         {
             return Base::AddRefCount();
         }
 
-        STDMETHOD_(std::size_t, QueryCount)()
+        STDMETHOD_(ULONG, QueryCount)()
         {
             return this->_queryCount;
         }
 
     private:
 
-        std::size_t _queryCount = 0;
+        ULONG _queryCount = 0;
     };
 
     class FooBar :
@@ -241,24 +241,24 @@ namespace dhorn::tests
         }
 
         // IBase
-        STDMETHOD_(std::size_t, RefCount)()
+        STDMETHOD_(ULONG, RefCount)()
         {
             return Base::RefCount();
         }
 
-        STDMETHOD_(std::size_t, AddRefCount)()
+        STDMETHOD_(ULONG, AddRefCount)()
         {
             return Base::AddRefCount();
         }
 
-        STDMETHOD_(std::size_t, QueryCount)()
+        STDMETHOD_(ULONG, QueryCount)()
         {
             return this->_queryCount;
         }
 
     private:
 
-        std::size_t _queryCount = 0;
+        ULONG _queryCount = 0;
     };
 
     TEST_CLASS(ComPtrTests)
@@ -285,9 +285,9 @@ namespace dhorn::tests
 
             func(foo, bar, foobar);
 
-            Assert::AreEqual(1u, foo->RefCount());
-            Assert::AreEqual(1u, bar->RefCount());
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foo->RefCount());
+            Assert::AreEqual(1ul, bar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
 
             foo->Release();
             bar->Release();
@@ -401,7 +401,7 @@ namespace dhorn::tests
                 auto qiCount = ptr->QueryCount();
 
                 dhorn::com::com_ptr<Ty> comPtr(static_cast<CastTy*>(ptr));
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
 
                 // Construction should add ref with no QIs
                 Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
@@ -472,7 +472,7 @@ namespace dhorn::tests
 
                 dhorn::com::com_ptr<OtherTy> comPtr(ptr);
                 dhorn::com::com_ptr<Ty> copyPtr(comPtr);
-                Assert::AreEqual(3u, ptr->RefCount());
+                Assert::AreEqual(3ul, ptr->RefCount());
 
                 // Construction should add ref with no QIs
                 Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
@@ -544,7 +544,7 @@ namespace dhorn::tests
                 dhorn::com::com_ptr<OtherTy> comPtr(ptr);
                 dhorn::com::com_ptr<Ty> movedPtr(std::move(comPtr));
 
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
                 Assert::IsFalse(comPtr);
                 Assert::IsTrue(movedPtr);
 
@@ -658,7 +658,7 @@ namespace dhorn::tests
 
                 comPtr = static_cast<CastTy*>(ptr);
                 Assert::IsTrue(comPtr);
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
 
                 // Construction should add ref with no QIs
                 Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
@@ -736,7 +736,7 @@ namespace dhorn::tests
 
                 copyPtr = comPtr;
                 Assert::IsTrue(comPtr);
-                Assert::AreEqual(3u, ptr->RefCount());
+                Assert::AreEqual(3ul, ptr->RefCount());
 
                 // Construction should add ref with no QIs
                 Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
@@ -813,7 +813,7 @@ namespace dhorn::tests
                 Assert::IsFalse(movedPtr);
 
                 movedPtr = std::move(comPtr);
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
                 Assert::IsFalse(comPtr);
                 Assert::IsTrue(movedPtr);
 
@@ -886,15 +886,15 @@ namespace dhorn::tests
                 // Easier to spot errors if the ref count is 1
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
                 foobar->Release();
-                Assert::AreEqual(1u, foobar->RefCount());
+                Assert::AreEqual(1ul, foobar->RefCount());
 
                 comPtr = comPtr;
-                Assert::AreEqual(1u, foobar->RefCount());
+                Assert::AreEqual(1ul, foobar->RefCount());
 
                 foobar->AddRef();
             }
 
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
             foobar->Release();
         }
 
@@ -912,18 +912,18 @@ namespace dhorn::tests
             auto foobar = new FooBar();
 
             dhorn::com::com_ptr<FooBar> comPtr(foobar);
-            Assert::AreEqual(2u, foobar->RefCount());
+            Assert::AreEqual(2ul, foobar->RefCount());
 
             comPtr.reset();
             Assert::IsFalse(comPtr);
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
 
             comPtr = foobar;
-            Assert::AreEqual(2u, foobar->RefCount());
+            Assert::AreEqual(2ul, foobar->RefCount());
 
             comPtr.reset(nullptr);
             Assert::IsFalse(comPtr);
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
 
             // Calling reset when null should be fine
             comPtr.reset();
@@ -958,11 +958,11 @@ namespace dhorn::tests
 
                 comPtr.reset(static_cast<CastTy*>(ptr));
                 Assert::IsTrue(comPtr);
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
 
                 comPtr.reset(static_cast<CastTy*>(ptr));
                 Assert::IsTrue(comPtr);
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
 
                 // One AddRef for each reset; no QIs
                 Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
@@ -1013,10 +1013,10 @@ namespace dhorn::tests
             auto foobar = new FooBar();
             {
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
-                Assert::AreEqual(2u, (*comPtr).RefCount());
+                Assert::AreEqual(2ul, (*comPtr).RefCount());
             }
 
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
             foobar->Release();
         }
 
@@ -1025,10 +1025,10 @@ namespace dhorn::tests
             auto foobar = new FooBar();
             {
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
-                Assert::AreEqual(2u, comPtr->RefCount());
+                Assert::AreEqual(2ul, comPtr->RefCount());
             }
 
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
             foobar->Release();
         }
 
@@ -1038,18 +1038,18 @@ namespace dhorn::tests
 
             {
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
-                Assert::AreEqual(2u, comPtr->RefCount());
+                Assert::AreEqual(2ul, comPtr->RefCount());
 
                 // operator& should release
                 auto ptr = &comPtr;
                 Assert::IsFalse(comPtr);
-                Assert::AreEqual(1u, foobar->RefCount());
+                Assert::AreEqual(1ul, foobar->RefCount());
                 Assert::IsTrue(*ptr == nullptr);
 
                 Assert::IsTrue(std::is_same_v<decltype(ptr), FooBar**>);
             }
 
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
             foobar->Release();
         }
 
@@ -1062,14 +1062,14 @@ namespace dhorn::tests
             // Attach should not AddRef
             comPtr.attach(foobar);
             Assert::IsTrue(comPtr);
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
 
             foobar->AddRef();
-            Assert::AreEqual(2u, foobar->RefCount());
+            Assert::AreEqual(2ul, foobar->RefCount());
 
             // Calling attach again should Release, but not AddRef the input
             comPtr.attach(foobar);
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
         }
 
         TEST_METHOD(DetachTest)
@@ -1077,14 +1077,14 @@ namespace dhorn::tests
             auto foobar = new FooBar();
             {
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
-                Assert::AreEqual(2u, foobar->RefCount());
+                Assert::AreEqual(2ul, foobar->RefCount());
 
                 auto ptr = comPtr.detach();
                 Assert::IsTrue(ptr == foobar);
                 Assert::IsFalse(comPtr);
             }
 
-            Assert::AreEqual(2u, foobar->RefCount());
+            Assert::AreEqual(2ul, foobar->RefCount());
             foobar->Release();
             foobar->Release();
         }
@@ -1100,19 +1100,19 @@ namespace dhorn::tests
                     dhorn::com::com_ptr<IBase> ptr2(bar);
 
                     ptr1.swap(ptr2);
-                    Assert::AreEqual(2u, foo->RefCount());
-                    Assert::AreEqual(2u, bar->RefCount());
+                    Assert::AreEqual(2ul, foo->RefCount());
+                    Assert::AreEqual(2ul, bar->RefCount());
 
                     Assert::IsTrue(ptr1.get() == bar);
                     Assert::IsTrue(ptr2.get() == foo);
                 }
 
-                Assert::AreEqual(1u, foo->RefCount());
-                Assert::AreEqual(2u, bar->RefCount());
+                Assert::AreEqual(1ul, foo->RefCount());
+                Assert::AreEqual(2ul, bar->RefCount());
             }
 
-            Assert::AreEqual(1u, foo->RefCount());
-            Assert::AreEqual(1u, bar->RefCount());
+            Assert::AreEqual(1ul, foo->RefCount());
+            Assert::AreEqual(1ul, bar->RefCount());
             foo->Release();
             bar->Release();
         }
@@ -1122,14 +1122,14 @@ namespace dhorn::tests
             auto foobar = new FooBar();
             {
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
-                Assert::AreEqual(2u, foobar->RefCount());
+                Assert::AreEqual(2ul, foobar->RefCount());
 
                 comPtr.swap(comPtr);
-                Assert::AreEqual(2u, foobar->RefCount());
+                Assert::AreEqual(2ul, foobar->RefCount());
                 Assert::IsTrue(comPtr.get() == foobar);
             }
 
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
             foobar->Release();
         }
 
@@ -1138,17 +1138,17 @@ namespace dhorn::tests
             auto foobar = new FooBar();
             {
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
-                Assert::AreEqual(2u, comPtr->RefCount());
+                Assert::AreEqual(2ul, comPtr->RefCount());
 
                 auto ptr = comPtr.release_and_get_address_of();
                 Assert::IsFalse(comPtr);
-                Assert::AreEqual(1u, foobar->RefCount());
+                Assert::AreEqual(1ul, foobar->RefCount());
                 Assert::IsTrue(*ptr == nullptr);
 
                 Assert::IsTrue(std::is_same_v<decltype(ptr), FooBar**>);
             }
 
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
             foobar->Release();
         }
 
@@ -1157,19 +1157,19 @@ namespace dhorn::tests
             auto foobar = new FooBar();
             {
                 dhorn::com::com_ptr<FooBar> comPtr(foobar);
-                Assert::AreEqual(2u, foobar->RefCount());
+                Assert::AreEqual(2ul, foobar->RefCount());
 
                 // address_of does _not_ release
                 auto ptr = comPtr.address_of();
                 Assert::IsTrue(comPtr);
-                Assert::AreEqual(2u, foobar->RefCount());
+                Assert::AreEqual(2ul, foobar->RefCount());
                 Assert::IsTrue(*ptr == foobar);
                 Assert::IsTrue(*ptr == comPtr.get());
 
                 Assert::IsTrue(std::is_same_v<decltype(ptr), FooBar**>);
             }
 
-            Assert::AreEqual(1u, foobar->RefCount());
+            Assert::AreEqual(1ul, foobar->RefCount());
             foobar->Release();
         }
 
@@ -1321,7 +1321,7 @@ namespace dhorn::tests
                         Assert::Fail(L"Expected an exception");
                     }
 
-                    Assert::AreEqual(3u, ptr->RefCount());
+                    Assert::AreEqual(3ul, ptr->RefCount());
 
                     // Query succeeded. Two AddRefs and QI only if needed
                     Assert::AreEqual(addRefCount + 2, ptr->AddRefCount());
@@ -1348,7 +1348,7 @@ namespace dhorn::tests
                     }
                 }
 
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
             }
         };
 
@@ -1388,7 +1388,7 @@ namespace dhorn::tests
 
                     if (ShouldSucceed)
                     {
-                        Assert::AreEqual(3u, ptr->RefCount());
+                        Assert::AreEqual(3ul, ptr->RefCount());
                         Assert::IsTrue(comPtr);
 
                         // Query succeeded. Two AddRefs and QI only if needed
@@ -1397,7 +1397,7 @@ namespace dhorn::tests
                     }
                     else
                     {
-                        Assert::AreEqual(2u, ptr->RefCount());
+                        Assert::AreEqual(2ul, ptr->RefCount());
                         Assert::IsFalse(comPtr);
 
                         // Query failed. One (initial) AddRef, but should have attempted QI
@@ -1407,7 +1407,7 @@ namespace dhorn::tests
                     }
                 }
 
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
             }
         };
 
@@ -1438,7 +1438,7 @@ namespace dhorn::tests
                         Assert::Fail(L"Expected an exception");
                     }
 
-                    Assert::AreEqual(3u, ptr->RefCount());
+                    Assert::AreEqual(3ul, ptr->RefCount());
                     rawPtr->Release();
 
                     // Query succeeded. Two AddRefs and QI only if needed
@@ -1466,7 +1466,7 @@ namespace dhorn::tests
                     }
                 }
 
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
             }
         };
 
@@ -1510,7 +1510,7 @@ namespace dhorn::tests
                         Assert::Fail(L"Expected an exception");
                     }
 
-                    Assert::AreEqual(3u, ptr->RefCount());
+                    Assert::AreEqual(3ul, ptr->RefCount());
                     rawPtr->Release();
 
                     // Query succeeded. Two AddRefs and always attempt QI
@@ -1537,7 +1537,7 @@ namespace dhorn::tests
                     }
                 }
 
-                Assert::AreEqual(2u, ptr->RefCount());
+                Assert::AreEqual(2ul, ptr->RefCount());
             }
         };
 
@@ -1566,7 +1566,7 @@ namespace dhorn::tests
                         Assert::Fail(L"Expected an exception");
                     }
 
-                    Assert::AreEqual(2u, ptr->RefCount());
+                    Assert::AreEqual(2ul, ptr->RefCount());
 
                     // Query succeeded. One AddRef and QI only if needed
                     Assert::AreEqual(addRefCount + 1, ptr->AddRefCount());
@@ -1593,7 +1593,7 @@ namespace dhorn::tests
                     }
                 }
 
-                Assert::AreEqual(1u, ptr->RefCount());
+                Assert::AreEqual(1ul, ptr->RefCount());
             }
         };
 
@@ -1633,7 +1633,7 @@ namespace dhorn::tests
 
                     if (ShouldSucceed)
                     {
-                        Assert::AreEqual(2u, ptr->RefCount());
+                        Assert::AreEqual(2ul, ptr->RefCount());
                         Assert::IsTrue(comPtr);
 
                         // Query succeeded. One AddRef and QI only if needed
@@ -1642,7 +1642,7 @@ namespace dhorn::tests
                     }
                     else
                     {
-                        Assert::AreEqual(1u, ptr->RefCount());
+                        Assert::AreEqual(1ul, ptr->RefCount());
                         Assert::IsFalse(comPtr);
 
                         // Query failed. No AddRefs, but should have attempted QI
@@ -1652,7 +1652,7 @@ namespace dhorn::tests
                     }
                 }
 
-                Assert::AreEqual(1u, ptr->RefCount());
+                Assert::AreEqual(1ul, ptr->RefCount());
             }
         };
 

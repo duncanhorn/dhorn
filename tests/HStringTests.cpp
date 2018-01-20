@@ -40,7 +40,7 @@ namespace dhorn
             {
                 dhorn::experimental::hstring_reference str(std::forward<Ty>(value));
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -112,7 +112,7 @@ namespace dhorn
                 dhorn::experimental::hstring_reference str(L"initvalue");
                 str = std::forward<Ty>(value);
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -166,7 +166,7 @@ namespace dhorn
                 dhorn::experimental::hstring_reference str(L"initvalue");
                 str.assign(std::forward<Ty>(value));
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -268,20 +268,20 @@ namespace dhorn
             TEST_METHOD(LengthAndSizeTest)
             {
                 dhorn::experimental::hstring_reference str;
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 str = L"";
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 str = L"foo\0bar";
-                Assert::AreEqual(7u, str.length());
-                Assert::AreEqual(7u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(7), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(7), str.size());
 
                 str.clear();
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
             }
 
             TEST_METHOD(ResetTest)
@@ -325,7 +325,7 @@ namespace dhorn
             {
                 dhorn::experimental::hstring str(std::forward<Ty>(value));
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -394,7 +394,7 @@ namespace dhorn
 
                 int result;
                 Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
-                    HStringReference(wstr.c_str(), wstr.length()).Get(),
+                    HStringReference(wstr.c_str(), static_cast<unsigned int>(wstr.length())).Get(),
                     str.get(),
                     &result)));
                 Assert::AreEqual(0, result);
@@ -432,7 +432,7 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"initvalue");
                 str = std::forward<Ty>(value);
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -513,7 +513,7 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"initvalue");
                 str.assign(std::forward<Ty>(value));
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -578,7 +578,7 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"foo");
                 str += std::forward<Ty>(value);
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -639,7 +639,7 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"foo");
                 str.append(std::forward<Ty>(value));
 
-                Assert::AreEqual(Size - 1, ::WindowsGetStringLen(str.get()));
+                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -809,25 +809,25 @@ namespace dhorn
             TEST_METHOD(LengthAndSizeTest)
             {
                 dhorn::experimental::hstring str;
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 str = L"";
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 str = L"foo\0bar";
-                Assert::AreEqual(7u, str.length());
-                Assert::AreEqual(7u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(7), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(7), str.size());
 
                 str.clear();
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 str = L"foo";
                 auto hstr = str.detach();
-                Assert::AreEqual(0u, str.length());
-                Assert::AreEqual(0u, str.size());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
+                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
 
                 ::WindowsDeleteString(hstr);
             }
@@ -881,14 +881,14 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs == rhs);
 
-                if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<LhsTy>>::value)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<RhsTy>>::value)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
@@ -1014,14 +1014,14 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs != rhs);
 
-                if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<LhsTy>>::value)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<RhsTy>>::value)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
@@ -1147,14 +1147,14 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs < rhs);
 
-                if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<LhsTy>>::value)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<RhsTy>>::value)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
@@ -1284,14 +1284,14 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs <= rhs);
 
-                if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<LhsTy>>::value)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<RhsTy>>::value)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
@@ -1421,14 +1421,14 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs > rhs);
 
-                if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<LhsTy>>::value)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<RhsTy>>::value)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
@@ -1558,14 +1558,14 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs >= rhs);
 
-                if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<LhsTy>>::value)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<RhsTy>>::value)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
@@ -1708,14 +1708,14 @@ namespace dhorn
                 Assert::IsTrue(std::is_same<decltype(result), dhorn::experimental::hstring>::value);
                 Assert::IsTrue(result == expected);
 
-                if (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<LhsTy>>::value)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoAppendTest(other, rhs, expected);
                 }
 
-                if (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
+                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
                     !std::is_const<std::remove_reference_t<RhsTy>>::value)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;

@@ -9,12 +9,13 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="efficiency.h">
-      <Filter>include</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_tests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="vector_baseline_tests.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
