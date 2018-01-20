@@ -12,7 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 
-#include "../crtp_base.h"
+#include "../../crtp_base.h"
 #include "nointrin_traits.h"
 
 #if _M_X64 || _M_IX86
@@ -23,7 +23,7 @@
 #error Architecture not supported
 #endif
 
-namespace dhorn::math
+namespace dhorn::experimental::math
 {
     // TODO: Arch specific/customizable
     template <typename Ty>

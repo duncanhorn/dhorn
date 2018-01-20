@@ -30,9 +30,6 @@
 #include <dhorn/com/com_traits.h>
 #include <dhorn/com/hresult_error.h>
 
-// Math Includes
-#include <dhorn/math/vector.h>
-
 // Windows Includes
 #include <dhorn/windows/file_time_clock.h>
 #include <dhorn/windows/guid.h>

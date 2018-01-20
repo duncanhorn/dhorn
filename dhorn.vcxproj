@@ -18,27 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F7242374-40D8-40D5-ABB5-FF54E43276F8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>dhorn</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <SubSystem>Console</SubSystem>
   </PropertyGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(SolutionDir)\common.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-
   <ItemGroup>
     <ClInclude Include="include\dhorn\algorithm.h" />
     <ClInclude Include="include\dhorn\bitmask.h" />
@@ -72,6 +67,9 @@
     <ClInclude Include="include\dhorn\experimental\json.h" />
     <ClInclude Include="include\dhorn\experimental\linear_animation.h" />
     <ClInclude Include="include\dhorn\experimental\math.h" />
+    <ClInclude Include="include\dhorn\experimental\math\nointrin_traits.h" />
+    <ClInclude Include="include\dhorn\experimental\math\sse2_traits.h" />
+    <ClInclude Include="include\dhorn\experimental\math\vector.h" />
     <ClInclude Include="include\dhorn\experimental\message_queue.h" />
     <ClInclude Include="include\dhorn\experimental\numeric.h" />
     <ClInclude Include="include\dhorn\experimental\service_container.h" />
@@ -88,9 +86,6 @@
     <ClInclude Include="include\dhorn\experimental\winrt_utility.h" />
     <ClInclude Include="include\dhorn\functional.h" />
     <ClInclude Include="include\dhorn\iterator.h" />
-    <ClInclude Include="include\dhorn\math\nointrin_traits.h" />
-    <ClInclude Include="include\dhorn\math\sse2_traits.h" />
-    <ClInclude Include="include\dhorn\math\vector.h" />
     <ClInclude Include="include\dhorn\scope_guard.h" />
     <ClInclude Include="include\dhorn\string.h" />
     <ClInclude Include="include\dhorn\thread_pool.h" />
@@ -104,6 +99,5 @@
     <ClInclude Include="include\dhorn\winrt\weak_ref.h" />
     <ClInclude Include="include\dhorn\winrt\winrt_traits.h" />
   </ItemGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

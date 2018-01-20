@@ -3,11 +3,11 @@
  */
 
 #include <benchmark/benchmark.h>
-#include <dhorn/math/vector.h>
+#include <dhorn/experimental/math/vector.h>
 
 #define DECLARE_TEST_SIZE_TYPE(Name, Size, Type) \
-BENCHMARK_TEMPLATE(Name, dhorn::math::vector<Type, Size, dhorn::math::nointrin_traits<Type>>); \
-BENCHMARK_TEMPLATE(Name, dhorn::math::vector<Type, Size, dhorn::math::sse2_traits<Type>>);
+BENCHMARK_TEMPLATE(Name, dhorn::experimental::math::vector<Type, Size, dhorn::experimental::math::nointrin_traits<Type>>); \
+BENCHMARK_TEMPLATE(Name, dhorn::experimental::math::vector<Type, Size, dhorn::experimental::math::sse2_traits<Type>>);
 
 #define DECLARE_TEST_SIZE(Name, Size) \
 DECLARE_TEST_SIZE_TYPE(Name, Size, char) \
@@ -27,8 +27,8 @@ DECLARE_TEST_SIZE(Name, 7) \
 DECLARE_TEST_SIZE(Name, 8)
 
 #define DECLARE_TEST_SIZE_TYPE_ARGS(Name, Size, Type, ...) \
-BENCHMARK_TEMPLATE(Name, dhorn::math::vector<Type, Size, dhorn::math::nointrin_traits<Type>>)->Args({ __VA_ARGS__ }); \
-BENCHMARK_TEMPLATE(Name, dhorn::math::vector<Type, Size, dhorn::math::sse2_traits<Type>>)->Args({ __VA_ARGS__ });
+BENCHMARK_TEMPLATE(Name, dhorn::experimental::math::vector<Type, Size, dhorn::experimental::math::nointrin_traits<Type>>)->Args({ __VA_ARGS__ }); \
+BENCHMARK_TEMPLATE(Name, dhorn::experimental::math::vector<Type, Size, dhorn::experimental::math::sse2_traits<Type>>)->Args({ __VA_ARGS__ });
 
 #define DECLARE_TEST_SIZE_ARGS(Name, Size, ...) \
 DECLARE_TEST_SIZE_TYPE_ARGS(Name, Size, char, __VA_ARGS__) \

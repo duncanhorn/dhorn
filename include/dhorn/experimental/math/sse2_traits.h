@@ -14,9 +14,9 @@
 #include <xmmintrin.h> // SSE
 #include <emmintrin.h> // SSE2
 
-#include "../utility.h"
+#include "../../utility.h"
 
-namespace dhorn::math
+namespace dhorn::experimental::math
 {
     namespace details
     {

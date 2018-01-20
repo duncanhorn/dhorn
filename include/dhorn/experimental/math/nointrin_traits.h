@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace dhorn::math
+namespace dhorn::experimental::math
 {
     namespace details
     {
