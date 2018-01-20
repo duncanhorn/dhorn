@@ -18,27 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-
   <PropertyGroup Label="Globals">
     <ProjectGuid>{593676EF-B372-4DFA-BA7F-250E89C2C770}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>efficiency_tests</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <SubSystem>Console</SubSystem>
   </PropertyGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(SolutionDir)\common.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>C:\git\google_benchmark\benchmark\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -67,12 +62,10 @@
       <AdditionalDependencies>C:\git\google_benchmark\build_x64\src\Release\benchmark.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="vector_tests.cpp" />
-    <ClCompile Include="vector_traits_tests.cpp" />
+    <ClCompile Include="vector_baseline_tests.cpp" />
   </ItemGroup>
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

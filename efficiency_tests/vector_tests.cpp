@@ -59,6 +59,8 @@ void Vector_DefaultConstruction(benchmark::State& state)
 }
 DECLARE_TEST(Vector_DefaultConstruction);
 
+
+
 template <typename VectorType, std::size_t... Values>
 VectorType Vector_ConstructConstantValues_Helper(std::index_sequence<Values...>)
 {
@@ -94,6 +96,8 @@ void Vector_ConstructNonConstantValues(benchmark::State& state)
 }
 DECLARE_TEST(Vector_ConstructNonConstantValues);
 
+
+
 template <typename VectorType>
 void Vector_Zero(benchmark::State& state)
 {
@@ -104,22 +108,69 @@ void Vector_Zero(benchmark::State& state)
 }
 DECLARE_TEST(Vector_Zero);
 
+
+
 template <typename VectorType>
-void Vector_SplatConstant(benchmark::State& state)
+void Vector_SplatConstantValue(benchmark::State& state)
 {
     for (auto _ : state)
     {
         benchmark::DoNotOptimize(VectorType::splat(1));
     }
 }
-DECLARE_TEST(Vector_SplatConstant);
+DECLARE_TEST(Vector_SplatConstantValue);
 
 template <typename VectorType>
-void Vector_SplatValue(benchmark::State& state)
+void Vector_SplatNonConstantValue(benchmark::State& state)
 {
+    const auto value = static_cast<typename VectorType::value_type>(state.range(0));
     for (auto _ : state)
     {
-        benchmark::DoNotOptimize(VectorType::splat(static_cast<typename VectorType::value_type>(state.range(0))));
+        benchmark::DoNotOptimize(VectorType::splat(value));
     }
 }
-DECLARE_TEST_ARGS(Vector_SplatValue, 42);
+DECLARE_TEST_ARGS(Vector_SplatNonConstantValue, 42);
+
+
+
+//template <typename VectorType>
+//void Vector_Negate(benchmark::State& state)
+//{
+//    auto v = VectorType::splat(static_cast<typename VectorType::value_type>(1));
+//    for (auto _ : state)
+//    {
+//        v = -v;
+//    }
+//
+//    benchmark::DoNotOptimize(v);
+//}
+//DECLARE_TEST(Vector_Negate);
+
+template <typename VectorType>
+void Vector_Addition(benchmark::State& state)
+{
+    const auto c = VectorType::splat(static_cast<typename VectorType::value_type>(1));
+    //auto v = VectorType::splat(static_cast<typename VectorType::value_type>(1));
+    auto v = Vector_ConstructConstantValues_Helper<VectorType>(std::make_index_sequence<VectorType::dimensions>{});
+    for (auto _ : state)
+    {
+        v += c;
+    }
+
+    benchmark::DoNotOptimize(v);
+}
+DECLARE_TEST(Vector_Addition);
+
+template <typename VectorType>
+void Vector_Subtraction(benchmark::State& state)
+{
+    const auto c = VectorType::splat(static_cast<typename VectorType::value_type>(1));
+    auto v = VectorType::splat(static_cast<typename VectorType::value_type>(1));
+    for (auto _ : state)
+    {
+        v -= c;
+    }
+
+    benchmark::DoNotOptimize(v);
+}
+DECLARE_TEST(Vector_Subtraction);

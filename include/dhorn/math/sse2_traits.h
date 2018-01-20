@@ -30,11 +30,7 @@ namespace dhorn::math
             static constexpr Ty mask_value = static_cast<Ty>(-1);
 
             std::array<Ty, size> result = {};
-
-            // NOTE: MSVC has a bug with fold expressions and the comma operator, hence the array
-            // NOTE: MSVC has a bug where it warns about a loss of precision here when sizeof(Ty) > sizeof(int)
-            [[maybe_unused]]
-            std::common_type_t<Ty, int> unused[] = { ((result[Indices] = mask_value), ..., 0) };
+            ((result[Indices] = mask_value), ...);
 
             return result;
         }
@@ -48,7 +44,7 @@ namespace dhorn::math
 
             static constexpr auto masks = sse2_mask_array<char, Indices...>();
             return _mm_setr_epi8(
-                masks[0], masks[1], masks[2],  masks[3],  masks[4],  masks[5],  masks[6],  masks[7],
+                masks[0], masks[1], masks[2], masks[3], masks[4], masks[5], masks[6], masks[7],
                 masks[8], masks[9], masks[10], masks[11], masks[12], masks[13], masks[14], masks[15]);
         }
 
@@ -316,9 +312,35 @@ namespace dhorn::math
 
 #pragma region Load/Store
 
+        template <std::size_t Size = size>
         static inline vector_type splat(value_type value) noexcept
         {
-            return _mm_set1_epi8(value);
+            static_assert(Size <= size);
+
+            if constexpr (Size == size)
+            {
+                return _mm_set1_epi8(value);
+            }
+            else
+            {
+                return _mm_setr_epi8(
+                    (Size >= 1) ? value : 0,
+                    (Size >= 2) ? value : 0,
+                    (Size >= 3) ? value : 0,
+                    (Size >= 4) ? value : 0,
+                    (Size >= 5) ? value : 0,
+                    (Size >= 6) ? value : 0,
+                    (Size >= 7) ? value : 0,
+                    (Size >= 8) ? value : 0,
+                    (Size >= 9) ? value : 0,
+                    (Size >= 10) ? value : 0,
+                    (Size >= 11) ? value : 0,
+                    (Size >= 12) ? value : 0,
+                    (Size >= 13) ? value : 0,
+                    (Size >= 14) ? value : 0,
+                    (Size >= 15) ? value : 0,
+                    (Size >= 16) ? value : 0);
+            }
         }
 
         static inline vector_type set(
@@ -443,9 +465,27 @@ namespace dhorn::math
 
 #pragma region Load/Store
 
+        template <std::size_t Size = size>
         static inline vector_type splat(value_type value) noexcept
         {
-            return _mm_set1_epi16(value);
+            static_assert(Size <= size);
+
+            if constexpr (Size == size)
+            {
+                return _mm_set1_epi16(value);
+            }
+            else
+            {
+                return _mm_setr_epi16(
+                    (Size >= 1) ? value : 0,
+                    (Size >= 2) ? value : 0,
+                    (Size >= 3) ? value : 0,
+                    (Size >= 4) ? value : 0,
+                    (Size >= 5) ? value : 0,
+                    (Size >= 6) ? value : 0,
+                    (Size >= 7) ? value : 0,
+                    (Size >= 8) ? value : 0);
+            }
         }
 
         static inline vector_type set(
@@ -566,9 +606,23 @@ namespace dhorn::math
 
 #pragma region Load/Store
 
+        template <std::size_t Size = size>
         static inline vector_type splat(value_type value) noexcept
         {
-            return _mm_set1_epi32(value);
+            static_assert(Size <= size);
+
+            if constexpr (Size == size)
+            {
+                return _mm_set1_epi32(value);
+            }
+            else
+            {
+                return _mm_setr_epi32(
+                    (Size >= 1) ? value : 0,
+                    (Size >= 2) ? value : 0,
+                    (Size >= 3) ? value : 0,
+                    (Size >= 4) ? value : 0);
+            }
         }
 
         static inline vector_type set(value_type v0, value_type v1, value_type v2, value_type v3) noexcept
@@ -686,9 +740,19 @@ namespace dhorn::math
 
 #pragma region Load/Store
 
+        template <std::size_t Size = size>
         static inline vector_type splat(value_type value) noexcept
         {
-            return _mm_set1_epi64x(value);
+            static_assert(Size <= size);
+
+            if constexpr (Size == size)
+            {
+                return _mm_set1_epi64x(value);
+            }
+            else
+            {
+                return _mm_set_epi64x((Size >= 2) ? value : 0, (Size >= 1) ? value : 0);
+            }
         }
 
         static inline vector_type set(value_type v0, value_type v1) noexcept
@@ -805,9 +869,23 @@ namespace dhorn::math
 
 #pragma region Load/Store
 
+        template <std::size_t Size = size>
         static inline vector_type splat(value_type value) noexcept
         {
-            return _mm_set1_ps(value);
+            static_assert(Size <= size);
+
+            if constexpr (Size == size)
+            {
+                return _mm_set1_ps(value);
+            }
+            else
+            {
+                return _mm_setr_ps(
+                    (Size >= 1) ? value : 0,
+                    (Size >= 2) ? value : 0,
+                    (Size >= 3) ? value : 0,
+                    (Size >= 4) ? value : 0);
+            }
         }
 
         static inline vector_type set(value_type v0, value_type v1, value_type v2, value_type v3) noexcept
@@ -925,9 +1003,19 @@ namespace dhorn::math
 
 #pragma region Load/Store
 
+        template <std::size_t Size = size>
         static inline vector_type splat(value_type value) noexcept
         {
-            return _mm_set1_pd(value);
+            static_assert(Size <= size);
+
+            if constexpr (Size == size)
+            {
+                return _mm_set1_pd(value);
+            }
+            else
+            {
+                return _mm_setr_pd((Size >= 1) ? value : 0, (Size >= 2) ? value : 0);
+            }
         }
 
         static inline vector_type set(value_type v0, value_type v1) noexcept

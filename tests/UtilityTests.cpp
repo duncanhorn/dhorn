@@ -88,6 +88,10 @@ namespace dhorn::tests
             Assert::IsTrue(std::is_same_v<
                 std::index_sequence<0>,
                 reverse_integer_sequence_t<std::index_sequence<0>>>);
+
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<8>,
+                reverse_integer_sequence_t<std::index_sequence<8>>>);
         }
 
         TEST_METHOD(ReverseMultipleElementSequenceTest)
@@ -101,6 +105,10 @@ namespace dhorn::tests
             Assert::IsTrue(std::is_same_v<
                 std::make_index_sequence<10>,
                 reverse_integer_sequence_t<reverse_integer_sequence_t<std::make_index_sequence<10>>>>);
+
+            Assert::IsTrue(std::is_same_v<
+                std::index_sequence<8, 42, 99, 0>,
+                reverse_integer_sequence_t<std::index_sequence<0, 99, 42, 8>>>);
         }
     };
 

@@ -48,15 +48,32 @@ namespace dhorn::math
                 return value;
             }
 
+            template <std::size_t Size>
+            static constexpr inline vector_type splat(value_type value) noexcept
+            {
+                static_assert(Size == 1);
+                return value;
+            }
+
             static constexpr vector_type set(value_type v) noexcept
             {
                 return v;
             }
 
+            template <std::size_t Size, std::size_t... Indices, typename... Args>
+            static constexpr void fill(
+                std::array<vector_type, Size>& result,
+                std::index_sequence<Indices...>,
+                Args... args) noexcept
+            {
+                ((result[Indices] = args), ...);
+            }
+
             template <std::size_t Size, typename... Args, std::enable_if_t<Size == sizeof...(Args), int> = 0>
             static constexpr void fill(std::array<vector_type, Size>& result, Args... args) noexcept
             {
-                result = { args... };
+                //result = { args... };
+                fill(result, std::make_index_sequence<Size>{}, args...);
             }
 
 #pragma endregion
@@ -68,6 +85,11 @@ namespace dhorn::math
 #pragma endregion
 
 #pragma region Arithmetic Operations
+
+            static constexpr inline vector_type negate(vector_type value) noexcept
+            {
+                return -value;
+            }
 
             static constexpr inline vector_type add(vector_type lhs, vector_type rhs) noexcept
             {

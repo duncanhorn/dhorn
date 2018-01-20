@@ -12,10 +12,10 @@
     <ClCompile Include="main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="vector_traits_tests.cpp">
+    <ClCompile Include="vector_tests.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="vector_tests.cpp">
+    <ClCompile Include="vector_baseline_tests.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

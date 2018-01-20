@@ -80,9 +80,15 @@ namespace dhorn::math
 
     private:
 
-        // Internal values for book-keeping/optimization
+        // Internal types/constants for book-keeping/optimization
         static constexpr std::size_t array_size = (Dimensions + vector_components - 1) / vector_components;
         static constexpr std::size_t extra_space = (vector_components * array_size) - Dimensions;
+        static constexpr std::size_t final_fill = vector_components - extra_space;
+
+        using array_index_sequence = std::make_index_sequence<array_size>;
+        using full_array_index_sequence = std::make_index_sequence<array_size - 1>;
+
+        using vector_array = std::array<vector_type, array_size>;
 
 
 
@@ -95,7 +101,7 @@ namespace dhorn::math
         template <
             typename... Args,
             std::enable_if_t<Dimensions == sizeof...(Args), int> = 0,
-            std::enable_if_t<std::conjunction_v<std::is_convertible<Args, Ty>...>, int> = 0>
+            std::enable_if_t<std::conjunction_v<std::is_convertible<Args, value_type>...>, int> = 0>
         vector(Args... args) noexcept
         {
             Traits::fill(this->_values, args...);
@@ -108,15 +114,22 @@ namespace dhorn::math
          */
         static vector zero() noexcept
         {
+#if 1
+            return zero(array_index_sequence{});
+#else
             // TODO: Poor code generation for MSVC here... Anything we can do to improve?
             vector result;
             std::fill(begin(result._values), end(result._values), Traits::zero());
 
             return result;
+#endif
         }
 
-        static vector splat(Ty value) noexcept
+        static vector splat(value_type value) noexcept
         {
+#if 1
+            return splat(value, full_array_index_sequence{});
+#else
             vector result;
             std::fill(begin(result._values), end(result._values), Traits::splat(value));
 
@@ -126,6 +139,7 @@ namespace dhorn::math
             }
 
             return result;
+#endif
         }
 
 
@@ -143,44 +157,41 @@ namespace dhorn::math
         /*
          * Arithmetic Operations
          */
-        vector& operator+=(vector other) noexcept
+        friend vector operator-(vector value) noexcept
         {
+            vector result;
             for (std::size_t i = 0; i < array_size; ++i)
             {
-                this->_values[i] = Traits::add(this->_values[i], other._values[i]);
+                result._values[i] = Traits::negate(value._values[i]);
             }
 
+            return result;
+        }
+
+        vector& operator+=(vector other) noexcept
+        {
+            this->_values = add(this->_values, other._values, array_index_sequence{});
             return *this;
         }
 
         friend vector operator+(vector lhs, vector rhs) noexcept
         {
             vector result;
-            for (std::size_t i = 0; i < array_size; ++i)
-            {
-                result._values[i] = Traits::add(lhs._values[i], rhs._values[i]);
-            }
+            result._values = add(lhs._values, rhs._values, array_index_sequence{});
 
             return result;
         }
 
         vector& operator-=(vector other) noexcept
         {
-            for (std::size_t i = 0; i < array_size; ++i)
-            {
-                this->_values[i] = Traits::subtract(this->_values[i], other._values[i]);
-            }
-
+            this->_values = subtract(*this, other, array_index_sequence{});
             return *this;
         }
 
         friend vector operator-(vector lhs, vector rhs) noexcept
         {
             vector result;
-            for (std::size_t i = 0; i < array_size; ++i)
-            {
-                result._values[i] = Traits::subtract(lhs._values[i], rhs._values[i]);
-            }
+            result._values = subtract(lhs, rhs, array_index_sequence{});
 
             return result;
         }
@@ -189,7 +200,87 @@ namespace dhorn::math
 
     private:
 
-        std::array<vector_type, array_size> _values;
+        template <std::size_t... Indices>
+        static inline vector zero(std::index_sequence<Indices...>) noexcept
+        {
+            vector result;
+            ((result._values[Indices] = Traits::zero()), ...);
+
+            return result;
+        }
+
+        template <std::size_t... Indices>
+        static inline vector splat(value_type value, std::index_sequence<Indices...>) noexcept
+        {
+            vector result;
+
+            // All except (potentially) the last value is a full splat
+            ((result._values[Indices] = Traits::splat(value)), ...);
+            result._values[array_size - 1] = Traits::template splat<final_fill>(value);
+
+            return result;
+        }
+
+        template <std::size_t... Indices>
+        static inline vector_array add(vector_array lhs, vector_array rhs, std::index_sequence<Indices...>) noexcept
+        {
+            vector_array result;
+            ((result[Indices] = Traits::add(lhs[Indices], rhs[Indices])), ...);
+
+            return result;
+        }
+
+        template <std::size_t... Indices>
+        static inline vector_array subtract(const vector& lhs, const vector& rhs, std::index_sequence<Indices...>) noexcept
+        {
+            vector_array result;
+            ((result[Indices] = Traits::subtract(lhs._values[Indices], rhs._values[Indices])), ...);
+
+            return result;
+        }
+
+
+
+
+        /* NOTE: Poor MSVC optimization, so removing for now
+        template <std::size_t... Indices>
+        static inline vector fill(vector_type value, std::index_sequence<Indices...>) noexcept
+        {
+            vector result;
+            ((result._values[Indices] = value), ...);
+
+            return result;
+        }
+
+        template <typename Func, std::size_t... Indices>
+        static inline vector fill(Func&& func) noexcept
+        {
+            return fill(func(), array_index_sequence{});
+        }
+
+        template <typename Func, std::size_t... Indices>
+        vector unary_transform(Func&& func, std::index_sequence<Indices...> = array_index_sequence{}) noexcept
+        {
+            vector result;
+            ((result._values[Indices] = func(this->_values[Indices])), ...);
+
+            return result;
+        }
+
+        template <typename Func, std::size_t... Indices>
+        vector binary_transform(
+            vector other,
+            Func&& func,
+            std::index_sequence<Indices...> = array_index_sequence{}) noexcept
+        {
+            vector result;
+            ((result._values[Indices] = func(this->_values[Indices], other._values[Indices])), ...);
+
+            return result;
+        }
+        */
+
+        vector_array _values;
     };
 
 

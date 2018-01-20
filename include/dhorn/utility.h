@@ -72,10 +72,18 @@ namespace dhorn
     template <typename IntegerSequence>
     struct reverse_integer_sequence;
 
-    template <typename Ty, Ty... Values>
-    struct reverse_integer_sequence<std::integer_sequence<Ty, Values...>>
+    template <typename Ty>
+    struct reverse_integer_sequence<std::integer_sequence<Ty>>
     {
-        using type = typename details::make_reverse_integer_sequence<std::integer_sequence<Ty, Values...>>::type;
+        using type = std::integer_sequence<Ty>;
+    };
+
+    template <typename Ty, Ty First, Ty... Others>
+    struct reverse_integer_sequence<std::integer_sequence<Ty, First, Others...>>
+    {
+        using type = join_integer_sequence_t<
+            typename reverse_integer_sequence<std::integer_sequence<Ty, Others...>>::type,
+            std::integer_sequence<Ty, First>>;
     };
 
     template <typename IntegerSequence>
