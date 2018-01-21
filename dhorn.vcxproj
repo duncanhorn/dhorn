@@ -63,6 +63,7 @@
     <ClInclude Include="include\dhorn\experimental\event_source.h" />
     <ClInclude Include="include\dhorn\experimental\functional.h" />
     <ClInclude Include="include\dhorn\experimental\hstring.h" />
+    <ClInclude Include="include\dhorn\experimental\inplace_function.h" />
     <ClInclude Include="include\dhorn\experimental\instance.h" />
     <ClInclude Include="include\dhorn\experimental\json.h" />
     <ClInclude Include="include\dhorn\experimental\linear_animation.h" />
