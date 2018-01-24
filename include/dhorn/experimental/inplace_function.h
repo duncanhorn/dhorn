@@ -119,9 +119,6 @@ namespace dhorn::experimental
         template <typename FuncTy>
         struct function_impl : function_base
         {
-            static_assert(sizeof(FuncTy) <= Size, "Function object too large for inlpace_function. Either reduce the " \
-                "object's size or use a larger sized inplace_function");
-
             template <typename Func>
             function_impl(Func&& func) :
                 func(std::forward<Func>(func))
@@ -374,7 +371,11 @@ namespace dhorn::experimental
             assert(!this->_func);
             if (!details::is_function_null(func))
             {
-                this->_func = ::new (this->_data) function_impl<std::decay_t<Func>>(std::forward<Func>(func));
+                using impl_type = function_impl<std::decay_t<Func>>;
+                static_assert(sizeof(impl_type) <= Size, "Function object too large for inlpace_function." \
+                    " Either reduce the object's size or use a larger sized inplace_function");
+
+                this->_func = ::new (this->_data) impl_type(std::forward<Func>(func));
             }
         }
 

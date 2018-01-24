@@ -167,7 +167,7 @@ namespace dhorn::tests
 
         TEST_METHOD(LargeObjectConstructionTest)
         {
-            std::uint8_t large_array[inplace_function<void()>::max_size];
+            std::uint8_t large_array[inplace_function<void()>::max_size - sizeof(void*)];
             auto large_lambda = [large_array]()
             {
             };
@@ -361,7 +361,7 @@ namespace dhorn::tests
 
         TEST_METHOD(LargeObjectAssignmentTest)
         {
-            std::uint8_t large_array[inplace_function<void()>::max_size];
+            std::uint8_t large_array[inplace_function<void()>::max_size - sizeof(void*)];
             auto large_lambda = [large_array]()
             {
             };
