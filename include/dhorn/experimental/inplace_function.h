@@ -153,6 +153,9 @@ namespace dhorn::experimental
             FuncTy func;
         };
 
+        // Need space for v-table
+        static constexpr std::size_t buffer_size = Size + sizeof(void*);
+
     public:
         /*
          * Public Types/Constants
@@ -372,8 +375,9 @@ namespace dhorn::experimental
             if (!details::is_function_null(func))
             {
                 using impl_type = function_impl<std::decay_t<Func>>;
-                static_assert(sizeof(impl_type) <= Size, "Function object too large for inlpace_function." \
+                static_assert(sizeof(std::decay_t<Func>) <= Size, "Function object too large for inlpace_function." \
                     " Either reduce the object's size or use a larger sized inplace_function");
+                static_assert(sizeof(impl_type) <= buffer_size, "Assumption about v-table size incorrect");
 
                 this->_func = ::new (this->_data) impl_type(std::forward<Func>(func));
             }
@@ -447,7 +451,7 @@ namespace dhorn::experimental
         union
         {
             std::max_align_t _;
-            std::uint8_t _data[Size];
+            std::uint8_t _data[buffer_size];
         };
     };
 
