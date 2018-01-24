@@ -377,7 +377,8 @@ namespace dhorn::experimental
                 using impl_type = function_impl<std::decay_t<Func>>;
                 static_assert(sizeof(std::decay_t<Func>) <= Size, "Function object too large for inlpace_function." \
                     " Either reduce the object's size or use a larger sized inplace_function");
-                static_assert(sizeof(impl_type) <= buffer_size, "Assumption about v-table size incorrect");
+                static_assert((sizeof(std::decay_t<Func>) <= Size) == (sizeof(impl_type) <= buffer_size),
+                    "Assumption about v-table size incorrect");
 
                 this->_func = ::new (this->_data) impl_type(std::forward<Func>(func));
             }
