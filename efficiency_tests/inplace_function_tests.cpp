@@ -5,6 +5,14 @@
 #include <benchmark/benchmark.h>
 #include <dhorn/experimental/inplace_function.h>
 
+struct test_object
+{
+    int value = 42;
+    int get_value() { return value; }
+};
+
+
+
 template <typename Func, typename... Args>
 void TestInvoke(benchmark::State& state, Func func, Args... args)
 {
@@ -13,6 +21,8 @@ void TestInvoke(benchmark::State& state, Func func, Args... args)
         benchmark::DoNotOptimize(std::invoke(func, args...));
     }
 }
+
+
 
 void Strlen_FunctionPointerTest(benchmark::State& state)
 {
@@ -33,14 +43,6 @@ void Strlen_InplaceFunctionTest(benchmark::State& state)
     TestInvoke(state, func, "");
 }
 BENCHMARK(Strlen_InplaceFunctionTest);
-
-
-
-struct test_object
-{
-    int value = 42;
-    int get_value() { return value; }
-};
 
 
 

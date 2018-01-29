@@ -60,19 +60,7 @@ namespace dhorn::experimental
          * is_function_null
          */
         template <typename Func>
-        inline bool is_function_null(const Func& func, std::true_type)
-        {
-            return !func;
-        }
-
-        template <typename Func>
-        inline bool is_function_null(const Func&, std::false_type)
-        {
-            return false;
-        }
-
-        template <typename Func>
-        inline bool is_function_null(const Func& func)
+        inline constexpr bool is_function_null([[maybe_unused]] const Func& func)
         {
             using is_pointer = std::disjunction<
                 std::is_member_pointer<Func>,
@@ -80,7 +68,14 @@ namespace dhorn::experimental
                     std::is_pointer<Func>,
                     std::is_function<std::remove_pointer_t<Func>>
                 >>;
-            return is_function_null(func, is_pointer{});
+            if constexpr (is_pointer::value)
+            {
+                return !func;
+            }
+            else
+            {
+                return false;
+            }
         }
 
 
