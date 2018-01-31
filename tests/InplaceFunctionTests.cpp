@@ -7,13 +7,11 @@
  */
 #include "stdafx.h"
 
-#include <dhorn/experimental/inplace_function.h>
+#include <dhorn/inplace_function.h>
 
 #include "object_counter.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
-
-using namespace dhorn::experimental;
 
 namespace dhorn::tests
 {

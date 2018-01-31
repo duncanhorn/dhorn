@@ -3,7 +3,7 @@
  */
 
 #include <benchmark/benchmark.h>
-#include <dhorn/experimental/inplace_function.h>
+#include <dhorn/inplace_function.h>
 
 struct test_object
 {
@@ -39,7 +39,7 @@ BENCHMARK(Strlen_StdFunctionTest);
 
 void Strlen_InplaceFunctionTest(benchmark::State& state)
 {
-    dhorn::experimental::inplace_function<std::size_t(const char*)> func(std::strlen);
+    dhorn::inplace_function<std::size_t(const char*)> func(std::strlen);
     TestInvoke(state, func, "");
 }
 BENCHMARK(Strlen_InplaceFunctionTest);
@@ -64,7 +64,7 @@ BENCHMARK(MemberFunction_StdFunctionTest);
 void MemberFunction_InplaceFunctionTest(benchmark::State& state)
 {
     test_object o;
-    dhorn::experimental::inplace_function<int(test_object&)> func(&test_object::get_value);
+    dhorn::inplace_function<int(test_object&)> func(&test_object::get_value);
     TestInvoke(state, func, o);
 }
 BENCHMARK(MemberFunction_InplaceFunctionTest);
@@ -89,7 +89,7 @@ BENCHMARK(Member_StdFunctionTest);
 void Member_InplaceFunctionTest(benchmark::State& state)
 {
     test_object o;
-    dhorn::experimental::inplace_function<int(test_object&)> func(&test_object::value);
+    dhorn::inplace_function<int(test_object&)> func(&test_object::value);
     TestInvoke(state, func, o);
 }
 BENCHMARK(Member_InplaceFunctionTest);

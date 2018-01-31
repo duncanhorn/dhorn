@@ -16,6 +16,7 @@
 #include <dhorn/crtp_base.h>
 #include <dhorn/debug.h>
 #include <dhorn/functional.h>
+#include <dhorn/inplace_function.h>
 #include <dhorn/iterator.h>
 #include <dhorn/scope_guard.h>
 #include <dhorn/string.h>

@@ -12,9 +12,9 @@
 #include <cassert>
 #include <functional>
 
-#include "../scope_guard.h"
+#include "scope_guard.h"
 
-namespace dhorn::experimental
+namespace dhorn
 {
     /*
      * inplace_function Declaration
