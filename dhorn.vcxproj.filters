@@ -225,5 +225,8 @@
     <ClInclude Include="include\dhorn\experimental\math\vector.h">
       <Filter>include\experimental\math</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\inplace_function.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
