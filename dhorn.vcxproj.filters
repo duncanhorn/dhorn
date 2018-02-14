@@ -228,5 +228,8 @@
     <ClInclude Include="include\dhorn\inplace_function.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\const_string.h">
+      <Filter>include\experimental</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

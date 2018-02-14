@@ -50,6 +50,7 @@
     <ClInclude Include="include\dhorn\experimental\array_reference.h" />
     <ClInclude Include="include\dhorn\experimental\command_line.h" />
     <ClInclude Include="include\dhorn\experimental\com_utility.h" />
+    <ClInclude Include="include\dhorn\experimental\const_string.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_utils.h" />
     <ClInclude Include="include\dhorn\experimental\d3d11\d3d11_window.h" />
     <ClInclude Include="include\dhorn\experimental\d3d\camera.h" />
