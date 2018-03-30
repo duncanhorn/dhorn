@@ -103,7 +103,7 @@ namespace dhorn
                 return *this;
             }
 
-            array_reference_iterator operator+(difference_type diff)
+            array_reference_iterator operator+(difference_type diff) const
             {
                 auto copy = *this;
                 copy += diff;
@@ -131,14 +131,14 @@ namespace dhorn
                 return *this;
             }
 
-            array_reference_iterator operator-(difference_type diff)
+            array_reference_iterator operator-(difference_type diff) const
             {
                 auto copy = *this;
                 copy -= diff;
                 return copy;
             }
 
-            difference_type operator-(const array_reference_iterator &other)
+            difference_type operator-(const array_reference_iterator &other) const
             {
                 return this->_ptr - other._ptr;
             }
@@ -563,7 +563,7 @@ namespace dhorn
             typename LhsTy,
             typename RhsTy,
             typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-            inline bool operator==(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
+        inline bool operator==(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             if (lhs.data() == rhs.data() && lhs.size() == rhs.size())
             {
@@ -581,7 +581,7 @@ namespace dhorn
             typename LhsTy,
             typename RhsTy,
             typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-            inline bool operator!=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
+        inline bool operator!=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return !(lhs == rhs);
         }
@@ -590,7 +590,7 @@ namespace dhorn
             typename LhsTy,
             typename RhsTy,
             typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-            inline bool operator<(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
+        inline bool operator<(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return std::lexicographical_compare(
                 lhs.begin(), lhs.end(),
@@ -602,7 +602,7 @@ namespace dhorn
             typename LhsTy,
             typename RhsTy,
             typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-            inline bool operator>(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
+        inline bool operator>(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return std::lexicographical_compare(
                 rhs.begin(), rhs.end(),
@@ -614,7 +614,7 @@ namespace dhorn
             typename LhsTy,
             typename RhsTy,
             typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-            inline bool operator<=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
+        inline bool operator<=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return !(lhs > rhs);
         }
@@ -623,7 +623,7 @@ namespace dhorn
             typename LhsTy,
             typename RhsTy,
             typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
-            inline bool operator>=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
+        inline bool operator>=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return !(lhs < rhs);
         }
