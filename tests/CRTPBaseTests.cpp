@@ -21,12 +21,12 @@ namespace dhorn::tests
         {
             void invoke()
             {
-                this->shim().impl();
+                this->derived().impl();
             }
 
             void invoke() const
             {
-                this->shim().impl();
+                this->derived().impl();
             }
         };
 

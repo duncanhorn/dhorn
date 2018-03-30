@@ -28,14 +28,12 @@ namespace dhorn
      * while testing.
      */
     template <typename Lockable>
-    inline void assert_lock_held(Lockable& lockable)
+    inline void assert_lock_held([[maybe_unused]] Lockable& lockable)
     {
 #if DHORN_DEBUG
         // We expect try_lock to return false. If it happens to return true, we'll assert fail, but we still want to be
         // continuable if a debugger is attached, so make sure to unlock as well
         assert(!lockable.try_lock() || (lockable.unlock(), false));
-#else
-        lockable;
 #endif
     }
 
@@ -49,13 +47,11 @@ namespace dhorn
      * assert that the caller is the one holding the lock.
      */
     template <typename SharedMutex>
-    inline void assert_lock_held_exclusive(SharedMutex& mutex)
+    inline void assert_lock_held_exclusive([[maybe_unused]] SharedMutex& mutex)
     {
 #if DHORN_DEBUG
         // Exclusive means we can't acquire it shared
         assert(!mutex.try_lock_shared() || (mutex.unlock_shared(), false));
-#else
-        mutex;
 #endif
     }
 
@@ -69,13 +65,11 @@ namespace dhorn
      * assert that the caller is the one holding the lock.
      */
     template <typename SharedMutex>
-    inline void assert_lock_held_shared(SharedMutex& mutex)
+    inline void assert_lock_held_shared([[maybe_unused]] SharedMutex& mutex)
     {
 #if DHORN_DEBUG
         // Shared means we can't acquire it exclusively
         assert_lock_held();
-#else
-        mutex;
 #endif
     }
 

@@ -38,6 +38,18 @@
     <Link>
       <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/await %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/await %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">/await %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/await %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="object_counter.h" />
@@ -51,6 +63,7 @@
     <ClCompile Include="AnimationManagerTests.cpp" />
     <ClCompile Include="AnimationTests.cpp" />
     <ClCompile Include="ArrayReferenceTests.cpp" />
+    <ClCompile Include="AsyncTests.cpp" />
     <ClCompile Include="BitmaskTests.cpp" />
     <ClCompile Include="CommandLineTests.cpp" />
     <ClCompile Include="CompressedBaseTests.cpp" />

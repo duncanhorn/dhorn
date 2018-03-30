@@ -4,8 +4,8 @@
  * crtp_base.h
  *
  * Useful base class for types that use the curiously recurring template pattern. It provides a single function -
- * `shim` that returns the `this` pointer converted to a pointer to the derived type. An example usage might look like
- * the following:
+ * `derived` that returns the `this` pointer converted to a pointer to the derived type. An example usage might look
+ * like the following:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  template <typename Derived>
  *  class foo : public crtp_base<Derived>
@@ -13,7 +13,7 @@
  *  public:
  *      void doit()
  *      {
- *          return this->shim().doit_impl();
+ *          return this->derived().doit_impl();
  *      }
  *  };
  *
@@ -36,12 +36,12 @@ namespace dhorn
     {
     protected:
 
-        Derived& shim(void)
+        Derived& derived(void) noexcept
         {
             return static_cast<Derived&>(*this);
         }
 
-        const Derived& shim(void) const
+        const Derived& derived(void) const noexcept
         {
             return static_cast<const Derived&>(*this);
         }

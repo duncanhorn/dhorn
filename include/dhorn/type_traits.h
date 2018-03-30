@@ -194,17 +194,8 @@ namespace dhorn
 #pragma region any_base_of
 
     template <typename Base, typename... Derived>
-    struct any_base_of;
-
-    template <typename Base, typename Ty>
-    struct any_base_of<Base, Ty> :
-        public std::is_base_of<Base, Ty>
-    {
-    };
-
-    template <typename Base, typename Ty, typename... Derived>
-    struct any_base_of<Base, Ty, Derived...> :
-        public std::disjunction<std::is_base_of<Base, Ty>, any_base_of<Base, Derived...>>
+    struct any_base_of :
+        public std::disjunction<std::is_base_of<Base, Derived>...>
     {
     };
 
@@ -224,17 +215,8 @@ namespace dhorn
 #pragma region all_base_of
 
     template <typename Base, typename... Derived>
-    struct all_base_of;
-
-    template <typename Base, typename Ty>
-    struct all_base_of<Base, Ty> :
-        public std::is_base_of<Base, Ty>
-    {
-    };
-
-    template <typename Base, typename Ty, typename... Derived>
-    struct all_base_of<Base, Ty, Derived...> :
-        public std::conjunction<std::is_base_of<Base, Ty>, all_base_of<Base, Derived...>>
+    struct all_base_of :
+        public std::conjunction<std::is_base_of<Base, Derived>...>
     {
     };
 
@@ -301,11 +283,9 @@ namespace dhorn
      * 4
      */
     template <typename Ty, typename Struct>
-    inline constexpr std::size_t byte_offset(Ty Struct::*member)
+    inline /*constexpr*/ std::size_t byte_offset(Ty Struct::*member)
     {
-        return
-            reinterpret_cast<std::uint8_t *>(&(reinterpret_cast<Struct *>(nullptr)->*member)) -
-            reinterpret_cast<std::uint8_t *>(nullptr);
+        return reinterpret_cast<std::uintptr_t>(&(reinterpret_cast<Struct*>(nullptr)->*member));
     }
 
 

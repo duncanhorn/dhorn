@@ -62,13 +62,13 @@ namespace dhorn
         template <typename Func>
         inline constexpr bool is_function_null([[maybe_unused]] const Func& func)
         {
-            using is_pointer = std::disjunction<
+            constexpr bool is_pointer = std::disjunction_v<
                 std::is_member_pointer<Func>,
                 std::conjunction<
                     std::is_pointer<Func>,
                     std::is_function<std::remove_pointer_t<Func>>
                 >>;
-            if constexpr (is_pointer::value)
+            if constexpr (is_pointer)
             {
                 return !func;
             }
