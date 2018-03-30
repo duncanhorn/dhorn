@@ -313,7 +313,7 @@ namespace dhorn::experimental
 
             bool done()
             {
-                assert_lock_held(this->_mutex):
+                assert_lock_held(this->_mutex);
                 return this->_value || this->_exception;
             }
 

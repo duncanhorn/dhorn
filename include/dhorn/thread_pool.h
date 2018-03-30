@@ -829,7 +829,7 @@ namespace dhorn
 
         template <typename Func, typename... Args>
         auto submit_for_result(Func&& func, Args&&... args) ->
-            std::future<std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>>
+            std::future<std::invoke_result_t<std::decay_t<Func>, std::decay_t<Args>...>>
         {
             return submit_for_result(
                 thread_pool_priority::normal,
@@ -841,9 +841,9 @@ namespace dhorn
 #pragma warning(disable:4702) // Unreachable code if `func` does not throw
         template <typename Func, typename... Args>
         auto submit_for_result(thread_pool_priority priority, Func&& func, Args&&... args) ->
-            std::future<std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>>
+            std::future<std::invoke_result_t<std::decay_t<Func>, std::decay_t<Args>...>>
         {
-            using result_type = std::result_of_t<std::decay_t<Func>(std::decay_t<Args>...)>;
+            using result_type = std::invoke_result_t<std::decay_t<Func>, std::decay_t<Args>...>;
             std::promise<result_type> promise;
             auto future = promise.get_future();
 
