@@ -312,6 +312,16 @@ namespace dhorn
 
 
         /*
+         * Accessors
+         */
+        Itr base() const noexcept
+        {
+            return this->_itr;
+        }
+
+
+
+        /*
          * Forward Iterator
          */
         bool operator==(utf_iterator other) const
@@ -430,6 +440,16 @@ namespace dhorn
 
 
         /*
+         * Accessors
+         */
+        Itr base() const noexcept
+        {
+            return this->_itr;
+        }
+
+
+
+        /*
          * Output Iterator
          */
         utf_output_iterator& operator*()
@@ -484,6 +504,12 @@ namespace dhorn
     inline auto utf32_output_iterator(Itr itr)
     {
         return utf_output_iterator<char32_t, Itr>(itr);
+    }
+
+    template <typename CharTy, typename Itr>
+    inline auto make_utf_output_iterator(Itr itr)
+    {
+        return utf_output_iterator<CharTy, Itr>(itr);
     }
 
 #pragma endregion

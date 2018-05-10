@@ -34,6 +34,9 @@
     <Filter Include="include\experimental\math">
       <UniqueIdentifier>{db81493d-bc5c-4c6d-8f25-fb236a1f41fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\experimental\json">
+      <UniqueIdentifier>{8aa64862-b855-4395-97dd-7276c5717a38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\experimental\animation.h">
@@ -233,6 +236,12 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\experimental\async.h">
       <Filter>include\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\json\scanner.h">
+      <Filter>include\experimental\json</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\experimental\json\json.h">
+      <Filter>include\experimental\json</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

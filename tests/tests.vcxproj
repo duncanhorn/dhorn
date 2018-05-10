@@ -78,6 +78,7 @@
     <ClCompile Include="GuidTests.cpp" />
     <ClCompile Include="HStringTests.cpp" />
     <ClCompile Include="InplaceFunctionTests.cpp" />
+    <ClCompile Include="JsonScannerTests.cpp" />
     <ClCompile Include="JsonTests.cpp" />
     <ClCompile Include="MessageQueueTests.cpp" />
     <ClCompile Include="NumericTests.cpp" />

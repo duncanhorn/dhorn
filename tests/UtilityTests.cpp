@@ -265,4 +265,44 @@ namespace dhorn::tests
             Assert::AreEqual(static_cast<std::uint8_t>(0xFF), get_byte<0>(value));
         }
     };
+
+
+
+    TEST_CLASS(VariantIndexTests)
+    {
+        TEST_METHOD(CompilationErrorsTest)
+        {
+            // NOTE: Compilation test only; each should fail
+            //variant_index_v<int, std::variant<>>;
+            //variant_index_v<int, std::variant<int&>>;
+        }
+
+        TEST_METHOD(SingleTypeTest)
+        {
+            Assert::AreEqual(static_cast<std::size_t>(0), variant_index_v<int, std::variant<int>>);
+        }
+
+        TEST_METHOD(MultipleTypeTest)
+        {
+            using variant_type = std::variant<int, float, double, std::string, char, unsigned char>;
+
+            Assert::AreEqual(static_cast<std::size_t>(0), variant_index_v<int, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(1), variant_index_v<float, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(2), variant_index_v<double, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(3), variant_index_v<std::string, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(4), variant_index_v<char, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(5), variant_index_v<unsigned char, variant_type>);
+        }
+
+        TEST_METHOD(WithReferencesTest)
+        {
+            using variant_type = std::variant<int, int&, const int&, volatile int, const volatile int&>;
+
+            Assert::AreEqual(static_cast<std::size_t>(0), variant_index_v<int, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(1), variant_index_v<int&, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(2), variant_index_v<const int&, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(3), variant_index_v<volatile int, variant_type>);
+            Assert::AreEqual(static_cast<std::size_t>(4), variant_index_v<const volatile int&, variant_type>);
+        }
+    };
 }

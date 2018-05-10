@@ -8,6 +8,7 @@
 #pragma once
 
 #include <utility>
+#include <variant>
 
 namespace dhorn
 {
@@ -151,6 +152,69 @@ namespace dhorn
         constexpr std::size_t shift = 8 * Index;
         return static_cast<std::uint8_t>((value >> shift) & static_cast<UnsignedInteger>(0xFF));
     }
+
+#pragma endregion
+
+
+
+    /*
+     * variant_index
+     */
+#pragma region variant_index
+
+    namespace details
+    {
+        template <typename Ty, typename...>
+        struct variant_index;
+
+        template <typename Ty, typename... Types>
+        constexpr std::size_t variant_index_v = variant_index<Ty, Types...>::value;
+
+        template <typename Ty>
+        struct variant_index<Ty>
+        {
+            // Type not found
+        };
+
+        template <typename Ty, typename... OtherTypes>
+        struct variant_index<Ty, Ty, OtherTypes...> :
+            std::integral_constant<std::size_t, 0>
+        {
+        };
+
+        template <typename Ty, typename WrongType, typename... OtherTypes>
+        struct variant_index<Ty, WrongType, OtherTypes...> :
+            std::integral_constant<std::size_t, 1 + variant_index_v<Ty, OtherTypes...>>
+        {
+        };
+    }
+
+    template <typename Ty, typename Variant>
+    struct variant_index;
+
+    template <typename Ty, typename Variant>
+    constexpr std::size_t variant_index_v = variant_index<Ty, Variant>::value;
+
+    template <typename Ty, typename... Types>
+    struct variant_index<Ty, std::variant<Types...>> :
+        details::variant_index<Ty, Types...>
+    {
+    };
+
+#pragma endregion
+
+
+
+    /*
+     * variant_index
+     */
+#pragma region variant_index
+
+    //template <typename Ty, typename... Types>
+    //inline constexpr std::size_t variant_index(const std::variant<Types...>&)
+    //{
+    //    return details::variant_index_v<Ty, Types...>;
+    //}
 
 #pragma endregion
 }
