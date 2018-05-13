@@ -710,7 +710,7 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"foo");
                 auto ptr = &str;
 
-                Assert::IsTrue(std::is_same<decltype(ptr), HSTRING *>::value);
+                Assert::IsTrue(std::is_same_v<decltype(ptr), HSTRING *>);
                 Assert::IsTrue(*ptr == str.get());
             }
 
@@ -881,15 +881,15 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs == rhs);
 
-                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<LhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<LhsTy>>)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<RhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<RhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<RhsTy>>)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
                     DoComparisonTest(lhs, other, expected);
@@ -1014,15 +1014,15 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs != rhs);
 
-                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<LhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<LhsTy>>)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<RhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<RhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<RhsTy>>)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
                     DoComparisonTest(lhs, other, expected);
@@ -1147,15 +1147,15 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs < rhs);
 
-                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<LhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<LhsTy>>)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<RhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<RhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<RhsTy>>)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
                     DoComparisonTest(lhs, other, expected);
@@ -1284,15 +1284,15 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs <= rhs);
 
-                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<LhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<LhsTy>>)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<RhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<RhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<RhsTy>>)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
                     DoComparisonTest(lhs, other, expected);
@@ -1421,15 +1421,15 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs > rhs);
 
-                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<LhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<LhsTy>>)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<RhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<RhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<RhsTy>>)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
                     DoComparisonTest(lhs, other, expected);
@@ -1558,15 +1558,15 @@ namespace dhorn
             {
                 Assert::AreEqual(expected, lhs >= rhs);
 
-                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<LhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<LhsTy>>)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoComparisonTest(other, rhs, expected);
                 }
 
-                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<RhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<RhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<RhsTy>>)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
                     DoComparisonTest(lhs, other, expected);
@@ -1705,18 +1705,18 @@ namespace dhorn
             void DoAppendTest(LhsTy &&lhs, RhsTy &&rhs, ResultTy &&expected)
             {
                 auto result = lhs + rhs;
-                Assert::IsTrue(std::is_same<decltype(result), dhorn::experimental::hstring>::value);
+                Assert::IsTrue(std::is_same_v<decltype(result), dhorn::experimental::hstring>);
                 Assert::IsTrue(result == expected);
 
-                if constexpr (!std::is_array<std::remove_reference_t<LhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<LhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<LhsTy>>)
                 {
                     const std::remove_reference_t<LhsTy> &other = lhs;
                     DoAppendTest(other, rhs, expected);
                 }
 
-                if constexpr (!std::is_array<std::remove_reference_t<RhsTy>>::value &&
-                    !std::is_const<std::remove_reference_t<RhsTy>>::value)
+                if constexpr (!std::is_array_v<std::remove_reference_t<RhsTy>> &&
+                    !std::is_const_v<std::remove_reference_t<RhsTy>>)
                 {
                     const std::remove_reference_t<RhsTy> &other = rhs;
                     DoAppendTest(lhs, other, expected);

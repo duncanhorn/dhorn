@@ -28,8 +28,8 @@ namespace dhorn
         /*
          * Constructor(s)/Destructor
          */
-        template <typename ValueTy, std::enable_if_t<std::is_constructible<Ty, ValueTy&&>::value, int> = 0>
-        constexpr proxy_pointer(ValueTy&& value) noexcept(std::is_nothrow_constructible<Ty, ValueTy&&>::value) :
+        template <typename ValueTy, std::enable_if_t<std::is_constructible_v<Ty, ValueTy&&>, int> = 0>
+        constexpr proxy_pointer(ValueTy&& value) noexcept(std::is_nothrow_constructible_v<Ty, ValueTy&&>) :
             _value(std::forward<ValueTy>(value))
         {
         }

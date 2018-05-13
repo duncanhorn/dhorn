@@ -54,6 +54,9 @@ namespace dhorn
         {
         };
 
+        template <typename InplaceFunction, typename Func>
+        constexpr bool is_inplace_function_constructible_v = is_inplace_function_constructible<InplaceFunction, Func>::value;
+
 
 
         /*
@@ -193,7 +196,7 @@ namespace dhorn
 
         template <
             typename Func,
-            std::enable_if_t<details::is_inplace_function_constructible<inplace_function, Func>::value, int> = 0>
+            std::enable_if_t<details::is_inplace_function_constructible_v<inplace_function, Func>, int> = 0>
         inplace_function(Func func)
         {
             set(std::move(func));
@@ -235,7 +238,7 @@ namespace dhorn
 
         template <
             typename Func,
-            std::enable_if_t<details::is_inplace_function_constructible<inplace_function, std::decay_t<Func>>::value, int> = 0>
+            std::enable_if_t<details::is_inplace_function_constructible_v<inplace_function, std::decay_t<Func>>, int> = 0>
         inplace_function& operator=(Func&& func)
         {
             reset();

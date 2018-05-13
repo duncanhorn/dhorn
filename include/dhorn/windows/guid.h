@@ -219,20 +219,19 @@ namespace dhorn::windows
      */
 #pragma region guid
 
-    class guid :
-        public GUID
+    class guid
     {
     public:
         /*
          * Constructor(s)/Destructor
          */
         constexpr guid() :
-            GUID{}
+            _value{}
         {
         }
 
         constexpr guid(const GUID& value) noexcept :
-            GUID{ value }
+            _value{ value }
         {
         }
 
@@ -240,8 +239,8 @@ namespace dhorn::windows
             std::uint32_t data1,
             std::uint16_t data2,
             std::uint16_t data3,
-            const std::array<std::uint8_t, 8>& data4) noexcept :
-        GUID{ data1, data2, data3, { data4[0], data4[1], data4[2], data4[3], data4[4], data4[5], data4[6], data4[7] } }
+        const std::array<std::uint8_t, 8>& data4) noexcept :
+            _value{ data1, data2, data3, { data4[0], data4[1], data4[2], data4[3], data4[4], data4[5], data4[6], data4[7] } }
         {
         }
 
@@ -252,7 +251,7 @@ namespace dhorn::windows
          */
         constexpr guid& operator=(const GUID& guid) noexcept
         {
-            static_cast<GUID&>(*this) = guid;
+            this->_value = guid;
             return *this;
         }
 
@@ -261,17 +260,41 @@ namespace dhorn::windows
         /*
          * Accessors
          */
+        constexpr GUID& get() noexcept
+        {
+            return this->_value;
+        }
+
+        constexpr const GUID& get() const noexcept
+        {
+            return this->_value;
+        }
+
+        constexpr operator GUID&() noexcept
+        {
+            return get();
+        }
+
+        constexpr operator const GUID&() const noexcept
+        {
+            return get();
+        }
+
         explicit constexpr operator bool() const noexcept
         {
-            auto ptr = reinterpret_cast<const std::uint64_t*>(this);
+            auto ptr = reinterpret_cast<const std::uint64_t*>(&this->_value);
             return (ptr[0] != 0) || (ptr[1] != 0);
         }
 
         std::string to_string() const
         {
-            auto str = details::guid_to_string(*this);
+            auto str = details::guid_to_string(this->_value);
             return std::string(str.data(), str.size() - 1);
         }
+
+    private:
+
+        GUID _value;
     };
 
     constexpr guid null_guid{};
@@ -410,6 +433,11 @@ namespace dhorn::windows
          */
         constexpr ref_guid(const GUID& value) noexcept :
             _value(value)
+        {
+        }
+
+        constexpr ref_guid(const guid& value) noexcept :
+            _value(value.get())
         {
         }
 

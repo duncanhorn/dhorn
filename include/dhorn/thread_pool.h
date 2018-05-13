@@ -164,7 +164,7 @@ namespace dhorn
             using behavior_result = decltype(CreationBehavior()());
 
             template <typename CreationBehavior>
-            static const bool is_behavior_result_void = std::is_void<behavior_result<CreationBehavior>>::value;
+            static const bool is_behavior_result_void = std::is_void_v<behavior_result<CreationBehavior>>;
 
             template <typename CreationBehavior, std::enable_if_t<is_behavior_result_void<CreationBehavior>, int> = 0>
             static auto start(CreationBehavior& value)
@@ -712,7 +712,7 @@ namespace dhorn
          *
          * This variant of the function accepts a `std::tuple` and invokes the function via `std::apply`.
          */
-        template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<std::is_void<Ty>::value, int> = 0>
+        template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<std::is_void_v<Ty>, int> = 0>
         void apply_set_value(std::promise<Ty>& promise, Func&& func, TupleTy&& tuple)
         {
             static_assert(std::is_void_v<decltype(std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple)))>,
@@ -722,7 +722,7 @@ namespace dhorn
             promise.set_value();
         }
 
-        template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<!std::is_void<Ty>::value, int> = 0>
+        template <typename Ty, typename Func, typename TupleTy, std::enable_if_t<!std::is_void_v<Ty>, int> = 0>
         void apply_set_value(std::promise<Ty>& promise, Func&& func, TupleTy&& tuple)
         {
             promise.set_value(std::apply(std::forward<Func>(func), std::forward<TupleTy>(tuple)));

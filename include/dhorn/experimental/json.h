@@ -933,7 +933,7 @@ namespace dhorn
 #pragma region Integer Casting
 
         template <typename Ty>
-        struct json_cast_t<Ty, std::enable_if_t<std::is_arithmetic<Ty>::value>>
+        struct json_cast_t<Ty, std::enable_if_t<std::is_arithmetic_v<Ty>>>
         {
             using value_type = Ty;
 
@@ -944,7 +944,7 @@ namespace dhorn
         };
 
         template <typename Ty>
-        struct make_json_t<Ty, std::enable_if_t<std::is_arithmetic<Ty>::value>>
+        struct make_json_t<Ty, std::enable_if_t<std::is_arithmetic_v<Ty>>>
         {
             inline std::shared_ptr<json_value> operator()(const Ty &value) const
             {

@@ -37,6 +37,13 @@ namespace dhorn
                 // Setting twice shouldn't do anything
                 value = dhorn::set_flag(value, 0x01);
                 Assert::AreEqual(0x01, value);
+
+                // Signed/unsigned difference
+                value = dhorn::set_flag(value, 0x02u);
+                Assert::AreEqual(0x03, value);
+
+                // constexpr tests
+                static_assert(dhorn::set_flags(0x55, 0xAAu) == 0xFF);
             }
 
             TEST_METHOD(ClearFlagTest)
@@ -55,6 +62,14 @@ namespace dhorn
 
                 value = dhorn::clear_flag(value, 0x0F);
                 Assert::AreEqual(0, value);
+
+                // Signed/unsigned difference
+                value = 0x03;
+                value = dhorn::clear_flag(value, 0x02u);
+                Assert::AreEqual(0x01, value);
+
+                // constexpr tests
+                static_assert(dhorn::clear_flags(0xAA, 0xCCu) == 0x22);
             }
 
             TEST_METHOD(ToggleFlagTest)
@@ -69,6 +84,13 @@ namespace dhorn
                 Assert::AreEqual(0x0A, value);
                 value = dhorn::toggle_flag(value, 0x0A);
                 Assert::AreEqual(0x00, value);
+
+                // Signed/unsigned difference
+                value = dhorn::toggle_flag(value, 0xA5u);
+                Assert::AreEqual(0xA5, value);
+
+                // constexpr tests
+                static_assert(dhorn::toggle_flags(0xAA, 0xFFu) == 0x55);
             }
 
             TEST_METHOD(IsAnyFlagSetTest)
@@ -80,6 +102,9 @@ namespace dhorn
                 Assert::IsFalse(dhorn::is_any_flag_set(value, 0x04));
                 Assert::IsFalse(dhorn::is_any_flag_set(value, 0x00));
                 Assert::IsTrue(dhorn::is_any_flag_set(value, 0xFF));
+
+                // Signed/unsigned difference
+                Assert::IsTrue(dhorn::is_any_flag_set(value, 0xAAu));
             }
 
             TEST_METHOD(AreAllFlagsSetTest)
@@ -92,6 +117,9 @@ namespace dhorn
                 Assert::IsFalse(dhorn::are_all_flags_set(value, 0x04));
                 Assert::IsFalse(dhorn::are_all_flags_set(value, 0x07));
                 Assert::IsFalse(dhorn::are_all_flags_set(value, 0xFF));
+
+                // Signed/unsigned difference
+                Assert::IsFalse(dhorn::are_all_flags_set(value, 0xAAu));
             }
 
             TEST_METHOD(AreAllFlagsClearTest)
@@ -103,6 +131,9 @@ namespace dhorn
                 Assert::IsTrue(dhorn::are_all_flags_clear(value, 0x00));
                 Assert::IsTrue(dhorn::are_all_flags_clear(value, 0xFC));
                 Assert::IsTrue(dhorn::are_all_flags_clear(value, 0xF0));
+
+                // Signed/unsigned difference
+                Assert::IsFalse(dhorn::are_all_flags_clear(value, 0xAAu));
             }
 
             TEST_METHOD(EnumOperatorOrTest)

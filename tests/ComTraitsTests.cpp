@@ -19,38 +19,38 @@ namespace dhorn::tests
     {
         TEST_METHOD(IUnknownTest)
         {
-            Assert::IsTrue(dhorn::com::any_unknown<IUnknown>::value);
+            Assert::IsTrue(dhorn::com::any_unknown_v<IUnknown>);
         }
 
         TEST_METHOD(SingleDerivedTest)
         {
-            Assert::IsTrue(dhorn::com::any_unknown<IBase>::value);
+            Assert::IsTrue(dhorn::com::any_unknown_v<IBase>);
         }
 
         TEST_METHOD(MultipleDerivedTest)
         {
-            Assert::IsTrue(dhorn::com::any_unknown<IFoo>::value);
-            Assert::IsTrue(dhorn::com::any_unknown<IBar>::value);
+            Assert::IsTrue(dhorn::com::any_unknown_v<IFoo>);
+            Assert::IsTrue(dhorn::com::any_unknown_v<IBar>);
         }
 
         TEST_METHOD(MultipleInheritanceTest)
         {
-            Assert::IsTrue(dhorn::com::any_unknown<IFooBar>::value);
+            Assert::IsTrue(dhorn::com::any_unknown_v<IFooBar>);
         }
 
         TEST_METHOD(NonIUnknownTest)
         {
-            Assert::IsFalse(dhorn::com::any_unknown<std::string>::value);
+            Assert::IsFalse(dhorn::com::any_unknown_v<std::string>);
         }
 
         TEST_METHOD(MultipleTypeTest)
         {
-            Assert::IsTrue(dhorn::com::any_unknown<IBase, IFoo, IBar>::value);
-            Assert::IsTrue(dhorn::com::any_unknown<IFoo, std::string, std::wstring>::value);
-            Assert::IsTrue(dhorn::com::any_unknown<std::string, IFoo, std::wstring>::value);
-            Assert::IsTrue(dhorn::com::any_unknown<std::string, std::wstring, IFoo>::value);
+            Assert::IsTrue(dhorn::com::any_unknown_v<IBase, IFoo, IBar>);
+            Assert::IsTrue(dhorn::com::any_unknown_v<IFoo, std::string, std::wstring>);
+            Assert::IsTrue(dhorn::com::any_unknown_v<std::string, IFoo, std::wstring>);
+            Assert::IsTrue(dhorn::com::any_unknown_v<std::string, std::wstring, IFoo>);
 
-            Assert::IsFalse(dhorn::com::any_unknown<std::string, std::wstring, int>::value);
+            Assert::IsFalse(dhorn::com::any_unknown_v<std::string, std::wstring, int>);
         }
     };
 
@@ -60,38 +60,38 @@ namespace dhorn::tests
     {
         TEST_METHOD(IUnknownTest)
         {
-            Assert::IsTrue(dhorn::com::all_unknown<IUnknown>::value);
+            Assert::IsTrue(dhorn::com::all_unknown_v<IUnknown>);
         }
 
         TEST_METHOD(SingleDerivedTest)
         {
-            Assert::IsTrue(dhorn::com::all_unknown<IBase>::value);
+            Assert::IsTrue(dhorn::com::all_unknown_v<IBase>);
         }
 
         TEST_METHOD(MultipleDerivedTest)
         {
-            Assert::IsTrue(dhorn::com::all_unknown<IFoo>::value);
-            Assert::IsTrue(dhorn::com::all_unknown<IBar>::value);
+            Assert::IsTrue(dhorn::com::all_unknown_v<IFoo>);
+            Assert::IsTrue(dhorn::com::all_unknown_v<IBar>);
         }
 
         TEST_METHOD(MultipleInheritanceTest)
         {
-            Assert::IsTrue(dhorn::com::all_unknown<IFooBar>::value);
+            Assert::IsTrue(dhorn::com::all_unknown_v<IFooBar>);
         }
 
         TEST_METHOD(NonIUnknownTest)
         {
-            Assert::IsFalse(dhorn::com::all_unknown<std::string>::value);
+            Assert::IsFalse(dhorn::com::all_unknown_v<std::string>);
         }
 
         TEST_METHOD(MultipleTypeTest)
         {
-            Assert::IsTrue(dhorn::com::all_unknown<IBase, IFoo, IBar>::value);
+            Assert::IsTrue(dhorn::com::all_unknown_v<IBase, IFoo, IBar>);
 
-            Assert::IsFalse(dhorn::com::all_unknown<std::string, IFoo, IBar>::value);
-            Assert::IsFalse(dhorn::com::all_unknown<IFoo, std::string, IFoo>::value);
-            Assert::IsFalse(dhorn::com::all_unknown<IFoo, IBar, std::string>::value);
-            Assert::IsFalse(dhorn::com::all_unknown<std::string, std::wstring, int>::value);
+            Assert::IsFalse(dhorn::com::all_unknown_v<std::string, IFoo, IBar>);
+            Assert::IsFalse(dhorn::com::all_unknown_v<IFoo, std::string, IFoo>);
+            Assert::IsFalse(dhorn::com::all_unknown_v<IFoo, IBar, std::string>);
+            Assert::IsFalse(dhorn::com::all_unknown_v<std::string, std::wstring, int>);
         }
     };
 

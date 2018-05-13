@@ -178,25 +178,25 @@ namespace dhorn
 #ifndef DHORN_NO_BITMASK_OPERATORS
 
 #define DHORN_DECLARE_BITMASK_OPERATORS(Type)   \
-inline constexpr Type operator|(const Type &lhs, const Type &rhs)                       \
+inline constexpr Type operator|(Type lhs, Type rhs)                                     \
 {                                                                                       \
     using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(static_cast<IntType>(lhs) | static_cast<IntType>(rhs));    \
 }                                                                                       \
                                                                                         \
-inline constexpr Type operator&(const Type &lhs, const Type &rhs)                       \
+inline constexpr Type operator&(Type lhs, Type rhs)                                     \
 {                                                                                       \
     using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(static_cast<IntType>(lhs) & static_cast<IntType>(rhs));    \
 }                                                                                       \
                                                                                         \
-inline constexpr Type operator^(const Type &lhs, const Type &rhs)                       \
+inline constexpr Type operator^(Type lhs, Type rhs)                                     \
 {                                                                                       \
     using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(static_cast<IntType>(lhs) ^ static_cast<IntType>(rhs));    \
 }                                                                                       \
                                                                                         \
-inline constexpr Type operator~(const Type &lhs)                                        \
+inline constexpr Type operator~(Type lhs)                                               \
 {                                                                                       \
     using IntType = std::underlying_type_t<Type>;                                       \
     return static_cast<Type>(~static_cast<IntType>(lhs));                               \

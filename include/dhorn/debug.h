@@ -69,7 +69,7 @@ namespace dhorn
     {
 #if DHORN_DEBUG
         // Shared means we can't acquire it exclusively
-        assert_lock_held();
+        assert_lock_held(mutex);
 #endif
     }
 

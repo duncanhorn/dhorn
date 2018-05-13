@@ -24,14 +24,14 @@ namespace dhorn
         namespace details
         {
             template <typename NumericType>
-            inline constexpr typename std::enable_if<std::is_signed<NumericType>::value, NumericType>::type
+            inline constexpr typename std::enable_if<std::is_signed_v<NumericType>, NumericType>::type
                 negate(NumericType val)
             {
                 return -val;
             }
 
             template <typename NumericType>
-            inline constexpr typename std::enable_if<std::is_unsigned<NumericType>::value, NumericType>::type
+            inline constexpr typename std::enable_if<std::is_unsigned_v<NumericType>, NumericType>::type
                 negate(NumericType)
             {
                 throw std::invalid_argument("Cannot negate an unsigned type");

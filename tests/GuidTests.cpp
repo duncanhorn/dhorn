@@ -120,17 +120,17 @@ namespace dhorn::tests
         {
             constexpr windows::guid guid;
 
-            Assert::AreEqual(0ul, guid.Data1);
-            Assert::AreEqual(static_cast<unsigned short>(0), guid.Data2);
-            Assert::AreEqual(static_cast<unsigned short>(0), guid.Data3);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[0]);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[1]);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[2]);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[3]);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[4]);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[5]);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[6]);
-            Assert::AreEqual(static_cast<unsigned char>(0), guid.Data4[7]);
+            Assert::AreEqual(0ul, guid.get().Data1);
+            Assert::AreEqual(static_cast<unsigned short>(0), guid.get().Data2);
+            Assert::AreEqual(static_cast<unsigned short>(0), guid.get().Data3);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[0]);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[1]);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[2]);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[3]);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[4]);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[5]);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[6]);
+            Assert::AreEqual(static_cast<unsigned char>(0), guid.get().Data4[7]);
         }
 
         TEST_METHOD(GuidConstructorTest)
@@ -139,17 +139,17 @@ namespace dhorn::tests
             constexpr GUID value = { 0x8e23d663, 0x8cd5, 0x4333, { 0xb8, 0x27, 0x12, 0x1a, 0x3f, 0x8f, 0x7c, 0x19 } };
             constexpr windows::guid guid(value);
 
-            Assert::AreEqual(0x8e23d663ul, guid.Data1);
-            Assert::AreEqual(static_cast<unsigned short>(0x8cd5), guid.Data2);
-            Assert::AreEqual(static_cast<unsigned short>(0x4333), guid.Data3);
-            Assert::AreEqual(static_cast<unsigned char>(0xb8), guid.Data4[0]);
-            Assert::AreEqual(static_cast<unsigned char>(0x27), guid.Data4[1]);
-            Assert::AreEqual(static_cast<unsigned char>(0x12), guid.Data4[2]);
-            Assert::AreEqual(static_cast<unsigned char>(0x1a), guid.Data4[3]);
-            Assert::AreEqual(static_cast<unsigned char>(0x3f), guid.Data4[4]);
-            Assert::AreEqual(static_cast<unsigned char>(0x8f), guid.Data4[5]);
-            Assert::AreEqual(static_cast<unsigned char>(0x7c), guid.Data4[6]);
-            Assert::AreEqual(static_cast<unsigned char>(0x19), guid.Data4[7]);
+            Assert::AreEqual(0x8e23d663ul, guid.get().Data1);
+            Assert::AreEqual(static_cast<unsigned short>(0x8cd5), guid.get().Data2);
+            Assert::AreEqual(static_cast<unsigned short>(0x4333), guid.get().Data3);
+            Assert::AreEqual(static_cast<unsigned char>(0xb8), guid.get().Data4[0]);
+            Assert::AreEqual(static_cast<unsigned char>(0x27), guid.get().Data4[1]);
+            Assert::AreEqual(static_cast<unsigned char>(0x12), guid.get().Data4[2]);
+            Assert::AreEqual(static_cast<unsigned char>(0x1a), guid.get().Data4[3]);
+            Assert::AreEqual(static_cast<unsigned char>(0x3f), guid.get().Data4[4]);
+            Assert::AreEqual(static_cast<unsigned char>(0x8f), guid.get().Data4[5]);
+            Assert::AreEqual(static_cast<unsigned char>(0x7c), guid.get().Data4[6]);
+            Assert::AreEqual(static_cast<unsigned char>(0x19), guid.get().Data4[7]);
         }
 
         TEST_METHOD(GuidAggregateInitializationTest)
@@ -157,17 +157,17 @@ namespace dhorn::tests
             // {8E23D663-8CD5-4333-B827-121A3F8F7C19}
             constexpr windows::guid guid = { 0x8e23d663, 0x8cd5, 0x4333, { 0xb8, 0x27, 0x12, 0x1a, 0x3f, 0x8f, 0x7c, 0x19 } };
 
-            Assert::AreEqual(0x8e23d663ul, guid.Data1);
-            Assert::AreEqual(static_cast<unsigned short>(0x8cd5), guid.Data2);
-            Assert::AreEqual(static_cast<unsigned short>(0x4333), guid.Data3);
-            Assert::AreEqual(static_cast<unsigned char>(0xb8), guid.Data4[0]);
-            Assert::AreEqual(static_cast<unsigned char>(0x27), guid.Data4[1]);
-            Assert::AreEqual(static_cast<unsigned char>(0x12), guid.Data4[2]);
-            Assert::AreEqual(static_cast<unsigned char>(0x1a), guid.Data4[3]);
-            Assert::AreEqual(static_cast<unsigned char>(0x3f), guid.Data4[4]);
-            Assert::AreEqual(static_cast<unsigned char>(0x8f), guid.Data4[5]);
-            Assert::AreEqual(static_cast<unsigned char>(0x7c), guid.Data4[6]);
-            Assert::AreEqual(static_cast<unsigned char>(0x19), guid.Data4[7]);
+            Assert::AreEqual(0x8e23d663ul, guid.get().Data1);
+            Assert::AreEqual(static_cast<unsigned short>(0x8cd5), guid.get().Data2);
+            Assert::AreEqual(static_cast<unsigned short>(0x4333), guid.get().Data3);
+            Assert::AreEqual(static_cast<unsigned char>(0xb8), guid.get().Data4[0]);
+            Assert::AreEqual(static_cast<unsigned char>(0x27), guid.get().Data4[1]);
+            Assert::AreEqual(static_cast<unsigned char>(0x12), guid.get().Data4[2]);
+            Assert::AreEqual(static_cast<unsigned char>(0x1a), guid.get().Data4[3]);
+            Assert::AreEqual(static_cast<unsigned char>(0x3f), guid.get().Data4[4]);
+            Assert::AreEqual(static_cast<unsigned char>(0x8f), guid.get().Data4[5]);
+            Assert::AreEqual(static_cast<unsigned char>(0x7c), guid.get().Data4[6]);
+            Assert::AreEqual(static_cast<unsigned char>(0x19), guid.get().Data4[7]);
         }
 
         TEST_METHOD(GuidAssignmentTest)
@@ -177,17 +177,17 @@ namespace dhorn::tests
             windows::guid guid;
             guid = value;
 
-            Assert::AreEqual(0x8e23d663ul, guid.Data1);
-            Assert::AreEqual(static_cast<unsigned short>(0x8cd5), guid.Data2);
-            Assert::AreEqual(static_cast<unsigned short>(0x4333), guid.Data3);
-            Assert::AreEqual(static_cast<unsigned char>(0xb8), guid.Data4[0]);
-            Assert::AreEqual(static_cast<unsigned char>(0x27), guid.Data4[1]);
-            Assert::AreEqual(static_cast<unsigned char>(0x12), guid.Data4[2]);
-            Assert::AreEqual(static_cast<unsigned char>(0x1a), guid.Data4[3]);
-            Assert::AreEqual(static_cast<unsigned char>(0x3f), guid.Data4[4]);
-            Assert::AreEqual(static_cast<unsigned char>(0x8f), guid.Data4[5]);
-            Assert::AreEqual(static_cast<unsigned char>(0x7c), guid.Data4[6]);
-            Assert::AreEqual(static_cast<unsigned char>(0x19), guid.Data4[7]);
+            Assert::AreEqual(0x8e23d663ul, guid.get().Data1);
+            Assert::AreEqual(static_cast<unsigned short>(0x8cd5), guid.get().Data2);
+            Assert::AreEqual(static_cast<unsigned short>(0x4333), guid.get().Data3);
+            Assert::AreEqual(static_cast<unsigned char>(0xb8), guid.get().Data4[0]);
+            Assert::AreEqual(static_cast<unsigned char>(0x27), guid.get().Data4[1]);
+            Assert::AreEqual(static_cast<unsigned char>(0x12), guid.get().Data4[2]);
+            Assert::AreEqual(static_cast<unsigned char>(0x1a), guid.get().Data4[3]);
+            Assert::AreEqual(static_cast<unsigned char>(0x3f), guid.get().Data4[4]);
+            Assert::AreEqual(static_cast<unsigned char>(0x8f), guid.get().Data4[5]);
+            Assert::AreEqual(static_cast<unsigned char>(0x7c), guid.get().Data4[6]);
+            Assert::AreEqual(static_cast<unsigned char>(0x19), guid.get().Data4[7]);
         }
 
         TEST_METHOD(GuidOperatorBoolTest)
@@ -197,7 +197,7 @@ namespace dhorn::tests
             windows::guid guid;
             Assert::IsFalse(static_cast<bool>(guid));
 
-            guid.Data3 = 1;
+            guid.get().Data3 = 1;
             Assert::IsTrue(static_cast<bool>(guid));
         }
 
@@ -243,7 +243,7 @@ namespace dhorn::tests
             windows::ref_guid refGuid = guid;
             Assert::IsFalse(static_cast<bool>(refGuid));
 
-            guid.Data3 = 1;
+            guid.get().Data3 = 1;
             Assert::IsTrue(static_cast<bool>(refGuid));
         }
 

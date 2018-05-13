@@ -80,38 +80,38 @@ namespace dhorn
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_default_constructible<FirstTy>,
                 std::is_default_constructible<SecondTy>
-            >::value, int> = 0,
-            std::enable_if_t<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
                 is_implicitly_default_constructible<FirstTy>,
                 is_implicitly_default_constructible<SecondTy>
-            >::value, int> = 0>
+            >, int> = 0>
         constexpr compressed_pair()
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
-            >::value)
+            >)
         {
         }
 
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_default_constructible<FirstTy>,
                 std::is_default_constructible<SecondTy>
-            >::value, int> = 0,
-            std::enable_if_t<std::negation<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
                 is_implicitly_default_constructible<FirstTy>,
                 is_implicitly_default_constructible<SecondTy>
-            >>::value, int> = 0>
+            >>, int> = 0>
         explicit constexpr compressed_pair()
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_default_constructible<First>,
                 std::is_nothrow_default_constructible<Second>
-            >::value)
+            >)
         {
         }
 
@@ -121,19 +121,19 @@ namespace dhorn
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_copy_constructible<FirstTy>,
                 std::is_copy_constructible<SecondTy>
-            >::value, int> = 0,
-            std::enable_if_t<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >::value, int> = 0>
+            >, int> = 0>
         constexpr compressed_pair(const first_type& first, const second_type& second)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_copy_constructible<First>,
                 std::is_nothrow_copy_constructible<Second>
-            >::value) :
+            >) :
             first_base(first),
             second_base(second)
         {
@@ -142,19 +142,19 @@ namespace dhorn
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_copy_constructible<FirstTy>,
                 std::is_copy_constructible<SecondTy>
-            >::value, int> = 0,
-            std::enable_if_t<std::negation<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >>::value, int> = 0>
+            >>, int> = 0>
         explicit constexpr compressed_pair(const first_type& first, const second_type& second)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_copy_constructible<First>,
                 std::is_nothrow_copy_constructible<Second>
-            >::value) :
+            >) :
             first_base(first),
             second_base(second)
         {
@@ -166,19 +166,19 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >::value, int> = 0,
-            std::enable_if_t<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >::value, int> = 0>
+            >, int> = 0>
         constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >::value) :
+            >) :
             first_base(std::forward<FirstTy>(first)),
             second_base(std::forward<SecondTy>(second))
         {
@@ -187,19 +187,19 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >::value, int> = 0,
-            std::enable_if_t<std::negation<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >>::value, int> = 0>
+            >>, int> = 0>
         explicit constexpr compressed_pair(FirstTy&& first, SecondTy&& second)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >::value) :
+            >) :
             first_base(std::forward<FirstTy>(first)),
             second_base(std::forward<SecondTy>(second))
         {
@@ -211,19 +211,19 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_constructible<First, const FirstTy&>,
                 std::is_constructible<Second, const SecondTy&>
-            >::value, int> = 0,
-            std::enable_if_t<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >::value, int> = 0>
+            >, int> = 0>
         constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, const FirstTy&>,
                 std::is_nothrow_constructible<Second, const SecondTy&>
-            >::value) :
+            >) :
             first_base(other.first()),
             second_base(other.second())
         {
@@ -232,19 +232,19 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_constructible<First, const FirstTy&>,
                 std::is_constructible<Second, const SecondTy&>
-            >::value, int> = 0,
-            std::enable_if_t<std::negation<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
                 std::is_convertible<const FirstTy&, First>,
                 std::is_convertible<const SecondTy&, Second>
-            >>::value, int> = 0>
+            >>, int> = 0>
         explicit constexpr compressed_pair(const compressed_pair<FirstTy, SecondTy>& other)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, const FirstTy&>,
                 std::is_nothrow_constructible<Second, const SecondTy&>
-            >::value) :
+            >) :
             first_base(other.first()),
             second_base(other.second())
         {
@@ -256,19 +256,19 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >::value, int> = 0,
-            std::enable_if_t<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::conjunction_v<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >::value, int> = 0>
+            >, int> = 0>
         constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >::value) :
+            >) :
             first_base(std::forward<FirstTy>(other.first())),
             second_base(std::forward<SecondTy>(other.second()))
         {
@@ -277,19 +277,19 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_constructible<First, FirstTy&&>,
                 std::is_constructible<Second, SecondTy&&>
-            >::value, int> = 0,
-            std::enable_if_t<std::negation<std::conjunction<
+            >, int> = 0,
+            std::enable_if_t<std::negation_v<std::conjunction<
                 std::is_convertible<FirstTy&&, First>,
                 std::is_convertible<SecondTy&&, Second>
-            >>::value, int> = 0>
+            >>, int> = 0>
         explicit constexpr compressed_pair(compressed_pair<FirstTy, SecondTy>&& other)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTy&&>,
                 std::is_nothrow_constructible<Second, SecondTy&&>
-            >::value) :
+            >) :
             first_base(std::forward<FirstTy>(other.first())),
             second_base(std::forward<SecondTy>(other.second()))
         {
@@ -303,10 +303,10 @@ namespace dhorn
             std::piecewise_construct_t,
             std::tuple<FirstTypes...> firstArgs,
             std::tuple<SecondTypes...> secondArgs)
-            noexcept(std::conjunction<
+            noexcept(std::conjunction_v<
                 std::is_nothrow_constructible<First, FirstTypes&&...>,
                 std::is_nothrow_constructible<Second, SecondTypes&&...>
-            >::value):
+            >) :
             first_base(std::move(firstArgs)),
             second_base(std::move(secondArgs))
         {
@@ -336,10 +336,10 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_assignable<First&, const FirstTy&>,
                 std::is_assignable<Second&, const SecondTy&>
-            >::value, int> = 0>
+            >, int> = 0>
         compressed_pair& operator=(const compressed_pair<FirstTy, SecondTy>& other)
         {
             static_cast<first_base&>(*this) = other.first();
@@ -350,10 +350,10 @@ namespace dhorn
         template <
             typename FirstTy,
             typename SecondTy,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_assignable<First&, FirstTy&&>,
                 std::is_assignable<Second&, SecondTy&&>
-            >::value, int> = 0>
+            >, int> = 0>
         compressed_pair& operator=(compressed_pair<FirstTy, SecondTy>&& other)
         {
             static_cast<first_base&>(*this) = std::forward<FirstTy>(other.first());
@@ -424,12 +424,12 @@ namespace dhorn
         template <
             typename FirstTy = First,
             typename SecondTy = Second,
-            std::enable_if_t<std::conjunction<
+            std::enable_if_t<std::conjunction_v<
                 std::is_swappable<FirstTy>,
                 std::is_swappable<SecondTy>
-            >::value, int> = 0>
+            >, int> = 0>
         void swap(compressed_pair& other)
-            noexcept(std::is_nothrow_swappable<First>::value && std::is_nothrow_swappable<Second>::value)
+            noexcept(std::is_nothrow_swappable_v<First> && std::is_nothrow_swappable_v<Second>)
         {
             first_base::swap(static_cast<first_base&>(other));
             second_base::swap(static_cast<second_base&>(other));
@@ -525,10 +525,10 @@ namespace dhorn
     template <
         typename First,
         typename Second,
-        std::enable_if_t<std::conjunction<
+        std::enable_if_t<std::conjunction_v<
             std::is_swappable<First>,
             std::is_swappable<Second>
-        >::value, int> = 0>
+        >, int> = 0>
     inline void swap(compressed_pair<First, Second>& lhs, compressed_pair<First, Second>& rhs)
         noexcept(noexcept(lhs.swap(rhs)))
     {

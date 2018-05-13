@@ -360,7 +360,7 @@ namespace dhorn
          */
         template <
             typename Category = iterator_category,
-            std::enable_if_t<std::is_base_of<std::bidirectional_iterator_tag, Category>::value, int> = 0>
+            std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag, Category>, int> = 0>
         utf_iterator& operator--()
         {
             do
@@ -374,7 +374,7 @@ namespace dhorn
 
         template <
             typename Category = iterator_category,
-            std::enable_if_t<std::is_base_of<std::bidirectional_iterator_tag, Category>::value, int> = 0>
+            std::enable_if_t<std::is_base_of_v<std::bidirectional_iterator_tag, Category>, int> = 0>
         utf_iterator operator--(int)
         {
             auto copy = *this;

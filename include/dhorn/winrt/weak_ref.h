@@ -76,7 +76,7 @@ namespace dhorn::winrt
          */
 #pragma region weak_ref_storage
 
-        template <typename Ty, bool HasIid = com::has_iid<Ty>::value>
+        template <typename Ty, bool HasIid = com::has_iid_v<Ty>>
         class weak_ref_storage;
 
         template <typename Ty>
@@ -88,19 +88,19 @@ namespace dhorn::winrt
              */
             weak_ref_storage() = default;
 
-            template <typename OtherTy, std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+            template <typename OtherTy, std::enable_if_t<std::is_base_of_v<Ty, OtherTy>, int> = 0>
             weak_ref_storage(OtherTy* ptr) :
                 _ptr(get_weak_reference(ptr))
             {
             }
 
-            template <typename OtherTy, std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+            template <typename OtherTy, std::enable_if_t<std::is_base_of_v<Ty, OtherTy>, int> = 0>
             weak_ref_storage(const weak_ref_storage<OtherTy>& other) noexcept :
                 _ptr(other.reference())
             {
             }
 
-            template <typename OtherTy, std::enable_if_t<std::is_base_of<Ty, OtherTy>::value, int> = 0>
+            template <typename OtherTy, std::enable_if_t<std::is_base_of_v<Ty, OtherTy>, int> = 0>
             weak_ref_storage(weak_ref_storage<OtherTy>&& other) noexcept :
                 _ptr(other.detach())
             {
@@ -116,13 +116,13 @@ namespace dhorn::winrt
                 this->_ptr.reset();
             }
 
-            template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
+            template <typename Type, std::enable_if_t<std::is_base_of_v<Ty, Type>, int> = 0>
             void reset(const weak_ref_storage<Type>& other) noexcept
             {
                 this->_ptr = other.reference();
             }
 
-            template <typename Type, std::enable_if_t<std::is_base_of<Ty, Type>::value, int> = 0>
+            template <typename Type, std::enable_if_t<std::is_base_of_v<Ty, Type>, int> = 0>
             void reset(weak_ref_storage<Type>&& other) noexcept
             {
                 this->_ptr = other.detach();
@@ -185,8 +185,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<com::has_iid_v<OtherTy>, int> = 0>
             weak_ref_storage(const weak_ref_storage<OtherTy>& other) noexcept :
                 _weakRef(other.reference()),
                 _ptr(other.resolve().get())
@@ -195,8 +195,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<!com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<!com::has_iid_v<OtherTy>, int> = 0>
             weak_ref_storage(const weak_ref_storage<OtherTy>& other) noexcept :
                 _weakRef(other.reference()),
                 _ptr(other.pointer())
@@ -205,8 +205,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<com::has_iid_v<OtherTy>, int> = 0>
             weak_ref_storage(weak_ref_storage<OtherTy>&& other) noexcept :
                 _ptr(other.resolve().get())
             {
@@ -215,8 +215,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<!com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<!com::has_iid_v<OtherTy>, int> = 0>
             weak_ref_storage(weak_ref_storage<OtherTy>&& other) noexcept :
                 _ptr(other.pointer())
             {
@@ -238,8 +238,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<com::has_iid_v<OtherTy>, int> = 0>
             void reset(const weak_ref_storage<OtherTy>& other) noexcept
             {
                 this->_ptr = other.resolve().get();
@@ -248,8 +248,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<!com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<!com::has_iid_v<OtherTy>, int> = 0>
             void reset(const weak_ref_storage<OtherTy>& other) noexcept
             {
                 this->_ptr = other.pointer();
@@ -258,8 +258,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<com::has_iid_v<OtherTy>, int> = 0>
             void reset(weak_ref_storage<OtherTy>&& other) noexcept
             {
                 this->_ptr = other.resolve().get();
@@ -268,8 +268,8 @@ namespace dhorn::winrt
 
             template <
                 typename OtherTy,
-                std::enable_if_t<std::is_convertible<OtherTy*, Ty*>::value, int> = 0,
-                std::enable_if_t<!com::has_iid<OtherTy>::value, int> = 0>
+                std::enable_if_t<std::is_convertible_v<OtherTy*, Ty*>, int> = 0,
+                std::enable_if_t<!com::has_iid_v<OtherTy>, int> = 0>
             void reset(weak_ref_storage<OtherTy>&& other) noexcept
             {
                 this->_ptr = other.pointer();
@@ -355,10 +355,10 @@ namespace dhorn::winrt
 
         template <
             typename OtherTy,
-            std::enable_if_t<std::disjunction<
+            std::enable_if_t<std::disjunction_v<
                 std::is_convertible<OtherTy*, Ty*>,
                 std::conjunction<com::has_iid<Ty>, std::is_base_of<Ty, OtherTy>>
-            >::value, int> = 0>
+            >, int> = 0>
         explicit weak_ref(OtherTy* ptr) :
             _data(ptr)
         {
@@ -366,10 +366,10 @@ namespace dhorn::winrt
 
         template <
             typename OtherTy,
-            std::enable_if_t<std::disjunction<
+            std::enable_if_t<std::disjunction_v<
                 std::is_convertible<OtherTy*, Ty*>,
                 std::conjunction<com::has_iid<Ty>, std::is_base_of<Ty, OtherTy>>
-            >::value, int> = 0>
+            >, int> = 0>
         explicit weak_ref(const com::com_ptr<OtherTy>& ptr) :
             _data(ptr.get())
         {
@@ -377,10 +377,10 @@ namespace dhorn::winrt
 
         template <
             typename OtherTy,
-            std::enable_if_t<std::disjunction<
+            std::enable_if_t<std::disjunction_v<
                 std::is_convertible<OtherTy*, Ty*>,
                 std::conjunction<com::has_iid<Ty>, std::is_base_of<Ty, OtherTy>>
-            >::value, int> = 0>
+            >, int> = 0>
         explicit weak_ref(const weak_ref<OtherTy>& ref) noexcept :
             _data(ref._data)
         {
@@ -388,10 +388,10 @@ namespace dhorn::winrt
 
         template <
             typename OtherTy,
-            std::enable_if_t<std::disjunction<
+            std::enable_if_t<std::disjunction_v<
                 std::is_convertible<OtherTy*, Ty*>,
                 std::conjunction<com::has_iid<Ty>, std::is_base_of<Ty, OtherTy>>
-            >::value, int> = 0>
+            >, int> = 0>
         explicit weak_ref(weak_ref<OtherTy>&& ref) noexcept :
             _data(std::move(ref._data))
         {
@@ -404,10 +404,10 @@ namespace dhorn::winrt
          */
         template <
             typename OtherTy,
-            std::enable_if_t<std::disjunction<
+            std::enable_if_t<std::disjunction_v<
                 std::is_convertible<OtherTy*, Ty*>,
                 std::conjunction<com::has_iid<Ty>, std::is_base_of<Ty, OtherTy>>
-            >::value, int> = 0>
+            >, int> = 0>
         weak_ref& operator=(const weak_ref<OtherTy>& ref) noexcept
         {
             this->_data.reset(ref._data);
@@ -416,10 +416,10 @@ namespace dhorn::winrt
 
         template <
             typename OtherTy,
-            std::enable_if_t<std::disjunction<
+            std::enable_if_t<std::disjunction_v<
                 std::is_convertible<OtherTy*, Ty*>,
                 std::conjunction<com::has_iid<Ty>, std::is_base_of<Ty, OtherTy>>
-            >::value, int> = 0>
+            >, int> = 0>
         weak_ref& operator=(weak_ref<OtherTy>&& ref) noexcept
         {
             this->_data.reset(std::move(ref._data));

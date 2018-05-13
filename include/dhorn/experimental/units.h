@@ -50,6 +50,9 @@ namespace dhorn
             {
             };
 
+            template <typename Ty>
+            constexpr bool is_ratio_v = is_ratio<Ty>::value;
+
 
 
             template <typename Ty>
@@ -72,8 +75,8 @@ namespace dhorn
                 typename From,
                 typename To,
                 typename Ty,
-                typename = std::enable_if<is_ratio<From>::value>::type,
-                typename = std::enable_if<is_ratio<To>::value>::type>
+                typename = std::enable_if<is_ratio_v<From>>::type,
+                typename = std::enable_if<is_ratio_v<To>>::type>
             inline constexpr Ty ratio_convert(const Ty &val)
             {
                 using convert_ratio = std::ratio_divide<From, To>;
@@ -127,7 +130,7 @@ namespace dhorn
         template <typename UnitType, typename Ratio>
         class unit final
         {
-            static_assert(details::is_ratio<Ratio>::value, "Second template argument must be of type std::ratio");
+            static_assert(details::is_ratio_v<Ratio>, "Second template argument must be of type std::ratio");
 
         public:
             /*
@@ -382,7 +385,7 @@ namespace dhorn
             typename UnitType,
             typename Ratio,
             typename = typename std::enable_if<details::unit_traits<TargetType>::is_unit>::type,
-            typename = typename std::enable_if<std::is_same<UnitType, typename details::unit_traits<TargetType>::unit_type>::value>::type>
+            typename = typename std::enable_if<std::is_same_v<UnitType, typename details::unit_traits<TargetType>::unit_type>>::type>
         inline constexpr TargetType unit_cast(const unit<UnitType, Ratio> &val)
         {
             return TargetType(val);

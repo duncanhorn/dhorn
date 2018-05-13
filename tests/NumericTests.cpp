@@ -24,7 +24,7 @@ namespace dhorn
             template <
                 typename Ty,
                 typename StringType,
-                typename = typename std::enable_if<!std::is_same<Ty, double>::value>::type>
+                typename = typename std::enable_if<!std::is_same_v<Ty, double>>::type>
             void DoTest(const StringType &str, Ty expected)
             {
                 auto val = dhorn::experimental::numeric_cast<Ty>(str);

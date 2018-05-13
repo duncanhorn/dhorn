@@ -28,7 +28,7 @@
 
 namespace dhorn
 {
-    template <typename Ty, bool CanDerive = !std::is_final<Ty>::value && std::is_empty<Ty>::value>
+    template <typename Ty, bool CanDerive = !std::is_final_v<Ty> && std::is_empty_v<Ty>>
     class compressed_base;
 
     // CanDerive == false specialization. Keep the value as a member as opposed to deriving from it
@@ -42,7 +42,7 @@ namespace dhorn
         // Tuple Construction Helper
         template <typename... Types, std::size_t... Indices>
         compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
-            noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
+            noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             _value(std::get<Indices>(std::move(args))...)
         {
         }
@@ -59,39 +59,37 @@ namespace dhorn
         constexpr compressed_base() = default;
 
         // Forwarding Construction
-        template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
-        constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+        template <typename Type, std::enable_if_t<std::is_constructible_v<Ty, Type&&>, int> = 0>
+        constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible_v<Ty, Type&&>) :
             _value(std::forward<Type>(value))
         {
         }
 
         // Copy Conversion Construction
-        template <typename Type, std::enable_if_t<std::is_constructible<Ty, const Type&>::value, int> = 0>
+        template <typename Type, std::enable_if_t<std::is_constructible_v<Ty, const Type&>, int> = 0>
         constexpr compressed_base(const compressed_base<Type>& other)
-            noexcept(std::is_nothrow_constructible<Ty, const Type&>::value) :
+            noexcept(std::is_nothrow_constructible_v<Ty, const Type&>) :
             _value(other.value())
         {
         }
 
         // Move Conversion Construction
-        template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
-        constexpr compressed_base(compressed_base<Type>&& other)
-            noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+        template <typename Type, std::enable_if_t<std::is_constructible_v<Ty, Type&&>, int> = 0>
+        constexpr compressed_base(compressed_base<Type>&& other) noexcept(std::is_nothrow_constructible_v<Ty, Type&&>) :
             _value(std::forward<Type>(other.value()))
         {
         }
 
         // "Emplace" Construction
-        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
-        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
+        template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
+        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             _value(std::forward<Types>(types)...)
         {
         }
 
         // Tuple Construction
-        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
-        compressed_base(std::tuple<Types...> args) /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
-            /*https://developercommunity.visualstudio.com/content/problem/32650/inheriting-constructors-where-base-class-has-noexc.html*/
+        template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
+        compressed_base(std::tuple<Types...> args) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
         {
         }
@@ -114,24 +112,23 @@ namespace dhorn
         compressed_base& operator=(const compressed_base&) = default;
         compressed_base& operator=(compressed_base&&) = default;
 
-        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
-        compressed_base& operator=(Type&& value) noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
+        template <typename Type, std::enable_if_t<std::is_assignable_v<Ty&, Type&&>, int> = 0>
+        compressed_base& operator=(Type&& value) noexcept(std::is_nothrow_assignable_v<Ty&, Type&&>)
         {
             this->_value = std::forward<Type>(value);
             return *this;
         }
 
-        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
+        template <typename Type, std::enable_if_t<std::is_assignable_v<Ty&, const Type&>, int> = 0>
         compressed_base& operator=(const compressed_base<Type>& other)
-            noexcept(std::is_nothrow_assignable<Ty&, const Type&>::value)
+            noexcept(std::is_nothrow_assignable_v<Ty&, const Type&>)
         {
             this->_value = other.value();
             return *this;
         }
 
-        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
-        compressed_base& operator=(compressed_base<Type>&& other)
-            noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
+        template <typename Type, std::enable_if_t<std::is_assignable_v<Ty&, Type&&>, int> = 0>
+        compressed_base& operator=(compressed_base<Type>&& other) noexcept(std::is_nothrow_assignable_v<Ty&, Type&&>)
         {
             this->_value = std::forward<Type>(other.value());
             return *this;
@@ -175,8 +172,8 @@ namespace dhorn
          */
 #pragma region Modifiers
 
-        template <typename Type = Ty, std::enable_if_t<std::is_swappable<Type>::value, int> = 0>
-        void swap(compressed_base& other) noexcept(std::is_nothrow_swappable<Ty>::value)
+        template <typename Type = Ty, std::enable_if_t<std::is_swappable_v<Type>, int> = 0>
+        void swap(compressed_base& other) noexcept(std::is_nothrow_swappable_v<Ty>)
         {
             using std::swap;
             if (this != std::addressof(other))
@@ -207,7 +204,7 @@ namespace dhorn
         // Tuple Construction Helper
         template <typename... Types, std::size_t... Indices>
         compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
-            noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
+            noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             Ty(std::get<Indices>(std::move(args))...)
         {
             // Visual Studio bug? Warning C4100: unreferenced formal parameter
@@ -223,45 +220,44 @@ namespace dhorn
 #pragma region Constructor(s)/Destructor
 
         // Default Construction
-        template <typename Type = Ty, std::enable_if_t<std::is_default_constructible<Type>::value, int> = 0>
-        constexpr compressed_base() noexcept(std::is_nothrow_default_constructible<Ty>::value)
+        template <typename Type = Ty, std::enable_if_t<std::is_default_constructible_v<Type>, int> = 0>
+        constexpr compressed_base() noexcept(std::is_nothrow_default_constructible_v<Ty>)
         {
         }
 
         // Forwarding Construction
-        template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
-        constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+        template <typename Type, std::enable_if_t<std::is_constructible_v<Ty, Type&&>, int> = 0>
+        constexpr compressed_base(Type&& value) noexcept(std::is_nothrow_constructible_v<Ty, Type&&>) :
             Ty(std::forward<Type>(value))
         {
         }
 
         // Copy Conversion Construction
-        template <typename Type, std::enable_if_t<std::is_constructible<Ty, const Type&>::value, int> = 0>
+        template <typename Type, std::enable_if_t<std::is_constructible_v<Ty, const Type&>, int> = 0>
         constexpr compressed_base(const compressed_base<Type>& other)
-            noexcept(std::is_nothrow_constructible<Ty, const Type&>::value) :
+            noexcept(std::is_nothrow_constructible_v<Ty, const Type&>) :
             Ty(other.value())
         {
         }
 
         // Move Conversion Construction
-        template <typename Type, std::enable_if_t<std::is_constructible<Ty, Type&&>::value, int> = 0>
+        template <typename Type, std::enable_if_t<std::is_constructible_v<Ty, Type&&>, int> = 0>
         constexpr compressed_base(compressed_base<Type>&& other)
-            noexcept(std::is_nothrow_constructible<Ty, Type&&>::value) :
+            noexcept(std::is_nothrow_constructible_v<Ty, Type&&>) :
             Ty(std::forward<Type>(other.value()))
         {
         }
 
         // "Emplace" Construction
-        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
-        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value) :
+        template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
+        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             Ty(std::forward<Types>(types)...)
         {
         }
 
         // Tuple Construction
-        template <typename... Types, std::enable_if_t<std::is_constructible<Ty, Types&&...>::value, int> = 0>
-        compressed_base(std::tuple<Types...> args) /*noexcept(std::is_nothrow_constructible<Ty, Types&&...>::value)*/ :
-            /*https://developercommunity.visualstudio.com/content/problem/32650/inheriting-constructors-where-base-class-has-noexc.html*/
+        template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
+        compressed_base(std::tuple<Types...> args) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
         {
         }
@@ -284,24 +280,24 @@ namespace dhorn
         compressed_base& operator=(const compressed_base&) = default;
         compressed_base& operator=(compressed_base&&) = default;
 
-        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
-        compressed_base& operator=(Type&& value) noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
+        template <typename Type, std::enable_if_t<std::is_assignable_v<Ty&, Type&&>, int> = 0>
+        compressed_base& operator=(Type&& value) noexcept(std::is_nothrow_assignable_v<Ty&, Type&&>)
         {
             static_cast<Ty&>(*this) = std::forward<Type>(value);
             return *this;
         }
 
-        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, const Type&>::value, int> = 0>
+        template <typename Type, std::enable_if_t<std::is_assignable_v<Ty&, const Type&>, int> = 0>
         compressed_base& operator=(const compressed_base<Type>& other)
-            noexcept(std::is_nothrow_assignable<Ty&, const Type&>::value)
+            noexcept(std::is_nothrow_assignable_v<Ty&, const Type&>)
         {
             static_cast<Ty&>(*this) = other.value();
             return *this;
         }
 
-        template <typename Type, std::enable_if_t<std::is_assignable<Ty&, Type&&>::value, int> = 0>
+        template <typename Type, std::enable_if_t<std::is_assignable_v<Ty&, Type&&>, int> = 0>
         compressed_base& operator=(compressed_base<Type>&& other)
-            noexcept(std::is_nothrow_assignable<Ty&, Type&&>::value)
+            noexcept(std::is_nothrow_assignable_v<Ty&, Type&&>)
         {
             static_cast<Ty&>(*this) = std::forward<Type>(other.value());
             return *this;
@@ -345,8 +341,8 @@ namespace dhorn
          */
 #pragma region Modifiers
 
-        template <typename Type = Ty, std::enable_if_t<std::is_swappable<Type>::value, int> = 0>
-        void swap(compressed_base&) noexcept(std::is_nothrow_swappable<Ty>::value)
+        template <typename Type = Ty, std::enable_if_t<std::is_swappable_v<Type>, int> = 0>
+        void swap(compressed_base&) noexcept(std::is_nothrow_swappable_v<Ty>)
         {
             // No state, so no need to swap anything
             // TODO: Is this definitely okay?

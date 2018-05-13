@@ -149,6 +149,7 @@ namespace dhorn::tests
     {
         TEST_METHOD(ScanNullRootTest)
         {
+#if 0
             auto invalid_test = [](std::string_view str, std::size_t row, std::size_t col, std::size_t abs)
             {
                 convert_all(str, [&](auto value)
@@ -179,6 +180,7 @@ namespace dhorn::tests
             valid_test(u8" null");
             valid_test(u8" null ");
             valid_test(u8"\r\n\tnull\t\r\n");
+#endif
         }
     };
 }

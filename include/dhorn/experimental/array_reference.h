@@ -175,7 +175,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
             inline bool operator==(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
         {
             // We don't really care if their ends are different since we could be comparing sub-arrays
@@ -185,7 +185,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
             inline bool operator!=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
         {
             return &(*lhs) != &(*rhs);
@@ -194,7 +194,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
             inline bool operator<(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
         {
             return &(*lhs) < &(*rhs);
@@ -203,7 +203,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
             inline bool operator<=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
         {
             return &(*lhs) <= &(*rhs);
@@ -212,7 +212,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
             inline bool operator>(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
         {
             return &(*lhs) > &(*rhs);
@@ -221,7 +221,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value>>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
             inline bool operator>=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
         {
             return &(*lhs) >= &(*rhs);
@@ -562,7 +562,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
         inline bool operator==(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             if (lhs.data() == rhs.data() && lhs.size() == rhs.size())
@@ -580,7 +580,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
         inline bool operator!=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return !(lhs == rhs);
@@ -589,7 +589,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
         inline bool operator<(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return std::lexicographical_compare(
@@ -601,7 +601,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
         inline bool operator>(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return std::lexicographical_compare(
@@ -613,7 +613,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
         inline bool operator<=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return !(lhs > rhs);
@@ -622,7 +622,7 @@ namespace dhorn
         template <
             typename LhsTy,
             typename RhsTy,
-            typename = std::enable_if_t<std::is_same<const LhsTy, const RhsTy>::value >>
+            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
         inline bool operator>=(const array_reference<LhsTy> &lhs, const array_reference<RhsTy> &rhs)
         {
             return !(lhs < rhs);

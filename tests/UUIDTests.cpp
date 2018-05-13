@@ -42,7 +42,7 @@ namespace dhorn
                 // Cannot construct with non-16-size std::uint8_t array
                 std::uint8_t invalid_array[] = { 1, 2, 3, 4 };
                 (void)invalid_array;
-                Assert::IsFalse(std::is_constructible<dhorn::experimental::uuid, decltype(invalid_array)>::value);
+                Assert::IsFalse(std::is_constructible_v<dhorn::experimental::uuid, decltype(invalid_array)>);
 
                 // Should be able to contruct with std::uint8_t[16]
                 dhorn::experimental::uuid id(byte_array);
@@ -67,7 +67,7 @@ namespace dhorn
                 // Cannot construct with non-16-size std::uint8_t array
                 std::uint32_t invalid_array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
                 (void)invalid_array;
-                Assert::IsFalse(std::is_constructible<dhorn::experimental::uuid, decltype(invalid_array)>::value);
+                Assert::IsFalse(std::is_constructible_v<dhorn::experimental::uuid, decltype(invalid_array)>);
 
                 // Should be able to contruct with std::uint8_t[16]
                 dhorn::experimental::uuid id(int_array);

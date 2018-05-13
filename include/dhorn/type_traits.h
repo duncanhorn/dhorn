@@ -189,7 +189,7 @@ namespace dhorn
      * any_base_of
      *
      * An extension of `std::is_base_of` that applies to a variadic set of types where `value` is true if there exists
-     * any type `T` in the template parameter pack such that `std::is_base_of<Base, T>::value` is true.
+     * any type `T` in the template parameter pack such that `std::is_base_of_v<Base, T>` is true.
      */
 #pragma region any_base_of
 
@@ -210,7 +210,7 @@ namespace dhorn
      * all_base_of
      *
      * An extension of `std::is_base_of` that applies to a variadic set of types where `value` is true if, for every
-     * type `T` in the template parameter pack, `std::is_base_of<Base, T>::value` is true.
+     * type `T` in the template parameter pack, `std::is_base_of_v<Base, T>` is true.
      */
 #pragma region all_base_of
 

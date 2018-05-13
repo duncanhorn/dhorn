@@ -178,7 +178,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        std::enable_if_t<std::is_same<std::remove_const_t<LhsCharT>, std::remove_const_t<RhsCharT>>::value, int> = 0>
+        std::enable_if_t<std::is_same_v<std::remove_const_t<LhsCharT>, std::remove_const_t<RhsCharT>>, int> = 0>
     bool operator==(
         basic_null_terminated_string_iterator<LhsCharT> lhs,
         basic_null_terminated_string_iterator<RhsCharT> rhs) noexcept
@@ -189,7 +189,7 @@ namespace dhorn
     template <
         typename LhsCharT,
         typename RhsCharT,
-        std::enable_if_t<std::is_same<std::remove_const_t<LhsCharT>, std::remove_const_t<RhsCharT>>::value, int> = 0>
+        std::enable_if_t<std::is_same_v<std::remove_const_t<LhsCharT>, std::remove_const_t<RhsCharT>>, int> = 0>
     bool operator!=(
         basic_null_terminated_string_iterator<LhsCharT> lhs,
         basic_null_terminated_string_iterator<RhsCharT> rhs) noexcept
@@ -298,7 +298,7 @@ namespace dhorn
 
         template <
             typename OtherCharT,
-            std::enable_if_t<std::is_same<std::remove_const_t<CharT>, OtherCharT>::value, int> = 0>
+            std::enable_if_t<std::is_same_v<std::remove_const_t<CharT>, OtherCharT>, int> = 0>
         constexpr basic_null_terminated_string& operator=(basic_null_terminated_string<OtherCharT> other) noexcept
         {
             // Allow assignment of non-const to const
@@ -421,7 +421,7 @@ namespace dhorn
     template <
         typename CharT,
         typename OtherCharT,
-        std::enable_if_t<std::is_same<std::remove_const_t<CharT>, std::remove_const_t<OtherCharT>>::value, int> = 0>
+        std::enable_if_t<std::is_same_v<std::remove_const_t<CharT>, std::remove_const_t<OtherCharT>>, int> = 0>
     inline bool starts_with(CharT* string, OtherCharT* compareString)
     {
         return starts_with(

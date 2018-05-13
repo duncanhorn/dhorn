@@ -69,7 +69,7 @@ namespace dhorn
         template <
             typename Ty,
             typename DestroyType = typename std::conditional<
-            std::is_pointer<typename details::unique_storage<Ty>::type>::value,
+            std::is_pointer_v<typename details::unique_storage<Ty>::type>,
             std::default_delete<typename std::remove_pointer<Ty>::type>, // Use operator delete if it's a pointer
             details::no_op<Ty>>::type, // Just nop if it's a non-pointer type (i.e. has destructor)
             typename Traits = details::unique_any_traits<typename details::unique_storage<Ty>::type>>

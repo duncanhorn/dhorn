@@ -202,19 +202,4 @@ namespace dhorn
     };
 
 #pragma endregion
-
-
-
-    /*
-     * variant_index
-     */
-#pragma region variant_index
-
-    //template <typename Ty, typename... Types>
-    //inline constexpr std::size_t variant_index(const std::variant<Types...>&)
-    //{
-    //    return details::variant_index_v<Ty, Types...>;
-    //}
-
-#pragma endregion
 }
