@@ -11,6 +11,9 @@ namespace details
     template <typename IntSeq, std::size_t Size, typename IntSeq::value_type Value, typename = void>
     struct expand_seq;
 
+    template <typename IntSeq, std::size_t Size, typename IntSeq::value_type Value>
+    using expand_seq_t = typename expand_seq<IntSeq, Size, Value>::type;
+
     template <typename Ty, Ty... ExistingValues, std::size_t Size, Ty Value>
     struct expand_seq<std::integer_sequence<Ty, ExistingValues...>, Size, Value, std::enable_if_t<sizeof...(ExistingValues) == Size>>
     {
@@ -21,7 +24,7 @@ namespace details
     struct expand_seq<std::integer_sequence<Ty, ExistingValues...>, Size, Value, std::enable_if_t<sizeof...(ExistingValues) != Size>>
     {
         static_assert(sizeof...(ExistingValues) < Size);
-        using type = typename expand_seq<std::integer_sequence<Ty, ExistingValues..., Value>, Size, Value>::type;
+        using type = expand_seq_t<std::integer_sequence<Ty, ExistingValues..., Value>, Size, Value>;
     };
 }
 

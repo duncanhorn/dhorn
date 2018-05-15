@@ -50,11 +50,11 @@ namespace dhorn::com
          */
 #pragma region Constructor(s)/Destructor
 
-        constexpr com_ptr() noexcept
+        com_ptr() noexcept
         {
         }
 
-        constexpr com_ptr(std::nullptr_t) noexcept
+        com_ptr(std::nullptr_t) noexcept
         {
         }
 

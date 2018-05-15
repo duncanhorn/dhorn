@@ -50,6 +50,9 @@ namespace dhorn
             };
 
             template <typename Ty>
+            using unique_storage_t = typename unique_storage<Ty>::type;
+
+            template <typename Ty>
             struct unique_any_traits
             {
                 static constexpr Ty invalid(void)
@@ -68,14 +71,13 @@ namespace dhorn
 
         template <
             typename Ty,
-            typename DestroyType = typename std::conditional<
-            std::is_pointer_v<typename details::unique_storage<Ty>::type>,
-            std::default_delete<typename std::remove_pointer<Ty>::type>, // Use operator delete if it's a pointer
-            details::no_op<Ty>>::type, // Just nop if it's a non-pointer type (i.e. has destructor)
-            typename Traits = details::unique_any_traits<typename details::unique_storage<Ty>::type>>
+            typename DestroyType = std::conditional_t<std::is_pointer_v<details::unique_storage_t<Ty>>,
+                std::default_delete<std::remove_pointer_t<Ty>>, // Use operator delete if it's a pointer
+                details::no_op<Ty>>, // Just nop if it's a non-pointer type (i.e. has destructor)
+            typename Traits = details::unique_any_traits<details::unique_storage_t<Ty>>>
         class unique_any
         {
-            using storage_type = typename details::unique_storage<Ty>::type;
+            using storage_type = details::unique_storage_t<Ty>;
 
         public:
             unique_any(void) :

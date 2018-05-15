@@ -299,7 +299,7 @@ namespace dhorn
 
         // Piecewise Construction
         template <typename... FirstTypes, typename... SecondTypes>
-        compressed_pair(
+        constexpr compressed_pair(
             std::piecewise_construct_t,
             std::tuple<FirstTypes...> firstArgs,
             std::tuple<SecondTypes...> secondArgs)
@@ -315,10 +315,10 @@ namespace dhorn
 
 
         // Copy Construction
-        compressed_pair(const compressed_pair&) = default;
+        constexpr compressed_pair(const compressed_pair&) = default;
 
         // Move Construction
-        compressed_pair(compressed_pair&&) = default;
+        constexpr compressed_pair(compressed_pair&&) = default;
 
 #pragma endregion
 

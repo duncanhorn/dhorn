@@ -79,7 +79,7 @@ namespace dhorn
     namespace details
     {
         template <typename Lhs, typename Rhs>
-        struct IsComparable
+        struct is_comparable
         {
             template <typename Left = Lhs, typename Right = Rhs>
             static auto evaluate(int) -> decltype((std::declval<Left>() == std::declval<Right>()), std::true_type{});
@@ -93,7 +93,7 @@ namespace dhorn
 
     template <typename Lhs, typename Rhs>
     struct is_comparable :
-        public details::IsComparable<Lhs, Rhs>::type
+        public details::is_comparable<Lhs, Rhs>::type
     {
     };
 
@@ -114,7 +114,7 @@ namespace dhorn
     namespace details
     {
         template <typename Lhs, typename Rhs>
-        struct IsLessThanComparable
+        struct is_less_than_comparable
         {
             template <typename Left = Lhs, typename Right = Rhs>
             static auto evaluate(int) -> decltype((std::declval<Left>() < std::declval<Right>()), std::true_type{});
@@ -128,7 +128,7 @@ namespace dhorn
 
     template <typename Lhs, typename Rhs>
     struct is_less_than_comparable :
-        public details::IsLessThanComparable<Lhs, Rhs>::type
+        public details::is_less_than_comparable<Lhs, Rhs>::type
     {
     };
 
@@ -149,7 +149,7 @@ namespace dhorn
     namespace details
     {
         template <typename Ty, typename... Args>
-        struct IsImplicitlyConstructible
+        struct is_implicitly_constructible
         {
             template <typename T>
             struct test_struct { T value; };
@@ -166,7 +166,7 @@ namespace dhorn
 
     template <typename Ty, typename... Args>
     struct is_implicitly_constructible :
-        public details::IsImplicitlyConstructible<Ty, Args...>::type
+        public details::is_implicitly_constructible<Ty, Args...>::type
     {
     };
 
@@ -238,22 +238,25 @@ namespace dhorn
     namespace details
     {
         template <typename Ty>
-        struct decay_ref_helper
+        struct decay_ref
         {
             using type = Ty;
         };
 
         template <typename Ty>
-        struct decay_ref_helper<std::reference_wrapper<Ty>>
+        struct decay_ref<std::reference_wrapper<Ty>>
         {
             using type = Ty&;
         };
+
+        template <typename Ty>
+        using decay_ref_t = typename decay_ref<Ty>::type;
     }
 
     template <typename Ty>
     struct decay_ref
     {
-        using type = typename details::decay_ref_helper<std::decay_t<Ty>>::type;
+        using type = details::decay_ref_t<std::decay_t<Ty>>;
     };
 
     template <typename Ty>

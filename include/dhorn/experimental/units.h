@@ -75,8 +75,8 @@ namespace dhorn
                 typename From,
                 typename To,
                 typename Ty,
-                typename = std::enable_if<is_ratio_v<From>>::type,
-                typename = std::enable_if<is_ratio_v<To>>::type>
+                std::enable_if_t<is_ratio_v<From>, int> = 0,
+                std::enable_if_t<is_ratio_v<To>, int> = 0>
             inline constexpr Ty ratio_convert(const Ty &val)
             {
                 using convert_ratio = std::ratio_divide<From, To>;
@@ -384,8 +384,8 @@ namespace dhorn
             typename TargetType,
             typename UnitType,
             typename Ratio,
-            typename = typename std::enable_if<details::unit_traits<TargetType>::is_unit>::type,
-            typename = typename std::enable_if<std::is_same_v<UnitType, typename details::unit_traits<TargetType>::unit_type>>::type>
+            std::enable_if_t<details::unit_traits<TargetType>::is_unit, int> = 0,
+            std::enable_if_t<std::is_same_v<UnitType, typename details::unit_traits<TargetType>::unit_type>, int> = 0>
         inline constexpr TargetType unit_cast(const unit<UnitType, Ratio> &val)
         {
             return TargetType(val);

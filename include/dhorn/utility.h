@@ -22,14 +22,14 @@ namespace dhorn
     template <typename FirstIntegerSequence, typename SecondIntegerSequence>
     struct join_integer_sequence;
 
+    template <typename FirstIntegerSequence, typename SecondIntegerSequence>
+    using join_integer_sequence_t = typename join_integer_sequence<FirstIntegerSequence, SecondIntegerSequence>::type;
+
     template <typename Ty, Ty... FirstValues, Ty... SecondValues>
     struct join_integer_sequence<std::integer_sequence<Ty, FirstValues...>, std::integer_sequence<Ty, SecondValues...>>
     {
         using type = std::integer_sequence<Ty, FirstValues..., SecondValues...>;
     };
-
-    template <typename FirstIntegerSequence, typename SecondIntegerSequence>
-    using join_integer_sequence_t = typename join_integer_sequence<FirstIntegerSequence, SecondIntegerSequence>::type;
 
 #pragma endregion
 
@@ -50,11 +50,14 @@ namespace dhorn
         {
             using type = std::integer_sequence<Ty, (sizeof...(Values) - Values - 1)...>;
         };
+
+        template <typename IntegerSequence>
+        using make_reverse_integer_sequence_t = typename make_reverse_integer_sequence<IntegerSequence>::type;
     }
 
     template <typename Ty, std::size_t N>
     using make_reverse_integer_sequence =
-        typename details::make_reverse_integer_sequence<std::make_integer_sequence<Ty, N>>::type;
+        details::make_reverse_integer_sequence_t<std::make_integer_sequence<Ty, N>>;
 
     template <std::size_t N>
     using make_reverse_index_sequence = make_reverse_integer_sequence<std::size_t, N>;
@@ -73,6 +76,9 @@ namespace dhorn
     template <typename IntegerSequence>
     struct reverse_integer_sequence;
 
+    template <typename IntegerSequence>
+    using reverse_integer_sequence_t = typename reverse_integer_sequence<IntegerSequence>::type;
+
     template <typename Ty>
     struct reverse_integer_sequence<std::integer_sequence<Ty>>
     {
@@ -83,12 +89,9 @@ namespace dhorn
     struct reverse_integer_sequence<std::integer_sequence<Ty, First, Others...>>
     {
         using type = join_integer_sequence_t<
-            typename reverse_integer_sequence<std::integer_sequence<Ty, Others...>>::type,
+            reverse_integer_sequence_t<std::integer_sequence<Ty, Others...>>,
             std::integer_sequence<Ty, First>>;
     };
-
-    template <typename IntegerSequence>
-    using reverse_integer_sequence_t = typename reverse_integer_sequence<IntegerSequence>::type;
 
 #pragma endregion
 
@@ -102,14 +105,14 @@ namespace dhorn
     template <typename IntegerSequence, typename IntegerSequence::value_type Value>
     struct increment_integer_sequence;
 
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    using increment_integer_sequence_t = typename increment_integer_sequence<IntegerSequence, Value>::type;
+
     template <typename Ty, Ty... Values, Ty IncrementValue>
     struct increment_integer_sequence<std::integer_sequence<Ty, Values...>, IncrementValue>
     {
         using type = std::integer_sequence<Ty, (Values + IncrementValue)...>;
     };
-
-    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
-    using increment_integer_sequence_t = typename increment_integer_sequence<IntegerSequence, Value>::type;
 
 #pragma endregion
 
@@ -123,14 +126,14 @@ namespace dhorn
     template <typename IntegerSequence, typename IntegerSequence::value_type Value>
     struct decrement_integer_sequence;
 
+    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
+    using decrement_integer_sequence_t = typename decrement_integer_sequence<IntegerSequence, Value>::type;
+
     template <typename Ty, Ty... Values, Ty DecrementValue>
     struct decrement_integer_sequence<std::integer_sequence<Ty, Values...>, DecrementValue>
     {
         using type = std::integer_sequence<Ty, (Values - DecrementValue)...>;
     };
-
-    template <typename IntegerSequence, typename IntegerSequence::value_type Value>
-    using decrement_integer_sequence_t = typename decrement_integer_sequence<IntegerSequence, Value>::type;
 
 #pragma endregion
 

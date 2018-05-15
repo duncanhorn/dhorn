@@ -123,6 +123,9 @@ namespace dhorn
             template <typename Pointer, typename Alloc>
             struct select_lifetime_traits;
 
+            template <typename Pointer, typename Alloc>
+            using select_lifetime_traits_t = typename select_lifetime_traits<Pointer, Alloc>::type;
+
             template <typename Ty, typename Alloc>
             struct select_lifetime_traits<std::shared_ptr<Ty>, Alloc>
             {
@@ -142,6 +145,9 @@ namespace dhorn
              */
             template <typename Pointer>
             struct select_pointer_for_atomic;
+
+            template <typename Pointer>
+            using select_pointer_for_atomic_t = typename select_pointer_for_atomic<Pointer>::type;
 
             template <typename Ty>
             struct select_pointer_for_atomic<std::shared_ptr<Ty>>
@@ -217,8 +223,8 @@ namespace dhorn
         private:
 
             // We are using atomic operations, so we may need to change the storage type
-            using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
-            using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
+            using pointer = details::select_pointer_for_atomic_t<Pointer>;
+            using lifetime_traits = details::select_lifetime_traits_t<Pointer, Alloc>;
 
             lifetime_traits _lifetimeTraits;
             pointer _instance;
@@ -258,7 +264,7 @@ namespace dhorn
         private:
 
             using pointer = Pointer;
-            using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
+            using lifetime_traits = details::select_lifetime_traits_t<Pointer, Alloc>;
 
             lifetime_traits _lifetimeTraits;
             pointer _instance;
@@ -316,8 +322,8 @@ namespace dhorn
         private:
 
             // We are using atomic operations, so we may need to change the storage type
-            using pointer = typename details::select_pointer_for_atomic<Pointer>::type;
-            using lifetime_traits = typename details::select_lifetime_traits<Pointer, Alloc>::type;
+            using pointer = details::select_pointer_for_atomic_t<Pointer>;
+            using lifetime_traits = details::select_lifetime_traits_t<Pointer, Alloc>;
 
             lifetime_traits _lifetimeTraits;
             pointer _instance;

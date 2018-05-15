@@ -24,22 +24,22 @@ namespace dhorn
             template <
                 typename Ty,
                 typename StringType,
-                typename = typename std::enable_if<!std::is_same_v<Ty, double>>::type>
-            void DoTest(const StringType &str, Ty expected)
+                typename = std::enable_if_t<!std::is_same_v<Ty, double>>>
+            void DoTest(const StringType& str, Ty expected)
             {
                 auto val = dhorn::experimental::numeric_cast<Ty>(str);
                 Assert::AreEqual(expected, val);
             }
 
             template <typename, typename StringType>
-            void DoTest(const StringType &str, double expected)
+            void DoTest(const StringType& str, double expected)
             {
                 auto val = dhorn::experimental::numeric_cast<double>(str);
                 Assert::AreEqual(expected, val, tolerance);
             }
 
             template <typename Ty>
-            void ExpectException(const char *str)
+            void ExpectException(const char* str)
             {
                 try
                 {

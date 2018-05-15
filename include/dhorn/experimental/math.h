@@ -287,8 +287,7 @@ namespace dhorn
         }
 
         template <typename Ty, typename... Types>
-        inline auto length_squared(const Ty &val, const Types &...vals) ->
-            typename std::common_type<Ty, Types...>::type
+        inline auto length_squared(const Ty &val, const Types &...vals) -> std::common_type_t<Ty, Types...>
         {
             return (val * val) * length_squared(vals...);
         }
@@ -303,8 +302,7 @@ namespace dhorn
 #pragma region Length
 
         template <typename... Types>
-        auto length(const Types &...vals) ->
-            decltype(std::sqrt(length_squared(length_squared(vals...))))
+        auto length(const Types &...vals) -> decltype(std::sqrt(length_squared(length_squared(vals...))))
         {
             return std::sqrt(length_squared(vals...));
         }

@@ -41,7 +41,7 @@ namespace dhorn
 
         // Tuple Construction Helper
         template <typename... Types, std::size_t... Indices>
-        compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
+        constexpr compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
             noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             _value(std::get<Indices>(std::move(args))...)
         {
@@ -82,23 +82,23 @@ namespace dhorn
 
         // "Emplace" Construction
         template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
-        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
+        constexpr compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             _value(std::forward<Types>(types)...)
         {
         }
 
         // Tuple Construction
         template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
-        compressed_base(std::tuple<Types...> args) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
+        constexpr compressed_base(std::tuple<Types...> args) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
         {
         }
 
         // Copy Construction
-        compressed_base(const compressed_base&) = default;
+        constexpr compressed_base(const compressed_base&) = default;
 
         // Move Construction
-        compressed_base(compressed_base&&) = default;
+        constexpr compressed_base(compressed_base&&) = default;
 
 #pragma endregion
 
@@ -128,7 +128,8 @@ namespace dhorn
         }
 
         template <typename Type, std::enable_if_t<std::is_assignable_v<Ty&, Type&&>, int> = 0>
-        compressed_base& operator=(compressed_base<Type>&& other) noexcept(std::is_nothrow_assignable_v<Ty&, Type&&>)
+        compressed_base& operator=(compressed_base<Type>&& other)
+            noexcept(std::is_nothrow_assignable_v<Ty&, Type&&>)
         {
             this->_value = std::forward<Type>(other.value());
             return *this;
@@ -203,7 +204,7 @@ namespace dhorn
 
         // Tuple Construction Helper
         template <typename... Types, std::size_t... Indices>
-        compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
+        constexpr compressed_base(std::tuple<Types...>& args, std::index_sequence<Indices...>)
             noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             Ty(std::get<Indices>(std::move(args))...)
         {
@@ -250,23 +251,23 @@ namespace dhorn
 
         // "Emplace" Construction
         template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
-        compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
+        constexpr compressed_base(Types&&... types) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             Ty(std::forward<Types>(types)...)
         {
         }
 
         // Tuple Construction
         template <typename... Types, std::enable_if_t<std::is_constructible_v<Ty, Types&&...>, int> = 0>
-        compressed_base(std::tuple<Types...> args) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
+        constexpr compressed_base(std::tuple<Types...> args) noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             compressed_base(args, std::make_index_sequence<sizeof...(Types)>{})
         {
         }
 
         // Copy Construction
-        compressed_base(const compressed_base&) = default;
+        constexpr compressed_base(const compressed_base&) = default;
 
         // Move Construction
-        compressed_base(compressed_base&&) = default;
+        constexpr compressed_base(compressed_base&&) = default;
 
 #pragma endregion
 

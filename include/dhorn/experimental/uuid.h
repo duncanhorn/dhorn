@@ -96,7 +96,7 @@ namespace dhorn
             {
             }
 
-            //template <int N, typename = std::enable_if<N == 8>::type>
+            //template <int N, typename = std::enable_if_t<N == 8>>
             uuid(std::uint32_t val0, std::uint16_t val1, std::uint16_t val2, const std::array<std::uint8_t, 8> &val3) :
                 Data1(val0),
                 Data2(val1),
