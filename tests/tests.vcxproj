@@ -90,6 +90,7 @@
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StringLiteralTests.cpp" />
     <ClCompile Include="StringTests.cpp" />
     <ClCompile Include="SynchronizedObjectTests.cpp" />
     <ClCompile Include="ThreadPoolTests.cpp" />

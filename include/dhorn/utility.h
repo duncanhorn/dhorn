@@ -205,4 +205,20 @@ namespace dhorn
     };
 
 #pragma endregion
+
+
+
+    /*
+     * USer-Defined Literals
+     */
+    inline namespace literals
+    {
+        inline namespace integer_literals
+        {
+            inline constexpr std::size_t operator""_sz(unsigned long long int value) noexcept
+            {
+                return static_cast<std::size_t>(value);
+            }
+        }
+    }
 }

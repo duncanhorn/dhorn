@@ -1,9 +1,9 @@
 /*
  * Duncan Horn
  *
- * CRTPBaseTests.cpp
+ * ConstStringTests.cpp
  *
- * Tests for the crtp_base.h header
+ * Tests for the const_string.h header
  */
 #include "stdafx.h"
 
