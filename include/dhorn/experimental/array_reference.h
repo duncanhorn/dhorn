@@ -13,224 +13,12 @@
 #include <cassert>
 #include <iterator>
 
+#include "../iterator.h"
+
 namespace dhorn
 {
     namespace experimental
     {
-        /*
-         * Iterators
-         */
-#pragma region Iterators
-
-        template <typename Ty>
-        class array_reference_iterator
-        {
-        public:
-            /*
-             * Iterator Types
-             */
-            using iterator_category = std::random_access_iterator_tag;
-            using value_type = Ty;
-            using difference_type = std::ptrdiff_t;
-            using reference = value_type&;
-            using pointer = value_type*;
-
-
-
-            /*
-             * Constructor(s)/Destructor
-             */
-            array_reference_iterator(void) :
-                _ptr(nullptr)
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-                , _end(nullptr)
-#endif
-            {
-            }
-
-            array_reference_iterator(
-                pointer ptr
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-                , pointer end
-#endif
-            ) :
-                _ptr(ptr)
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-                , _end(end)
-#endif
-            {
-                CheckBounds();
-            }
-
-
-
-            /*
-             * Operators
-             */
-            reference operator*(void) const
-            {
-                return *this->_ptr;
-            }
-
-            reference operator[](difference_type index) const
-            {
-                return this->_ptr[index];
-            }
-
-            pointer operator->(void) const
-            {
-                return this->_ptr;
-            }
-
-            array_reference_iterator &operator++(void)
-            {
-                ++this->_ptr;
-                CheckBounds();
-                return *this;
-            }
-
-            array_reference_iterator operator++(int /*unused*/)
-            {
-                auto copy = *this;
-                ++(*this);
-                return copy;
-            }
-
-            array_reference_iterator &operator+=(difference_type diff)
-            {
-                this->_ptr += diff;
-                CheckBounds();
-                return *this;
-            }
-
-            array_reference_iterator operator+(difference_type diff) const
-            {
-                auto copy = *this;
-                copy += diff;
-                return copy;
-            }
-
-            array_reference_iterator &operator--(void)
-            {
-                // No bounds check since we can only ever move away from our limit
-                --this->_ptr;
-                return *this;
-            }
-
-            array_reference_iterator operator--(int /*unused*/)
-            {
-                auto copy = *this;
-                --(*this);
-                return copy;
-            }
-
-            array_reference_iterator &operator-=(difference_type diff)
-            {
-                // No bounds check since we can only ever move away from our limit
-                this->_ptr -= diff;
-                return *this;
-            }
-
-            array_reference_iterator operator-(difference_type diff) const
-            {
-                auto copy = *this;
-                copy -= diff;
-                return copy;
-            }
-
-            difference_type operator-(const array_reference_iterator &other) const
-            {
-                return this->_ptr - other._ptr;
-            }
-
-            operator array_reference_iterator<const Ty>(void) const
-            {
-                return array_reference_iterator<const Ty>(
-                    this->_ptr
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-                    , this->_end
-#endif
-                    );
-            }
-
-
-
-        private:
-
-            inline void CheckBounds(void)
-            {
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-                assert(this->_ptr <= this->_end);
-#endif
-            }
-
-
-
-            pointer _ptr;
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-            pointer _end;
-#endif
-        };
-
-        template <
-            typename LhsTy,
-            typename RhsTy,
-            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
-            inline bool operator==(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
-        {
-            // We don't really care if their ends are different since we could be comparing sub-arrays
-            return &(*lhs) == &(*rhs);
-        }
-
-        template <
-            typename LhsTy,
-            typename RhsTy,
-            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
-            inline bool operator!=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
-        {
-            return &(*lhs) != &(*rhs);
-        }
-
-        template <
-            typename LhsTy,
-            typename RhsTy,
-            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
-            inline bool operator<(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
-        {
-            return &(*lhs) < &(*rhs);
-        }
-
-        template <
-            typename LhsTy,
-            typename RhsTy,
-            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
-            inline bool operator<=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
-        {
-            return &(*lhs) <= &(*rhs);
-        }
-
-        template <
-            typename LhsTy,
-            typename RhsTy,
-            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
-            inline bool operator>(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
-        {
-            return &(*lhs) > &(*rhs);
-        }
-
-        template <
-            typename LhsTy,
-            typename RhsTy,
-            typename = std::enable_if_t<std::is_same_v<const LhsTy, const RhsTy>>>
-            inline bool operator>=(const array_reference_iterator<LhsTy> &lhs, const array_reference_iterator<RhsTy> &rhs)
-        {
-            return &(*lhs) >= &(*rhs);
-        }
-
-#pragma endregion
-
-
-
         /*
          * array_reference
          */
@@ -248,8 +36,8 @@ namespace dhorn
             using const_reference = const Ty &;
             using pointer = Ty *;
             using const_pointer = const Ty *;
-            using iterator = array_reference_iterator<Ty>;
-            using const_iterator = array_reference_iterator<const Ty>;
+            using iterator = array_iterator<array_reference>;
+            using const_iterator = const_array_iterator<array_reference>;
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -464,89 +252,67 @@ namespace dhorn
              */
             iterator begin(void)
             {
-                return MakeIterator(this->_ptr);
+                return iterator(this->_ptr);
             }
 
             const_iterator begin(void) const
             {
-                return MakeIterator(this->_ptr);
+                return const_iterator(this->_ptr);
             }
 
             const_iterator cbegin(void) const
             {
-                return MakeIterator(this->_ptr);
+                return const_iterator(this->_ptr);
             }
 
             iterator end(void)
             {
-                return MakeIterator(this->_ptr + this->_size);
+                return iterator(this->_ptr + this->_size);
             }
 
             const_iterator end(void) const
             {
-                return MakeIterator(this->_ptr + this->_size);
+                return const_iterator(this->_ptr + this->_size);
             }
 
             const_iterator cend(void) const
             {
-                return MakeIterator(this->_ptr + this->_size);
+                return const_iterator(this->_ptr + this->_size);
             }
 
             reverse_iterator rbegin(void)
             {
-                return reverse_iterator(MakeIterator(this->_ptr + this->_size));
+                return reverse_iterator(end());
             }
 
             const_reverse_iterator rbegin(void) const
             {
-                return const_reverse_iterator(MakeIterator(this->_ptr + this->_size));
+                return const_reverse_iterator(cend());
             }
 
             const_reverse_iterator crbegin(void) const
             {
-                return const_reverse_iterator(MakeIterator(this->_ptr + this->_size));
+                return const_reverse_iterator(cend());
             }
 
             reverse_iterator rend(void)
             {
-                return reverse_iterator(MakeIterator(this->_ptr));
+                return reverse_iterator(begin());
             }
 
             const_reverse_iterator rend(void) const
             {
-                return const_reverse_iterator(MakeIterator(this->_ptr));
+                return const_reverse_iterator(cbegin());
             }
 
             const_reverse_iterator crend(void) const
             {
-                return const_reverse_iterator(MakeIterator(this->_ptr));
+                return const_reverse_iterator(cbegin());
             }
 
 
 
         private:
-
-            iterator MakeIterator(pointer ptr)
-            {
-                return iterator(
-                    ptr
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-                    , this->_ptr + this->_size
-#endif
-                );
-            }
-
-            const_iterator MakeIterator(const_pointer ptr) const
-            {
-                return const_iterator(
-                    ptr
-#if (defined DEBUG) || (defined _DEBUG) || (defined DBG)
-                    , this->_ptr + this->_size
-#endif
-                );
-            }
-
-
 
             pointer _ptr;
             size_type _size;

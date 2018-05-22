@@ -70,7 +70,6 @@
     <ClCompile Include="CompressedPairTests.cpp" />
     <ClCompile Include="ComPtrTests.cpp" />
     <ClCompile Include="ComTraitsTests.cpp" />
-    <ClCompile Include="ConstStringTests.cpp" />
     <ClCompile Include="CRTPBaseTests.cpp" />
     <ClCompile Include="EventSourceTests.cpp" />
     <ClCompile Include="FunctionalTest.cpp" />

@@ -168,6 +168,12 @@ namespace dhorn::tests
             constexpr string_literal<6> s = "foobar";
             constexpr std::string_view sv = "foobar"sv;
             CONSTEXPR_ASSERT_TRUE(are_equal(s.begin(), s.end(), sv.begin(), sv.end()));
+            CONSTEXPR_ASSERT_EQUALS('f', s.begin()[0]);
+            CONSTEXPR_ASSERT_EQUALS('o', s.begin()[1]);
+            CONSTEXPR_ASSERT_EQUALS('o', s.begin()[2]);
+            CONSTEXPR_ASSERT_EQUALS('b', s.begin()[3]);
+            CONSTEXPR_ASSERT_EQUALS('a', s.begin()[4]);
+            CONSTEXPR_ASSERT_EQUALS('r', s.begin()[5]);
 
             string_literal<6> s2 = "foobar";
             std::string_view sv2 = "moobar"sv;
@@ -180,11 +186,32 @@ namespace dhorn::tests
             constexpr string_literal<6> s = "foobar";
             constexpr std::string_view sv = "raboof"sv;
             CONSTEXPR_ASSERT_TRUE(are_equal(s.rbegin(), s.rend(), sv.begin(), sv.end()));
+            CONSTEXPR_ASSERT_EQUALS('r', s.rbegin()[0]);
+            CONSTEXPR_ASSERT_EQUALS('a', s.rbegin()[1]);
+            CONSTEXPR_ASSERT_EQUALS('b', s.rbegin()[2]);
+            CONSTEXPR_ASSERT_EQUALS('o', s.rbegin()[3]);
+            CONSTEXPR_ASSERT_EQUALS('o', s.rbegin()[4]);
+            CONSTEXPR_ASSERT_EQUALS('f', s.rbegin()[5]);
 
             string_literal<6> s2 = "foobar";
             std::string_view sv2 = "foobaz"sv;
             *s2.rbegin() = 'z';
             Assert::IsTrue(std::equal(s2.rbegin(), s2.rend(), sv2.rbegin(), sv2.rend()));
+        }
+
+        TEST_METHOD(IteratorConversionTest)
+        {
+            // This is just a compilation test
+            string_literal<6> s = "foobar";
+            string_literal<6>::iterator it = s.begin();
+            string_literal<6>::const_iterator cit = it;
+            cit = it + 2;
+            Assert::AreEqual('o', *cit);
+
+            string_literal<6>::reverse_iterator rit = s.rbegin();
+            string_literal<6>::const_reverse_iterator crit = rit;
+            crit = rit + 2;
+            Assert::AreEqual('b', *crit);
         }
 
         TEST_METHOD(SizeLengthTest)
@@ -225,18 +252,18 @@ namespace dhorn::tests
             CONSTEXPR_ASSERT_EQUALS('r', s[5]);
             CONSTEXPR_ASSERT_EQUALS('\0', s[6]);
 
-            constexpr auto s2 = s + "bar";
-            CONSTEXPR_ASSERT_EQUALS(9_sz, s2.length());
-            CONSTEXPR_ASSERT_EQUALS('f', s2[0]);
-            CONSTEXPR_ASSERT_EQUALS('o', s2[1]);
-            CONSTEXPR_ASSERT_EQUALS('o', s2[2]);
-            CONSTEXPR_ASSERT_EQUALS('b', s2[3]);
-            CONSTEXPR_ASSERT_EQUALS('a', s2[4]);
-            CONSTEXPR_ASSERT_EQUALS('r', s2[5]);
-            CONSTEXPR_ASSERT_EQUALS('b', s2[6]);
-            CONSTEXPR_ASSERT_EQUALS('a', s2[7]);
-            CONSTEXPR_ASSERT_EQUALS('r', s2[8]);
-            CONSTEXPR_ASSERT_EQUALS('\0', s2[9]);
+            //constexpr auto s2 = s + "bar";
+            //CONSTEXPR_ASSERT_EQUALS(9_sz, s2.length());
+            //CONSTEXPR_ASSERT_EQUALS('f', s2[0]);
+            //CONSTEXPR_ASSERT_EQUALS('o', s2[1]);
+            //CONSTEXPR_ASSERT_EQUALS('o', s2[2]);
+            //CONSTEXPR_ASSERT_EQUALS('b', s2[3]);
+            //CONSTEXPR_ASSERT_EQUALS('a', s2[4]);
+            //CONSTEXPR_ASSERT_EQUALS('r', s2[5]);
+            //CONSTEXPR_ASSERT_EQUALS('b', s2[6]);
+            //CONSTEXPR_ASSERT_EQUALS('a', s2[7]);
+            //CONSTEXPR_ASSERT_EQUALS('r', s2[8]);
+            //CONSTEXPR_ASSERT_EQUALS('\0', s2[9]);
         }
     };
 }

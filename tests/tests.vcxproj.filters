@@ -149,9 +149,6 @@
     <ClCompile Include="InplaceFunctionTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ConstStringTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="AsyncTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

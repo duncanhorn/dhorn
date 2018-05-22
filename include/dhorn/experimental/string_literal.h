@@ -11,165 +11,10 @@
 #include <cassert>
 #include <string_view>
 
+#include "../iterator.h"
+
 namespace dhorn::experimental
 {
-    /*
-     * basic_string_buffer_iterator
-     *
-     * A reusable iterator type for strings whose lengths are known ahead of time
-     */
-    template <typename CharTy>
-    class basic_string_buffer_iterator
-    {
-    public:
-        /*
-         * Public Types
-         */
-        using difference_type = std::ptrdiff_t;
-        using value_type = std::remove_cv_t<CharTy>;
-        using pointer = CharTy*;
-        using reference = CharTy&;
-        using iterator_category = std::random_access_iterator_tag;
-
-
-
-        /*
-         * Constructor(s)/Destructor
-         */
-        constexpr basic_string_buffer_iterator() noexcept = default;
-
-        constexpr basic_string_buffer_iterator(CharTy* ptr) noexcept :
-            _ptr(ptr)
-        {
-        }
-
-
-
-        /*
-         * ForwardIterator
-         */
-        constexpr reference operator*() const noexcept
-        {
-            return *this->_ptr;
-        }
-
-        constexpr pointer operator->() const noexcept
-        {
-            return this->_ptr;
-        }
-
-        constexpr basic_string_buffer_iterator& operator++() noexcept
-        {
-            ++this->_ptr;
-            return *this;
-        }
-
-        constexpr basic_string_buffer_iterator operator++(int) noexcept
-        {
-            auto copy = *this;
-            ++this->_ptr;
-            return copy;
-        }
-
-        friend constexpr bool operator==(basic_string_buffer_iterator lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return lhs._ptr == rhs._ptr;
-        }
-
-        friend constexpr bool operator!=(basic_string_buffer_iterator lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return lhs._ptr != rhs._ptr;
-        }
-
-
-
-        /*
-         * BidirectionalIterator
-         */
-        constexpr basic_string_buffer_iterator& operator--() noexcept
-        {
-            --this->_ptr;
-            return *this;
-        }
-
-        constexpr basic_string_buffer_iterator operator--(int) noexcept
-        {
-            auto copy = *this;
-            --this->_ptr;
-            return copy;
-        }
-
-
-
-        /*
-         * RandomAccessIterator
-         */
-        constexpr reference operator[](difference_type index) const noexcept
-        {
-            return this->_ptr[index];
-        }
-
-        constexpr basic_string_buffer_iterator& operator+=(difference_type diff) noexcept
-        {
-            this->_ptr += diff;
-            return *this;
-        }
-
-        constexpr basic_string_buffer_iterator& operator-=(difference_type diff) noexcept
-        {
-            this->_ptr -= diff;
-            return *this;
-        }
-
-        friend constexpr basic_string_buffer_iterator operator+(basic_string_buffer_iterator lhs, difference_type rhs) noexcept
-        {
-            return lhs += rhs;
-        }
-
-        friend constexpr basic_string_buffer_iterator operator+(difference_type lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return rhs += lhs;
-        }
-
-        friend constexpr basic_string_buffer_iterator operator-(basic_string_buffer_iterator lhs, difference_type rhs) noexcept
-        {
-            return lhs -= rhs;
-        }
-
-        friend constexpr difference_type operator-(basic_string_buffer_iterator lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return lhs._ptr - rhs._ptr;
-        }
-
-        friend constexpr bool operator<(basic_string_buffer_iterator lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return lhs._ptr < rhs._ptr;
-        }
-
-        friend constexpr bool operator<=(basic_string_buffer_iterator lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return lhs._ptr <= rhs._ptr;
-        }
-
-        friend constexpr bool operator>(basic_string_buffer_iterator lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return lhs._ptr > rhs._ptr;
-        }
-
-        friend constexpr bool operator>=(basic_string_buffer_iterator lhs, basic_string_buffer_iterator rhs) noexcept
-        {
-            return lhs._ptr >= rhs._ptr;
-        }
-
-
-
-    private:
-
-        CharTy* _ptr = nullptr;
-    };
-
-
-
     /*
      * basic_string_literal
      */
@@ -193,8 +38,8 @@ namespace dhorn::experimental
         using const_pointer = const CharTy*;
         using reference = value_type&;
         using const_reference = const value_type&;
-        using iterator = basic_string_buffer_iterator<CharTy>;
-        using const_iterator = basic_string_buffer_iterator<const CharTy>;
+        using iterator = array_iterator<basic_string_literal>;
+        using const_iterator = const_array_iterator<basic_string_literal>;
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using size_type = std::size_t;
@@ -672,4 +517,10 @@ namespace dhorn::experimental
 
     template <std::size_t Length>
     using u32string_literal = basic_string_literal<char32_t, Length>;
+
+
+
+    /*
+     * 
+     */
 }
