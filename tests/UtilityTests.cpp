@@ -305,4 +305,312 @@ namespace dhorn::tests
             Assert::AreEqual(static_cast<std::size_t>(4), variant_index_v<const volatile int&, variant_type>);
         }
     };
+
+
+
+#define CONSTEXPR_ASSERT_TRUE(expr) \
+{ \
+    constexpr bool result = (expr); \
+    Assert::IsTrue(result); \
+}
+
+#define CONSTEXPR_ASSERT_FALSE(expr) \
+{ \
+    constexpr bool result = (expr); \
+    Assert::IsFalse(result); \
+}
+
+    TEST_CLASS(AnyOfTests)
+    {
+        TEST_METHOD(CompareWithEmptyTest)
+        {
+            CONSTEXPR_ASSERT_FALSE(0 == any_of());
+            CONSTEXPR_ASSERT_FALSE(any_of() == 0);
+            CONSTEXPR_ASSERT_FALSE(0 != any_of());
+            CONSTEXPR_ASSERT_FALSE(any_of() != 0);
+            CONSTEXPR_ASSERT_FALSE(0 < any_of());
+            CONSTEXPR_ASSERT_FALSE(any_of() < 0);
+            CONSTEXPR_ASSERT_FALSE(0 > any_of());
+            CONSTEXPR_ASSERT_FALSE(any_of() > 0);
+            CONSTEXPR_ASSERT_FALSE(0 <= any_of());
+            CONSTEXPR_ASSERT_FALSE(any_of() <= 0);
+            CONSTEXPR_ASSERT_FALSE(0 >= any_of());
+            CONSTEXPR_ASSERT_FALSE(any_of() >= 0);
+        }
+
+        TEST_METHOD(CompareWithSingleValueTest)
+        {
+            CONSTEXPR_ASSERT_FALSE(0 == any_of(1));
+            CONSTEXPR_ASSERT_FALSE(any_of(1) == 0);
+            CONSTEXPR_ASSERT_TRUE(0 == any_of(0));
+            CONSTEXPR_ASSERT_TRUE(any_of(0) == 0);
+
+            CONSTEXPR_ASSERT_TRUE(0 != any_of(1));
+            CONSTEXPR_ASSERT_TRUE(any_of(1) != 0);
+            CONSTEXPR_ASSERT_FALSE(0 != any_of(0));
+            CONSTEXPR_ASSERT_FALSE(any_of(0) != 0);
+
+            CONSTEXPR_ASSERT_TRUE(0 < any_of(1));
+            CONSTEXPR_ASSERT_FALSE(any_of(1) < 0);
+            CONSTEXPR_ASSERT_FALSE(0 < any_of(0));
+            CONSTEXPR_ASSERT_FALSE(any_of(0) < 0);
+
+            CONSTEXPR_ASSERT_FALSE(0 > any_of(1));
+            CONSTEXPR_ASSERT_TRUE(any_of(1) > 0);
+            CONSTEXPR_ASSERT_FALSE(0 > any_of(0));
+            CONSTEXPR_ASSERT_FALSE(any_of(0) > 0);
+
+            CONSTEXPR_ASSERT_TRUE(0 <= any_of(1));
+            CONSTEXPR_ASSERT_FALSE(any_of(1) <= 0);
+            CONSTEXPR_ASSERT_TRUE(0 <= any_of(0));
+            CONSTEXPR_ASSERT_TRUE(any_of(0) <= 0);
+
+            CONSTEXPR_ASSERT_FALSE(0 >= any_of(1));
+            CONSTEXPR_ASSERT_TRUE(any_of(1) >= 0);
+            CONSTEXPR_ASSERT_TRUE(0 >= any_of(0));
+            CONSTEXPR_ASSERT_TRUE(any_of(0) >= 0);
+        }
+
+        TEST_METHOD(CompareWithMultipleValuesTest)
+        {
+            CONSTEXPR_ASSERT_FALSE(0 == any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) == 0);
+            CONSTEXPR_ASSERT_TRUE(1 == any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) == 1);
+            CONSTEXPR_ASSERT_TRUE(2 == any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) == 2);
+            CONSTEXPR_ASSERT_TRUE(3 == any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) == 3);
+            CONSTEXPR_ASSERT_TRUE(4 == any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) == 4);
+            CONSTEXPR_ASSERT_TRUE(5 == any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) == 5);
+            CONSTEXPR_ASSERT_FALSE(6 == any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) == 6);
+
+            CONSTEXPR_ASSERT_TRUE(0 != any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) != 0);
+            CONSTEXPR_ASSERT_TRUE(1 != any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) != 1);
+            CONSTEXPR_ASSERT_TRUE(2 != any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) != 2);
+            CONSTEXPR_ASSERT_TRUE(3 != any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) != 3);
+            CONSTEXPR_ASSERT_TRUE(4 != any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) != 4);
+            CONSTEXPR_ASSERT_TRUE(5 != any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) != 5);
+            CONSTEXPR_ASSERT_TRUE(6 != any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) != 6);
+
+            CONSTEXPR_ASSERT_TRUE(0 < any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) < 0);
+            CONSTEXPR_ASSERT_TRUE(1 < any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) < 1);
+            CONSTEXPR_ASSERT_TRUE(2 < any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) < 2);
+            CONSTEXPR_ASSERT_TRUE(3 < any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) < 3);
+            CONSTEXPR_ASSERT_TRUE(4 < any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) < 4);
+            CONSTEXPR_ASSERT_FALSE(5 < any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) < 5);
+            CONSTEXPR_ASSERT_FALSE(6 < any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) < 6);
+
+            CONSTEXPR_ASSERT_FALSE(0 > any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) > 0);
+            CONSTEXPR_ASSERT_FALSE(1 > any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) > 1);
+            CONSTEXPR_ASSERT_TRUE(2 > any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) > 2);
+            CONSTEXPR_ASSERT_TRUE(3 > any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) > 3);
+            CONSTEXPR_ASSERT_TRUE(4 > any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) > 4);
+            CONSTEXPR_ASSERT_TRUE(5 > any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) > 5);
+            CONSTEXPR_ASSERT_TRUE(6 > any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) > 6);
+
+            CONSTEXPR_ASSERT_TRUE(0 <= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) <= 0);
+            CONSTEXPR_ASSERT_TRUE(1 <= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) <= 1);
+            CONSTEXPR_ASSERT_TRUE(2 <= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) <= 2);
+            CONSTEXPR_ASSERT_TRUE(3 <= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) <= 3);
+            CONSTEXPR_ASSERT_TRUE(4 <= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) <= 4);
+            CONSTEXPR_ASSERT_TRUE(5 <= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) <= 5);
+            CONSTEXPR_ASSERT_FALSE(6 <= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) <= 6);
+
+            CONSTEXPR_ASSERT_FALSE(0 >= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) >= 0);
+            CONSTEXPR_ASSERT_TRUE(1 >= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) >= 1);
+            CONSTEXPR_ASSERT_TRUE(2 >= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) >= 2);
+            CONSTEXPR_ASSERT_TRUE(3 >= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) >= 3);
+            CONSTEXPR_ASSERT_TRUE(4 >= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) >= 4);
+            CONSTEXPR_ASSERT_TRUE(5 >= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(any_of(1, 2, 3, 4, 5) >= 5);
+            CONSTEXPR_ASSERT_TRUE(6 >= any_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(any_of(1, 2, 3, 4, 5) >= 6);
+        }
+    };
+
+
+
+    TEST_CLASS(AllOfTests)
+    {
+        TEST_METHOD(CompareWithEmptyTest)
+        {
+            CONSTEXPR_ASSERT_TRUE(0 == all_of());
+            CONSTEXPR_ASSERT_TRUE(all_of() == 0);
+            CONSTEXPR_ASSERT_TRUE(0 != all_of());
+            CONSTEXPR_ASSERT_TRUE(all_of() != 0);
+            CONSTEXPR_ASSERT_TRUE(0 < all_of());
+            CONSTEXPR_ASSERT_TRUE(all_of() < 0);
+            CONSTEXPR_ASSERT_TRUE(0 > all_of());
+            CONSTEXPR_ASSERT_TRUE(all_of() > 0);
+            CONSTEXPR_ASSERT_TRUE(0 <= all_of());
+            CONSTEXPR_ASSERT_TRUE(all_of() <= 0);
+            CONSTEXPR_ASSERT_TRUE(0 >= all_of());
+            CONSTEXPR_ASSERT_TRUE(all_of() >= 0);
+        }
+
+        TEST_METHOD(CompareWithSingleValueTest)
+        {
+            CONSTEXPR_ASSERT_FALSE(0 == all_of(1));
+            CONSTEXPR_ASSERT_FALSE(all_of(1) == 0);
+            CONSTEXPR_ASSERT_TRUE(0 == all_of(0));
+            CONSTEXPR_ASSERT_TRUE(all_of(0) == 0);
+
+            CONSTEXPR_ASSERT_TRUE(0 != all_of(1));
+            CONSTEXPR_ASSERT_TRUE(all_of(1) != 0);
+            CONSTEXPR_ASSERT_FALSE(0 != all_of(0));
+            CONSTEXPR_ASSERT_FALSE(all_of(0) != 0);
+
+            CONSTEXPR_ASSERT_TRUE(0 < all_of(1));
+            CONSTEXPR_ASSERT_FALSE(all_of(1) < 0);
+            CONSTEXPR_ASSERT_FALSE(0 < all_of(0));
+            CONSTEXPR_ASSERT_FALSE(all_of(0) < 0);
+
+            CONSTEXPR_ASSERT_FALSE(0 > all_of(1));
+            CONSTEXPR_ASSERT_TRUE(all_of(1) > 0);
+            CONSTEXPR_ASSERT_FALSE(0 > all_of(0));
+            CONSTEXPR_ASSERT_FALSE(all_of(0) > 0);
+
+            CONSTEXPR_ASSERT_TRUE(0 <= all_of(1));
+            CONSTEXPR_ASSERT_FALSE(all_of(1) <= 0);
+            CONSTEXPR_ASSERT_TRUE(0 <= all_of(0));
+            CONSTEXPR_ASSERT_TRUE(all_of(0) <= 0);
+
+            CONSTEXPR_ASSERT_FALSE(0 >= all_of(1));
+            CONSTEXPR_ASSERT_TRUE(all_of(1) >= 0);
+            CONSTEXPR_ASSERT_TRUE(0 >= all_of(0));
+            CONSTEXPR_ASSERT_TRUE(all_of(0) >= 0);
+        }
+
+        TEST_METHOD(CompareWithMultipleValuesTest)
+        {
+            CONSTEXPR_ASSERT_FALSE(0 == all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) == 0);
+            CONSTEXPR_ASSERT_FALSE(1 == all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) == 1);
+            CONSTEXPR_ASSERT_FALSE(2 == all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) == 2);
+            CONSTEXPR_ASSERT_FALSE(3 == all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) == 3);
+            CONSTEXPR_ASSERT_FALSE(4 == all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) == 4);
+            CONSTEXPR_ASSERT_FALSE(5 == all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) == 5);
+            CONSTEXPR_ASSERT_FALSE(6 == all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) == 6);
+            CONSTEXPR_ASSERT_TRUE(0 == all_of(0, 0, 0, 0, 0));
+            CONSTEXPR_ASSERT_TRUE(all_of(0, 0, 0, 0, 0) == 0);
+
+            CONSTEXPR_ASSERT_TRUE(0 != all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) != 0);
+            CONSTEXPR_ASSERT_FALSE(1 != all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) != 1);
+            CONSTEXPR_ASSERT_FALSE(2 != all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) != 2);
+            CONSTEXPR_ASSERT_FALSE(3 != all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) != 3);
+            CONSTEXPR_ASSERT_FALSE(4 != all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) != 4);
+            CONSTEXPR_ASSERT_FALSE(5 != all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) != 5);
+            CONSTEXPR_ASSERT_TRUE(6 != all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) != 6);
+
+            CONSTEXPR_ASSERT_TRUE(0 < all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) < 0);
+            CONSTEXPR_ASSERT_FALSE(1 < all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) < 1);
+            CONSTEXPR_ASSERT_FALSE(2 < all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) < 2);
+            CONSTEXPR_ASSERT_FALSE(3 < all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) < 3);
+            CONSTEXPR_ASSERT_FALSE(4 < all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) < 4);
+            CONSTEXPR_ASSERT_FALSE(5 < all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) < 5);
+            CONSTEXPR_ASSERT_FALSE(6 < all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) < 6);
+
+            CONSTEXPR_ASSERT_FALSE(0 > all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) > 0);
+            CONSTEXPR_ASSERT_FALSE(1 > all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) > 1);
+            CONSTEXPR_ASSERT_FALSE(2 > all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) > 2);
+            CONSTEXPR_ASSERT_FALSE(3 > all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) > 3);
+            CONSTEXPR_ASSERT_FALSE(4 > all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) > 4);
+            CONSTEXPR_ASSERT_FALSE(5 > all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) > 5);
+            CONSTEXPR_ASSERT_TRUE(6 > all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) > 6);
+
+            CONSTEXPR_ASSERT_TRUE(0 <= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) <= 0);
+            CONSTEXPR_ASSERT_TRUE(1 <= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) <= 1);
+            CONSTEXPR_ASSERT_FALSE(2 <= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) <= 2);
+            CONSTEXPR_ASSERT_FALSE(3 <= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) <= 3);
+            CONSTEXPR_ASSERT_FALSE(4 <= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) <= 4);
+            CONSTEXPR_ASSERT_FALSE(5 <= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) <= 5);
+            CONSTEXPR_ASSERT_FALSE(6 <= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) <= 6);
+
+            CONSTEXPR_ASSERT_FALSE(0 >= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) >= 0);
+            CONSTEXPR_ASSERT_FALSE(1 >= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_TRUE(all_of(1, 2, 3, 4, 5) >= 1);
+            CONSTEXPR_ASSERT_FALSE(2 >= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) >= 2);
+            CONSTEXPR_ASSERT_FALSE(3 >= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) >= 3);
+            CONSTEXPR_ASSERT_FALSE(4 >= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) >= 4);
+            CONSTEXPR_ASSERT_TRUE(5 >= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) >= 5);
+            CONSTEXPR_ASSERT_TRUE(6 >= all_of(1, 2, 3, 4, 5));
+            CONSTEXPR_ASSERT_FALSE(all_of(1, 2, 3, 4, 5) >= 6);
+        }
+    };
 }

@@ -209,6 +209,261 @@ namespace dhorn
 
 
     /*
+     * any_of
+     *
+     * A helper type for comparing a single value with multiple values, returning true if the comparison is true for any
+     * one of the values.
+     */
+#pragma region any_of
+
+    namespace details
+    {
+        template <typename... Types>
+        class any_of_t
+        {
+            using seq = std::make_index_sequence<sizeof...(Types)>;
+
+        public:
+            constexpr any_of_t(Types&&... values) :
+                _values(std::forward<Types>(values)...)
+            {
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator==(const Ty& lhs, const any_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator==(const any_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator!=(const Ty& lhs, const any_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::not_equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator!=(const any_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::not_equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<(const Ty& lhs, const any_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::less<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<(const any_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::less<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>(const Ty& lhs, const any_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::greater<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>(const any_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::greater<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<=(const Ty& lhs, const any_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::less_equal<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<=(const any_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::less_equal<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>=(const Ty& lhs, const any_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::greater_equal<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>=(const any_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::greater_equal<>{}, seq{});
+            }
+
+        private:
+
+            template <typename Ty, typename Compare, std::size_t... Indices>
+            static constexpr bool compare(
+                [[maybe_unused]] const Ty& lhs,
+                [[maybe_unused]] const any_of_t& rhs,
+                [[maybe_unused]] const Compare& compareOp,
+                std::index_sequence<Indices...>)
+            {
+                return (compareOp(lhs, std::get<Indices>(rhs._values)) || ...);
+            }
+
+            template <typename Ty, typename Compare, std::size_t... Indices>
+            static constexpr bool compare(
+                [[maybe_unused]] const any_of_t& lhs,
+                [[maybe_unused]] const Ty& rhs,
+                [[maybe_unused]] const Compare& compareOp,
+                std::index_sequence<Indices...>)
+            {
+                return (compareOp(std::get<Indices>(lhs._values), rhs) || ...);
+            }
+
+            std::tuple<Types...> _values;
+        };
+    }
+
+    template <typename... Types>
+    inline constexpr details::any_of_t<Types...> any_of(Types&&... values)
+    {
+        return details::any_of_t(std::forward<Types>(values)...);
+    }
+
+#pragma endregion
+
+
+
+    /*
+     * all_of
+     */
+#pragma region all_of
+
+    namespace details
+    {
+        template <typename... Types>
+        class all_of_t
+        {
+            using seq = std::make_index_sequence<sizeof...(Types)>;
+
+        public:
+            constexpr all_of_t(Types&&... values) :
+                _values(std::forward<Types>(values)...)
+            {
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator==(const Ty& lhs, const all_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator==(const all_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator!=(const Ty& lhs, const all_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::not_equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator!=(const all_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::not_equal_to<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<(const Ty& lhs, const all_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::less<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<(const all_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::less<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>(const Ty& lhs, const all_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::greater<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>(const all_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::greater<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<=(const Ty& lhs, const all_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::less_equal<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator<=(const all_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::less_equal<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>=(const Ty& lhs, const all_of_t& rhs)
+            {
+                return compare(lhs, rhs, std::greater_equal<>{}, seq{});
+            }
+
+            template <typename Ty>
+            friend constexpr bool operator>=(const all_of_t& lhs, const Ty& rhs)
+            {
+                return compare(lhs, rhs, std::greater_equal<>{}, seq{});
+            }
+
+        private:
+
+            template <typename Ty, typename Compare, std::size_t... Indices>
+            static constexpr bool compare(
+                [[maybe_unused]] const Ty& lhs,
+                [[maybe_unused]] const all_of_t& rhs,
+                [[maybe_unused]] const Compare& compareOp,
+                std::index_sequence<Indices...>)
+            {
+                return (compareOp(lhs, std::get<Indices>(rhs._values)) && ...);
+            }
+
+            template <typename Ty, typename Compare, std::size_t... Indices>
+            static constexpr bool compare(
+                [[maybe_unused]] const all_of_t& lhs,
+                [[maybe_unused]] const Ty& rhs,
+                [[maybe_unused]] const Compare& compareOp,
+                std::index_sequence<Indices...>)
+            {
+                return (compareOp(std::get<Indices>(lhs._values), rhs) && ...);
+            }
+
+            std::tuple<Types...> _values;
+        };
+    }
+
+    template <typename... Types>
+    inline constexpr details::all_of_t<Types...> all_of(Types&&... values)
+    {
+        return details::all_of_t(std::forward<Types>(values)...);
+    }
+
+#pragma endregion
+
+
+
+    /*
      * USer-Defined Literals
      */
     inline namespace literals
