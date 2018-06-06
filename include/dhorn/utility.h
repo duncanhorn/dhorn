@@ -339,6 +339,9 @@ namespace dhorn
 
     /*
      * all_of
+     *
+     * A helper type for comparing a single value with multiple values, returning true if the comparison is true for all
+     * of the values.
      */
 #pragma region all_of
 
