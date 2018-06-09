@@ -16,6 +16,17 @@
 namespace dhorn
 {
     template <typename... InvocableTypes>
+    struct visitor :
+        public InvocableTypes...
+    {
+        using InvocableTypes::operator()...;
+    };
+
+    template <typename... InvocableTypes>
+    visitor(InvocableTypes...) -> visitor<InvocableTypes...>;
+
+#if 0
+    template <typename... InvocableTypes>
     struct visitor;
 
     template <typename Invocable>
@@ -52,4 +63,5 @@ namespace dhorn
     {
         return visitor<std::decay_t<InvocableTypes>...>(std::forward<InvocableTypes>(args)...);
     }
+#endif
 }
