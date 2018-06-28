@@ -37,6 +37,9 @@
     <Filter Include="include\experimental\json">
       <UniqueIdentifier>{8aa64862-b855-4395-97dd-7276c5717a38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\unicode">
+      <UniqueIdentifier>{997fe013-79ca-4499-8ff2-6ec622495e7b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\dhorn\experimental\animation.h">
@@ -198,9 +201,6 @@
     <ClInclude Include="include\dhorn\algorithm.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\dhorn\utf.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\dhorn\iterator.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -242,6 +242,12 @@
     </ClInclude>
     <ClInclude Include="include\dhorn\experimental\string_literal.h">
       <Filter>include\experimental</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\unicode\encoding.h">
+      <Filter>include\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dhorn\unicode\iterator.h">
+      <Filter>include\unicode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

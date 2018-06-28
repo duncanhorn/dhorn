@@ -108,16 +108,16 @@ namespace dhorn::tests
         std::u16string result;
         result.reserve(str.length());
         std::copy(
-            make_utf_iterator(str.begin()),
-            make_utf_iterator(str.end()),
-            utf16_output_iterator(std::back_inserter(result)));
+            unicode::iterator(str.begin()),
+            unicode::iterator(str.end()),
+            unicode::utf16_output_iterator(std::back_inserter(result)));
 
         return result;
     }
 
     std::u32string utf32_convert(std::string_view str)
     {
-        return std::u32string(make_utf_iterator(str.begin()), make_utf_iterator(str.end()));
+        return std::u32string(unicode::iterator(str.begin()), unicode::iterator(str.end()));
     }
 
     template <typename CharTy>

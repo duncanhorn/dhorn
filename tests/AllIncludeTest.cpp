@@ -22,7 +22,6 @@
 #include <dhorn/string.h>
 #include <dhorn/thread_pool.h>
 #include <dhorn/type_traits.h>
-#include <dhorn/utf.h>
 #include <dhorn/utility.h>
 #include <dhorn/visitor.h>
 
@@ -30,6 +29,10 @@
 #include <dhorn/com/com_ptr.h>
 #include <dhorn/com/com_traits.h>
 #include <dhorn/com/hresult_error.h>
+
+// Unicode Includes
+#include <dhorn/unicode/encoding.h>
+#include <dhorn/unicode/iterator.h>
 
 // Windows Includes
 #include <dhorn/windows/file_time_clock.h>

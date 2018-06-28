@@ -15,7 +15,7 @@
 #include <string_view>
 #include <vector>
 
-#include "../../utf.h"
+#include "../../unicode/iterator.h"
 
 namespace dhorn::experimental::json
 {
@@ -700,8 +700,8 @@ namespace dhorn::experimental::json
         [[noreturn]]
         void invalid_character(char32_t ch)
         {
-            char str[utf_traits<char>::max_code_point_size + 1];
-            auto itr = utf8_output_iterator(str);
+            char str[unicode::encoding_traits<unicode::encoding::utf_8>::max_code_point_size + 1];
+            auto itr = unicode::make_output_iterator<unicode::encoding::utf_8>(str);
             *itr++ = ch;
             *itr++ = '\0';
             assert(itr.base() <= std::end(str));
@@ -723,8 +723,8 @@ namespace dhorn::experimental::json
         template <typename Itr>
         void continue_scan(Itr front, Itr back)
         {
-            auto begin = make_utf_iterator(front);
-            auto end = make_utf_iterator(back);
+            auto begin = unicode::iterator(front);
+            auto end = unicode::iterator(back);
             while (begin != end)
             {
                 assert(!this->_stateStack.empty());
@@ -872,7 +872,9 @@ namespace dhorn::experimental::json
                 }
 
                 // TODO: Is construction of the output iterator inefficient, or is it a no-op? Should we cache it?
-                if (!state.consume(ch, make_utf_output_iterator<CharTy>(std::back_inserter(this->_stringBuffer))))
+                if (!state.consume(
+                    ch,
+                    make_output_iterator<unicode::character_encoding_v<CharTy>>(std::back_inserter(this->_stringBuffer))))
                 {
                     invalid_character(ch);
                 }

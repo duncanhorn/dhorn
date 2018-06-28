@@ -95,7 +95,8 @@
     <ClInclude Include="include\dhorn\string.h" />
     <ClInclude Include="include\dhorn\thread_pool.h" />
     <ClInclude Include="include\dhorn\type_traits.h" />
-    <ClInclude Include="include\dhorn\utf.h" />
+    <ClInclude Include="include\dhorn\unicode\encoding.h" />
+    <ClInclude Include="include\dhorn\unicode\iterator.h" />
     <ClInclude Include="include\dhorn\utility.h" />
     <ClInclude Include="include\dhorn\visitor.h" />
     <ClInclude Include="include\dhorn\windows\file_time_clock.h" />

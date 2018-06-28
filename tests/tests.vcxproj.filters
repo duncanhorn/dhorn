@@ -125,9 +125,6 @@
     <ClCompile Include="CompressedPairTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UtfTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="VisitorTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -156,6 +153,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="StringLiteralTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnicodeEncodingTests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnicodeIteratorTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

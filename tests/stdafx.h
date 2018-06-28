@@ -25,4 +25,12 @@ namespace Microsoft::VisualStudio::CppUnitTestFramework
     template<> inline std::wstring ToString<unsigned short>(const unsigned short& t) { RETURN_WIDE_STRING(t); }
     template<> inline std::wstring ToString<unsigned short>(const unsigned short* t) { RETURN_WIDE_STRING(t); }
     template<> inline std::wstring ToString<unsigned short>(unsigned short* t) { RETURN_WIDE_STRING(t); }
+
+    template<> inline std::wstring ToString<char16_t>(const char16_t& ch) { RETURN_WIDE_STRING(ch); }
+    template<> inline std::wstring ToString<char16_t>(const char16_t* ch) { RETURN_WIDE_STRING(ch); }
+    template<> inline std::wstring ToString<char16_t>(char16_t* ch) { RETURN_WIDE_STRING(ch); }
+
+    template<> inline std::wstring ToString<char32_t>(const char32_t& ch) { RETURN_WIDE_STRING(ch); }
+    template<> inline std::wstring ToString<char32_t>(const char32_t* ch) { RETURN_WIDE_STRING(ch); }
+    template<> inline std::wstring ToString<char32_t>(char32_t* ch) { RETURN_WIDE_STRING(ch); }
 }
