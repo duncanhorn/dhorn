@@ -133,13 +133,13 @@ namespace dhorn::tests
     }
 
     template <typename Traits, typename CharTy, std::size_t Size>
-    void DoWriteCodePointTest(char32_t ch, const CharTy (&expected)[Size])
+    void DoWriteCodePointTest(char32_t ch, const CharTy (&expected)[Size], std::size_t expectedSize = Size - 1)
     {
         typename Traits::value_type buffer[Traits::max_code_point_size];
         auto ptr = Traits::write(buffer, ch);
 
-        Assert::AreEqual(Size - 1, static_cast<std::size_t>(std::distance(buffer, ptr)));
-        for (std::size_t i = 0; i < Size - 1; ++i)
+        Assert::AreEqual(expectedSize, static_cast<std::size_t>(std::distance(buffer, ptr)));
+        for (std::size_t i = 0; i < expectedSize; ++i)
         {
             Assert::AreEqual(expected[i], buffer[i]);
         }
@@ -169,8 +169,8 @@ namespace dhorn::tests
         TEST_METHOD(ReadCodePointSizeTest)
         {
             // Just do the ones that are interesting...
-            DoReadCodePointSizeTest<traits>(u8"\u0000");
-            DoReadCodePointSizeTest<checked_traits>(u8"\u0000");
+            DoReadCodePointSizeTest<traits>(u8"", 1);
+            DoReadCodePointSizeTest<checked_traits>(u8"", 1);
             DoReadCodePointSizeTest<traits>(u8"\u007F");
             DoReadCodePointSizeTest<checked_traits>(u8"\u007F");
 
@@ -221,8 +221,8 @@ namespace dhorn::tests
         TEST_METHOD(IsInitialCodeUnitTest)
         {
             // Just do the ones that are interesting...
-            DoIsInitialCodeUnitTest<traits>(u8"\u0000");
-            DoIsInitialCodeUnitTest<checked_traits>(u8"\u0000");
+            DoIsInitialCodeUnitTest<traits>(u8"");
+            DoIsInitialCodeUnitTest<checked_traits>(u8"");
             DoIsInitialCodeUnitTest<traits>(u8"\u007F");
             DoIsInitialCodeUnitTest<checked_traits>(u8"\u007F");
 
@@ -244,8 +244,8 @@ namespace dhorn::tests
 
         TEST_METHOD(ReadCodePointTest)
         {
-            DoReadCodePointTest<traits>(u8"\u0000", U'\u0000');
-            DoReadCodePointTest<checked_traits>(u8"\u0000", U'\u0000');
+            DoReadCodePointTest<traits>(u8"", U'\u0000', 1);
+            DoReadCodePointTest<checked_traits>(u8"", U'\u0000', 1);
             DoReadCodePointTest<traits>(u8"\u007F", U'\u007F');
             DoReadCodePointTest<checked_traits>(u8"\u007F", U'\u007F');
 
@@ -285,8 +285,8 @@ namespace dhorn::tests
 
         TEST_METHOD(WriteCodePointTest)
         {
-            DoWriteCodePointTest<traits>(U'\u0000', u8"\u0000");
-            DoWriteCodePointTest<checked_traits>(U'\u0000', u8"\u0000");
+            DoWriteCodePointTest<traits>(U'\u0000', u8"", 1);
+            DoWriteCodePointTest<checked_traits>(U'\u0000', u8"", 1);
             DoWriteCodePointTest<traits>(U'\u007F', u8"\u007F");
             DoWriteCodePointTest<checked_traits>(U'\u007F', u8"\u007F");
 
@@ -367,8 +367,8 @@ namespace dhorn::tests
         TEST_METHOD(ReadCodePointSizeTest)
         {
             // Just do the ones that are interesting...
-            DoReadCodePointSizeTest<traits>(u"\u0000");
-            DoReadCodePointSizeTest<checked_traits>(u"\u0000");
+            DoReadCodePointSizeTest<traits>(u"", 1);
+            DoReadCodePointSizeTest<checked_traits>(u"", 1);
             DoReadCodePointSizeTest<traits>(u"\uFFFF");
             DoReadCodePointSizeTest<checked_traits>(u"\uFFFF");
 
@@ -415,8 +415,8 @@ namespace dhorn::tests
         TEST_METHOD(IsInitialCodeUnitTest)
         {
             // Just do the ones that are interesting...
-            DoIsInitialCodeUnitTest<traits>(u"\u0000");
-            DoIsInitialCodeUnitTest<checked_traits>(u"\u0000");
+            DoIsInitialCodeUnitTest<traits>(u"");
+            DoIsInitialCodeUnitTest<checked_traits>(u"");
             DoIsInitialCodeUnitTest<traits>(u"\uFFFF");
             DoIsInitialCodeUnitTest<checked_traits>(u"\uFFFF");
 
@@ -442,13 +442,13 @@ namespace dhorn::tests
         {
             // TODO: Assuming little endian for now...
             static_assert(std::is_same_v<traits, le_traits>);
-            DoReadCodePointTest<le_traits>(u"\u0000", U'\u0000');
-            DoReadCodePointTest<checked_le_traits>(u"\u0000", U'\u0000');
+            DoReadCodePointTest<le_traits>(u"", U'\u0000', 1);
+            DoReadCodePointTest<checked_le_traits>(u"", U'\u0000', 1);
             DoReadCodePointTest<le_traits>(u"\uFFFF", U'\uFFFF');
             DoReadCodePointTest<checked_le_traits>(u"\uFFFF", U'\uFFFF');
 
-            DoReadCodePointTest<be_traits>(u"\u0000", U'\u0000');
-            DoReadCodePointTest<checked_be_traits>(u"\u0000", U'\u0000');
+            DoReadCodePointTest<be_traits>(u"", U'\u0000', 1);
+            DoReadCodePointTest<checked_be_traits>(u"", U'\u0000', 1);
             DoReadCodePointTest<be_traits>(u"\uFFFF", U'\uFFFF');
             DoReadCodePointTest<checked_be_traits>(u"\uFFFF", U'\uFFFF');
 
@@ -475,13 +475,13 @@ namespace dhorn::tests
         {
             // TODO: Assuming little endian for now...
             static_assert(std::is_same_v<traits, le_traits>);
-            DoWriteCodePointTest<le_traits>(U'\u0000', u"\u0000");
-            DoWriteCodePointTest<checked_le_traits>(U'\u0000', u"\u0000");
+            DoWriteCodePointTest<le_traits>(U'\u0000', u"", 1);
+            DoWriteCodePointTest<checked_le_traits>(U'\u0000', u"", 1);
             DoWriteCodePointTest<le_traits>(U'\uFFFF', u"\uFFFF");
             DoWriteCodePointTest<checked_le_traits>(U'\uFFFF', u"\uFFFF");
 
-            DoWriteCodePointTest<be_traits>(U'\u0000', u"\u0000");
-            DoWriteCodePointTest<checked_be_traits>(U'\u0000', u"\u0000");
+            DoWriteCodePointTest<be_traits>(U'\u0000', u"", 1);
+            DoWriteCodePointTest<checked_be_traits>(U'\u0000', u"", 1);
             DoWriteCodePointTest<be_traits>(U'\uFFFF', u"\uFFFF");
             DoWriteCodePointTest<checked_be_traits>(U'\uFFFF', u"\uFFFF");
 
@@ -553,8 +553,8 @@ namespace dhorn::tests
         TEST_METHOD(ReadCodePointSizeTest)
         {
             // Size is always one, so nothing is interesting here...
-            DoReadCodePointSizeTest<traits>(U"\u0000");
-            DoReadCodePointSizeTest<checked_traits>(U"\u0000");
+            DoReadCodePointSizeTest<traits>(U"", 1);
+            DoReadCodePointSizeTest<checked_traits>(U"", 1);
             DoReadCodePointSizeTest<traits>(U"\U0010FFFF");
             DoReadCodePointSizeTest<checked_traits>(U"\U0010FFFF");
 
@@ -597,8 +597,8 @@ namespace dhorn::tests
         TEST_METHOD(IsInitialCodeUnitTest)
         {
             // Size is always one, so nothing is interesting here...
-            DoIsInitialCodeUnitTest<traits>(U"\u0000");
-            DoIsInitialCodeUnitTest<checked_traits>(U"\u0000");
+            DoIsInitialCodeUnitTest<traits>(U"");
+            DoIsInitialCodeUnitTest<checked_traits>(U"");
             DoIsInitialCodeUnitTest<traits>(U"\U0010FFFF");
             DoIsInitialCodeUnitTest<checked_traits>(U"\U0010FFFF");
 
@@ -614,13 +614,13 @@ namespace dhorn::tests
         {
             // TODO: Assuming little endian for now...
             static_assert(std::is_same_v<traits, le_traits>);
-            DoReadCodePointTest<le_traits>(U"\u0000", U'\u0000');
-            DoReadCodePointTest<checked_le_traits>(U"\u0000", U'\u0000');
+            DoReadCodePointTest<le_traits>(U"", U'\u0000', 1);
+            DoReadCodePointTest<checked_le_traits>(U"", U'\u0000', 1);
             DoReadCodePointTest<le_traits>(U"\U0010FFFF", U'\U0010FFFF');
             DoReadCodePointTest<checked_le_traits>(U"\U0010FFFF", U'\U0010FFFF');
 
-            DoReadCodePointTest<be_traits>(U"\u0000", U'\u0000');
-            DoReadCodePointTest<checked_be_traits>(U"\u0000", U'\u0000');
+            DoReadCodePointTest<be_traits>(U"", U'\u0000', 1);
+            DoReadCodePointTest<checked_be_traits>(U"", U'\u0000', 1);
             DoReadCodePointTest<be_traits>(U"\xFFFF1000", U'\U0010FFFF');
             DoReadCodePointTest<checked_be_traits>(U"\xFFFF1000", U'\U0010FFFF');
 
@@ -637,13 +637,13 @@ namespace dhorn::tests
         {
             // TODO: Assuming little endian for now...
             static_assert(std::is_same_v<traits, le_traits>);
-            DoWriteCodePointTest<le_traits>(U'\u0000', U"\u0000");
-            DoWriteCodePointTest<checked_le_traits>(U'\u0000', U"\u0000");
+            DoWriteCodePointTest<le_traits>(U'\u0000', U"", 1);
+            DoWriteCodePointTest<checked_le_traits>(U'\u0000', U"", 1);
             DoWriteCodePointTest<le_traits>(U'\U0010FFFF', U"\U0010FFFF");
             DoWriteCodePointTest<checked_le_traits>(U'\U0010FFFF', U"\U0010FFFF");
 
-            DoWriteCodePointTest<be_traits>(U'\u0000', U"\u0000");
-            DoWriteCodePointTest<checked_be_traits>(U'\u0000', U"\u0000");
+            DoWriteCodePointTest<be_traits>(U'\u0000', U"", 1);
+            DoWriteCodePointTest<checked_be_traits>(U'\u0000', U"", 1);
             DoWriteCodePointTest<be_traits>(U'\U0010FFFF', U"\xFFFF1000");
             DoWriteCodePointTest<checked_be_traits>(U'\U0010FFFF', U"\xFFFF1000");
 

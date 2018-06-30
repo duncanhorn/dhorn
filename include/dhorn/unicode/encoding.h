@@ -3,7 +3,7 @@
  *
  * encoding.h
  *
- * 
+ *
  */
 #pragma once
 
@@ -155,18 +155,12 @@ namespace dhorn::unicode
         inline constexpr string_length length(Itr str) noexcept
         {
             string_length result = {};
-            while (true)
+            while (*str)
             {
                 auto units = Traits::code_point_size(*str);
-                auto [ch, pos] = Traits::read(str);
-                if (!ch)
-                {
-                    return result;
-                }
-
                 if constexpr (Traits::is_checked)
                 {
-                    if (ch == eof)
+                    if (!units)
                     {
                         // TODO? What's the best way to indicate error? For now, we'll keep code_units unmodified so
                         // that the caller knows where the error occurred, but give "-1" back for code_points
@@ -175,9 +169,10 @@ namespace dhorn::unicode
                     }
                 }
 
-                ++result.code_points;
                 result.code_units += units;
-                str = pos;
+                ++result.code_points;
+
+                std::advance(str, units);
             }
 
             return result;
@@ -187,7 +182,7 @@ namespace dhorn::unicode
 
 
     /*
-     * encoding_traits (TODO: NAME?)
+     * encoding_traits
      */
 #pragma region encoding_traits
 
@@ -211,7 +206,6 @@ namespace dhorn::unicode
             // Two bytes:   110x xxxx
             // Three bytes: 1110 xxxx
             // Four bytes:  1111 0xxx
-            // TODO: Lookup table?
             return ((ch & 0x80) == 0x00) ? 1 :
                    ((ch & 0xE0) == 0xC0) ? 2 :
                    ((ch & 0xF0) == 0xE0) ? 3 :
@@ -246,7 +240,6 @@ namespace dhorn::unicode
         template <typename InputItr>
         static constexpr InputItr next(InputItr pos) noexcept
         {
-            // TODO: REMOVE?
             std::advance(pos, code_point_size(*pos));
             return pos;
         }

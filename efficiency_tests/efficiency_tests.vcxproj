@@ -65,6 +65,7 @@
   <ItemGroup>
     <ClCompile Include="inplace_function_tests.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="unicode_tests.cpp" />
     <ClCompile Include="vector_tests.cpp" />
     <ClCompile Include="vector_baseline_tests.cpp" />
   </ItemGroup>
