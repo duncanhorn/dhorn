@@ -89,8 +89,6 @@ void worker::thread_proc(void)
 {
     while (this->_running)
     {
-        using PointType = std::pair<std::size_t, std::size_t>;
-
         int row_index = ++this->_nextRow;
         for (; row_index < static_cast<int>(this->_data->size()); row_index = ++this->_nextRow)
         {
@@ -213,7 +211,7 @@ void worker::update_size(void)
 
 callback_handler::result_type worker::on_paint(window *pWindow, std::uintptr_t /*wparam*/, std::intptr_t /*lparam*/)
 {
-    pWindow;
+    (void)pWindow;
     //auto ps = pWindow->begin_paint();
 
     //// Grab a strong reference to the data (in case the size changes)
@@ -286,7 +284,7 @@ callback_handler::result_type worker::on_scrollwheel(
     }
 
     // Percentage of the current window
-    float amt = 1 / (1 + ((std::int16_t)HIWORD(wparam) / 120.0f));
+    float amt = .5 / (1 + ((std::int16_t)HIWORD(wparam) / 120.0f));
 
     std::size_t new_width = static_cast<std::size_t>(size.width * amt);
     std::size_t new_height = static_cast<std::size_t>(size.height * amt);

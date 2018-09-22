@@ -44,6 +44,7 @@ namespace dhorn
             using tid_t = std::uint32_t;
 
             using handle_t = HANDLE;
+            using handle_int_t = std::intptr_t;
             using bitmap_handle = HBITMAP;
             using brush_handle = HBRUSH;
             using cursor_handle = HCURSOR;
@@ -55,7 +56,7 @@ namespace dhorn
             using module_handle = HMODULE;
             using window_handle = HWND;
 
-            static const handle_t invalid_handle_value = INVALID_HANDLE_VALUE;
+            static const handle_int_t invalid_handle_value = -1;
 
 #pragma endregion
 
@@ -81,11 +82,11 @@ namespace dhorn
                     com::check_hresult(func(std::forward<Args>(args)...));
                 }
 
-                template <typename ResultType, ResultType Failure = ResultType{}, typename Func, typename... Args>
+                template <typename ResultType, auto Failure = ResultType{}, typename Func, typename... Args>
                 inline ResultType make_call_fail_on_value(Func &func, Args&&... args)
                 {
                     auto result = func(std::forward<Args>(args)...);
-                    if (result == Failure)
+                    if (result == (ResultType)Failure)
                     {
                         auto err = ::GetLastError();
                         throw std::system_error(err, std::system_category());
@@ -96,9 +97,9 @@ namespace dhorn
 
 
 
-                inline const TCHAR *null_if_empty(const tstring &str)
+                inline const TCHAR* null_if_empty(const tstring& str)
                 {
-                    return ((&str == nullptr) || str.empty()) ? nullptr : str.c_str();
+                    return str.empty() ? nullptr : str.c_str();
                 }
             }
 
@@ -840,29 +841,6 @@ namespace dhorn
                 RECT result;
                 details::make_boolean_call(GetWindowRect, window, &result);
 
-                return result;
-            }
-
-            inline void get_window_text(window_handle window, TCHAR *text, int len)
-            {
-                GetWindowText(window, text, len);
-            }
-
-            template <std::size_t size>
-            inline void get_window_text(window_handle window, TCHAR text[size])
-            {
-                GetWindowText(window, text, size);
-            }
-
-            template <int max_length = UINT_MAX>
-            inline tstring get_window_text(window_handle window)
-            {
-                // Get the estimated size
-                std::size_t size = std::min(GetWindowTextLength(window), max_length) + 1;
-                std::unique_ptr<TCHAR> str(new TCHAR[size]);
-                GetWindowText(window, str.get(), size);
-
-                tstring result = str.get();
                 return result;
             }
 
