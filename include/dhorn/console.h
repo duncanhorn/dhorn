@@ -152,8 +152,8 @@ namespace dhorn
             {
                 info.srWindow.Left,
                 info.srWindow.Top,
-                info.srWindow.Right - info.srWindow.Left + 1,
-                info.srWindow.Bottom - info.srWindow.Top + 1
+                static_cast<std::int16_t>(info.srWindow.Right - info.srWindow.Left + 1),
+                static_cast<std::int16_t>(info.srWindow.Bottom - info.srWindow.Top + 1)
             };
         }
 
