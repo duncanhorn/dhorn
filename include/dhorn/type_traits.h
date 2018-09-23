@@ -288,7 +288,7 @@ namespace dhorn
     template <typename Ty, typename Struct>
     inline /*constexpr*/ std::size_t byte_offset(Ty Struct::*member)
     {
-        return reinterpret_cast<std::uintptr_t>(&(reinterpret_cast<Struct*>(nullptr)->*member));
+        return reinterpret_cast<std::uintptr_t>(&(static_cast<Struct*>(nullptr)->*member));
     }
 
 

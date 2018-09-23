@@ -140,6 +140,9 @@ static std::pair<bool, std::intptr_t> key_press_handler(
         globals::down = key_down;
         handled = true;
         break;
+
+    default:
+        break;
     }
 
     return std::make_pair(handled, 0);

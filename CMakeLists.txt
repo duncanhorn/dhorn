@@ -24,5 +24,6 @@ set(DHORN_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_subdirectory(googletest)
 
+add_subdirectory(d3d_tests)
 add_subdirectory(functional_tests)
 add_subdirectory(window_tests)

@@ -200,8 +200,15 @@ namespace dhorn
                 UINT bindFlags)
             {
                 D3D11_BUFFER_DESC desc = buffer_desc(static_cast<UINT>(length * sizeof(Ty)), bindFlags);
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-field-initializers"
+#endif
                 D3D11_SUBRESOURCE_DATA data = { bufferData };
 
+#if __clang__
+#pragma clang diagnostic pop
+#endif
                 com::com_ptr<ID3D11Buffer> buffer;
                 com::check_hresult(device->CreateBuffer(&desc, &data, &buffer));
 

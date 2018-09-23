@@ -11,6 +11,7 @@
 
 #include "../../com/com_ptr.h"
 
+#include "../d3d/colors.h"
 #include "../functional.h"
 #include "../unique_any.h"
 #include "../windows/window.h"
