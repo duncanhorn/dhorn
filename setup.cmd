@@ -27,7 +27,10 @@ if "%~1" == "x86" (
     set CXXFLAGS=-m32
 )
 
-cmake -GNinja -DCMAKE_BUILD_TYPE=%~2 -DCMAKE_LINKER:PATH=lld-link ..\..
+:: TODO: Figure this out
+set ADDITIONAL_FLAGS=-DBENCHMARK_ENABLE_TESTING=OFF
+
+cmake -GNinja -DCMAKE_BUILD_TYPE=%~2 -DCMAKE_LINKER:PATH=lld-link %ADDITIONAL_FLAGS% ..\..
 
 echo.
 popd

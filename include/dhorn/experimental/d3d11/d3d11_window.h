@@ -212,7 +212,8 @@ namespace dhorn
                         Traits::swap_chain_format,
                         Traits::back_buffer_count);
 
-                    auto device = this->_device.as<IDXGIDevice>();
+                    // !TEMPORARY! 'template as' should be unnecessary, but needed here thanks to bug in Clang
+                    auto device = this->_device.template as<IDXGIDevice>();
                     com::com_ptr<IDXGIAdapter> adapter;
                     com::com_ptr<IDXGIFactory> factory;
                     com::check_hresult(device->GetParent(IID_PPV_ARGS(&adapter)));

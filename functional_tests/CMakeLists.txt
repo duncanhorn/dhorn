@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
+include(../cmake/build_flags.cmake)
+
 project(functional_tests)
 
 set(SOURCES
