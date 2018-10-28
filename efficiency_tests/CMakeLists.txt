@@ -20,3 +20,4 @@ set(INCLUDES
 add_executable(efficiency_tests WIN32)
 target_sources(efficiency_tests PUBLIC ${SOURCES})
 target_include_directories(efficiency_tests PUBLIC ${INCLUDES})
+target_link_libraries(efficiency_tests benchmark)

@@ -26,8 +26,8 @@ namespace dhorn::experimental::math
         template <typename Ty, std::size_t... Indices>
         inline constexpr auto sse2_mask_array() noexcept
         {
-            static constexpr std::size_t size = 16 / sizeof(Ty);
-            static constexpr Ty mask_value = static_cast<Ty>(-1);
+            constexpr std::size_t size = 16 / sizeof(Ty);
+            constexpr Ty mask_value = static_cast<Ty>(-1);
 
             std::array<Ty, size> result = {};
             ((result[Indices] = mask_value), ...);
@@ -42,7 +42,7 @@ namespace dhorn::experimental::math
         {
             static_assert(((Indices < 16) && ... && true));
 
-            static constexpr auto masks = sse2_mask_array<char, Indices...>();
+            constexpr auto masks = sse2_mask_array<char, Indices...>();
             return _mm_setr_epi8(
                 masks[0], masks[1], masks[2], masks[3], masks[4], masks[5], masks[6], masks[7],
                 masks[8], masks[9], masks[10], masks[11], masks[12], masks[13], masks[14], masks[15]);
@@ -143,7 +143,7 @@ namespace dhorn::experimental::math
         {
             static_assert(((Indices < 8) && ... && true));
 
-            static constexpr auto masks = sse2_mask_array<short, Indices...>();
+            constexpr auto masks = sse2_mask_array<short, Indices...>();
             return _mm_setr_epi16(masks[0], masks[1], masks[2], masks[3], masks[4], masks[5], masks[6], masks[7]);
         }
 
@@ -202,7 +202,7 @@ namespace dhorn::experimental::math
         {
             static_assert(((Indices < 4) && ... && true));
 
-            static constexpr auto masks = sse2_mask_array<std::int32_t, Indices...>();
+            constexpr auto masks = sse2_mask_array<std::int32_t, Indices...>();
             return _mm_setr_epi32(masks[0], masks[1], masks[2], masks[3]);
         }
 
@@ -242,7 +242,7 @@ namespace dhorn::experimental::math
             static_assert(((Indices < 2) && ... && true));
 
             // NOTE: _mm_setr_epi64x not available on 32-bit MSVC :(
-            static constexpr auto masks = sse2_mask_array<std::int64_t, Indices...>();
+            constexpr auto masks = sse2_mask_array<std::int64_t, Indices...>();
             return _mm_set_epi64x(masks[1], masks[0]);
         }
 
@@ -356,13 +356,24 @@ namespace dhorn::experimental::math
         template <typename = void>
         static inline void fill_array(vector_type*) {}
 
-        template <typename... Args>
+        template <typename = void>
         static inline void fill_array(
             vector_type* result,
             value_type v0,      value_type v1  = 0, value_type v2  = 0, value_type v3 = 0,
             value_type v4  = 0, value_type v5  = 0, value_type v6  = 0, value_type v7 = 0,
             value_type v8  = 0, value_type v9  = 0, value_type v10 = 0, value_type v11 = 0,
-            value_type v12 = 0, value_type v13 = 0, value_type v14 = 0, value_type v15 = 0, Args... args) noexcept
+            value_type v12 = 0, value_type v13 = 0, value_type v14 = 0, value_type v15 = 0) noexcept
+        {
+            *result = set(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
+        }
+
+        template <typename... Args>
+        static inline void fill_array(
+            vector_type* result,
+            value_type v0,  value_type v1,  value_type v2,  value_type v3,
+            value_type v4,  value_type v5,  value_type v6,  value_type v7,
+            value_type v8,  value_type v9,  value_type v10, value_type v11,
+            value_type v12, value_type v13, value_type v14, value_type v15, Args... args) noexcept
         {
             *result = set(v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15);
             fill_array(result + 1, args...);
@@ -499,11 +510,20 @@ namespace dhorn::experimental::math
         template <typename = void>
         static inline void fill_array(vector_type*) {}
 
-        template <typename... Args>
+        template <typename = void>
         static inline void fill_array(
             vector_type* result,
             value_type v0,     value_type v1 = 0, value_type v2 = 0, value_type v3 = 0,
-            value_type v4 = 0, value_type v5 = 0, value_type v6 = 0, value_type v7 = 0, Args... args) noexcept
+            value_type v4 = 0, value_type v5 = 0, value_type v6 = 0, value_type v7 = 0) noexcept
+        {
+            *result = set(v0, v1, v2, v3, v4, v5, v6, v7);
+        }
+
+        template <typename... Args>
+        static inline void fill_array(
+            vector_type* result,
+            value_type v0, value_type v1, value_type v2, value_type v3,
+            value_type v4, value_type v5, value_type v6, value_type v7, Args... args) noexcept
         {
             *result = set(v0, v1, v2, v3, v4, v5, v6, v7);
             fill_array(result + 1, args...);
@@ -634,10 +654,17 @@ namespace dhorn::experimental::math
         template <typename = void>
         static inline void fill_array(vector_type*) {}
 
+        template <typename = void>
+        static inline void fill_array(
+            vector_type* result, value_type v0, value_type v1 = 0, value_type v2 = 0, value_type v3 = 0) noexcept
+        {
+            *result = set(v0, v1, v2, v3);
+        }
+
         template <typename... Args>
         static inline void fill_array(
             vector_type* result,
-            value_type v0, value_type v1 = 0, value_type v2 = 0, value_type v3 = 0, Args... args) noexcept
+            value_type v0, value_type v1, value_type v2, value_type v3, Args... args) noexcept
         {
             *result = set(v0, v1, v2, v3);
             fill_array(result + 1, args...);
@@ -765,8 +792,14 @@ namespace dhorn::experimental::math
         template <typename = void>
         static inline void fill_array(vector_type*) {}
 
+        template <typename = void>
+        static inline void fill_array(vector_type* result, value_type v0, value_type v1 = 0) noexcept
+        {
+            *result = set(v0, v1);
+        }
+
         template <typename... Args>
-        static inline void fill_array(vector_type* result, value_type v0, value_type v1 = 0, Args... args) noexcept
+        static inline void fill_array(vector_type* result, value_type v0, value_type v1, Args... args) noexcept
         {
             *result = set(v0, v1);
             fill_array(result + 1, args...);
@@ -897,10 +930,18 @@ namespace dhorn::experimental::math
         template <typename = void>
         static inline void fill_array(vector_type*) {}
 
+        template <typename = void>
+        static inline void fill_array(
+            vector_type* result,
+            value_type v0, value_type v1 = 0, value_type v2 = 0, value_type v3 = 0) noexcept
+        {
+            *result = set(v0, v1, v2, v3);
+        }
+
         template <typename... Args>
         static inline void fill_array(
             vector_type* result,
-            value_type v0, value_type v1 = 0, value_type v2 = 0, value_type v3 = 0, Args... args) noexcept
+            value_type v0, value_type v1, value_type v2, value_type v3, Args... args) noexcept
         {
             *result = set(v0, v1, v2, v3);
             fill_array(result + 1, args...);
@@ -1027,8 +1068,14 @@ namespace dhorn::experimental::math
         template <typename = void>
         static inline void fill_array(vector_type*) {}
 
+        template <typename = void>
+        static inline void fill_array(vector_type* result, value_type v0, value_type v1 = 0) noexcept
+        {
+            *result = set(v0, v1);
+        }
+
         template <typename... Args>
-        static inline void fill_array(vector_type* result, value_type v0, value_type v1 = 0, Args... args) noexcept
+        static inline void fill_array(vector_type* result, value_type v0, value_type v1, Args... args) noexcept
         {
             *result = set(v0, v1);
             fill_array(result + 1, args...);

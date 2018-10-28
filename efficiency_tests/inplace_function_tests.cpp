@@ -16,7 +16,7 @@ struct test_object
 template <typename Func, typename... Args>
 void TestInvoke(benchmark::State& state, Func func, Args... args)
 {
-    for (auto _ : state)
+    for ([[maybe_unused]] auto _ : state)
     {
         benchmark::DoNotOptimize(std::invoke(func, args...));
     }
