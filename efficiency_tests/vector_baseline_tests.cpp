@@ -44,7 +44,7 @@ using expand_seq_t = typename expand_seq<IntSeq, Size, Value>::type;
 template <std::size_t Size>
 void VectorBaseline_DefaultConstruction_Int(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         __m128i v0;
         benchmark::DoNotOptimize(v0);
@@ -76,7 +76,7 @@ BENCHMARK_TEMPLATE(VectorBaseline_DefaultConstruction_Int, 4);
 template <std::size_t Size>
 void VectorBaseline_DefaultConstruction_Float(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         __m128 v0;
         benchmark::DoNotOptimize(v0);
@@ -94,7 +94,7 @@ BENCHMARK_TEMPLATE(VectorBaseline_DefaultConstruction_Float, 2);
 template <std::size_t Size>
 void VectorBaseline_DefaultConstruction_Double(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         __m128d v0;
         benchmark::DoNotOptimize(v0);
@@ -138,7 +138,7 @@ __m128i VectorBaseline_ConstructConstantValues_Char_Helper(std::integer_sequence
 template <std::size_t Size>
 void VectorBaseline_ConstructConstantValues_Char(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         using seq = expand_seq_t<std::make_integer_sequence<char, Size>, 16>;
         benchmark::DoNotOptimize(VectorBaseline_ConstructConstantValues_Char_Helper(seq{}));
@@ -161,7 +161,7 @@ __m128i VectorBaseline_ConstructConstantValues_Short_Helper(std::integer_sequenc
 template <std::size_t Size>
 void VectorBaseline_ConstructConstantValues_Short(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         using seq = expand_seq_t<std::make_integer_sequence<short, Size>, 8>;
         benchmark::DoNotOptimize(VectorBaseline_ConstructConstantValues_Short_Helper(seq{}));
@@ -184,7 +184,7 @@ __m128i VectorBaseline_ConstructConstantValues_Int32_Helper(std::integer_sequenc
 template <std::size_t Size>
 void VectorBaseline_ConstructConstantValues_Int32(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -216,7 +216,7 @@ __m128i VectorBaseline_ConstructConstantValues_Int64_Helper(std::integer_sequenc
 template <std::size_t Size>
 void VectorBaseline_ConstructConstantValues_Int64(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr auto SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -260,7 +260,7 @@ __m128 VectorBaseline_ConstructConstantValues_Float_Helper(std::integer_sequence
 template <std::size_t Size>
 void VectorBaseline_ConstructConstantValues_Float(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -292,7 +292,7 @@ __m128d VectorBaseline_ConstructConstantValues_Double_Helper(std::integer_sequen
 template <std::size_t Size>
 void VectorBaseline_ConstructConstantValues_Double(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr auto SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -345,7 +345,7 @@ __m128i VectorBaseline_ConstructNonConstantValues_Char_Helper(
 template <std::size_t Size>
 void VectorBaseline_ConstructNonConstantValues_Char(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         using seq = std::make_index_sequence<Size>;
         using zero = expand_seq_t<std::integer_sequence<char>, 16 - Size>;
@@ -372,7 +372,7 @@ __m128i VectorBaseline_ConstructNonConstantValues_Short_Helper(
 template <std::size_t Size>
 void VectorBaseline_ConstructNonConstantValues_Short(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         using seq = std::make_index_sequence<Size>;
         using zero = expand_seq_t<std::integer_sequence<short>, 8 - Size>;
@@ -399,7 +399,7 @@ __m128i VectorBaseline_ConstructNonConstantValues_Int32_Helper(
 template <std::size_t Size>
 void VectorBaseline_ConstructNonConstantValues_Int32(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -437,7 +437,7 @@ __m128i VectorBaseline_ConstructNonConstantValues_Int64_Helper(
 template <std::size_t Size>
 void VectorBaseline_ConstructNonConstantValues_Int64(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr auto SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -489,7 +489,7 @@ __m128 VectorBaseline_ConstructNonConstantValues_Float_Helper(
 template <std::size_t Size>
 void VectorBaseline_ConstructNonConstantValues_Float(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -527,7 +527,7 @@ __m128d VectorBaseline_ConstructNonConstantValues_Double_Helper(
 template <std::size_t Size>
 void VectorBaseline_ConstructNonConstantValues_Double(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr auto SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -576,7 +576,7 @@ BENCHMARK_TEMPLATE(VectorBaseline_ConstructNonConstantValues_Double, 8);
 template <std::size_t Size>
 void VectorBaseline_ZeroConstruction_Int(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         benchmark::DoNotOptimize(_mm_setzero_si128());
 
@@ -604,7 +604,7 @@ BENCHMARK_TEMPLATE(VectorBaseline_ZeroConstruction_Int, 4);
 template <std::size_t Size>
 void VectorBaseline_ZeroConstruction_Float(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         benchmark::DoNotOptimize(_mm_setzero_ps());
 
@@ -620,7 +620,7 @@ BENCHMARK_TEMPLATE(VectorBaseline_ZeroConstruction_Float, 2);
 template <std::size_t Size>
 void VectorBaseline_ZeroConstruction_Double(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         benchmark::DoNotOptimize(_mm_setzero_pd());
 
@@ -669,7 +669,7 @@ __m128i VectorBaseline_SplatConstant_Char_Helper(
 template <std::size_t Size>
 void VectorBaseline_SplatConstant_Char(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         using seq = expand_seq_t<std::integer_sequence<char>, Size, 42>;
         using zero = expand_seq_t<std::integer_sequence<char>, 16 - Size>;
@@ -702,7 +702,7 @@ __m128i VectorBaseline_SplatConstant_Short_Helper(
 template <std::size_t Size>
 void VectorBaseline_SplatConstant_Short(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         using seq = expand_seq_t<std::integer_sequence<short>, Size, 42>;
         using zero = expand_seq_t<std::integer_sequence<short>, 8 - Size>;
@@ -735,7 +735,7 @@ __m128i VectorBaseline_SplatConstant_Int32_Helper(
 template <std::size_t Size>
 void VectorBaseline_SplatConstant_Int32(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -779,7 +779,7 @@ __m128i VectorBaseline_SplatConstant_Int64_Helper(
 template <std::size_t Size>
 void VectorBaseline_SplatConstant_Int64(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr auto SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -837,7 +837,7 @@ __m128 VectorBaseline_SplatConstant_Float_Helper(
 template <std::size_t Size>
 void VectorBaseline_SplatConstant_Float(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -881,7 +881,7 @@ __m128d VectorBaseline_SplatConstant_Double_Helper(
 template <std::size_t Size>
 void VectorBaseline_SplatConstant_Double(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr auto SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -931,7 +931,7 @@ template <std::size_t Size>
 void VectorBaseline_SplatNonConstant_Char(benchmark::State& state)
 {
     const auto value = static_cast<char>(state.range(0));
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         if constexpr (Size == 16)
         {
@@ -971,7 +971,7 @@ template <std::size_t Size>
 void VectorBaseline_SplatNonConstant_Short(benchmark::State& state)
 {
     const auto value = static_cast<short>(state.range(0));
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         if constexpr (Size == 8)
         {
@@ -1020,7 +1020,7 @@ template <std::size_t Size>
 void VectorBaseline_SplatNonConstant_Int32(benchmark::State& state)
 {
     const auto value = state.range(0);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -1059,7 +1059,7 @@ template <std::size_t Size>
 void VectorBaseline_SplatNonConstant_Int64(benchmark::State& state)
 {
     const auto value = state.range(0);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr std::size_t FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr std::size_t SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -1110,7 +1110,7 @@ template <std::size_t Size>
 void VectorBaseline_SplatNonConstant_Float(benchmark::State& state)
 {
     const auto value = static_cast<float>(state.range(0));
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(4), Size);
         constexpr auto SecondSize = (Size <= 4) ? 0 : std::min(static_cast<std::size_t>(4), Size - 4);
@@ -1149,7 +1149,7 @@ template <std::size_t Size>
 void VectorBaseline_SplatNonConstant_Double(benchmark::State& state)
 {
     const auto value = static_cast<double>(state.range(0));
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         constexpr auto FirstSize = std::min(static_cast<std::size_t>(2), Size);
         constexpr auto SecondSize = (Size <= 2) ? 0 : std::min(static_cast<std::size_t>(2), Size - 2);
@@ -1190,7 +1190,7 @@ void VectorBaseline_Addition_Char(benchmark::State& state)
 {
     const auto c = _mm_set1_epi8(1);
     auto v = _mm_set1_epi8(1);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v = _mm_add_epi8(v, c);
     }
@@ -1204,7 +1204,7 @@ void VectorBaseline_Addition_Short(benchmark::State& state)
 {
     const auto c = _mm_set1_epi16(1);
     auto v = _mm_set1_epi16(1);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v = _mm_add_epi16(v, c);
     }
@@ -1219,7 +1219,7 @@ void VectorBaseline_Addition_Int32(benchmark::State& state)
     const auto c = _mm_set1_epi32(1);
     auto v0 = _mm_set1_epi32(1);
     auto v1 = _mm_set1_epi32(2);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v0 = _mm_add_epi32(v0, c);
         if constexpr (Size >= 2)
@@ -1245,7 +1245,7 @@ void VectorBaseline_Addition_Int64(benchmark::State& state)
     auto v1 = _mm_set1_epi64x(2);
     auto v2 = _mm_set1_epi64x(3);
     auto v3 = _mm_set1_epi64x(4);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v0 = _mm_add_epi64(v0, c);
         if constexpr (Size >= 2)
@@ -1287,7 +1287,7 @@ void VectorBaseline_Addition_Float(benchmark::State& state)
     const auto c = _mm_set1_ps(1);
     auto v0 = _mm_set1_ps(1);
     auto v1 = _mm_set1_ps(2);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v0 = _mm_add_ps(v0, c);
         if constexpr (Size >= 2)
@@ -1313,7 +1313,7 @@ void VectorBaseline_Addition_Double(benchmark::State& state)
     auto v1 = _mm_set1_pd(2);
     auto v2 = _mm_set1_pd(3);
     auto v3 = _mm_set1_pd(4);
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v0 = _mm_add_pd(v0, c);
         if constexpr (Size >= 2)

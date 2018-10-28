@@ -9,6 +9,6 @@ set(SOURCES
 
 set(INCLUDES ${DHORN_INCLUDE_PATH})
 
-add_executable(functional_tests WIN32)
+add_executable(functional_tests)
 target_sources(functional_tests PUBLIC ${SOURCES})
 target_include_directories(functional_tests PUBLIC ${INCLUDES})

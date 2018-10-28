@@ -353,10 +353,6 @@ namespace dhorn::experimental::math
         }
 
         // NOTE: Probably inefficient. TODO: Make better!
-        template <typename = void>
-        static inline void fill_array(vector_type*) {}
-
-        template <typename = void>
         static inline void fill_array(
             vector_type* result,
             value_type v0,      value_type v1  = 0, value_type v2  = 0, value_type v3 = 0,
@@ -507,10 +503,6 @@ namespace dhorn::experimental::math
         }
 
         // NOTE: Probably inefficient. TODO: Make better!
-        template <typename = void>
-        static inline void fill_array(vector_type*) {}
-
-        template <typename = void>
         static inline void fill_array(
             vector_type* result,
             value_type v0,     value_type v1 = 0, value_type v2 = 0, value_type v3 = 0,
@@ -651,10 +643,6 @@ namespace dhorn::experimental::math
         }
 
         // NOTE: Probably inefficient. TODO: Make better!
-        template <typename = void>
-        static inline void fill_array(vector_type*) {}
-
-        template <typename = void>
         static inline void fill_array(
             vector_type* result, value_type v0, value_type v1 = 0, value_type v2 = 0, value_type v3 = 0) noexcept
         {
@@ -789,10 +777,6 @@ namespace dhorn::experimental::math
         }
 
         // NOTE: Probably inefficient. TODO: Make better!
-        template <typename = void>
-        static inline void fill_array(vector_type*) {}
-
-        template <typename = void>
         static inline void fill_array(vector_type* result, value_type v0, value_type v1 = 0) noexcept
         {
             *result = set(v0, v1);
@@ -927,10 +911,6 @@ namespace dhorn::experimental::math
         }
 
         // NOTE: Probably inefficient. TODO: Make better!
-        template <typename = void>
-        static inline void fill_array(vector_type*) {}
-
-        template <typename = void>
         static inline void fill_array(
             vector_type* result,
             value_type v0, value_type v1 = 0, value_type v2 = 0, value_type v3 = 0) noexcept
@@ -1065,10 +1045,6 @@ namespace dhorn::experimental::math
         }
 
         // NOTE: Probably inefficient. TODO: Make better!
-        template <typename = void>
-        static inline void fill_array(vector_type*) {}
-
-        template <typename = void>
         static inline void fill_array(vector_type* result, value_type v0, value_type v1 = 0) noexcept
         {
             *result = set(v0, v1);

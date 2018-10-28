@@ -21,7 +21,7 @@ void StringLength_Strlen_Test(benchmark::State& state)
 {
     std::size_t size = 0;
 
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         size += std::strlen(ansi_string);
     }
@@ -34,7 +34,7 @@ void StringLength_Utf8Iterator_Test(benchmark::State& state)
 {
     std::size_t size = 0;
 
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         dhorn::unicode::iterator itr(ansi_string);
         while (*itr++) ++size;
@@ -48,7 +48,7 @@ void StringLength_TraitsLength_Test(benchmark::State& state)
 {
     std::size_t size = 0;
 
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         size += dhorn::unicode::encoding_traits<dhorn::unicode::encoding::utf_8>::length(ansi_string).code_points;
     }
@@ -61,7 +61,7 @@ void StringLength_CodePointSize_Test(benchmark::State& state)
 {
     std::size_t size = 0;
 
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         std::size_t s = 0;
         while (ansi_string[s])
@@ -77,7 +77,7 @@ BENCHMARK(StringLength_CodePointSize_Test);
 
 void FindCharacter_Strchr_Test(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         auto ptr = std::strchr(ansi_string, '=');
         benchmark::DoNotOptimize(ptr);
@@ -87,7 +87,7 @@ BENCHMARK(FindCharacter_Strchr_Test);
 
 void FindCharacter_Utf8Iterator_Test(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         dhorn::unicode::iterator itr(ansi_string);
         while (true)
@@ -106,7 +106,7 @@ BENCHMARK(FindCharacter_Utf8Iterator_Test);
 
 void FindCharacter_CodePointSize_Test(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         std::size_t i = 0;
         while (ansi_string[i] && (ansi_string[i] != '='))

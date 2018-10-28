@@ -50,7 +50,7 @@ DECLARE_TEST_SIZE_ARGS(Name, 8, __VA_ARGS__)
 template <typename VectorType>
 void Vector_DefaultConstruction(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         // Should NOP in all cases
         VectorType v;
@@ -70,7 +70,7 @@ VectorType Vector_ConstructConstantValues_Helper(std::index_sequence<Values...>)
 template <typename VectorType>
 void Vector_ConstructConstantValues(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         const auto v = Vector_ConstructConstantValues_Helper<VectorType>(std::make_index_sequence<VectorType::dimensions>{});
         benchmark::DoNotOptimize(v);
@@ -88,7 +88,7 @@ VectorType Vector_ConstructNonConstantValues_Helper(std::index_sequence<Indices.
 template <typename VectorType>
 void Vector_ConstructNonConstantValues(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         const auto v = Vector_ConstructNonConstantValues_Helper<VectorType>(std::make_index_sequence<VectorType::dimensions>{});
         benchmark::DoNotOptimize(v);
@@ -101,7 +101,7 @@ DECLARE_TEST(Vector_ConstructNonConstantValues);
 template <typename VectorType>
 void Vector_Zero(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         benchmark::DoNotOptimize(VectorType::zero());
     }
@@ -113,7 +113,7 @@ DECLARE_TEST(Vector_Zero);
 template <typename VectorType>
 void Vector_SplatConstantValue(benchmark::State& state)
 {
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         benchmark::DoNotOptimize(VectorType::splat(1));
     }
@@ -124,7 +124,7 @@ template <typename VectorType>
 void Vector_SplatNonConstantValue(benchmark::State& state)
 {
     const auto value = static_cast<typename VectorType::value_type>(state.range(0));
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         benchmark::DoNotOptimize(VectorType::splat(value));
     }
@@ -137,7 +137,7 @@ DECLARE_TEST_ARGS(Vector_SplatNonConstantValue, 42);
 //void Vector_Negate(benchmark::State& state)
 //{
 //    auto v = VectorType::splat(static_cast<typename VectorType::value_type>(1));
-//    for ([[maybe_unused]] auto _ : state)
+//    for (auto _ : state)
 //    {
 //        v = -v;
 //    }
@@ -152,7 +152,7 @@ void Vector_Addition(benchmark::State& state)
     const auto c = VectorType::splat(static_cast<typename VectorType::value_type>(1));
     //auto v = VectorType::splat(static_cast<typename VectorType::value_type>(1));
     auto v = Vector_ConstructConstantValues_Helper<VectorType>(std::make_index_sequence<VectorType::dimensions>{});
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v += c;
     }
@@ -166,7 +166,7 @@ void Vector_Subtraction(benchmark::State& state)
 {
     const auto c = VectorType::splat(static_cast<typename VectorType::value_type>(1));
     auto v = VectorType::splat(static_cast<typename VectorType::value_type>(1));
-    for ([[maybe_unused]] auto _ : state)
+    for (auto _ : state)
     {
         v -= c;
     }
