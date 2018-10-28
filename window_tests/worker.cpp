@@ -286,7 +286,6 @@ callback_handler::result_type worker::on_scrollwheel(
     // Percentage of the current window
     auto scrollAmt = static_cast<std::int16_t>(HIWORD(wparam)) / 120.0f;
     float amt = 4. / (scrollAmt * 3 + 5);
-    //float amt = 1. / (2 + ((std::int16_t)HIWORD(wparam) / 120.0f));
 
     auto new_width = static_cast<std::int64_t>(size.width * amt);
     auto new_height = static_cast<std::int64_t>(size.height * amt);
