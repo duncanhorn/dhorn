@@ -284,10 +284,12 @@ callback_handler::result_type worker::on_scrollwheel(
     }
 
     // Percentage of the current window
-    float amt = .5 / (1 + ((std::int16_t)HIWORD(wparam) / 120.0f));
+    auto scrollAmt = static_cast<std::int16_t>(HIWORD(wparam)) / 120.0f;
+    float amt = 4. / (scrollAmt * 3 + 5);
+    //float amt = 1. / (2 + ((std::int16_t)HIWORD(wparam) / 120.0f));
 
-    std::size_t new_width = static_cast<std::size_t>(size.width * amt);
-    std::size_t new_height = static_cast<std::size_t>(size.height * amt);
+    auto new_width = static_cast<std::int64_t>(size.width * amt);
+    auto new_height = static_cast<std::int64_t>(size.height * amt);
 
     auto left = pt.x - new_width / 2;
     auto top = pt.y - new_height / 2;
@@ -296,9 +298,9 @@ callback_handler::result_type worker::on_scrollwheel(
 
     // Convert these co-ords to complex values
     auto topLeftReal = this->_topLeft.real() + (this->_bottomRight.real() - this->_topLeft.real()) * left / size.width;
-    auto topLeftImag = this->_bottomRight.imag() + (this->_topLeft.imag() - this->_bottomRight.imag()) * top / size.height;
+    auto topLeftImag = this->_topLeft.imag() - (this->_topLeft.imag() - this->_bottomRight.imag()) * top / size.height;
     auto bottomRightReal = this->_topLeft.real() + (this->_bottomRight.real() - this->_topLeft.real()) * right / size.width;
-    auto bottomRightImag = this->_bottomRight.imag() + (this->_topLeft.imag() - this->_bottomRight.imag()) * bottom / size.height;
+    auto bottomRightImag = this->_topLeft.imag() - (this->_topLeft.imag() - this->_bottomRight.imag()) * bottom / size.height;
 
     this->_topLeft = { topLeftReal, topLeftImag };
     this->_bottomRight = { bottomRightReal, bottomRightImag };
