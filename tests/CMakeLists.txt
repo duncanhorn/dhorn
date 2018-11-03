@@ -38,7 +38,7 @@ set(SOURCES
 #    HStringTests.cpp
     InplaceFunctionTests.cpp
 #    InstanceTests.cpp
-#    IteratorTests.cpp
+    IteratorTests.cpp
 #    JsonScannerTests.cpp
 #    JSONTests.cpp
     main.cpp

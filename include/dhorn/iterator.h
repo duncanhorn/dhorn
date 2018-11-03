@@ -6,6 +6,7 @@
 #pragma once
 
 #include <iterator>
+#include <type_traits>
 
 namespace dhorn
 {
@@ -250,4 +251,248 @@ namespace dhorn
      */
     template <typename Ty>
     using const_array_iterator = array_iterator<std::add_const_t<Ty>>;
+
+
+
+    /*
+     * exclusive_iterator
+     *
+     *
+     */
+    template <typename Integer>
+    class exclusive_iterator
+    {
+        static_assert(!std::is_const_v<Integer>);
+        static_assert(std::is_integral_v<Integer>);
+
+    public:
+        /*
+         * Public Types
+         */
+        using difference_type = Integer;
+        using value_type = Integer;
+        using pointer = void;
+        using reference = value_type;
+        using iterator_category = std::random_access_iterator_tag;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        constexpr exclusive_iterator(Integer value) noexcept :
+            _value(value)
+        {
+        }
+
+
+
+        /*
+         * ForwardIterator
+         */
+        constexpr reference operator*() const noexcept
+        {
+            return this->_value;
+        }
+
+        constexpr exclusive_iterator& operator++() noexcept
+        {
+            ++this->_value;
+            return *this;
+        }
+
+        constexpr exclusive_iterator operator++(int) noexcept
+        {
+            auto copy = *this;
+            ++this->_value;
+            return copy;
+        }
+
+        friend constexpr bool operator==(exclusive_iterator lhs, exclusive_iterator rhs) noexcept
+        {
+            return lhs._value == rhs._value;
+        }
+
+        friend constexpr bool operator!=(exclusive_iterator lhs, exclusive_iterator rhs) noexcept
+        {
+            return lhs._value != rhs._value;
+        }
+
+
+
+        /*
+         * BidirectionalIterator
+         */
+        constexpr exclusive_iterator& operator--() noexcept
+        {
+            --this->_value;
+            return *this;
+        }
+
+        constexpr exclusive_iterator operator--(int) noexcept
+        {
+            auto copy = *this;
+            --this->_value;
+            return copy;
+        }
+
+
+
+        /*
+         * RandomAccessIterator
+         */
+        constexpr reference operator[](difference_type index) const noexcept
+        {
+            return this->_value + index;
+        }
+
+        constexpr exclusive_iterator& operator+=(difference_type diff) noexcept
+        {
+            this->_value += diff;
+            return *this;
+        }
+
+        constexpr exclusive_iterator& operator-=(difference_type diff) noexcept
+        {
+            this->_value -= diff;
+            return *this;
+        }
+
+        friend constexpr exclusive_iterator operator+(exclusive_iterator lhs, difference_type rhs) noexcept
+        {
+            return lhs += rhs;
+        }
+
+        friend constexpr exclusive_iterator operator+(difference_type lhs, exclusive_iterator rhs) noexcept
+        {
+            return rhs += lhs;
+        }
+
+        friend constexpr exclusive_iterator operator-(exclusive_iterator lhs, difference_type rhs) noexcept
+        {
+            return lhs -= rhs;
+        }
+
+        friend constexpr difference_type operator-(exclusive_iterator lhs, exclusive_iterator rhs) noexcept
+        {
+            return lhs._value - rhs._value;
+        }
+
+        friend constexpr bool operator<(exclusive_iterator lhs, exclusive_iterator rhs) noexcept
+        {
+            return lhs._value < rhs._value;
+        }
+
+        friend constexpr bool operator<=(exclusive_iterator lhs, exclusive_iterator rhs) noexcept
+        {
+            return lhs._value <= rhs._value;
+        }
+
+        friend constexpr bool operator>(exclusive_iterator lhs, exclusive_iterator rhs) noexcept
+        {
+            return lhs._value > rhs._value;
+        }
+
+        friend constexpr bool operator>=(exclusive_iterator lhs, exclusive_iterator rhs) noexcept
+        {
+            return lhs._value >= rhs._value;
+        }
+
+
+
+    private:
+
+        Integer _value;
+    };
+
+
+
+    /*
+     * exclusive_range
+     */
+    template <typename Integer>
+    class exclusive_range
+    {
+    public:
+        /*
+         * Public Types
+         */
+        using iterator = exclusive_iterator<Integer>;
+        using const_iterator = iterator;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = reverse_iterator;
+
+
+
+        /*
+         * Constructor(s)/Destructor
+         */
+        constexpr exclusive_range(Integer begin, Integer end) noexcept :
+            _begin(begin),
+            _end(end)
+        {
+        }
+
+
+
+        /*
+         * Iterators
+         */
+        constexpr iterator begin() const noexcept
+        {
+            return iterator{ this->_begin };
+        }
+
+        constexpr const_iterator cbegin() const noexcept
+        {
+            return begin();
+        }
+
+        constexpr iterator end() const noexcept
+        {
+            return iterator{ this->_end };
+        }
+
+        constexpr const_iterator cend() const noexcept
+        {
+            return end();
+        }
+
+        constexpr reverse_iterator rbegin() const noexcept
+        {
+            return reverse_iterator{ end() };
+        }
+
+        constexpr const_reverse_iterator crbegin() const noexcept
+        {
+            return rbegin();
+        }
+
+        constexpr reverse_iterator rend() const noexcept
+        {
+            return reverse_iterator{ begin() };
+        }
+
+        constexpr const_reverse_iterator crend() const noexcept
+        {
+            return rend();
+        }
+
+
+
+    private:
+
+        Integer _begin;
+        Integer _end;
+    };
+
+
+
+    /*
+     * index_range
+     */
+    inline exclusive_range<std::size_t> index_range(std::size_t length) noexcept
+    {
+        return exclusive_range<std::size_t>(0, length);
+    }
 }
