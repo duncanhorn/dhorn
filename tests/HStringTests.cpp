@@ -26,11 +26,11 @@ namespace dhorn
             void AssertEquals(const dhorn::experimental::hstring_reference &lhs, StringT&& rhs)
             {
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(
                     lhs.get(),
                     HStringReference(rhs).Get(),
                     &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_EQ(0, result);
             }
 
 #pragma region constructor tests
@@ -40,15 +40,15 @@ namespace dhorn
             {
                 dhorn::experimental::hstring_reference str(std::forward<Ty>(value));
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
             TEST_METHOD(DefaultConstructorTest)
             {
                 dhorn::experimental::hstring_reference str;
-                Assert::IsFalse(static_cast<bool>(str));
-                Assert::IsTrue(str.get() == nullptr);
+                ASSERT_FALSE(static_cast<bool>(str));
+                ASSERT_TRUE(str.get() == nullptr);
             }
 
             TEST_METHOD(WStringConstructorTest)
@@ -80,14 +80,14 @@ namespace dhorn
                 static const wchar_t *cstr = L"foo\0bar";
 
                 dhorn::experimental::hstring_reference str(cstr, 7);
-                Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(7u, ::WindowsGetStringLen(str.get()));
 
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(
                     HStringReference(cstr, 7).Get(),
                     str.get(),
                     &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_EQ(0, result);
             }
 
             TEST_METHOD(CopyConstructorTest)
@@ -95,11 +95,11 @@ namespace dhorn
                 dhorn::experimental::hstring_reference str1(L"foo\0bar");
                 dhorn::experimental::hstring_reference str2(str1);
 
-                Assert::IsTrue(str2.get() != nullptr);
+                ASSERT_TRUE(str2.get() != nullptr);
 
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(str1.get(), str2.get(), &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(str1.get(), str2.get(), &result)));
+                ASSERT_EQ(0, result);
             }
 
 #pragma endregion
@@ -112,7 +112,7 @@ namespace dhorn
                 dhorn::experimental::hstring_reference str(L"initvalue");
                 str = std::forward<Ty>(value);
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -152,7 +152,7 @@ namespace dhorn
                     str = exitingStr;
                 }
 
-                Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(7u, ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, strArray);
             }
 
@@ -166,7 +166,7 @@ namespace dhorn
                 dhorn::experimental::hstring_reference str(L"initvalue");
                 str.assign(std::forward<Ty>(value));
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
@@ -207,30 +207,30 @@ namespace dhorn
             TEST_METHOD(OperatorBoolTest)
             {
                 dhorn::experimental::hstring_reference str;
-                Assert::IsFalse(str);
+                ASSERT_FALSE(str);
 
                 str = L"";
-                Assert::IsFalse(str);
+                ASSERT_FALSE(str);
 
                 str = L"foo";
-                Assert::IsTrue(str);
+                ASSERT_TRUE(str);
 
                 str.reset();
-                Assert::IsFalse(str);
+                ASSERT_FALSE(str);
             }
 
             TEST_METHOD(CStrTest)
             {
                 dhorn::experimental::hstring_reference str = L"foo";
-                Assert::AreEqual(0, wcscmp(str.c_str(), L"foo"));
+                ASSERT_EQ(0, wcscmp(str.c_str(), L"foo"));
             }
 
             TEST_METHOD(ClearTest)
             {
                 dhorn::experimental::hstring_reference str = L"foo";
                 str.clear();
-                Assert::IsFalse(str);
-                Assert::IsTrue(str.get() == nullptr);
+                ASSERT_FALSE(str);
+                ASSERT_TRUE(str.get() == nullptr);
             }
 
             TEST_METHOD(CopyToTest)
@@ -240,56 +240,56 @@ namespace dhorn
                 str.copy_to(hstr.GetAddressOf());
 
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(str.get(), hstr.Get(), &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(str.get(), hstr.Get(), &result)));
+                ASSERT_EQ(0, result);
             }
 
             TEST_METHOD(DataTest)
             {
                 dhorn::experimental::hstring_reference str = L"foo";
-                Assert::AreEqual(0, wcscmp(str.data(), L"foo"));
+                ASSERT_EQ(0, wcscmp(str.data(), L"foo"));
             }
 
             TEST_METHOD(EmptyTest)
             {
                 dhorn::experimental::hstring_reference str;
-                Assert::IsTrue(str.empty());
+                ASSERT_TRUE(str.empty());
 
                 str = L"foo";
-                Assert::IsFalse(str.empty());
+                ASSERT_FALSE(str.empty());
 
                 str.clear();
-                Assert::IsTrue(str.empty());
+                ASSERT_TRUE(str.empty());
 
                 str = L"";
-                Assert::IsTrue(str.empty());
+                ASSERT_TRUE(str.empty());
             }
 
             TEST_METHOD(LengthAndSizeTest)
             {
                 dhorn::experimental::hstring_reference str;
-                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.size());
 
                 str = L"";
-                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.size());
 
                 str = L"foo\0bar";
-                Assert::AreEqual(static_cast<std::size_t>(7), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(7), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(7), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(7), str.size());
 
                 str.clear();
-                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.size());
             }
 
             TEST_METHOD(ResetTest)
             {
                 dhorn::experimental::hstring_reference str = L"foo";
                 str.reset();
-                Assert::IsFalse(str);
-                Assert::IsTrue(str.get() == nullptr);
+                ASSERT_FALSE(str);
+                ASSERT_TRUE(str.get() == nullptr);
             }
 
             TEST_METHOD(SwapTest)
@@ -311,11 +311,11 @@ namespace dhorn
             void AssertEquals(const dhorn::experimental::hstring &lhs, StringT&& rhs)
             {
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(
                     lhs.get(),
                     HStringReference(rhs).Get(),
                     &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_EQ(0, result);
             }
 
 #pragma region constructor tests
@@ -325,21 +325,21 @@ namespace dhorn
             {
                 dhorn::experimental::hstring str(std::forward<Ty>(value));
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
             TEST_METHOD(DefaultConstructorTest)
             {
                 dhorn::experimental::hstring str;
-                Assert::IsFalse(static_cast<bool>(str));
-                Assert::IsTrue(str.get() == nullptr);
+                ASSERT_FALSE(static_cast<bool>(str));
+                ASSERT_TRUE(str.get() == nullptr);
             }
 
             TEST_METHOD(HStringConstructorTest)
             {
                 HSTRING hstr;
-                Assert::IsTrue(SUCCEEDED(::WindowsCreateString(L"foo\0bar", 7, &hstr)));
+                ASSERT_TRUE(SUCCEEDED(::WindowsCreateString(L"foo\0bar", 7, &hstr)));
 
                 DoConstructorTest(hstr, L"foo\0bar");
 
@@ -375,14 +375,14 @@ namespace dhorn
                 static const wchar_t *cstr = L"foo\0bar";
 
                 dhorn::experimental::hstring str(cstr, 7);
-                Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(7u, ::WindowsGetStringLen(str.get()));
 
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(
                     HStringReference(cstr, 7).Get(),
                     str.get(),
                     &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_EQ(0, result);
             }
 
             TEST_METHOD(IteratorConstructorTest)
@@ -390,14 +390,14 @@ namespace dhorn
                 std::wstring wstr(L"foo\0bar", 7);
 
                 dhorn::experimental::hstring str(wstr.begin(), wstr.end());
-                Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(7u, ::WindowsGetStringLen(str.get()));
 
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(
                     HStringReference(wstr.c_str(), static_cast<unsigned int>(wstr.length())).Get(),
                     str.get(),
                     &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_EQ(0, result);
             }
 
             TEST_METHOD(CopyConstructorTest)
@@ -405,11 +405,11 @@ namespace dhorn
                 dhorn::experimental::hstring str1(L"foo\0bar");
                 dhorn::experimental::hstring str2(str1);
 
-                Assert::IsTrue(str2.get() != nullptr);
+                ASSERT_TRUE(str2.get() != nullptr);
 
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(str1.get(), str2.get(), &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(str1.get(), str2.get(), &result)));
+                ASSERT_EQ(0, result);
             }
 
             TEST_METHOD(MoveConstructorTest)
@@ -418,8 +418,8 @@ namespace dhorn
                 auto hstr = str1.get();
 
                 dhorn::experimental::hstring str2(std::move(str1));
-                Assert::IsTrue(hstr == str2.get());
-                Assert::IsTrue(str1.get() == nullptr);
+                ASSERT_TRUE(hstr == str2.get());
+                ASSERT_TRUE(str1.get() == nullptr);
             }
 
 #pragma endregion
@@ -432,14 +432,14 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"initvalue");
                 str = std::forward<Ty>(value);
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
             TEST_METHOD(HStringAssignmentOperatorTest)
             {
                 HSTRING hstr;
-                Assert::IsTrue(SUCCEEDED(::WindowsCreateString(L"foo\0bar", 7, &hstr)));
+                ASSERT_TRUE(SUCCEEDED(::WindowsCreateString(L"foo\0bar", 7, &hstr)));
 
                 DoAssignmentOperatorTest(hstr, L"foo\0bar");
 
@@ -481,7 +481,7 @@ namespace dhorn
                     str = exitingStr;
                 }
 
-                Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(7u, ::WindowsGetStringLen(str.get()));
             }
 
             TEST_METHOD(MoveAssignmentOperatorTest)
@@ -492,7 +492,7 @@ namespace dhorn
                 dhorn::experimental::hstring str2(L"initvalue");
                 str2 = std::move(str1);
 
-                Assert::IsTrue(hstr == str2.get());
+                ASSERT_TRUE(hstr == str2.get());
 
                 dhorn::experimental::hstring str;
                 {
@@ -500,7 +500,7 @@ namespace dhorn
                     str = std::move(exitingStr);
                 }
 
-                Assert::AreEqual(7u, ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(7u, ::WindowsGetStringLen(str.get()));
             }
 
 #pragma endregion
@@ -513,14 +513,14 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"initvalue");
                 str.assign(std::forward<Ty>(value));
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
             TEST_METHOD(HStringAssignTest)
             {
                 HSTRING hstr;
-                Assert::IsTrue(SUCCEEDED(::WindowsCreateString(L"foo\0bar", 7, &hstr)));
+                ASSERT_TRUE(SUCCEEDED(::WindowsCreateString(L"foo\0bar", 7, &hstr)));
 
                 DoAssignTest(hstr, L"foo\0bar");
 
@@ -565,7 +565,7 @@ namespace dhorn
                 dhorn::experimental::hstring str2(L"initvalue");
                 str2.assign(std::move(str1));
 
-                Assert::IsTrue(hstr == str2.get());
+                ASSERT_TRUE(hstr == str2.get());
             }
 
 #pragma endregion
@@ -578,14 +578,14 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"foo");
                 str += std::forward<Ty>(value);
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
             TEST_METHOD(HStringAppendOperatorTest)
             {
                 HSTRING hstr;
-                Assert::IsTrue(SUCCEEDED(::WindowsCreateString(L"bar\0car", 7, &hstr)));
+                ASSERT_TRUE(SUCCEEDED(::WindowsCreateString(L"bar\0car", 7, &hstr)));
 
                 DoAppendOperatorTest(hstr, L"foobar\0car");
 
@@ -639,14 +639,14 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"foo");
                 str.append(std::forward<Ty>(value));
 
-                Assert::AreEqual(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(static_cast<UINT32>(Size - 1), ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, expected);
             }
 
             TEST_METHOD(HStringAppendTest)
             {
                 HSTRING hstr;
-                Assert::IsTrue(SUCCEEDED(::WindowsCreateString(L"bar\0car", 7, &hstr)));
+                ASSERT_TRUE(SUCCEEDED(::WindowsCreateString(L"bar\0car", 7, &hstr)));
 
                 DoAppendTest(hstr, L"foobar\0car");
 
@@ -684,7 +684,7 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"foo");
                 str.append(cstr, 7);
 
-                Assert::AreEqual(10u, ::WindowsGetStringLen(str.get()));
+                ASSERT_EQ(10u, ::WindowsGetStringLen(str.get()));
                 AssertEquals(str, L"foobar\0car");
             }
 
@@ -710,23 +710,23 @@ namespace dhorn
                 dhorn::experimental::hstring str(L"foo");
                 auto ptr = &str;
 
-                Assert::IsTrue(std::is_same_v<decltype(ptr), HSTRING *>);
-                Assert::IsTrue(*ptr == str.get());
+                ASSERT_TRUE(std::is_same_v<decltype(ptr), HSTRING *>);
+                ASSERT_TRUE(*ptr == str.get());
             }
 
             TEST_METHOD(OperatorBoolTest)
             {
                 dhorn::experimental::hstring str;
-                Assert::IsFalse(str);
+                ASSERT_FALSE(str);
 
                 str = L"";
-                Assert::IsFalse(str);
+                ASSERT_FALSE(str);
 
                 str = L"foo";
-                Assert::IsTrue(str);
+                ASSERT_TRUE(str);
 
                 str.reset();
-                Assert::IsFalse(str);
+                ASSERT_FALSE(str);
             }
 
 #pragma endregion
@@ -736,25 +736,25 @@ namespace dhorn
             TEST_METHOD(AttachTest)
             {
                 HSTRING hstr;
-                Assert::IsTrue(SUCCEEDED(::WindowsCreateString(L"foo", 3, &hstr)));
+                ASSERT_TRUE(SUCCEEDED(::WindowsCreateString(L"foo", 3, &hstr)));
 
                 dhorn::experimental::hstring str;
                 str.attach(hstr);
-                Assert::IsTrue(str.get() == hstr);
+                ASSERT_TRUE(str.get() == hstr);
             }
 
             TEST_METHOD(CStrTest)
             {
                 dhorn::experimental::hstring str = L"foo";
-                Assert::AreEqual(0, wcscmp(str.c_str(), L"foo"));
+                ASSERT_EQ(0, wcscmp(str.c_str(), L"foo"));
             }
 
             TEST_METHOD(ClearTest)
             {
                 dhorn::experimental::hstring str = L"foo";
                 str.clear();
-                Assert::IsFalse(str);
-                Assert::IsTrue(str.get() == nullptr);
+                ASSERT_FALSE(str);
+                ASSERT_TRUE(str.get() == nullptr);
             }
 
             TEST_METHOD(CopyToTest)
@@ -764,14 +764,14 @@ namespace dhorn
                 str.copy_to(hstr.GetAddressOf());
 
                 int result;
-                Assert::IsTrue(SUCCEEDED(::WindowsCompareStringOrdinal(str.get(), hstr.Get(), &result)));
-                Assert::AreEqual(0, result);
+                ASSERT_TRUE(SUCCEEDED(::WindowsCompareStringOrdinal(str.get(), hstr.Get(), &result)));
+                ASSERT_EQ(0, result);
             }
 
             TEST_METHOD(DataTest)
             {
                 dhorn::experimental::hstring str = L"foo";
-                Assert::AreEqual(0, wcscmp(str.data(), L"foo"));
+                ASSERT_EQ(0, wcscmp(str.data(), L"foo"));
             }
 
             TEST_METHOD(DetachTest)
@@ -780,7 +780,7 @@ namespace dhorn
                 auto value = str.get();
 
                 auto hstr = str.detach();
-                Assert::IsTrue(hstr == value);
+                ASSERT_TRUE(hstr == value);
 
                 ::WindowsDeleteString(hstr);
             }
@@ -788,20 +788,20 @@ namespace dhorn
             TEST_METHOD(EmptyTest)
             {
                 dhorn::experimental::hstring str;
-                Assert::IsTrue(str.empty());
+                ASSERT_TRUE(str.empty());
 
                 str = L"foo";
-                Assert::IsFalse(str.empty());
+                ASSERT_FALSE(str.empty());
 
                 str.clear();
-                Assert::IsTrue(str.empty());
+                ASSERT_TRUE(str.empty());
 
                 str = L"";
-                Assert::IsTrue(str.empty());
+                ASSERT_TRUE(str.empty());
 
                 str = L"foo";
                 auto hstr = str.detach();
-                Assert::IsTrue(str.empty());
+                ASSERT_TRUE(str.empty());
 
                 ::WindowsDeleteString(hstr);
             }
@@ -809,25 +809,25 @@ namespace dhorn
             TEST_METHOD(LengthAndSizeTest)
             {
                 dhorn::experimental::hstring str;
-                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.size());
 
                 str = L"";
-                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.size());
 
                 str = L"foo\0bar";
-                Assert::AreEqual(static_cast<std::size_t>(7), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(7), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(7), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(7), str.size());
 
                 str.clear();
-                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.size());
 
                 str = L"foo";
                 auto hstr = str.detach();
-                Assert::AreEqual(static_cast<std::size_t>(0), str.length());
-                Assert::AreEqual(static_cast<std::size_t>(0), str.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.length());
+                ASSERT_EQ(static_cast<std::size_t>(0), str.size());
 
                 ::WindowsDeleteString(hstr);
             }
@@ -838,7 +838,7 @@ namespace dhorn
                 auto value = str.get();
 
                 auto hstr = str.release();
-                Assert::IsTrue(hstr == value);
+                ASSERT_TRUE(hstr == value);
 
                 ::WindowsDeleteString(hstr);
             }
@@ -847,8 +847,8 @@ namespace dhorn
             {
                 dhorn::experimental::hstring str = L"foo";
                 str.reset();
-                Assert::IsFalse(str);
-                Assert::IsTrue(str.get() == nullptr);
+                ASSERT_FALSE(str);
+                ASSERT_TRUE(str.get() == nullptr);
             }
 
             TEST_METHOD(SwapTest)
@@ -879,7 +879,7 @@ namespace dhorn
             template <typename LhsTy, typename RhsTy>
             void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
-                Assert::AreEqual(expected, lhs == rhs);
+                ASSERT_EQ(expected, lhs == rhs);
 
                 if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
                     !std::is_const_v<std::remove_reference_t<LhsTy>>)
@@ -932,7 +932,7 @@ namespace dhorn
             TEST_METHOD(HSTRINGEqualityTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(L"foo\0bar")));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(L"foo\0bar")));
                 auto str = hstr.Get();
 
                 DoComparisonTest(hfoobar, str, true);
@@ -1012,7 +1012,7 @@ namespace dhorn
             template <typename LhsTy, typename RhsTy>
             void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
-                Assert::AreEqual(expected, lhs != rhs);
+                ASSERT_EQ(expected, lhs != rhs);
 
                 if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
                     !std::is_const_v<std::remove_reference_t<LhsTy>>)
@@ -1065,7 +1065,7 @@ namespace dhorn
             TEST_METHOD(HSTRINGInequalityTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(L"foo\0bar")));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(L"foo\0bar")));
                 auto str = hstr.Get();
 
                 DoComparisonTest(hfoobar, str, false);
@@ -1145,7 +1145,7 @@ namespace dhorn
             template <typename LhsTy, typename RhsTy>
             void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
-                Assert::AreEqual(expected, lhs < rhs);
+                ASSERT_EQ(expected, lhs < rhs);
 
                 if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
                     !std::is_const_v<std::remove_reference_t<LhsTy>>)
@@ -1202,7 +1202,7 @@ namespace dhorn
             TEST_METHOD(HSTRINGLessThanTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(L"foo\0bar")));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(L"foo\0bar")));
                 auto str = hstr.Get();
 
                 DoComparisonTest(hfoobar, str, false);
@@ -1282,7 +1282,7 @@ namespace dhorn
             template <typename LhsTy, typename RhsTy>
             void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
-                Assert::AreEqual(expected, lhs <= rhs);
+                ASSERT_EQ(expected, lhs <= rhs);
 
                 if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
                     !std::is_const_v<std::remove_reference_t<LhsTy>>)
@@ -1339,7 +1339,7 @@ namespace dhorn
             TEST_METHOD(HSTRINGLessThanOrEqualsTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(L"foo\0bar")));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(L"foo\0bar")));
                 auto str = hstr.Get();
 
                 DoComparisonTest(hfoobar, str, true);
@@ -1419,7 +1419,7 @@ namespace dhorn
             template <typename LhsTy, typename RhsTy>
             void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
-                Assert::AreEqual(expected, lhs > rhs);
+                ASSERT_EQ(expected, lhs > rhs);
 
                 if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
                     !std::is_const_v<std::remove_reference_t<LhsTy>>)
@@ -1476,7 +1476,7 @@ namespace dhorn
             TEST_METHOD(HSTRINGGreaterThanTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(L"foo\0bar")));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(L"foo\0bar")));
                 auto str = hstr.Get();
 
                 DoComparisonTest(hfoobar, str, false);
@@ -1556,7 +1556,7 @@ namespace dhorn
             template <typename LhsTy, typename RhsTy>
             void DoComparisonTest(LhsTy &&lhs, RhsTy &&rhs, bool expected)
             {
-                Assert::AreEqual(expected, lhs >= rhs);
+                ASSERT_EQ(expected, lhs >= rhs);
 
                 if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
                     !std::is_const_v<std::remove_reference_t<LhsTy>>)
@@ -1613,7 +1613,7 @@ namespace dhorn
             TEST_METHOD(HSTRINGGreaterThanOrEqualsTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(L"foo\0bar")));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(L"foo\0bar")));
                 auto str = hstr.Get();
 
                 DoComparisonTest(hfoobar, str, true);
@@ -1705,8 +1705,8 @@ namespace dhorn
             void DoAppendTest(LhsTy &&lhs, RhsTy &&rhs, ResultTy &&expected)
             {
                 auto result = lhs + rhs;
-                Assert::IsTrue(std::is_same_v<decltype(result), dhorn::experimental::hstring>);
-                Assert::IsTrue(result == expected);
+                ASSERT_TRUE(std::is_same_v<decltype(result), dhorn::experimental::hstring>);
+                ASSERT_TRUE(result == expected);
 
                 if constexpr (!std::is_array_v<std::remove_reference_t<LhsTy>> &&
                     !std::is_const_v<std::remove_reference_t<LhsTy>>)
@@ -1726,7 +1726,7 @@ namespace dhorn
             TEST_METHOD(AppendToHStringTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(fooBarConstArray)));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(fooBarConstArray)));
 
                 DoAppendTest(hfoobar, hfoobar, fooBarFooBar);
                 DoAppendTest(hfoobar, rfoobar, fooBarFooBar);
@@ -1747,7 +1747,7 @@ namespace dhorn
             TEST_METHOD(AppendToHStringReferenceTest)
             {
                 HString hstr;
-                Assert::IsTrue(SUCCEEDED(hstr.Set(fooBarConstArray)));
+                ASSERT_TRUE(SUCCEEDED(hstr.Set(fooBarConstArray)));
 
                 DoAppendTest(rfoobar, rfoobar, fooBarFooBar);
                 DoAppendTest(rfoobar, fooBarConstArray, fooBarFooBar);

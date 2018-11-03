@@ -52,20 +52,20 @@ namespace dhorn
                 {
                     // Default construct should not affect the count
                     dhorn::experimental::unique_any<test_class *> ptr;
-                    Assert::AreEqual(0, count);
+                    ASSERT_EQ(0, count);
 
                     ptr = new test_class();
-                    Assert::AreEqual(1, count);
+                    ASSERT_EQ(1, count);
 
                     // Resetting the value should destroy the previous one
                     ptr = new test_class();
-                    Assert::AreEqual(1, count);
+                    ASSERT_EQ(1, count);
                     ptr.reset(new test_class());
-                    Assert::AreEqual(1, count);
+                    ASSERT_EQ(1, count);
                 }
 
                 // Should have released all resources
-                Assert::AreEqual(0, count);
+                ASSERT_EQ(0, count);
             }
 
             TEST_METHOD(ArrayTest)
@@ -73,43 +73,43 @@ namespace dhorn
                 {
                     // Default construct should not affect the count
                     dhorn::experimental::unique_any<test_class[]> ptr;
-                    Assert::AreEqual(0, count);
+                    ASSERT_EQ(0, count);
 
                     // Calling new[] with a size of 5 should mean that count is now 5 as well
                     ptr = new test_class[5];
-                    Assert::AreEqual(5, count);
+                    ASSERT_EQ(5, count);
 
                     // Resetting should call the destructor for *all* elements in the array
                     ptr = new test_class[6];
-                    Assert::AreEqual(6, count);
+                    ASSERT_EQ(6, count);
                     ptr.reset(new test_class[2]);
-                    Assert::AreEqual(2, count);
+                    ASSERT_EQ(2, count);
                 }
 
                 // Should have released all resources
-                Assert::AreEqual(0, count);
+                ASSERT_EQ(0, count);
             }
 
             TEST_METHOD(ValueTest)
             {
                 std::vector<test_class> arr(5);
-                Assert::AreEqual(5, count);
+                ASSERT_EQ(5, count);
 
                 {
                     dhorn::experimental::unique_any<std::vector<test_class>> val;
-                    Assert::AreEqual(5, count);
+                    ASSERT_EQ(5, count);
 
                     // Assignment should copy here (i.e. it acts like a normal non-unique value)
                     val = arr;
-                    Assert::AreEqual(10, count);
+                    ASSERT_EQ(10, count);
 
                     // Moving should transfer all ownership, though
                     val.reset(std::move(arr));
-                    Assert::AreEqual(5, count);
+                    ASSERT_EQ(5, count);
                 }
 
                 // Should have released all resources
-                Assert::AreEqual(0, count);
+                ASSERT_EQ(0, count);
             }
         };
 
@@ -123,7 +123,7 @@ namespace dhorn
                 HANDLE h = CreateFile(L"foo.txt", GENERIC_READ | GENERIC_WRITE, 0, nullptr,
                     CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-                Assert::AreNotEqual(h, INVALID_HANDLE_VALUE, L"Handle not previously closed :(");
+                ASSERT_NE(h, INVALID_HANDLE_VALUE, L"Handle not previously closed :(");
                 return h;
             }
 
@@ -133,13 +133,13 @@ namespace dhorn
                 HANDLE h = CreateFile(L"bar.txt", GENERIC_READ | GENERIC_WRITE, 0, nullptr,
                     CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-                Assert::AreNotEqual(h, INVALID_HANDLE_VALUE, L"Handle not previously closed :(");
+                ASSERT_NE(h, INVALID_HANDLE_VALUE, L"Handle not previously closed :(");
                 return h;
             }
 
             void verify_handle_closed(void)
             {
-                Assert::IsTrue(!!CloseHandle(make_valid_handle()));
+                ASSERT_TRUE(!!CloseHandle(make_valid_handle()));
             }
 
             HANDLE make_invalid_handle(void)
@@ -152,7 +152,7 @@ namespace dhorn
             {
                 // Should construct and should be invalid
                 dhorn::experimental::unique_handle handle;
-                Assert::IsTrue(static_cast<HANDLE>(handle) == INVALID_HANDLE_VALUE);
+                ASSERT_TRUE(static_cast<HANDLE>(handle) == INVALID_HANDLE_VALUE);
             }
 
             TEST_METHOD(HandleConstructorTest)
@@ -162,8 +162,8 @@ namespace dhorn
                     auto handle = make_valid_handle();
                     dhorn::experimental::unique_handle h(handle);
 
-                    Assert::AreNotEqual(handle, INVALID_HANDLE_VALUE);
-                    Assert::AreEqual(handle, static_cast<HANDLE>(h));
+                    ASSERT_NE(handle, INVALID_HANDLE_VALUE);
+                    ASSERT_EQ(handle, static_cast<HANDLE>(h));
                 }
 
                 // Make sure the handle was closed
@@ -181,7 +181,7 @@ namespace dhorn
                 }
                 catch (const std::system_error& e)
                 {
-                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
+                    ASSERT_TRUE(e.code().value() == ERROR_INVALID_HANDLE);
                 }
             }
 
@@ -212,12 +212,12 @@ namespace dhorn
                 auto test_func = [&](std::function<void(HANDLE h)> func)
                 {
                     HANDLE handle = make_valid_handle();
-                    Assert::IsTrue(handle != INVALID_HANDLE_VALUE);
+                    ASSERT_TRUE(handle != INVALID_HANDLE_VALUE);
 
                     func(handle);
 
                     // Handle should be closed. I.e. CloseHandle should fail
-                    Assert::IsFalse(!!CloseHandle(handle));
+                    ASSERT_FALSE(!!CloseHandle(handle));
                 };
 
                 // TEST 1 : Construct two should throw exception
@@ -233,7 +233,7 @@ namespace dhorn
                     }
                     catch (std::system_error& e)
                     {
-                        Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
+                        ASSERT_TRUE(e.code().value() == ERROR_INVALID_HANDLE);
                     }
                 });
 
@@ -253,7 +253,7 @@ namespace dhorn
                 }
                 catch (std::system_error& e)
                 {
-                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
+                    ASSERT_TRUE(e.code().value() == ERROR_INVALID_HANDLE);
                 }
 
                 // TEST 4 : No-arg should not cause exception
@@ -268,7 +268,7 @@ namespace dhorn
                     dhorn::experimental::unique_handle x;
 
                     // Ensure no optimizations
-                    Assert::IsTrue(static_cast<HANDLE>(x) == INVALID_HANDLE_VALUE);
+                    ASSERT_TRUE(static_cast<HANDLE>(x) == INVALID_HANDLE_VALUE);
 
                     x = handle;
                 });
@@ -282,7 +282,7 @@ namespace dhorn
                         x = other;
                     }
 
-                    Assert::IsFalse(!!CloseHandle(other));
+                    ASSERT_FALSE(!!CloseHandle(other));
                 });
 
                 // TEST 7 : Assign to same should throw exception
@@ -295,7 +295,7 @@ namespace dhorn
                             dhorn::experimental::unique_handle y;
 
                             // Ensure no optimizations
-                            Assert::IsTrue(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
+                            ASSERT_TRUE(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
 
                             y = handle;
                         }
@@ -303,7 +303,7 @@ namespace dhorn
                     }
                     catch (std::system_error& e)
                     {
-                        Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
+                        ASSERT_TRUE(e.code().value() == ERROR_INVALID_HANDLE);
                     }
                 });
             }
@@ -313,7 +313,7 @@ namespace dhorn
                 // Assignment should work
                 {
                     dhorn::experimental::unique_handle x;
-                    Assert::IsTrue(static_cast<HANDLE>(x) == INVALID_HANDLE_VALUE);
+                    ASSERT_TRUE(static_cast<HANDLE>(x) == INVALID_HANDLE_VALUE);
 
                     x = make_valid_handle();
                 }
@@ -325,7 +325,7 @@ namespace dhorn
                     x = make_valid_handle2();
                 }
                 verify_handle_closed();
-                Assert::IsTrue(!!CloseHandle(make_valid_handle2()));
+                ASSERT_TRUE(!!CloseHandle(make_valid_handle2()));
 
                 // Assigning the same handle to same object should fail
                 try
@@ -339,7 +339,7 @@ namespace dhorn
                 }
                 catch (std::system_error& e)
                 {
-                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
+                    ASSERT_TRUE(e.code().value() == ERROR_INVALID_HANDLE);
                 }
             }
 
@@ -351,7 +351,7 @@ namespace dhorn
                 dhorn::experimental::unique_handle x;
                 dhorn::experimental::unique_handle y;
 
-                Assert::IsTrue(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
+                ASSERT_TRUE(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
 
                 // y = x;
             }
@@ -362,7 +362,7 @@ namespace dhorn
                 {
                     dhorn::experimental::unique_handle y;
 
-                    Assert::IsTrue(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
+                    ASSERT_TRUE(static_cast<HANDLE>(y) == INVALID_HANDLE_VALUE);
 
                     y = std::move(x);
                     x = std::move(y);
@@ -377,20 +377,20 @@ namespace dhorn
             {
                 // Default should be invalid
                 dhorn::experimental::unique_handle x;
-                Assert::IsFalse(x);
+                ASSERT_FALSE(x);
 
                 // Assign to non-invalid
                 x = make_valid_handle();
-                Assert::IsTrue(x);
+                ASSERT_TRUE(x);
 
                 // Move should make invalid again
                 dhorn::experimental::unique_handle y(std::move(x));
-                Assert::IsFalse(x);
-                Assert::IsTrue(y);
+                ASSERT_FALSE(x);
+                ASSERT_TRUE(y);
 
                 x = std::move(y);
-                Assert::IsTrue(x);
-                Assert::IsFalse(y);
+                ASSERT_TRUE(x);
+                ASSERT_FALSE(y);
             }
 
             TEST_METHOD(ResetTest)
@@ -404,13 +404,13 @@ namespace dhorn
                     x.reset();
                 }
                 // Handle should now be closed and x should be invalid
-                Assert::IsTrue(!!CloseHandle(make_valid_handle()));
-                Assert::IsFalse(x);
+                ASSERT_TRUE(!!CloseHandle(make_valid_handle()));
+                ASSERT_FALSE(x);
 
                 // Calling reset on an invalid handle should be harmless
                 dhorn::experimental::unique_handle y;
                 y.reset();
-                Assert::IsFalse(y);
+                ASSERT_FALSE(y);
             }
 
             TEST_METHOD(SwapTest)
@@ -427,14 +427,14 @@ namespace dhorn
                         }
                         // one should be closed and two should still be active
                         verify_handle_closed();
-                        Assert::IsFalse(!!CloseHandle(one));
-                        Assert::IsTrue(!!CloseHandle(two));
+                        ASSERT_FALSE(!!CloseHandle(one));
+                        ASSERT_TRUE(!!CloseHandle(two));
                     }
                     Assert::Fail(L"Expected an exception");
                 }
                 catch (std::system_error& e)
                 {
-                    Assert::IsTrue(e.code().value() == ERROR_INVALID_HANDLE);
+                    ASSERT_TRUE(e.code().value() == ERROR_INVALID_HANDLE);
                 }
             }
         };

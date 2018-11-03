@@ -80,8 +80,8 @@ namespace dhorn
             TEST_METHOD(DefaultConstructorTest)
             {
                 dhorn::experimental::service_container x;
-                Assert::IsTrue(x.size() == 0);
-                Assert::IsTrue(x.empty());
+                ASSERT_TRUE(x.size() == 0);
+                ASSERT_TRUE(x.empty());
             }
 
             TEST_METHOD(MoveConstructorTest)
@@ -90,14 +90,14 @@ namespace dhorn
 
                 x.insert(new test_type_1());
                 x.insert(new test_type_2());
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 dhorn::experimental::service_container y(std::move(x));
-                Assert::IsTrue(y.size() == 2);
+                ASSERT_TRUE(y.size() == 2);
 
                 // Pointers should still be there
-                Assert::IsTrue(y.find<test_type_1>()->val == 8);
-                Assert::IsTrue(y.find<test_type_2>()->val == 42);
+                ASSERT_TRUE(y.find<test_type_1>()->val == 8);
+                ASSERT_TRUE(y.find<test_type_2>()->val == 42);
 
                 // Shouldn't be able to find fake_test_type_1
                 try
@@ -118,16 +118,16 @@ namespace dhorn
 
                     x.insert(new test_type_1());
                     x.insert(new test_type_2());
-                    Assert::IsTrue(x.size() == 2);
-                    Assert::IsTrue(y.empty());
+                    ASSERT_TRUE(x.size() == 2);
+                    ASSERT_TRUE(y.empty());
 
                     y = std::move(x);
                 }
-                Assert::IsTrue(y.size() == 2);
+                ASSERT_TRUE(y.size() == 2);
 
                 // Pointers should still be there
-                Assert::IsTrue(y.find<test_type_1>()->val == 8);
-                Assert::IsTrue(y.find<test_type_2>()->val == 42);
+                ASSERT_TRUE(y.find<test_type_1>()->val == 8);
+                ASSERT_TRUE(y.find<test_type_2>()->val == 42);
 
                 // Shouldn't be able to find fake_test_type_1
                 try
@@ -143,13 +143,13 @@ namespace dhorn
             TEST_METHOD(PointerInsertTest)
             {
                 dhorn::experimental::service_container x;
-                Assert::IsTrue(x.size() == 0);
+                ASSERT_TRUE(x.size() == 0);
 
                 x.insert(new test_type_1());
-                Assert::IsTrue(x.size() == 1);
+                ASSERT_TRUE(x.size() == 1);
 
                 x.insert(new test_type_2(), std::default_delete<test_type_2>());
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 // Make sure exceptions are thrown
                 try
@@ -160,7 +160,7 @@ namespace dhorn
                 catch (dhorn::experimental::service_published &)
                 {
                 }
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 try
                 {
@@ -170,7 +170,7 @@ namespace dhorn
                 catch (dhorn::experimental::service_published &)
                 {
                 }
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 // fake_test_type_1 has same uuid as test_type_1, so it should fail
                 try
@@ -181,19 +181,19 @@ namespace dhorn
                 catch (dhorn::experimental::service_published &)
                 {
                 }
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
             }
 
             TEST_METHOD(EmplaceTest)
             {
                 dhorn::experimental::service_container x;
-                Assert::IsTrue(x.size() == 0);
+                ASSERT_TRUE(x.size() == 0);
 
                 x.emplace<test_type_1>();
-                Assert::IsTrue(x.size() == 1);
+                ASSERT_TRUE(x.size() == 1);
 
                 x.emplace<test_type_2>();
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 // Make sure exceptions are thrown
                 try
@@ -204,7 +204,7 @@ namespace dhorn
                 catch (dhorn::experimental::service_published &)
                 {
                 }
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 try
                 {
@@ -214,7 +214,7 @@ namespace dhorn
                 catch (dhorn::experimental::service_published &)
                 {
                 }
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 // fake_test_type_1 has same uuid as test_type_1, so it should fail
                 try
@@ -225,19 +225,19 @@ namespace dhorn
                 catch (dhorn::experimental::service_published &)
                 {
                 }
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
             }
 
             TEST_METHOD(AllocateTest)
             {
                 dhorn::experimental::service_container x;
-                Assert::IsTrue(x.size() == 0);
-                Assert::IsTrue(x.empty());
+                ASSERT_TRUE(x.size() == 0);
+                ASSERT_TRUE(x.empty());
 
                 x.allocate<test_type_1>(std::allocator<test_type_1>());
-                Assert::IsTrue(x.size() == 1);
-                Assert::IsTrue(!x.empty());
-                Assert::IsTrue(x.find<test_type_1>()->val == 8);
+                ASSERT_TRUE(x.size() == 1);
+                ASSERT_TRUE(!x.empty());
+                ASSERT_TRUE(x.find<test_type_1>()->val == 8);
 
                 // Cannot add again
                 try
@@ -266,7 +266,7 @@ namespace dhorn
                 // No exception after inserting
                 x.insert(new test_type_1());
                 auto ptr = x.find<test_type_1>();
-                Assert::IsTrue(ptr->val == 8);
+                ASSERT_TRUE(ptr->val == 8);
 
                 // Should throw exception
                 try
@@ -281,11 +281,11 @@ namespace dhorn
                 // No exception after inserting
                 x.insert(new test_type_2());
                 auto ptr2 = x.find<test_type_2>();
-                Assert::IsTrue(ptr2->val == 42);
+                ASSERT_TRUE(ptr2->val == 42);
 
                 // test_type_1 should still be there
                 ptr = x.find<test_type_1>();
-                Assert::IsTrue(ptr->val == 8);
+                ASSERT_TRUE(ptr->val == 8);
 
                 // Even though fake_test_type_1 has the same uuid, it should still give bad_cast
                 try
@@ -303,7 +303,7 @@ namespace dhorn
                 dhorn::experimental::service_container x;
                 x.insert(new test_type_1());
                 x.insert(new test_type_2());
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 // Trying to remove fake_test_type_1 should give bad_cast
                 try
@@ -314,12 +314,12 @@ namespace dhorn
                 catch (dhorn::experimental::service_not_published &)
                 {
                 }
-                Assert::IsTrue(x.size() == 2);
+                ASSERT_TRUE(x.size() == 2);
 
                 // Removing test_type_1 should succeed without the destructor running
                 auto ptr = x.remove<test_type_1>();
-                Assert::IsTrue(ptr->val == 8);
-                Assert::IsTrue(x.size() == 1);
+                ASSERT_TRUE(ptr->val == 8);
+                ASSERT_TRUE(x.size() == 1);
 
                 // Cannot find
                 try
@@ -333,13 +333,13 @@ namespace dhorn
 
                 // Should be able to add test_type_1 again
                 x.insert(new test_type_1());
-                Assert::IsTrue(x.find<test_type_1>()->val == 8);
-                Assert::IsTrue(x.size() == 2);
-                Assert::IsTrue(x.remove<test_type_1>()->val == 8);
-                Assert::IsTrue(x.size() == 1);
+                ASSERT_TRUE(x.find<test_type_1>()->val == 8);
+                ASSERT_TRUE(x.size() == 2);
+                ASSERT_TRUE(x.remove<test_type_1>()->val == 8);
+                ASSERT_TRUE(x.size() == 1);
 
                 // Can still find test_type_2
-                Assert::IsTrue(x.find<test_type_2>()->val == 42);
+                ASSERT_TRUE(x.find<test_type_2>()->val == 42);
 
                 // Attempting to remove test_type_1 again should give an exception
                 try
@@ -356,13 +356,13 @@ namespace dhorn
                 test_type_2 *tt2;
                 {
                     auto ptr2 = x.remove<test_type_2>();
-                    Assert::IsTrue(x.size() == 0);
-                    Assert::IsTrue(x.empty());
+                    ASSERT_TRUE(x.size() == 0);
+                    ASSERT_TRUE(x.empty());
 
                     tt2 = ptr2.get();
-                    Assert::IsTrue(tt2->val == 42);
+                    ASSERT_TRUE(tt2->val == 42);
                 }
-                Assert::IsTrue(tt2->val != 42);
+                ASSERT_TRUE(tt2->val != 42);
             }
 
             TEST_METHOD(MemoryLeakTest)
@@ -405,19 +405,19 @@ namespace dhorn
                     }
 
                     auto ptr3 = x.remove<test_type_1>();
-                    Assert::IsTrue(ptr3 == ptr1);
+                    ASSERT_TRUE(ptr3 == ptr1);
 
                     x.insert(ptr3);
-                    Assert::IsTrue(x.remove<test_type_1>() == ptr1);
+                    ASSERT_TRUE(x.remove<test_type_1>() == ptr1);
 
                     // Moving shouldn't have any effect on memory
                     dhorn::experimental::service_container y(std::move(x));
                     y.emplace<test_type_1>();
-                    Assert::IsTrue(y.find<test_type_1>() != ptr1);
+                    ASSERT_TRUE(y.find<test_type_1>() != ptr1);
 
-                    Assert::IsTrue(y.remove<test_type_2>() == ptr2);
+                    ASSERT_TRUE(y.remove<test_type_2>() == ptr2);
                     y.allocate<test_type_2>(std::allocator<test_type_2>());
-                    Assert::IsTrue(y.find<test_type_2>() != ptr2);
+                    ASSERT_TRUE(y.find<test_type_2>() != ptr2);
                 }
 
                 _CrtMemState end;
@@ -426,7 +426,7 @@ namespace dhorn
 
                 _CrtMemState diff;
                 UNREFERENCED_PARAMETER(diff);
-                Assert::IsTrue(!_CrtMemDifference(&diff, &start, &end));
+                ASSERT_TRUE(!_CrtMemDifference(&diff, &start, &end));
             }
         };
     }

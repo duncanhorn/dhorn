@@ -29,11 +29,11 @@ namespace dhorn
                 // Make sure all fields are zero
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::IsTrue(id.data[i] == 0);
+                    ASSERT_TRUE(id.data[i] == 0);
                 }
                 for (std::size_t i = 0; i < 4; i++)
                 {
-                    Assert::IsTrue(id.data32[i] == 0);
+                    ASSERT_TRUE(id.data32[i] == 0);
                 }
             }
 
@@ -42,14 +42,14 @@ namespace dhorn
                 // Cannot construct with non-16-size std::uint8_t array
                 std::uint8_t invalid_array[] = { 1, 2, 3, 4 };
                 (void)invalid_array;
-                Assert::IsFalse(std::is_constructible_v<dhorn::experimental::uuid, decltype(invalid_array)>);
+                ASSERT_FALSE(std::is_constructible_v<dhorn::experimental::uuid, decltype(invalid_array)>);
 
                 // Should be able to contruct with std::uint8_t[16]
                 dhorn::experimental::uuid id(byte_array);
 
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::IsTrue(id.data[i] == byte_array[i]);
+                    ASSERT_TRUE(id.data[i] == byte_array[i]);
                 }
 
                 // Should be able to use initializer list syntax
@@ -58,7 +58,7 @@ namespace dhorn
 
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::IsTrue(id.data[i] == byte_array[i]);
+                    ASSERT_TRUE(id.data[i] == byte_array[i]);
                 }
             }
 
@@ -67,14 +67,14 @@ namespace dhorn
                 // Cannot construct with non-16-size std::uint8_t array
                 std::uint32_t invalid_array[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
                 (void)invalid_array;
-                Assert::IsFalse(std::is_constructible_v<dhorn::experimental::uuid, decltype(invalid_array)>);
+                ASSERT_FALSE(std::is_constructible_v<dhorn::experimental::uuid, decltype(invalid_array)>);
 
                 // Should be able to contruct with std::uint8_t[16]
                 dhorn::experimental::uuid id(int_array);
 
                 for (std::size_t i = 0; i < 4; i++)
                 {
-                    Assert::IsTrue(id.data32[i] == int_array[i]);
+                    ASSERT_TRUE(id.data32[i] == int_array[i]);
                 }
 
                 // Should be able to use initializer list syntax
@@ -82,7 +82,7 @@ namespace dhorn
 
                 for (std::size_t i = 0; i < 4; i++)
                 {
-                    Assert::IsTrue(id.data32[i] == int_array[i]);
+                    ASSERT_TRUE(id.data32[i] == int_array[i]);
                 }
             }
 
@@ -94,7 +94,7 @@ namespace dhorn
 
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::IsTrue(id.data[i] == byte_array[i]);
+                    ASSERT_TRUE(id.data[i] == byte_array[i]);
                 }
 
                 // Construct with GUID
@@ -102,12 +102,12 @@ namespace dhorn
                     { 0x8f, 0xfa, 0xf1, 0xbc, 0x36, 0xcd, 0x98, 0x4c } };
                 id = guid;
 
-                Assert::IsTrue(guid.Data1 == id.Data1);
-                Assert::IsTrue(guid.Data2 == id.Data2);
-                Assert::IsTrue(guid.Data3 == id.Data3);
+                ASSERT_TRUE(guid.Data1 == id.Data1);
+                ASSERT_TRUE(guid.Data2 == id.Data2);
+                ASSERT_TRUE(guid.Data3 == id.Data3);
                 for (std::size_t i = 0; i < 8; i++)
                 {
-                    Assert::IsTrue(guid.Data4[i] == id.Data4[i]);
+                    ASSERT_TRUE(guid.Data4[i] == id.Data4[i]);
                 }
             }
 
@@ -118,7 +118,7 @@ namespace dhorn
 
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::IsTrue(id2.data[i] == byte_array[i]);
+                    ASSERT_TRUE(id2.data[i] == byte_array[i]);
                 }
             }
 
@@ -129,18 +129,18 @@ namespace dhorn
                 dhorn::experimental::uuid y = { 0xd51675dc, 0xdebc, 0x49bc,
                     { 0x91, 0xa9, 0xf4, 0xa2, 0x85, 0x95, 0x7e, 0x6e } };
 
-                Assert::IsTrue(x == x);
-                Assert::IsTrue(x != y);
+                ASSERT_TRUE(x == x);
+                ASSERT_TRUE(x != y);
 
-                Assert::IsFalse(x < x);
-                Assert::IsTrue(x < y);
-                Assert::IsTrue(x <= x);
-                Assert::IsTrue(x <= y);
+                ASSERT_FALSE(x < x);
+                ASSERT_TRUE(x < y);
+                ASSERT_TRUE(x <= x);
+                ASSERT_TRUE(x <= y);
 
-                Assert::IsFalse(x > x);
-                Assert::IsTrue(y > x);
-                Assert::IsTrue(x >= x);
-                Assert::IsTrue(y >= x);
+                ASSERT_FALSE(x > x);
+                ASSERT_TRUE(y > x);
+                ASSERT_TRUE(x >= x);
+                ASSERT_TRUE(y >= x);
             }
 
             TEST_METHOD(HashTest)
@@ -151,7 +151,7 @@ namespace dhorn
                 { 0x91, 0xa9, 0xf4, 0xa2, 0x85, 0x95, 0x7e, 0x6e } };
 
                 std::hash<dhorn::experimental::uuid> hasher;
-                Assert::IsTrue(hasher(x) != hasher(y));
+                ASSERT_TRUE(hasher(x) != hasher(y));
             }
 
 #ifdef _DEBUG
@@ -165,11 +165,11 @@ namespace dhorn
 
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::IsTrue(id.data[i] == 0xCC);
+                    ASSERT_TRUE(id.data[i] == 0xCC);
                 }
                 for (std::size_t i = 0; i < 4; i++)
                 {
-                    Assert::IsTrue(id.data32[i] == 0xCCCCCCCC);
+                    ASSERT_TRUE(id.data32[i] == 0xCCCCCCCC);
                 }
             }
 #endif

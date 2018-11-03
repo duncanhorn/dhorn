@@ -25,7 +25,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_number>(str);
                 auto num = dhorn::experimental::json_cast<std::int32_t>(value.get());
-                Assert::AreEqual(-42, num);
+                ASSERT_EQ(-42, num);
             }
 
             TEST_METHOD(UInt32JsonCastTest)
@@ -34,7 +34,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_number>(str);
                 auto num = dhorn::experimental::json_cast<std::uint32_t>(value.get());
-                Assert::AreEqual(42u, num);
+                ASSERT_EQ(42u, num);
             }
 
             TEST_METHOD(FloatJsonCastTest)
@@ -43,7 +43,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_number>(str);
                 auto num = dhorn::experimental::json_cast<float>(value.get());
-                Assert::AreEqual(42.123f, num);
+                ASSERT_EQ(42.123f, num);
             }
 
             TEST_METHOD(DoubleJsonCastTest)
@@ -52,7 +52,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_number>(str);
                 auto num = dhorn::experimental::json_cast<double>(value.get());
-                Assert::AreEqual(42.123, num);
+                ASSERT_EQ(42.123, num);
             }
 
             TEST_METHOD(Utf8StdStringJsonCastTest)
@@ -61,7 +61,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_string>(str);
                 auto string = dhorn::experimental::json_cast<std::string>(value.get());
-                Assert::IsTrue(str == string.c_str());
+                ASSERT_TRUE(str == string.c_str());
             }
 
             TEST_METHOD(Utf16StdStringJsonCastTest)
@@ -70,7 +70,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_string>(str);
                 auto string = dhorn::experimental::json_cast<std::basic_string<char16_t>>(value.get());
-                Assert::IsTrue(str == string.c_str());
+                ASSERT_TRUE(str == string.c_str());
             }
 
             TEST_METHOD(Utf32StdStringJsonCastTest)
@@ -79,7 +79,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_string>(str);
                 auto string = dhorn::experimental::json_cast<std::basic_string<char32_t>>(value.get());
-                Assert::IsTrue(str == string.c_str());
+                ASSERT_TRUE(str == string.c_str());
             }
 
             TEST_METHOD(Utf8StringJsonCastTest)
@@ -88,7 +88,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_string>(str);
                 auto string = dhorn::experimental::json_cast< dhorn::experimental::utf8_string>(value.get());
-                Assert::IsTrue(str == string);
+                ASSERT_TRUE(str == string);
             }
 
             TEST_METHOD(Utf16StringJsonCastTest)
@@ -97,7 +97,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_string>(str);
                 auto string = dhorn::experimental::json_cast< dhorn::experimental::utf16_string>(value.get());
-                Assert::IsTrue(str == string);
+                ASSERT_TRUE(str == string);
             }
 
             TEST_METHOD(Utf32StringJsonCastTest)
@@ -106,7 +106,7 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_string>(str);
                 auto string = dhorn::experimental::json_cast< dhorn::experimental::utf32_string>(value.get());
-                Assert::IsTrue(str == string);
+                ASSERT_TRUE(str == string);
             }
 
             TEST_METHOD(StdVectorJsonCastTest)
@@ -122,10 +122,10 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::vector< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(array.size(), arr.size());
-                Assert::IsTrue(arr[0] == str1);
-                Assert::IsTrue(arr[1] == str2);
-                Assert::IsTrue(arr[2] == str3);
+                ASSERT_EQ(array.size(), arr.size());
+                ASSERT_TRUE(arr[0] == str1);
+                ASSERT_TRUE(arr[1] == str2);
+                ASSERT_TRUE(arr[2] == str3);
             }
 
             TEST_METHOD(StdListJsonCastTest)
@@ -141,14 +141,14 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::list< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(array.size(), arr.size());
+                ASSERT_EQ(array.size(), arr.size());
 
                 auto itr = arr.begin();
-                Assert::IsTrue(*itr == str1);
+                ASSERT_TRUE(*itr == str1);
                 ++itr;
-                Assert::IsTrue(*itr == str2);
+                ASSERT_TRUE(*itr == str2);
                 ++itr;
-                Assert::IsTrue(*itr == str3);
+                ASSERT_TRUE(*itr == str3);
             }
 
             TEST_METHOD(StdForwardListJsonCastTest)
@@ -166,14 +166,14 @@ namespace dhorn
                 auto arr = dhorn::experimental::json_cast<std::forward_list< dhorn::experimental::utf8_string>>(value.get());
 
                 auto itr = arr.begin();
-                Assert::IsTrue(*itr == str1);
+                ASSERT_TRUE(*itr == str1);
                 ++itr;
-                Assert::IsTrue(*itr == str2);
+                ASSERT_TRUE(*itr == str2);
                 ++itr;
-                Assert::IsTrue(*itr == str3);
+                ASSERT_TRUE(*itr == str3);
 
                 ++itr;
-                Assert::IsTrue(itr == arr.end());
+                ASSERT_TRUE(itr == arr.end());
             }
 
             TEST_METHOD(StdSetJsonCastTest)
@@ -189,17 +189,17 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), arr.size());
 
-                Assert::IsTrue(arr.find(str1) != arr.end());
-                Assert::IsTrue(arr.find(str2) != arr.end());
-                Assert::IsTrue(arr.find(str3) != arr.end());
+                ASSERT_TRUE(arr.find(str1) != arr.end());
+                ASSERT_TRUE(arr.find(str2) != arr.end());
+                ASSERT_TRUE(arr.find(str3) != arr.end());
 
                 // set does not allow duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), arr.size());
             }
 
             TEST_METHOD(StdMultiSetJsonCastTest)
@@ -215,17 +215,17 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), arr.size());
 
-                Assert::IsTrue(arr.find(str1) != arr.end());
-                Assert::IsTrue(arr.find(str2) != arr.end());
-                Assert::IsTrue(arr.find(str3) != arr.end());
+                ASSERT_TRUE(arr.find(str1) != arr.end());
+                ASSERT_TRUE(arr.find(str2) != arr.end());
+                ASSERT_TRUE(arr.find(str3) != arr.end());
 
                 // multiset allows duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(4), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(4), arr.size());
             }
 
             TEST_METHOD(StdUnorderedSetJsonCastTest)
@@ -241,17 +241,17 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::unordered_set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), arr.size());
 
-                Assert::IsTrue(arr.find(str1) != arr.end());
-                Assert::IsTrue(arr.find(str2) != arr.end());
-                Assert::IsTrue(arr.find(str3) != arr.end());
+                ASSERT_TRUE(arr.find(str1) != arr.end());
+                ASSERT_TRUE(arr.find(str2) != arr.end());
+                ASSERT_TRUE(arr.find(str3) != arr.end());
 
                 // unordered_set does not allow duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::unordered_set< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), arr.size());
             }
 
             TEST_METHOD(StdUnorderedMultiSetJsonCastTest)
@@ -267,17 +267,17 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::unordered_multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), arr.size());
 
-                Assert::IsTrue(arr.find(str1) != arr.end());
-                Assert::IsTrue(arr.find(str2) != arr.end());
-                Assert::IsTrue(arr.find(str3) != arr.end());
+                ASSERT_TRUE(arr.find(str1) != arr.end());
+                ASSERT_TRUE(arr.find(str2) != arr.end());
+                ASSERT_TRUE(arr.find(str3) != arr.end());
 
                 // unordered_multiset allows duplicates
                 array.push_back(std::make_shared<dhorn::experimental::json_string>(str1));
                 value = std::make_shared<dhorn::experimental::json_array>(array);
                 arr = dhorn::experimental::json_cast<std::unordered_multiset< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(4), arr.size());
+                ASSERT_EQ(static_cast<std::size_t>(4), arr.size());
             }
 
             TEST_METHOD(StdStackJsonCastTest)
@@ -293,13 +293,13 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto stack = dhorn::experimental::json_cast<std::stack< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), stack.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), stack.size());
 
-                Assert::IsTrue(stack.top() == str3);
+                ASSERT_TRUE(stack.top() == str3);
                 stack.pop();
-                Assert::IsTrue(stack.top() == str2);
+                ASSERT_TRUE(stack.top() == str2);
                 stack.pop();
-                Assert::IsTrue(stack.top() == str1);
+                ASSERT_TRUE(stack.top() == str1);
                 stack.pop();
             }
 
@@ -316,13 +316,13 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto queue = dhorn::experimental::json_cast<std::queue< dhorn::experimental::utf8_string>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), queue.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), queue.size());
 
-                Assert::IsTrue(queue.front() == str1);
+                ASSERT_TRUE(queue.front() == str1);
                 queue.pop();
-                Assert::IsTrue(queue.front() == str2);
+                ASSERT_TRUE(queue.front() == str2);
                 queue.pop();
-                Assert::IsTrue(queue.front() == str3);
+                ASSERT_TRUE(queue.front() == str3);
                 queue.pop();
             }
 
@@ -335,14 +335,14 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto queue = dhorn::experimental::json_cast<std::priority_queue<int>>(value.get());
-                Assert::AreEqual(static_cast<std::size_t>(3), queue.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), queue.size());
 
                 // By default, priority_queue gives highest-value-first
-                Assert::AreEqual(3, queue.top());
+                ASSERT_EQ(3, queue.top());
                 queue.pop();
-                Assert::AreEqual(2, queue.top());
+                ASSERT_EQ(2, queue.top());
                 queue.pop();
-                Assert::AreEqual(1, queue.top());
+                ASSERT_EQ(1, queue.top());
                 queue.pop();
             }
 
@@ -359,10 +359,10 @@ namespace dhorn
 
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto arr = dhorn::experimental::json_cast<std::array< dhorn::experimental::utf8_string, 3u>>(value.get());
-                Assert::AreEqual(array.size(), arr.size());
-                Assert::IsTrue(arr[0] == str1);
-                Assert::IsTrue(arr[1] == str2);
-                Assert::IsTrue(arr[2] == str3);
+                ASSERT_EQ(array.size(), arr.size());
+                ASSERT_TRUE(arr[0] == str1);
+                ASSERT_TRUE(arr[1] == str2);
+                ASSERT_TRUE(arr[2] == str3);
 
                 try
                 {
@@ -401,13 +401,13 @@ namespace dhorn
                 auto value = std::make_shared<dhorn::experimental::json_array>(array);
                 auto map = dhorn::experimental::json_cast<std::map<int,  dhorn::experimental::utf8_string>>(value.get());
 
-                Assert::AreEqual(array.size(), map.size());
+                ASSERT_EQ(array.size(), map.size());
 
                 for (auto &pair : map)
                 {
                     auto &jsonValue = values[pair.first][1];
                     auto jsonString = jsonValue->as<dhorn::experimental::json_string>();
-                    Assert::IsTrue(jsonString->str() == pair.second);
+                    ASSERT_TRUE(jsonString->str() == pair.second);
                 }
             }
 

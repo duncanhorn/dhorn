@@ -34,7 +34,7 @@ namespace dhorn
                         nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL);
 
                     char message[] = "Hello, world!";
-                    Assert::IsTrue(!!WriteFile(x, message, sizeof(message) - 1, nullptr, nullptr));
+                    ASSERT_TRUE(!!WriteFile(x, message, sizeof(message) - 1, nullptr, nullptr));
                     x.reset();
 
                     // Now read what we wrote
@@ -42,8 +42,8 @@ namespace dhorn
                         nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL);
 
                     char result[sizeof(message)]; result[sizeof(message) - 1] = '\0';
-                    Assert::IsTrue(!!ReadFile(x, result, sizeof(result) - 1, nullptr, nullptr));
-                    Assert::IsTrue(strcmp(message, result) == 0);
+                    ASSERT_TRUE(!!ReadFile(x, result, sizeof(result) - 1, nullptr, nullptr));
+                    ASSERT_TRUE(strcmp(message, result) == 0);
                 }
 
                 // Try to create bogus file (should throw)
@@ -59,7 +59,7 @@ namespace dhorn
                 }
                 catch (std::system_error& e)
                 {
-                    Assert::IsTrue(e.code().value() == ERROR_PATH_NOT_FOUND);
+                    ASSERT_TRUE(e.code().value() == ERROR_PATH_NOT_FOUND);
                 }
             }
         };
@@ -76,13 +76,13 @@ namespace dhorn
                 // Should be larger than what we provide
                 RECT input{ 0, 0, 100, 100 };
                 RECT output = dhorn::experimental::win32::adjust_window_rect(input, WS_OVERLAPPEDWINDOW, false);
-                Assert::IsTrue((output.right - output.left > 100));
-                Assert::IsTrue((output.bottom - output.top) > 100);
+                ASSERT_TRUE((output.right - output.left > 100));
+                ASSERT_TRUE((output.bottom - output.top) > 100);
 
                 // Test the Ex version
                 output = dhorn::experimental::win32::adjust_window_rect(input, WS_OVERLAPPED, false, WS_EX_OVERLAPPEDWINDOW);
-                Assert::IsTrue((output.right - output.left > 100));
-                Assert::IsTrue((output.bottom - output.top) > 100);
+                ASSERT_TRUE((output.right - output.left > 100));
+                ASSERT_TRUE((output.bottom - output.top) > 100);
             }
 
             TEST_METHOD(AllowSetForegroundWindowTest)

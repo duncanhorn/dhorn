@@ -149,7 +149,7 @@ namespace dhorn
                     thread.join();
                 }
 
-                Assert::AreEqual(num_threads * num_iterations, val.copy_unlocked());
+                ASSERT_EQ(num_threads * num_iterations, val.copy_unlocked());
             }
 
             /*****
@@ -182,7 +182,7 @@ namespace dhorn
 
                 // The access to val was not thread safe; at least one should have screwed up. This technically can
                 // fail unexpectedly, but it's highly unlikely
-                Assert::AreNotEqual(num_threads * num_iterations, val.copy_unlocked());
+                ASSERT_NE(num_threads * num_iterations, val.copy_unlocked());
             }
             *****/
 
@@ -218,7 +218,7 @@ namespace dhorn
                     thread.join();
                 }
 
-                Assert::AreEqual(num_threads, val.copy_unlocked());
+                ASSERT_EQ(num_threads, val.copy_unlocked());
             }
 
             TEST_METHOD(RecursiveMutexTest)
@@ -233,7 +233,7 @@ namespace dhorn
                     });
                 });
 
-                Assert::AreEqual(static_cast<std::size_t>(42), val.copy_unlocked());
+                ASSERT_EQ(static_cast<std::size_t>(42), val.copy_unlocked());
             }
 
             TEST_METHOD(CopyLockedLockedTest)
@@ -264,7 +264,7 @@ namespace dhorn
 
                 for (auto count : check_vector)
                 {
-                    Assert::AreEqual(static_cast<std::size_t>(1), count);
+                    ASSERT_EQ(static_cast<std::size_t>(1), count);
                 }
             }
 
@@ -307,7 +307,7 @@ namespace dhorn
                     }
                 }
 
-                Assert::IsTrue(pass);
+                ASSERT_TRUE(pass);
             }
             *****/
 
@@ -359,7 +359,7 @@ namespace dhorn
                 {
                     for (auto value : arr)
                     {
-                        Assert::AreEqual(static_cast<std::size_t>(1), value);
+                        ASSERT_EQ(static_cast<std::size_t>(1), value);
                     }
                 });
             }
@@ -424,7 +424,7 @@ namespace dhorn
                     }
                 });
 
-                Assert::IsTrue(true);
+                ASSERT_TRUE(true);
             }
 
             TEST_METHOD(LockNormalTest)
@@ -452,7 +452,7 @@ namespace dhorn
                     thread.join();
                 }
 
-                Assert::AreEqual(num_threads * num_iterations, val.copy_unlocked());
+                ASSERT_EQ(num_threads * num_iterations, val.copy_unlocked());
             }
 
             TEST_METHOD(TryToLockTest)
@@ -484,8 +484,8 @@ namespace dhorn
                 }
 
                 // At least one attempt to get the lock should have failed, but at least one should have succeeded
-                Assert::AreNotEqual(static_cast<std::size_t>(0), val.copy_unlocked());
-                Assert::AreNotEqual(num_threads * num_iterations, val.copy_unlocked());
+                ASSERT_NE(static_cast<std::size_t>(0), val.copy_unlocked());
+                ASSERT_NE(num_threads * num_iterations, val.copy_unlocked());
             }
 
             TEST_METHOD(DeferLockTest)
@@ -514,7 +514,7 @@ namespace dhorn
                     thread.join();
                 }
 
-                Assert::AreEqual(num_threads * num_iterations, val.copy_unlocked());
+                ASSERT_EQ(num_threads * num_iterations, val.copy_unlocked());
             }
         };
     }

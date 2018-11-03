@@ -3,9 +3,8 @@
  *
  * AllIncludeTest.h
  *
- * Makes sure that there aren't any conflicting types/etc. 
+ * Makes sure that there aren't any conflicting types/etc.
  */
-#include "stdafx.h"
 
 // "Normal" Includes
 #include <dhorn/algorithm.h>

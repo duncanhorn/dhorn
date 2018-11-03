@@ -49,28 +49,28 @@ namespace dhorn
                 // Test the do_multiply function
                 std::function<int(void)> mult;
                 mult = dhorn::experimental::bind_member_function(&test_class::do_multiply, obj);
-                Assert::AreEqual(mult(), 50);
+                ASSERT_EQ(mult(), 50);
                 obj.val0 = 1;
-                Assert::AreEqual(mult(), 5);
+                ASSERT_EQ(mult(), 5);
 
                 mult = dhorn::experimental::bind_member_function(&test_class::do_multiply, obj2);
-                Assert::AreEqual(mult(), 20);
+                ASSERT_EQ(mult(), 20);
 
                 mult = dhorn::experimental::bind_member_function(&test_class::do_multiply, pObj);
-                Assert::AreEqual(mult(), 5);
+                ASSERT_EQ(mult(), 5);
                 obj.val1 = 50;
-                Assert::AreEqual(mult(), 50);
+                ASSERT_EQ(mult(), 50);
 
                 // Test the add function
                 std::function<int(int, int)> add;
                 add = dhorn::experimental::bind_member_function(&test_class::add, obj);
-                Assert::AreEqual(add(2, 5), 7);
+                ASSERT_EQ(add(2, 5), 7);
                 add = dhorn::experimental::bind_member_function(&test_class::add, pObj);
-                Assert::AreEqual(add(20, 30), 50);
+                ASSERT_EQ(add(20, 30), 50);
 
                 // Test the min function (with the current add object)
                 add = dhorn::experimental::bind_member_function(&test_class::min, obj);
-                Assert::AreEqual(add(10, 5), 5);
+                ASSERT_EQ(add(10, 5), 5);
             }
         };
     }

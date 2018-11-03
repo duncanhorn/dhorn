@@ -24,11 +24,11 @@ namespace dhorn
                 dhorn::experimental::event_source<void(void)> source;
 
                 auto cookie = source.add([&]() { ++x; });
-                Assert::AreNotEqual(dhorn::experimental::invalid_event_cookie, cookie);
-                Assert::AreEqual(static_cast<std::size_t>(1), source.size());
+                ASSERT_NE(dhorn::experimental::invalid_event_cookie, cookie);
+                ASSERT_EQ(static_cast<std::size_t>(1), source.size());
 
                 source.invoke_all();
-                Assert::AreEqual(1, x);
+                ASSERT_EQ(1, x);
             }
 
             TEST_METHOD(RemoveTest)
@@ -38,7 +38,7 @@ namespace dhorn
 
                 auto cookie = source.add([&]() { ++x; });
                 source.remove(cookie);
-                Assert::AreEqual(static_cast<std::size_t>(0), source.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), source.size());
 
                 // Should throw if we try and remove again
                 try
@@ -58,7 +58,7 @@ namespace dhorn
                 source.add([&]() { x += 2; });
 
                 source.invoke_one(); // Invokes first added
-                Assert::AreEqual(1, x);
+                ASSERT_EQ(1, x);
             }
 
             TEST_METHOD(MultipleEventInvokeOneAdvancedTest)
@@ -69,8 +69,8 @@ namespace dhorn
                 source.add([&]() -> int { ++x; return x; });
                 source.add([&]() -> int { x += 2; return x; });
 
-                source.invoke_one([&](int val) { Assert::AreEqual(1, val); }); // Invokes first added
-                Assert::AreEqual(1, x);
+                source.invoke_one([&](int val) { ASSERT_EQ(1, val); }); // Invokes first added
+                ASSERT_EQ(1, x);
             }
 
             TEST_METHOD(MultipleEventInvokeAllSimpleTest)
@@ -82,7 +82,7 @@ namespace dhorn
                 source.add([&]() { x += 2; });
 
                 source.invoke_all();
-                Assert::AreEqual(3, x);
+                ASSERT_EQ(3, x);
             }
 
             TEST_METHOD(MultipleEventInvokeAllAdvancedTest)
@@ -93,12 +93,12 @@ namespace dhorn
                 auto cookie = source.add([&]() -> int { ++x; return x; });
                 source.add([&]() -> int { x += 2; return x; });
 
-                source.invoke_all([&](int val) { Assert::AreEqual(x, val); });
-                Assert::AreEqual(3, x);
+                source.invoke_all([&](int val) { ASSERT_EQ(x, val); });
+                ASSERT_EQ(3, x);
 
                 source.remove(cookie);
                 source.invoke_all();
-                Assert::AreEqual(5, x);
+                ASSERT_EQ(5, x);
             }
 
             TEST_METHOD(NonVoidArgsTest)
@@ -113,7 +113,7 @@ namespace dhorn
 
                 source.invoke_all(1, 2);
 
-                Assert::AreEqual(3, x);
+                ASSERT_EQ(3, x);
             }
         };
 
@@ -137,11 +137,11 @@ namespace dhorn
                         source.add([]() {}),
                         std::bind(&source_type::remove, &source, std::placeholders::_1));
 
-                    Assert::AreEqual(static_cast<std::size_t>(1), source.size());
+                    ASSERT_EQ(static_cast<std::size_t>(1), source.size());
                 }
 
                 // Destructor should have removed
-                Assert::AreEqual(static_cast<std::size_t>(0), source.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), source.size());
             }
 
             TEST_METHOD(EventCookieMoveConstructionTest)
@@ -151,14 +151,14 @@ namespace dhorn
                     dhorn::experimental::unique_event_cookie cookie(
                         source.add([]() {}),
                         std::bind(&source_type::remove, &source, std::placeholders::_1));
-                    Assert::AreEqual(static_cast<std::size_t>(1), source.size());
+                    ASSERT_EQ(static_cast<std::size_t>(1), source.size());
 
                     dhorn::experimental::unique_event_cookie cookie2(std::move(cookie));
-                    Assert::AreEqual(dhorn::experimental::invalid_event_cookie, static_cast<dhorn::experimental::event_cookie>(cookie));
+                    ASSERT_EQ(dhorn::experimental::invalid_event_cookie, static_cast<dhorn::experimental::event_cookie>(cookie));
                 }
 
                 // Destructor should have removed
-                Assert::AreEqual(static_cast<std::size_t>(0), source.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), source.size());
             }
         };
     }

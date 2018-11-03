@@ -64,17 +64,17 @@ namespace dhorn
                 dhorn::experimental::lazy_init_instance_t<test_class> obj;
 
                 // Lazy init shouldn't create until we access it
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
 
                 auto ptr = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                 Assert::IsNotNull(ptr.get());
 
                 // Calling get again should give the same value
                 auto other = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
-                Assert::IsTrue(ptr == other);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
+                ASSERT_TRUE(ptr == other);
             }
 
             TEST_METHOD(LazyInitRawPointerGetInstanceTest)
@@ -82,17 +82,17 @@ namespace dhorn
                 dhorn::experimental::lazy_init_instance_t<test_class, test_class *> obj;
 
                 // Lazy init shouldn't create until we access it
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
 
                 auto ptr = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                 Assert::IsNotNull(ptr);
 
                 // Calling get again should give the same value
                 auto other = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
-                Assert::IsTrue(ptr == other);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
+                ASSERT_TRUE(ptr == other);
             }
 
             TEST_METHOD(EagerInitSharedPtrGetInstanceTest)
@@ -100,17 +100,17 @@ namespace dhorn
                 dhorn::experimental::eager_init_instance_t<test_class> obj;
 
                 // Eager init creates the object right away
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
 
                 auto ptr = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                 Assert::IsNotNull(ptr.get());
 
                 // Calling get again should give the same value
                 auto other = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
-                Assert::IsTrue(ptr == other);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
+                ASSERT_TRUE(ptr == other);
             }
 
             TEST_METHOD(EagerInitRawPtrGetInstanceTest)
@@ -118,17 +118,17 @@ namespace dhorn
                 dhorn::experimental::eager_init_instance_t<test_class, test_class *> obj;
 
                 // Eager init creates the object right away
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
 
                 auto ptr = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                 Assert::IsNotNull(ptr);
 
                 // Calling get again should give the same value
                 auto other = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
-                Assert::IsTrue(ptr == other);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
+                ASSERT_TRUE(ptr == other);
             }
 
             TEST_METHOD(AtomicExchangeSharedPtrGetInstanceTest)
@@ -136,17 +136,17 @@ namespace dhorn
                 dhorn::experimental::atomic_exchange_instance_t<test_class> obj;
 
                 // Atomic exchange init shouldn't create until we access it
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
 
                 auto ptr = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                 Assert::IsNotNull(ptr.get());
 
                 // Calling get again should give the same value
                 auto other = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
-                Assert::IsTrue(ptr == other);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
+                ASSERT_TRUE(ptr == other);
             }
 
             TEST_METHOD(AtomicExchangeRawPtrGetInstanceTest)
@@ -154,17 +154,17 @@ namespace dhorn
                 dhorn::experimental::atomic_exchange_instance_t<test_class, test_class *> obj;
 
                 // Atomic exchange init shouldn't create until we access it
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
 
                 auto ptr = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                 Assert::IsNotNull(ptr);
 
                 // Calling get again should give the same value
                 auto other = obj.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
-                Assert::IsTrue(ptr == other);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
+                ASSERT_TRUE(ptr == other);
             }
 
 #pragma endregion
@@ -178,15 +178,15 @@ namespace dhorn
                     {
                         dhorn::experimental::lazy_init_instance_t<test_class> obj;
                         ptr = obj.get();
-                        Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                        ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                     }
 
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(0), test_class::destroyed_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(0), test_class::destroyed_count.load());
                 }
 
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
             }
 
             TEST_METHOD(LazyInitRawPtrDestroyTest)
@@ -196,16 +196,16 @@ namespace dhorn
                     {
                         dhorn::experimental::lazy_init_instance_t<test_class, test_class *> obj;
                         ptr = obj.get();
-                        Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                        ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                     }
 
                     // Even though ptr still references the object, no reference count is maintained
-                    Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
                 }
 
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
             }
 
             TEST_METHOD(EagerInitSharedPtrDestroyTest)
@@ -215,15 +215,15 @@ namespace dhorn
                     {
                         dhorn::experimental::eager_init_instance_t<test_class> obj;
                         ptr = obj.get();
-                        Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                        ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                     }
 
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(0), test_class::destroyed_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(0), test_class::destroyed_count.load());
                 }
 
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
             }
 
             TEST_METHOD(EagerInitRawPtrDestroyTest)
@@ -233,16 +233,16 @@ namespace dhorn
                     {
                         dhorn::experimental::eager_init_instance_t<test_class, test_class *> obj;
                         ptr = obj.get();
-                        Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                        ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                     }
 
                     // Even though ptr still references the object, no reference count is maintained
-                    Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
                 }
 
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
             }
 
             TEST_METHOD(AtomicExchangeSharedPtrDestroyTest)
@@ -252,15 +252,15 @@ namespace dhorn
                     {
                         dhorn::experimental::atomic_exchange_instance_t<test_class> obj;
                         ptr = obj.get();
-                        Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                        ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                     }
 
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(0), test_class::destroyed_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(0), test_class::destroyed_count.load());
                 }
 
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
             }
 
             TEST_METHOD(AtomicExchangeRawPtrDestroyTest)
@@ -270,16 +270,16 @@ namespace dhorn
                     {
                         dhorn::experimental::atomic_exchange_instance_t<test_class, test_class *> obj;
                         ptr = obj.get();
-                        Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                        ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                     }
 
                     // Even though ptr still references the object, no reference count is maintained
-                    Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
                 }
 
-                Assert::AreEqual(static_cast<std::size_t>(0), test_class::instance_count.load());
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::destroyed_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(0), test_class::instance_count.load());
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::destroyed_count.load());
             }
 
 #pragma endregion
@@ -292,8 +292,8 @@ namespace dhorn
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
-                Assert::AreEqual(42, obj->x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, obj->x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(LazyInitRawPtrOperatorArrowTest)
@@ -302,8 +302,8 @@ namespace dhorn
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
-                Assert::AreEqual(42, obj->x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, obj->x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(LazyInitSharedPtrOperatorStarTest)
@@ -312,8 +312,8 @@ namespace dhorn
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
-                Assert::AreEqual(42, (*obj).x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, (*obj).x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(LazyInitRawPtrOperatorStarTest)
@@ -322,8 +322,8 @@ namespace dhorn
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
-                Assert::AreEqual(42, (*obj).x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, (*obj).x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(EagerInitSharedPtrOperatorArrowTest)
@@ -332,8 +332,8 @@ namespace dhorn
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
-                Assert::AreEqual(42, obj->x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, obj->x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(EagerInitRawPtrOperatorArrowTest)
@@ -342,8 +342,8 @@ namespace dhorn
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
-                Assert::AreEqual(42, obj->x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, obj->x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(EagerInitSharedPtrOperatorStarTest)
@@ -352,8 +352,8 @@ namespace dhorn
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
-                Assert::AreEqual(42, (*obj).x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, (*obj).x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(EagerInitRawPtrOperatorStarTest)
@@ -362,8 +362,8 @@ namespace dhorn
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
-                Assert::AreEqual(42, (*obj).x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, (*obj).x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(AtomicExchangeSharedPtrOperatorArrowTest)
@@ -372,8 +372,8 @@ namespace dhorn
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
-                Assert::AreEqual(42, obj->x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, obj->x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(AtomicExchangeRawPtrOperatorArrowTest)
@@ -382,8 +382,8 @@ namespace dhorn
 
                 // operator-> should do an implicit get/initialization
                 obj->x = 42;
-                Assert::AreEqual(42, obj->x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, obj->x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(AtomicExchangeSharedPtrOperatorStarTest)
@@ -392,8 +392,8 @@ namespace dhorn
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
-                Assert::AreEqual(42, (*obj).x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, (*obj).x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
             TEST_METHOD(AtomicExchangeRawPtrOperatorStarTest)
@@ -402,8 +402,8 @@ namespace dhorn
 
                 // operator* should do an implicit get/initialization
                 (*obj).x = 42;
-                Assert::AreEqual(42, (*obj).x);
-                Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                ASSERT_EQ(42, (*obj).x);
+                ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
             }
 
 #pragma endregion
@@ -453,12 +453,12 @@ namespace dhorn
                     for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads[j].join();
-                        Assert::IsTrue(pointers[0] == pointers[j]);
+                        ASSERT_TRUE(pointers[0] == pointers[j]);
                     }
 
                     // Only one instance should have been created
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
                 }
             }
 
@@ -502,12 +502,12 @@ namespace dhorn
                     for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads[j].join();
-                        Assert::IsTrue(pointers[0] == pointers[j]);
+                        ASSERT_TRUE(pointers[0] == pointers[j]);
                     }
 
                     // Only one instance should have been created
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::created_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::created_count.load());
                 }
             }
 
@@ -553,11 +553,11 @@ namespace dhorn
                     for (std::size_t j = 0; j < test_threads; ++j)
                     {
                         threads[j].join();
-                        Assert::IsTrue(pointers[0] == pointers[j]);
+                        ASSERT_TRUE(pointers[0] == pointers[j]);
                     }
 
                     // May have created more than one instance, but only should still exist
-                    Assert::AreEqual(static_cast<std::size_t>(1), test_class::instance_count.load());
+                    ASSERT_EQ(static_cast<std::size_t>(1), test_class::instance_count.load());
                     if (test_class::created_count.load() > 1)
                     {
                         doubleAccess = true;
@@ -565,7 +565,7 @@ namespace dhorn
                 }
 
                 // We should have had at least one race condition
-                Assert::IsTrue(doubleAccess);
+                ASSERT_TRUE(doubleAccess);
             }
 
 #pragma endregion

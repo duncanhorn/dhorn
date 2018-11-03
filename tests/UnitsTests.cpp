@@ -23,17 +23,17 @@ namespace dhorn
                 dhorn::experimental::meters v2(150);
                 dhorn::experimental::meters v3(100);
 
-                Assert::IsFalse(v1 == v2);
-                Assert::IsFalse(v2 == v1);
-                Assert::IsTrue(v1 == v3);
-                Assert::IsTrue(v3 == v1);
-                Assert::IsFalse(v2 == v3);
-                Assert::IsFalse(v3 == v2);
+                ASSERT_FALSE(v1 == v2);
+                ASSERT_FALSE(v2 == v1);
+                ASSERT_TRUE(v1 == v3);
+                ASSERT_TRUE(v3 == v1);
+                ASSERT_FALSE(v2 == v3);
+                ASSERT_FALSE(v3 == v2);
 
-                Assert::IsTrue(100 == v1);
-                Assert::IsTrue(v1 == 100);
-                Assert::IsFalse(200 == v1);
-                Assert::IsFalse(v1 == 200);
+                ASSERT_TRUE(100 == v1);
+                ASSERT_TRUE(v1 == 100);
+                ASSERT_FALSE(200 == v1);
+                ASSERT_FALSE(v1 == 200);
             }
 
             TEST_METHOD(InequalityTest)
@@ -42,108 +42,108 @@ namespace dhorn
                 dhorn::experimental::meters v2(150);
                 dhorn::experimental::meters v3(100);
 
-                Assert::IsTrue(v1 != v2);
-                Assert::IsTrue(v2 != v1);
-                Assert::IsFalse(v1 != v3);
-                Assert::IsFalse(v3 != v1);
-                Assert::IsTrue(v2 != v3);
-                Assert::IsTrue(v3 != v2);
+                ASSERT_TRUE(v1 != v2);
+                ASSERT_TRUE(v2 != v1);
+                ASSERT_FALSE(v1 != v3);
+                ASSERT_FALSE(v3 != v1);
+                ASSERT_TRUE(v2 != v3);
+                ASSERT_TRUE(v3 != v2);
 
-                Assert::IsFalse(100 != v1);
-                Assert::IsFalse(v1 != 100);
-                Assert::IsTrue(200 != v1);
-                Assert::IsTrue(v1 != 200);
+                ASSERT_FALSE(100 != v1);
+                ASSERT_FALSE(v1 != 100);
+                ASSERT_TRUE(200 != v1);
+                ASSERT_TRUE(v1 != 200);
             }
 
             TEST_METHOD(PositiveTest)
             {
                 dhorn::experimental::meters val(1);
-                Assert::IsTrue((+val).value() == 1);
+                ASSERT_TRUE((+val).value() == 1);
 
                 val = -2;
-                Assert::IsTrue((+val).value() == -2);
+                ASSERT_TRUE((+val).value() == -2);
 
                 val = 0;
-                Assert::IsTrue((+val).value() == 0);
+                ASSERT_TRUE((+val).value() == 0);
             }
 
             TEST_METHOD(NegateTest)
             {
                 dhorn::experimental::meters val(1);
-                Assert::IsTrue((-val).value() == -1);
+                ASSERT_TRUE((-val).value() == -1);
 
                 val = -2;
-                Assert::IsTrue((-val).value() == 2);
+                ASSERT_TRUE((-val).value() == 2);
 
                 val = 0;
-                Assert::IsTrue((-val).value() == 0);
+                ASSERT_TRUE((-val).value() == 0);
             }
 
             TEST_METHOD(IncrementTest)
             {
                 dhorn::experimental::meters val(0);
 
-                Assert::IsTrue((++val).value() == 1);
-                Assert::IsTrue(val.value() == 1);
+                ASSERT_TRUE((++val).value() == 1);
+                ASSERT_TRUE(val.value() == 1);
 
-                Assert::IsTrue((val++).value() == 1);
-                Assert::IsTrue(val.value() == 2);
+                ASSERT_TRUE((val++).value() == 1);
+                ASSERT_TRUE(val.value() == 2);
             }
 
             TEST_METHOD(DecrementTest)
             {
                 dhorn::experimental::meters val(0);
 
-                Assert::IsTrue((--val).value() == -1);
-                Assert::IsTrue(val.value() == -1);
+                ASSERT_TRUE((--val).value() == -1);
+                ASSERT_TRUE(val.value() == -1);
 
-                Assert::IsTrue((val--).value() == -1);
-                Assert::IsTrue(val.value() == -2);
+                ASSERT_TRUE((val--).value() == -1);
+                ASSERT_TRUE(val.value() == -2);
             }
 
             TEST_METHOD(MultiplyTest)
             {
                 dhorn::experimental::meters val(10);
-                Assert::IsTrue((val * 10).value() == 100);
+                ASSERT_TRUE((val * 10).value() == 100);
 
                 val *= 3;
-                Assert::IsTrue(val.value() == 30);
+                ASSERT_TRUE(val.value() == 30);
 
                 val = -10;
-                Assert::IsTrue((val * 2).value() == -20);
+                ASSERT_TRUE((val * 2).value() == -20);
 
                 val *= 4;
-                Assert::IsTrue(val.value() == -40);
+                ASSERT_TRUE(val.value() == -40);
             }
 
             TEST_METHOD(DivideTest)
             {
                 dhorn::experimental::meters val(100);
-                Assert::IsTrue((val / 2).value() == 50);
+                ASSERT_TRUE((val / 2).value() == 50);
 
                 val /= 20;
-                Assert::IsTrue(val.value() == 5);
+                ASSERT_TRUE(val.value() == 5);
 
                 val = -100;
-                Assert::IsTrue((val / 5).value() == -20);
+                ASSERT_TRUE((val / 5).value() == -20);
 
                 val /= 50;
-                Assert::IsTrue(val.value() == -2);
+                ASSERT_TRUE(val.value() == -2);
             }
 
             TEST_METHOD(ModulousTest)
             {
                 dhorn::experimental::meters val(10);
-                Assert::IsTrue((val % 3).value() == 1);
+                ASSERT_TRUE((val % 3).value() == 1);
 
                 val %= 6;
-                Assert::IsTrue(val.value() == 4);
+                ASSERT_TRUE(val.value() == 4);
 
                 val = -10;
-                Assert::IsTrue((val % 4).value() == -2);
+                ASSERT_TRUE((val % 4).value() == -2);
 
                 val %= 7;
-                Assert::IsTrue(val.value() == -3);
+                ASSERT_TRUE(val.value() == -3);
             }
 
             TEST_METHOD(AdditionTest)
@@ -151,9 +151,9 @@ namespace dhorn
                 dhorn::experimental::meters v1(100);
                 dhorn::experimental::meters v2(250);
 
-                Assert::IsTrue((v1 + 50).value() == 150);
-                Assert::IsTrue((150 + v2).value() == 400);
-                Assert::IsTrue((v1 + v2).value() == 350);
+                ASSERT_TRUE((v1 + 50).value() == 150);
+                ASSERT_TRUE((150 + v2).value() == 400);
+                ASSERT_TRUE((v1 + v2).value() == 350);
             }
 
             TEST_METHOD(SubtractionTest)
@@ -161,9 +161,9 @@ namespace dhorn
                 dhorn::experimental::meters v1(100);
                 dhorn::experimental::meters v2(250);
 
-                Assert::IsTrue((v1 - 50).value() == 50);
-                Assert::IsTrue((150 - v2).value() == -100);
-                Assert::IsTrue((v1 - v2).value() == -150);
+                ASSERT_TRUE((v1 - 50).value() == 50);
+                ASSERT_TRUE((150 - v2).value() == -100);
+                ASSERT_TRUE((v1 - v2).value() == -150);
             }
 
             TEST_METHOD(UnitCastTest)
@@ -172,16 +172,16 @@ namespace dhorn
 
                 // Same type should give same value
                 auto other = dhorn::experimental::unit_cast<dhorn::experimental::kilometers>(km);
-                Assert::IsTrue(other.value() == 1);
+                ASSERT_TRUE(other.value() == 1);
 
                 // One kilometer is 1000 meters
                 auto m = dhorn::experimental::unit_cast<dhorn::experimental::meters>(km);
-                Assert::IsTrue(m.value() == 1000);
+                ASSERT_TRUE(m.value() == 1000);
 
                 // 2500 meters is 2.5 (rounds down to 2) kilometers
                 m = dhorn::experimental::meters(2500);
                 km = dhorn::experimental::unit_cast<dhorn::experimental::kilometers>(m);
-                Assert::IsTrue(km.value() == 2);
+                ASSERT_TRUE(km.value() == 2);
             }
 
             TEST_METHOD(ConstructConvertTest)
@@ -189,11 +189,11 @@ namespace dhorn
                 dhorn::experimental::kilometers km(1);
 
                 dhorn::experimental::meters m(km);
-                Assert::IsTrue(m.value() == 1000);
+                ASSERT_TRUE(m.value() == 1000);
 
                 m = 2000;
                 dhorn::experimental::kilometers km2(m);
-                Assert::IsTrue(km2.value() == 2);
+                ASSERT_TRUE(km2.value() == 2);
             }
 
             TEST_METHOD(AssignConvertTest)
@@ -201,13 +201,13 @@ namespace dhorn
                 dhorn::experimental::kilometers km(1);
 
                 dhorn::experimental::meters m(1);
-                Assert::IsTrue(m.value() == 1); // Prevent optimizations
+                ASSERT_TRUE(m.value() == 1); // Prevent optimizations
                 m = km;
-                Assert::IsTrue(m.value() == 1000);
+                ASSERT_TRUE(m.value() == 1000);
 
                 m = 2000;
                 km = m;
-                Assert::IsTrue(km.value() == 2);
+                ASSERT_TRUE(km.value() == 2);
             }
         };
     }

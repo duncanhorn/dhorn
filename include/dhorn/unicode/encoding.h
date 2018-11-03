@@ -8,6 +8,9 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
+#include <iterator>
+#include <limits>
 
 namespace dhorn::unicode
 {
@@ -169,10 +172,24 @@ namespace dhorn::unicode
                     }
                 }
 
+                if constexpr (Traits::is_checked)
+                {
+                    auto [ch, nextPtr] = Traits::read(str);
+                    if (ch == eof)
+                    {
+                        result.code_points = npos;
+                        break;
+                    }
+
+                    str = nextPtr;
+                }
+                else
+                {
+                    std::advance(str, units);
+                }
+
                 result.code_units += units;
                 ++result.code_points;
-
-                std::advance(str, units);
             }
 
             return result;

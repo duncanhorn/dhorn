@@ -95,10 +95,10 @@ namespace dhorn
                         data.push_back(word);
                     }
 
-                    Assert::AreEqual(data.size(), words.size());
+                    ASSERT_EQ(data.size(), words.size());
                     for (std::size_t i = 0; i < data.size(); ++i)
                     {
-                        Assert::IsTrue(data[i] == words[i]);
+                        ASSERT_TRUE(data[i] == words[i]);
                     }
                 });
             }
@@ -134,7 +134,7 @@ namespace dhorn
                         sentence += buffer;
                     }
 
-                    Assert::IsTrue(sentence == str);
+                    ASSERT_TRUE(sentence == str);
                 });
             }
 
@@ -160,10 +160,10 @@ namespace dhorn
                         data.push_back(value);
                     }
 
-                    Assert::AreEqual(data.size(), values.size());
+                    ASSERT_EQ(data.size(), values.size());
                     for (std::size_t i = 0; i < data.size(); ++i)
                     {
-                        Assert::IsTrue(data[i] == values[i]);
+                        ASSERT_TRUE(data[i] == values[i]);
                     }
                 });
             }
@@ -199,7 +199,7 @@ namespace dhorn
                         output += buffer;
                     }
 
-                    Assert::IsTrue(output == str);
+                    ASSERT_TRUE(output == str);
                 });
             }
         };
@@ -282,10 +282,10 @@ namespace dhorn
                         data.push_back(word);
                     }
 
-                    Assert::AreEqual(data.size(), words.size());
+                    ASSERT_EQ(data.size(), words.size());
                     for (std::size_t i = 0; i < data.size(); ++i)
                     {
-                        Assert::IsTrue(data[i] == words[i]);
+                        ASSERT_TRUE(data[i] == words[i]);
                     }
                 });
             }
@@ -320,7 +320,7 @@ namespace dhorn
                         sentence += buffer;
                     }
 
-                    Assert::IsTrue(sentence == str);
+                    ASSERT_TRUE(sentence == str);
                 });
             }
 
@@ -345,10 +345,10 @@ namespace dhorn
                         data.push_back(value);
                     }
 
-                    Assert::AreEqual(data.size(), values.size());
+                    ASSERT_EQ(data.size(), values.size());
                     for (std::size_t i = 0; i < data.size(); ++i)
                     {
-                        Assert::IsTrue(data[i] == values[i]);
+                        ASSERT_TRUE(data[i] == values[i]);
                     }
                 });
             }
@@ -383,7 +383,7 @@ namespace dhorn
                         output += buffer;
                     }
 
-                    Assert::IsTrue(output == str);
+                    ASSERT_TRUE(output == str);
                 });
             }
         };

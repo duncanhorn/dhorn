@@ -24,7 +24,7 @@ namespace dhorn::tests
 
         TEST_METHOD_CLEANUP(TestCleanup)
         {
-            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
+            ASSERT_EQ(static_cast<std::size_t>(0), object_counter::instance_count);
             object_counter::reset();
         }
 
@@ -41,7 +41,7 @@ namespace dhorn::tests
                 co_return 42;
             }();
 
-            Assert::AreEqual(42, value.get());
+            ASSERT_EQ(42, value.get());
         }
 
         TEST_METHOD(SimpleReferenceCountTest)
@@ -53,17 +53,17 @@ namespace dhorn::tests
                 }();
 
                 value.wait();
-                Assert::AreEqual(static_cast<std::size_t>(1), object_counter::instance_count);
-                Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
+                ASSERT_EQ(static_cast<std::size_t>(1), object_counter::instance_count);
+                ASSERT_EQ(static_cast<std::size_t>(0), object_counter::copy_count);
 
                 decltype(auto) movedValue = value.get();
-                Assert::AreEqual(static_cast<std::size_t>(1), object_counter::instance_count);
-                Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
+                ASSERT_EQ(static_cast<std::size_t>(1), object_counter::instance_count);
+                ASSERT_EQ(static_cast<std::size_t>(0), object_counter::copy_count);
             }
 
-            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::instance_count);
-            Assert::AreEqual(static_cast<std::size_t>(0), object_counter::copy_count);
-            Assert::AreEqual(object_counter::constructed_count, object_counter::destructed_count);
+            ASSERT_EQ(static_cast<std::size_t>(0), object_counter::instance_count);
+            ASSERT_EQ(static_cast<std::size_t>(0), object_counter::copy_count);
+            ASSERT_EQ(object_counter::constructed_count, object_counter::destructed_count);
         }
 
         TEST_METHOD(SimpleExceptionTest)
@@ -87,10 +87,10 @@ namespace dhorn::tests
             }();
 
             decltype(auto) y = value.get();
-            Assert::AreEqual(&x, &y);
+            ASSERT_EQ(&x, &y);
 
             y = 42;
-            Assert::AreEqual(42, x);
+            ASSERT_EQ(42, x);
         }
 
         //TEST_METHOD(CopyConstructorTest)

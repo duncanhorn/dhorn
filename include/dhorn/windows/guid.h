@@ -24,7 +24,7 @@ namespace dhorn::windows
     {
         // {XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX}
         constexpr std::size_t guid_string_length = 38;
-        constexpr const char* guid_fmt = "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}";
+        constexpr const char* guid_fmt = "{%08lX-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}";
 
         // TODO: Need to be able to handle wchar_t for operator<<
         inline std::array<char, guid_string_length + 1> guid_to_string(const GUID& guid)
@@ -81,7 +81,7 @@ namespace dhorn::windows
      * Similar to `guid_compare`, but doesn't do element-wise comparison. E.g. the result is not necessarily guaranteed
      * to be negative if `lhs.Data1` is less than `rhs.Data1`.
      */
-    constexpr int fast_guid_compare(const GUID& lhs, const GUID& rhs) noexcept
+    inline int fast_guid_compare(const GUID& lhs, const GUID& rhs) noexcept
     {
         // GUIDs are 128 bits
         auto lhs64 = reinterpret_cast<const std::int64_t*>(&lhs);
@@ -111,7 +111,7 @@ namespace dhorn::windows
 
     struct guid_equal_to
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             // fast_guid_compare for equality should yield the same result as guid_compare
             return fast_guid_compare(lhs, rhs) == 0;
@@ -120,7 +120,7 @@ namespace dhorn::windows
 
     struct fast_guid_equal_to
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             return fast_guid_compare(lhs, rhs) == 0;
         }
@@ -128,7 +128,7 @@ namespace dhorn::windows
 
     struct guid_not_equal_to
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             // fast_guid_compare for equality should yield the same result as guid_compare
             return fast_guid_compare(lhs, rhs) != 0;
@@ -137,7 +137,7 @@ namespace dhorn::windows
 
     struct fast_guid_not_equal_to
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             return fast_guid_compare(lhs, rhs) != 0;
         }
@@ -153,7 +153,7 @@ namespace dhorn::windows
 
     struct fast_guid_greater
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             return fast_guid_compare(lhs, rhs) > 0;
         }
@@ -169,7 +169,7 @@ namespace dhorn::windows
 
     struct fast_guid_greater_equal
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             return fast_guid_compare(lhs, rhs) >= 0;
         }
@@ -185,7 +185,7 @@ namespace dhorn::windows
 
     struct fast_guid_less
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             return fast_guid_compare(lhs, rhs) < 0;
         }
@@ -201,7 +201,7 @@ namespace dhorn::windows
 
     struct fast_guid_less_equal
     {
-        constexpr bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
+        bool operator()(const GUID& lhs, const GUID& rhs) const noexcept
         {
             return fast_guid_compare(lhs, rhs) <= 0;
         }
@@ -239,7 +239,7 @@ namespace dhorn::windows
             std::uint32_t data1,
             std::uint16_t data2,
             std::uint16_t data3,
-        const std::array<std::uint8_t, 8>& data4) noexcept :
+            const std::array<std::uint8_t, 8>& data4) noexcept :
             _value{ data1, data2, data3, { data4[0], data4[1], data4[2], data4[3], data4[4], data4[5], data4[6], data4[7] } }
         {
         }
@@ -280,7 +280,7 @@ namespace dhorn::windows
             return get();
         }
 
-        explicit constexpr operator bool() const noexcept
+        explicit operator bool() const noexcept
         {
             auto ptr = reinterpret_cast<const std::uint64_t*>(&this->_value);
             return (ptr[0] != 0) || (ptr[1] != 0);
@@ -306,32 +306,32 @@ namespace dhorn::windows
      */
 #pragma region Comparison Operators
 
-    constexpr bool operator==(const guid& lhs, const guid& rhs) noexcept
+    inline bool operator==(const guid& lhs, const guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator==(const guid& lhs, const GUID& rhs) noexcept
+    inline bool operator==(const guid& lhs, const GUID& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator==(const GUID& lhs, const guid& rhs) noexcept
+    inline bool operator==(const GUID& lhs, const guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator!=(const guid& lhs, const guid& rhs) noexcept
+    inline bool operator!=(const guid& lhs, const guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
 
-    constexpr bool operator!=(const GUID& lhs, const guid& rhs) noexcept
+    inline bool operator!=(const GUID& lhs, const guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
 
-    constexpr bool operator!=(const guid& lhs, const GUID& rhs) noexcept
+    inline bool operator!=(const guid& lhs, const GUID& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
@@ -432,12 +432,12 @@ namespace dhorn::windows
          * Constructor(s)/Destructor
          */
         constexpr ref_guid(const GUID& value) noexcept :
-            _value(value)
+            _value(&value)
         {
         }
 
         constexpr ref_guid(const guid& value) noexcept :
-            _value(value.get())
+            _value(&value.get())
         {
         }
 
@@ -448,23 +448,23 @@ namespace dhorn::windows
          */
         constexpr operator const GUID&() const noexcept
         {
-            return this->_value;
+            return *this->_value;
         }
 
-        explicit constexpr operator bool() const noexcept
+        explicit operator bool() const noexcept
         {
-            auto ptr = reinterpret_cast<const std::uint64_t*>(&this->_value);
+            auto ptr = reinterpret_cast<const std::uint64_t*>(this->_value);
             return (ptr[0] != 0) || (ptr[1] != 0);
         }
 
         constexpr const GUID& get() const noexcept
         {
-            return this->_value;
+            return *this->_value;
         }
 
         std::string to_string() const
         {
-            auto str = details::guid_to_string(this->_value);
+            auto str = details::guid_to_string(*this->_value);
             return std::string(str.data(), str.size() - 1);
         }
 
@@ -472,7 +472,7 @@ namespace dhorn::windows
 
     private:
 
-        const GUID& _value;
+        const GUID* _value;
     };
 
 
@@ -482,52 +482,52 @@ namespace dhorn::windows
      */
 #pragma region Comparison Operators
 
-    constexpr bool operator==(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    inline bool operator==(const ref_guid& lhs, const ref_guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator==(const guid& lhs, const ref_guid& rhs) noexcept
+    inline bool operator==(const guid& lhs, const ref_guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator==(const ref_guid& lhs, const guid& rhs) noexcept
+    inline bool operator==(const ref_guid& lhs, const guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator==(const GUID& lhs, const ref_guid& rhs) noexcept
+    inline bool operator==(const GUID& lhs, const ref_guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator==(const ref_guid& lhs, const GUID& rhs) noexcept
+    inline bool operator==(const ref_guid& lhs, const GUID& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) == 0;
     }
 
-    constexpr bool operator!=(const ref_guid& lhs, const ref_guid& rhs) noexcept
+    inline bool operator!=(const ref_guid& lhs, const ref_guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
 
-    constexpr bool operator!=(const guid& lhs, const ref_guid& rhs) noexcept
+    inline bool operator!=(const guid& lhs, const ref_guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
 
-    constexpr bool operator!=(const ref_guid& lhs, const guid& rhs) noexcept
+    inline bool operator!=(const ref_guid& lhs, const guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
 
-    constexpr bool operator!=(const GUID& lhs, const ref_guid& rhs) noexcept
+    inline bool operator!=(const GUID& lhs, const ref_guid& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
 
-    constexpr bool operator!=(const ref_guid& lhs, const GUID& rhs) noexcept
+    inline bool operator!=(const ref_guid& lhs, const GUID& rhs) noexcept
     {
         return fast_guid_compare(lhs, rhs) != 0;
     }
@@ -723,7 +723,7 @@ namespace std
     template <>
     struct hash<GUID>
     {
-        constexpr std::size_t operator()(const GUID& guid)
+        std::size_t operator()(const GUID& guid)
         {
             static_assert(sizeof(GUID) % sizeof(std::size_t) == 0);
             auto ptr = reinterpret_cast<const std::size_t*>(&guid);

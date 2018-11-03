@@ -20,123 +20,123 @@ namespace dhorn
             TEST_METHOD(EmptyTest)
             {
                 dhorn::experimental::command_line cmdLine;
-                Assert::AreEqual(static_cast<std::size_t>(0), cmdLine.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), cmdLine.size());
 
                 dhorn::experimental::command_line cmdLine2({});
-                Assert::AreEqual(static_cast<std::size_t>(0), cmdLine2.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), cmdLine2.size());
 
-                Assert::IsTrue(cmdLine.begin() == cmdLine.end());
+                ASSERT_TRUE(cmdLine.begin() == cmdLine.end());
             }
 
             TEST_METHOD(SingleValueTest)
             {
                 dhorn::experimental::command_line cmdLine({ "foo" });
-                Assert::AreEqual(static_cast<std::size_t>(1), cmdLine.size());
+                ASSERT_EQ(static_cast<std::size_t>(1), cmdLine.size());
 
-                Assert::IsTrue(*cmdLine.begin() == "foo");
-                Assert::IsTrue(cmdLine.begin().begin() == cmdLine.begin().end());
-                Assert::IsTrue(cmdLine.begin() != cmdLine.end());
+                ASSERT_TRUE(*cmdLine.begin() == "foo");
+                ASSERT_TRUE(cmdLine.begin().begin() == cmdLine.begin().end());
+                ASSERT_TRUE(cmdLine.begin() != cmdLine.end());
             }
 
             TEST_METHOD(TwoValueTest)
             {
                 dhorn::experimental::command_line cmdLine({ "foo", "bar" });
-                Assert::AreEqual(static_cast<std::size_t>(2), cmdLine.size());
+                ASSERT_EQ(static_cast<std::size_t>(2), cmdLine.size());
 
                 auto itr = cmdLine.begin();
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "foo");
-                Assert::IsTrue(itr.begin() == itr.end());
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "foo");
+                ASSERT_TRUE(itr.begin() == itr.end());
 
                 ++itr;
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "bar");
-                Assert::IsTrue(itr.begin() == itr.end());
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "bar");
+                ASSERT_TRUE(itr.begin() == itr.end());
 
                 ++itr;
-                Assert::IsTrue(itr == cmdLine.end());
+                ASSERT_TRUE(itr == cmdLine.end());
             }
 
             TEST_METHOD(SingleSwitchTest)
             {
                 dhorn::experimental::command_line cmdLine({ "/foo" });
-                Assert::AreEqual(static_cast<std::size_t>(1), cmdLine.size());
+                ASSERT_EQ(static_cast<std::size_t>(1), cmdLine.size());
 
-                Assert::IsTrue(*cmdLine.begin() == "/foo");
-                Assert::IsTrue(cmdLine.begin().begin() == cmdLine.begin().end());
-                Assert::IsTrue(cmdLine.begin() != cmdLine.end());
+                ASSERT_TRUE(*cmdLine.begin() == "/foo");
+                ASSERT_TRUE(cmdLine.begin().begin() == cmdLine.begin().end());
+                ASSERT_TRUE(cmdLine.begin() != cmdLine.end());
             }
 
             TEST_METHOD(TwoSwitchTest)
             {
                 dhorn::experimental::command_line cmdLine({ "/foo", "/bar" });
-                Assert::AreEqual(static_cast<std::size_t>(2), cmdLine.size());
+                ASSERT_EQ(static_cast<std::size_t>(2), cmdLine.size());
 
                 auto itr = cmdLine.begin();
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "/foo");
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "/foo");
 
                 auto switchItr = itr.begin();
-                Assert::IsTrue(switchItr == itr.end());
+                ASSERT_TRUE(switchItr == itr.end());
 
                 ++itr;
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "/bar");
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "/bar");
 
                 switchItr = itr.begin();
-                Assert::IsTrue(switchItr == itr.end());
+                ASSERT_TRUE(switchItr == itr.end());
 
                 ++itr;
-                Assert::IsTrue(itr == cmdLine.end());
+                ASSERT_TRUE(itr == cmdLine.end());
             }
 
             TEST_METHOD(SingleSwitchWithSingleArgTest)
             {
                 dhorn::experimental::command_line cmdLine({ "/foo", "bar" });
-                Assert::AreEqual(static_cast<std::size_t>(2), cmdLine.size());
+                ASSERT_EQ(static_cast<std::size_t>(2), cmdLine.size());
 
                 auto itr = cmdLine.begin();
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "/foo");
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "/foo");
 
                 auto switchItr = itr.begin();
-                Assert::IsTrue(switchItr != itr.end());
-                Assert::IsTrue(*switchItr == "bar");
+                ASSERT_TRUE(switchItr != itr.end());
+                ASSERT_TRUE(*switchItr == "bar");
 
                 ++switchItr;
-                Assert::IsTrue(switchItr == itr.end());
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "bar");
+                ASSERT_TRUE(switchItr == itr.end());
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "bar");
 
                 ++itr;
-                Assert::IsTrue(itr == cmdLine.end());
+                ASSERT_TRUE(itr == cmdLine.end());
             }
 
             TEST_METHOD(SingleSwitchWithMultiArgTest)
             {
                 dhorn::experimental::command_line cmdLine({ "/foo", "bar1", "bar2" });
-                Assert::AreEqual(static_cast<std::size_t>(3), cmdLine.size());
+                ASSERT_EQ(static_cast<std::size_t>(3), cmdLine.size());
 
                 auto itr = cmdLine.begin();
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "/foo");
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "/foo");
 
                 auto switchItr = itr.begin();
-                Assert::IsTrue(switchItr != itr.end());
-                Assert::IsTrue(*switchItr == "bar1");
+                ASSERT_TRUE(switchItr != itr.end());
+                ASSERT_TRUE(*switchItr == "bar1");
 
                 ++switchItr;
-                Assert::IsTrue(switchItr != itr.end());
-                Assert::IsTrue(*switchItr == "bar2");
-                Assert::IsTrue(*itr == "bar1");
+                ASSERT_TRUE(switchItr != itr.end());
+                ASSERT_TRUE(*switchItr == "bar2");
+                ASSERT_TRUE(*itr == "bar1");
 
                 ++switchItr;
-                Assert::IsTrue(switchItr == itr.end());
-                Assert::IsTrue(itr != cmdLine.end());
-                Assert::IsTrue(*itr == "bar2");
+                ASSERT_TRUE(switchItr == itr.end());
+                ASSERT_TRUE(itr != cmdLine.end());
+                ASSERT_TRUE(*itr == "bar2");
 
                 ++itr;
-                Assert::IsTrue(itr == cmdLine.end());
+                ASSERT_TRUE(itr == cmdLine.end());
             }
 
             void DoComplexIterteTest(
@@ -168,9 +168,9 @@ namespace dhorn
                     }
                 }
 
-                Assert::IsTrue(input == output);
-                Assert::IsTrue(switches == outSwitches);
-                Assert::IsTrue(args == outArgs);
+                ASSERT_TRUE(input == output);
+                ASSERT_TRUE(switches == outSwitches);
+                ASSERT_TRUE(args == outArgs);
             }
 
             TEST_METHOD(ComplexIterateTest1)

@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <tuple>
 #include <utility>
 #include <variant>
 
@@ -100,7 +101,7 @@ namespace dhorn
     /*
      * increment_integer_sequence
      */
-#pragma region 
+#pragma region
 
     template <typename IntegerSequence, typename IntegerSequence::value_type Value>
     struct increment_integer_sequence;
@@ -121,7 +122,7 @@ namespace dhorn
     /*
      * decrement_integer_sequence
      */
-#pragma region 
+#pragma region
 
     template <typename IntegerSequence, typename IntegerSequence::value_type Value>
     struct decrement_integer_sequence;

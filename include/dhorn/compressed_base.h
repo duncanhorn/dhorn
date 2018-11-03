@@ -208,8 +208,6 @@ namespace dhorn
             noexcept(std::is_nothrow_constructible_v<Ty, Types&&...>) :
             Ty(std::get<Indices>(std::move(args))...)
         {
-            // Visual Studio bug? Warning C4100: unreferenced formal parameter
-            args;
         }
 
 

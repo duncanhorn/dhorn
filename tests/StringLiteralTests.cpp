@@ -21,14 +21,14 @@ using namespace std::literals;
     constexpr const auto e = (expected); \
     constexpr const auto v = (value); \
     static_assert(e == v); \
-    Assert::AreEqual(e, v); \
+    ASSERT_EQ(e, v); \
 }
 
 #define CONSTEXPR_ASSERT_TRUE(value) \
 { \
     constexpr bool v = (value); \
     static_assert(v); \
-    Assert::IsTrue(v); \
+    ASSERT_TRUE(v); \
 }
 
 namespace dhorn::tests
@@ -66,7 +66,7 @@ namespace dhorn::tests
 
             string_literal<6> s2 = "foobar";
             s2[5] = 'z';
-            Assert::AreEqual('z', s2[5]);
+            ASSERT_EQ('z', s2[5]);
         }
 
         TEST_METHOD(AtTest)
@@ -82,7 +82,7 @@ namespace dhorn::tests
 
             string_literal<6> s2 = "foobar";
             s2.at(5) = 'z';
-            Assert::AreEqual('z', s2.at(5));
+            ASSERT_EQ('z', s2.at(5));
         }
 
         TEST_METHOD(FrontTest)
@@ -92,7 +92,7 @@ namespace dhorn::tests
 
             string_literal<6> s2 = "foobar";
             s2.front() = 'm';
-            Assert::AreEqual('m', s2.front());
+            ASSERT_EQ('m', s2.front());
         }
 
         TEST_METHOD(BackTest)
@@ -102,7 +102,7 @@ namespace dhorn::tests
 
             string_literal<6> s2 = "foobar";
             s2.back() = 'z';
-            Assert::AreEqual('z', s2.back());
+            ASSERT_EQ('z', s2.back());
         }
 
         TEST_METHOD(CStrTest)
@@ -132,7 +132,7 @@ namespace dhorn::tests
 
             string_literal<6> s2 = "foobar";
             s2.data()[5] = 'z';
-            Assert::AreEqual('z', s2.back());
+            ASSERT_EQ('z', s2.back());
         }
 
         TEST_METHOD(StringViewOperatorTest)
@@ -178,7 +178,7 @@ namespace dhorn::tests
             string_literal<6> s2 = "foobar";
             std::string_view sv2 = "moobar"sv;
             *s2.begin() = 'm';
-            Assert::IsTrue(std::equal(s2.begin(), s2.end(), sv2.begin(), sv2.end()));
+            ASSERT_TRUE(std::equal(s2.begin(), s2.end(), sv2.begin(), sv2.end()));
         }
 
         TEST_METHOD(ReverseIterationTest)
@@ -196,7 +196,7 @@ namespace dhorn::tests
             string_literal<6> s2 = "foobar";
             std::string_view sv2 = "foobaz"sv;
             *s2.rbegin() = 'z';
-            Assert::IsTrue(std::equal(s2.rbegin(), s2.rend(), sv2.rbegin(), sv2.rend()));
+            ASSERT_TRUE(std::equal(s2.rbegin(), s2.rend(), sv2.rbegin(), sv2.rend()));
         }
 
         TEST_METHOD(IteratorConversionTest)
@@ -206,12 +206,12 @@ namespace dhorn::tests
             string_literal<6>::iterator it = s.begin();
             string_literal<6>::const_iterator cit = it;
             cit = it + 2;
-            Assert::AreEqual('o', *cit);
+            ASSERT_EQ('o', *cit);
 
             string_literal<6>::reverse_iterator rit = s.rbegin();
             string_literal<6>::const_reverse_iterator crit = rit;
             crit = rit + 2;
-            Assert::AreEqual('b', *crit);
+            ASSERT_EQ('b', *crit);
         }
 
         TEST_METHOD(SizeLengthTest)

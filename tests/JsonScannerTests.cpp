@@ -86,9 +86,9 @@ namespace dhorn::tests
         }
         catch (const json::bad_json& err)
         {
-            Assert::AreEqual(line, err.position().line);
-            Assert::AreEqual(col, err.position().column);
-            Assert::AreEqual(abs, err.position().absolute);
+            ASSERT_EQ(line, err.position().line);
+            ASSERT_EQ(col, err.position().column);
+            ASSERT_EQ(abs, err.position().absolute);
         }
     }
 

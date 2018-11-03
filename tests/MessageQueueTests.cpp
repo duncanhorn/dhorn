@@ -38,14 +38,14 @@ namespace dhorn
                     });
                 }
 
-                Assert::IsTrue(x == 0);
+                ASSERT_TRUE(x == 0);
 
                 // Remove data
                 int localCount = 0;
                 for (int i = 0; i < testCount; ++i)
                 {
-                    Assert::IsTrue(msgQueue.pop_front()(i, 1) == (i + 1));
-                    Assert::IsTrue(x == ++localCount);
+                    ASSERT_TRUE(msgQueue.pop_front()(i, 1) == (i + 1));
+                    ASSERT_TRUE(x == ++localCount);
                 }
             }
 
@@ -71,7 +71,7 @@ namespace dhorn
                 for (std::size_t i = 0; i < testCount; ++i)
                 {
                     msgQueue.pop_front()();
-                    Assert::IsTrue(x == ++localCount);
+                    ASSERT_TRUE(x == ++localCount);
                 }
 
                 producer.join();
@@ -105,14 +105,14 @@ namespace dhorn
                     msgQueue.pop_front()();
 
                     int count = std::accumulate(std::begin(counts), std::end(counts), 0);
-                    Assert::IsTrue(count == ++localCount);
+                    ASSERT_TRUE(count == ++localCount);
                 }
 
                 int index = 0;
                 for (auto &thread : producers)
                 {
                     thread.join();
-                    Assert::IsTrue(counts[index++] == testCount);
+                    ASSERT_TRUE(counts[index++] == testCount);
                 }
             }
 
@@ -148,7 +148,7 @@ namespace dhorn
                 {
                     thread.join();
                 }
-                Assert::IsTrue(static_cast<std::size_t>(x) == testCount);
+                ASSERT_TRUE(static_cast<std::size_t>(x) == testCount);
             }
 
             TEST_METHOD(MultipleProducersMultipleConsumersTest)
@@ -197,10 +197,10 @@ namespace dhorn
                 for (auto &thread : producers)
                 {
                     thread.join();
-                    Assert::IsTrue(static_cast<std::size_t>(counts[index++]) == testCount);
+                    ASSERT_TRUE(static_cast<std::size_t>(counts[index++]) == testCount);
                 }
 
-                Assert::IsTrue(x == (testCount * producerCount));
+                ASSERT_TRUE(x == (testCount * producerCount));
             }
 
             TEST_METHOD(TryPopFrontTest)
@@ -218,7 +218,7 @@ namespace dhorn
                     });
                 }
 
-                Assert::IsTrue(x == 0);
+                ASSERT_TRUE(x == 0);
 
                 std::function<void(void)> func;
                 while (msgQueue.try_pop_front(func))
@@ -226,7 +226,7 @@ namespace dhorn
                     func();
                 }
 
-                Assert::IsTrue(x == testCount);
+                ASSERT_TRUE(x == testCount);
             }
         };
     }

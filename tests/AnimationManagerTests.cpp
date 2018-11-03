@@ -97,11 +97,11 @@ namespace dhorn
                 mgr.cancel(handle.get());
 
                 // Should either be in the canceled or completed state; we don't really care
-                Assert::IsTrue(dhorn::experimental::details::is_complete(mgr.query_state(handle.get())));
+                ASSERT_TRUE(dhorn::experimental::details::is_complete(mgr.query_state(handle.get())));
 
                 // After update, it should definitely be completed
                 mgr.update();
-                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::completed);
+                ASSERT_TRUE(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::completed);
 
                 // Animations should be able to cancel themselves (and immediately transition to completed
                 anim = new test_animation();
@@ -109,7 +109,7 @@ namespace dhorn
                 handle = mgr.submit(anim);
 
                 mgr.update();
-                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::completed);
+                ASSERT_TRUE(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::completed);
             }
 
             TEST_METHOD(DestroyTest)
@@ -126,15 +126,15 @@ namespace dhorn
 
                 { // Let the handle fall out of scope
                     auto handle = mgr.submit(anim);
-                    Assert::AreEqual(0, x);
+                    ASSERT_EQ(0, x);
                 }
 
                 // Handle is destroyed; shouldn't destroy the animation yet since it is still running
-                Assert::AreEqual(0, x);
+                ASSERT_EQ(0, x);
 
                 // After update, the animation will complete and will be destroyed
                 mgr.update();
-                Assert::AreEqual(42, x);
+                ASSERT_EQ(42, x);
 
                 x = 0;
                 anim = new test_animation();
@@ -149,11 +149,11 @@ namespace dhorn
                     mgr.update();
 
                     // Animation is complete, but hasn't fallen out of scope
-                    Assert::AreEqual(0, x);
+                    ASSERT_EQ(0, x);
                 }
                 // NOTE: The animation won't be destroyed yet since we defer the remove until the next call to update
                 mgr.update();
-                Assert::AreEqual(42, x);
+                ASSERT_EQ(42, x);
             }
 
             TEST_METHOD(PauseResumeTest)
@@ -163,22 +163,22 @@ namespace dhorn
                 auto handle = mgr.submit(anim);
 
                 mgr.pause(handle.get());
-                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
+                ASSERT_TRUE(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
 
                 // Update shouldn't impact animations
                 int x = 0;
                 anim->on_update([&]() { x = 42; });
                 mgr.update();
-                Assert::AreEqual(0, x);
-                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
+                ASSERT_EQ(0, x);
+                ASSERT_TRUE(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
 
                 mgr.resume(handle.get());
-                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::running);
+                ASSERT_TRUE(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::running);
 
                 // Animations should be able to transition themselves to paused
                 anim->set_next_state(dhorn::experimental::animation_state::paused);
                 mgr.update();
-                Assert::IsTrue(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
+                ASSERT_TRUE(mgr.query_state(handle.get()) == dhorn::experimental::animation_state::paused);
             }
 
             TEST_METHOD(DestructorTest)
@@ -198,8 +198,8 @@ namespace dhorn
                     auto handle2 = mgr.submit(anim2);
                 }
 
-                Assert::AreEqual(42, x);
-                Assert::AreEqual(0, y);
+                ASSERT_EQ(42, x);
+                ASSERT_EQ(0, y);
             }
         };
     }

@@ -51,18 +51,18 @@ namespace dhorn
             TEST_METHOD(DefaultConstructorTest)
             {
                 dhorn::experimental::ipv4_address addr;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0ul);
             }
 
             TEST_METHOD(CreateTypeConstructorTest)
             {
                 // Simple test: value is zero
                 dhorn::experimental::ipv4_address ip(0);
-                Assert::AreEqual(((in_addr)ip).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)ip).s_addr, 0ul);
 
                 // More complicated case: must reverse byte order
                 dhorn::experimental::ipv4_address ip2(0x00c0ffee);
-                Assert::AreEqual(((in_addr)ip2).s_addr, 0xeeffc000ul);
+                ASSERT_EQ(((in_addr)ip2).s_addr, 0xeeffc000ul);
             }
 
             TEST_METHOD(IpAddrConstructorTest)
@@ -77,16 +77,16 @@ namespace dhorn
                     addr.s_impno = rand() % 256;
 
                     dhorn::experimental::ipv4_address ip(addr);
-                    Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
+                    ASSERT_EQ(((in_addr)ip).s_addr, addr.s_addr);
                 }
 
                 addr.s_addr = 0xFFFFFFFF;
                 dhorn::experimental::ipv4_address ip1(addr);
-                Assert::AreEqual(((in_addr)ip1).s_addr, addr.s_addr);
+                ASSERT_EQ(((in_addr)ip1).s_addr, addr.s_addr);
 
                 addr.s_addr = 0;
                 dhorn::experimental::ipv4_address ip2(addr);
-                Assert::AreEqual(((in_addr)ip2).s_addr, addr.s_addr);
+                ASSERT_EQ(((in_addr)ip2).s_addr, addr.s_addr);
             }
 
             TEST_METHOD(SockAddrConstructorTest)
@@ -97,7 +97,7 @@ namespace dhorn
                 addr.sin_addr.s_addr = htonl(0x7F000001ul);
 
                 dhorn::experimental::ipv4_address ip(addr);
-                Assert::IsTrue(((in_addr)ip).s_addr == 0x0100007Ful);
+                ASSERT_TRUE(((in_addr)ip).s_addr == 0x0100007Ful);
 
                 // Cannot construct if family is AF_INET6
                 try
@@ -115,20 +115,20 @@ namespace dhorn
             {
                 std::string ip1 = "0.0.0.0";
                 dhorn::experimental::ipv4_address addr1(ip1.c_str());
-                Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr1).s_addr, 0ul);
 
                 std::string ip2 = "255.255.255.255";
                 dhorn::experimental::ipv4_address addr2(ip2.c_str());
-                Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse" (network-byte-order)
                 std::string ip3 = "127.0.0.1";
                 dhorn::experimental::ipv4_address addr3(ip3.c_str());
-                Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr3).s_addr, 0x0100007Ful);
 
                 std::string ip4 = "2.0.0.10";
                 dhorn::experimental::ipv4_address addr4(ip4.c_str());
-                Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr4).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -138,7 +138,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -148,7 +148,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -156,20 +156,20 @@ namespace dhorn
             {
                 std::wstring ip1 = L"0.0.0.0";
                 dhorn::experimental::ipv4_address addr1(ip1.c_str());
-                Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr1).s_addr, 0ul);
 
                 std::wstring ip2 = L"255.255.255.255";
                 dhorn::experimental::ipv4_address addr2(ip2.c_str());
-                Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 dhorn::experimental::ipv4_address addr3(ip3.c_str());
-                Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr3).s_addr, 0x0100007Ful);
 
                 std::wstring ip4 = L"2.0.0.10";
                 dhorn::experimental::ipv4_address addr4(ip4.c_str());
-                Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr4).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -179,7 +179,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -189,7 +189,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -197,20 +197,20 @@ namespace dhorn
             {
                 std::string ip1 = "0.0.0.0";
                 dhorn::experimental::ipv4_address addr1(ip1);
-                Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr1).s_addr, 0ul);
 
                 std::string ip2 = "255.255.255.255";
                 dhorn::experimental::ipv4_address addr2(ip2);
-                Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "127.0.0.1";
                 dhorn::experimental::ipv4_address addr3(ip3);
-                Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr3).s_addr, 0x0100007Ful);
 
                 std::string ip4 = "2.0.0.10";
                 dhorn::experimental::ipv4_address addr4(ip4);
-                Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr4).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -220,7 +220,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -231,7 +231,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -239,20 +239,20 @@ namespace dhorn
             {
                 std::wstring ip1 = L"0.0.0.0";
                 dhorn::experimental::ipv4_address addr1(ip1);
-                Assert::AreEqual(((in_addr)addr1).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr1).s_addr, 0ul);
 
                 std::wstring ip2 = L"255.255.255.255";
                 dhorn::experimental::ipv4_address addr2(ip2);
-                Assert::AreEqual(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr2).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 dhorn::experimental::ipv4_address addr3(ip3);
-                Assert::AreEqual(((in_addr)addr3).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr3).s_addr, 0x0100007Ful);
 
                 std::wstring ip4 = L"2.0.0.10";
                 dhorn::experimental::ipv4_address addr4(ip4);
-                Assert::AreEqual(((in_addr)addr4).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr4).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -262,7 +262,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -273,7 +273,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -291,10 +291,10 @@ namespace dhorn
                 dhorn::experimental::ipv4_address ip;
 
                 ip = 0;
-                Assert::AreEqual(((in_addr)ip).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)ip).s_addr, 0ul);
 
                 ip = 0x00c0ffee;
-                Assert::AreEqual(((in_addr)ip).s_addr, 0xeeffc000ul);
+                ASSERT_EQ(((in_addr)ip).s_addr, 0xeeffc000ul);
             }
 
             TEST_METHOD(IpAddrAssignmentTest)
@@ -310,16 +310,16 @@ namespace dhorn
                     addr.s_impno = rand() % 256;
 
                     ip = addr;
-                    Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
+                    ASSERT_EQ(((in_addr)ip).s_addr, addr.s_addr);
                 }
 
                 addr.s_addr = 0xFFFFFFFF;
                 ip = addr;
-                Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
+                ASSERT_EQ(((in_addr)ip).s_addr, addr.s_addr);
 
                 addr.s_addr = 0;
                 ip = addr;
-                Assert::AreEqual(((in_addr)ip).s_addr, addr.s_addr);
+                ASSERT_EQ(((in_addr)ip).s_addr, addr.s_addr);
             }
 
             TEST_METHOD(SockAddrAssignmentTest)
@@ -331,7 +331,7 @@ namespace dhorn
                 addr.sin_addr.s_addr = htonl(0x7F000001ul);
 
                 ip = addr;
-                Assert::IsTrue(((in_addr)ip).s_addr == 0x0100007Ful);
+                ASSERT_TRUE(((in_addr)ip).s_addr == 0x0100007Ful);
 
                 // Cannot construct if family is AF_INET6
                 try
@@ -352,20 +352,20 @@ namespace dhorn
 
                 std::string ip1 = "0.0.0.0";
                 addr = ip1.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0ul);
 
                 std::string ip2 = "255.255.255.255";
                 addr = ip2.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "127.0.0.1";
                 addr = ip3.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0100007Ful);
 
                 std::string ip4 = "2.0.0.10";
                 addr = ip4.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -375,7 +375,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -385,7 +385,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -396,20 +396,20 @@ namespace dhorn
 
                 std::wstring ip1 = L"0.0.0.0";
                 addr = ip1.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0ul);
 
                 std::wstring ip2 = L"255.255.255.255";
                 addr = ip2.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 addr = ip3.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0100007Ful);
 
                 std::wstring ip4 = L"2.0.0.10";
                 addr = ip4.c_str();
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -419,7 +419,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -429,7 +429,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -440,20 +440,20 @@ namespace dhorn
 
                 std::string ip1 = "0.0.0.0";
                 addr = ip1;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0ul);
 
                 std::string ip2 = "255.255.255.255";
                 addr = ip2;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "127.0.0.1";
                 addr = ip3;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0100007Ful);
 
                 std::string ip4 = "2.0.0.10";
                 addr = ip4;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -463,7 +463,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -473,7 +473,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -484,20 +484,20 @@ namespace dhorn
 
                 std::wstring ip1 = L"0.0.0.0";
                 addr = ip1;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0ul);
 
                 std::wstring ip2 = L"255.255.255.255";
                 addr = ip2;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0xFFFFFFFFul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0xFFFFFFFFul);
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"127.0.0.1";
                 addr = ip3;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0100007Ful);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0100007Ful);
 
                 std::wstring ip4 = L"2.0.0.10";
                 addr = ip4;
-                Assert::AreEqual(((in_addr)addr).s_addr, 0x0A000002ul);
+                ASSERT_EQ(((in_addr)addr).s_addr, 0x0A000002ul);
 
                 try
                 {
@@ -507,7 +507,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -517,7 +517,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -543,7 +543,7 @@ namespace dhorn
                     in.s_impno = rand() % 256;
 
                     addr = in;
-                    Assert::AreEqual(((in_addr)addr).s_addr, in.s_addr);
+                    ASSERT_EQ(((in_addr)addr).s_addr, in.s_addr);
                 }
             }
 
@@ -558,7 +558,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv4_address addr(str);
-                    Assert::AreEqual((std::string)addr, str);
+                    ASSERT_EQ((std::string)addr, str);
                 }
             }
 
@@ -573,7 +573,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv4_address addr(str);
-                    Assert::AreEqual((std::wstring)addr, str);
+                    ASSERT_EQ((std::wstring)addr, str);
                 }
             }
 
@@ -599,7 +599,7 @@ namespace dhorn
                     in.s_impno = rand() % 256;
 
                     addr = in;
-                    Assert::AreEqual(addr.addr().s_addr, in.s_addr);
+                    ASSERT_EQ(addr.addr().s_addr, in.s_addr);
                 }
             }
 
@@ -614,7 +614,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv4_address addr(str);
-                    Assert::AreEqual(addr.str(), str);
+                    ASSERT_EQ(addr.str(), str);
                 }
             }
 
@@ -629,7 +629,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv4_address addr(str);
-                    Assert::AreEqual(addr.str<wchar_t>(), str);
+                    ASSERT_EQ(addr.str<wchar_t>(), str);
                 }
             }
 
@@ -686,7 +686,7 @@ namespace dhorn
             TEST_METHOD(DefaultConstructorTest)
             {
                 dhorn::experimental::ipv6_address addr;
-                Assert::IsTrue((in_addr6)addr == zero());
+                ASSERT_TRUE((in_addr6)addr == zero());
             }
 
             TEST_METHOD(CreateTypeConstructorTest)
@@ -698,7 +698,7 @@ namespace dhorn
 
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::AreEqual(val[i], ip.addr().s6_addr[i]);
+                    ASSERT_EQ(val[i], ip.addr().s6_addr[i]);
                 }
             }
 
@@ -711,16 +711,16 @@ namespace dhorn
                     addr = random_addr();
 
                     dhorn::experimental::ipv6_address ip(addr);
-                    Assert::IsTrue(addr == ip);
+                    ASSERT_TRUE(addr == ip);
                 }
 
                 addr = make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
                 dhorn::experimental::ipv6_address ip1(addr);
-                Assert::IsTrue(addr == ip1);
+                ASSERT_TRUE(addr == ip1);
 
                 addr = zero();
                 dhorn::experimental::ipv6_address ip2(addr);
-                Assert::IsTrue(addr == ip2);
+                ASSERT_TRUE(addr == ip2);
             }
 
             TEST_METHOD(SockAddrConstructorTest)
@@ -731,7 +731,7 @@ namespace dhorn
                 addr.sin6_addr = make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb);
 
                 dhorn::experimental::ipv6_address ip(addr);
-                Assert::IsTrue((in6_addr)ip == addr.sin6_addr);
+                ASSERT_TRUE((in6_addr)ip == addr.sin6_addr);
 
                 // Cannot construct if family is AF_INET
                 try
@@ -749,20 +749,20 @@ namespace dhorn
             {
                 std::string ip1 = "::";
                 dhorn::experimental::ipv6_address addr1(ip1.c_str());
-                Assert::IsTrue(zero() == addr1);
+                ASSERT_TRUE(zero() == addr1);
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::experimental::ipv6_address addr2(ip2.c_str());
-                Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
+                ASSERT_TRUE(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::string ip3 = "::1";
                 dhorn::experimental::ipv6_address addr3(ip3.c_str());
-                Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
+                ASSERT_TRUE(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 dhorn::experimental::ipv6_address addr4(ip4.c_str());
-                Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
+                ASSERT_TRUE(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
 
                 try
                 {
@@ -772,7 +772,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -782,7 +782,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -790,20 +790,20 @@ namespace dhorn
             {
                 std::wstring ip1 = L"::";
                 dhorn::experimental::ipv6_address addr1(ip1.c_str());
-                Assert::IsTrue(zero() == addr1);
+                ASSERT_TRUE(zero() == addr1);
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::experimental::ipv6_address addr2(ip2.c_str());
-                Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
+                ASSERT_TRUE(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::wstring ip3 = L"::1";
                 dhorn::experimental::ipv6_address addr3(ip3.c_str());
-                Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
+                ASSERT_TRUE(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 dhorn::experimental::ipv6_address addr4(ip4.c_str());
-                Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
+                ASSERT_TRUE(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
 
                 try
                 {
@@ -813,7 +813,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -823,7 +823,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -831,20 +831,20 @@ namespace dhorn
             {
                 std::string ip1 = "::";
                 dhorn::experimental::ipv6_address addr1(ip1);
-                Assert::IsTrue(zero() == addr1);
+                ASSERT_TRUE(zero() == addr1);
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::experimental::ipv6_address addr2(ip2);
-                Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
+                ASSERT_TRUE(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::string ip3 = "::1";
                 dhorn::experimental::ipv6_address addr3(ip3);
-                Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
+                ASSERT_TRUE(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 dhorn::experimental::ipv6_address addr4(ip4);
-                Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
+                ASSERT_TRUE(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
 
                 try
                 {
@@ -854,7 +854,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -865,7 +865,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -873,20 +873,20 @@ namespace dhorn
             {
                 std::wstring ip1 = L"::";
                 dhorn::experimental::ipv6_address addr1(ip1);
-                Assert::IsTrue(zero() == addr1);
+                ASSERT_TRUE(zero() == addr1);
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 dhorn::experimental::ipv6_address addr2(ip2);
-                Assert::IsTrue(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
+                ASSERT_TRUE(make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF) == addr2);
 
                 // Note: on x86/amd64 machines, the byte order in each word should be reversed
                 std::wstring ip3 = L"::1";
                 dhorn::experimental::ipv6_address addr3(ip3);
-                Assert::IsTrue(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
+                ASSERT_TRUE(make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100) == addr3);
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 dhorn::experimental::ipv6_address addr4(ip4);
-                Assert::IsTrue(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
+                ASSERT_TRUE(make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb) == addr4);
 
                 try
                 {
@@ -896,7 +896,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -907,7 +907,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -930,7 +930,7 @@ namespace dhorn
 
                 for (std::size_t i = 0; i < 16; i++)
                 {
-                    Assert::AreEqual(val[i], ip.addr().s6_addr[i]);
+                    ASSERT_EQ(val[i], ip.addr().s6_addr[i]);
                 }
             }
 
@@ -944,16 +944,16 @@ namespace dhorn
                     addr = random_addr();
 
                     ip = addr;
-                    Assert::IsTrue(ip == addr);
+                    ASSERT_TRUE(ip == addr);
                 }
 
                 addr = make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF);
                 ip = addr;
-                Assert::IsTrue(ip == addr);
+                ASSERT_TRUE(ip == addr);
 
                 addr = zero();
                 ip = addr;
-                Assert::IsTrue(ip == addr);
+                ASSERT_TRUE(ip == addr);
             }
 
             TEST_METHOD(SockAddrAssignmentTest)
@@ -965,7 +965,7 @@ namespace dhorn
                 addr.sin6_addr = make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb);
 
                 ip = addr;
-                Assert::IsTrue((in6_addr)ip == addr.sin6_addr);
+                ASSERT_TRUE((in6_addr)ip == addr.sin6_addr);
 
                 // Cannot construct if family is AF_INET
                 try
@@ -986,20 +986,20 @@ namespace dhorn
 
                 std::string ip1 = "::";
                 addr = ip1.c_str();
-                Assert::IsTrue(addr == zero());
+                ASSERT_TRUE(addr == zero());
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2.c_str();
-                Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
+                ASSERT_TRUE(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "::1";
                 addr = ip3.c_str();
-                Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
+                ASSERT_TRUE(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 addr = ip4.c_str();
-                Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
+                ASSERT_TRUE(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
 
                 try
                 {
@@ -1009,7 +1009,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -1019,7 +1019,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -1030,20 +1030,20 @@ namespace dhorn
 
                 std::wstring ip1 = L"::";
                 addr = ip1.c_str();
-                Assert::IsTrue(addr == zero());
+                ASSERT_TRUE(addr == zero());
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2.c_str();
-                Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
+                ASSERT_TRUE(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"::1";
                 addr = ip3.c_str();
-                Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
+                ASSERT_TRUE(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 addr = ip4.c_str();
-                Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
+                ASSERT_TRUE(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
 
                 try
                 {
@@ -1053,7 +1053,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -1063,7 +1063,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEFAULT);
+                    ASSERT_TRUE(e.get_error() == WSAEFAULT);
                 }
             }
 
@@ -1074,20 +1074,20 @@ namespace dhorn
 
                 std::string ip1 = "::";
                 addr = ip1;
-                Assert::IsTrue(addr == zero());
+                ASSERT_TRUE(addr == zero());
 
                 std::string ip2 = "FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2;
-                Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
+                ASSERT_TRUE(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::string ip3 = "::1";
                 addr = ip3;
-                Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
+                ASSERT_TRUE(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
 
                 std::string ip4 = "0123:4567::aaaa:bbbb";
                 addr = ip4;
-                Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
+                ASSERT_TRUE(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
 
                 try
                 {
@@ -1097,7 +1097,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -1108,7 +1108,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -1119,20 +1119,20 @@ namespace dhorn
 
                 std::wstring ip1 = L"::";
                 addr = ip1;
-                Assert::IsTrue(addr == zero());
+                ASSERT_TRUE(addr == zero());
 
                 std::wstring ip2 = L"FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF";
                 addr = ip2;
-                Assert::IsTrue(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
+                ASSERT_TRUE(addr == make_addr(0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF));
 
                 // Note: on x86/amd64 machines, the ip address should be stored in "reverse"
                 std::wstring ip3 = L"::1";
                 addr = ip3;
-                Assert::IsTrue(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
+                ASSERT_TRUE(addr == make_addr(0, 0, 0, 0, 0, 0, 0, 0x0100));
 
                 std::wstring ip4 = L"0123:4567::aaaa:bbbb";
                 addr = ip4;
-                Assert::IsTrue(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
+                ASSERT_TRUE(addr == make_addr(0x2301, 0x6745, 0, 0, 0, 0, 0xaaaa, 0xbbbb));
 
                 try
                 {
@@ -1142,7 +1142,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
 
                 try
@@ -1153,7 +1153,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSA_INVALID_PARAMETER);
+                    ASSERT_TRUE(e.get_error() == WSA_INVALID_PARAMETER);
                 }
             }
 
@@ -1176,7 +1176,7 @@ namespace dhorn
                     in = random_addr();
 
                     addr = in;
-                    Assert::IsTrue((in6_addr)addr == in);
+                    ASSERT_TRUE((in6_addr)addr == in);
                 }
             }
 
@@ -1192,7 +1192,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv6_address addr(str);
-                    Assert::AreEqual((std::string)addr, str);
+                    ASSERT_EQ((std::string)addr, str);
                 }
             }
 
@@ -1208,7 +1208,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv6_address addr(str);
-                    Assert::AreEqual((std::wstring)addr, str);
+                    ASSERT_EQ((std::wstring)addr, str);
                 }
             }
 
@@ -1231,7 +1231,7 @@ namespace dhorn
                     in = random_addr();
 
                     addr = in;
-                    Assert::IsTrue(addr.addr() == in);
+                    ASSERT_TRUE(addr.addr() == in);
                 }
             }
 
@@ -1247,7 +1247,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv6_address addr(str);
-                    Assert::AreEqual(addr.str(), str);
+                    ASSERT_EQ(addr.str(), str);
                 }
             }
 
@@ -1263,7 +1263,7 @@ namespace dhorn
                 for (auto &str : test_strings)
                 {
                     dhorn::experimental::ipv6_address addr(str);
-                    Assert::AreEqual(addr.str<wchar_t>(), str);
+                    ASSERT_EQ(addr.str<wchar_t>(), str);
                 }
             }
 
@@ -1279,7 +1279,7 @@ namespace dhorn
             {
                 // Construct a socket. This is the one that we'll be using for the test
                 dhorn::experimental::socket_t rawSocket = ::socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-                Assert::IsTrue(rawSocket != dhorn::experimental::invalid_socket);
+                ASSERT_TRUE(rawSocket != dhorn::experimental::invalid_socket);
 
                 func(rawSocket);
 
@@ -1346,7 +1346,7 @@ namespace dhorn
             {
                 // Default constructor has socket with value dhorn::experimental::invalid_socket
                 dhorn::experimental::socket_base sock;
-                Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
+                ASSERT_TRUE(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
             }
 
             TEST_METHOD(SocketConstuctorTest)
@@ -1355,7 +1355,7 @@ namespace dhorn
                 {
                     // Constructing with invalid socket should not cause issues
                     dhorn::experimental::socket_base sock(dhorn::experimental::invalid_socket);
-                    Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
+                    ASSERT_TRUE(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
 
                     // Construct with pre-made socket. Since we're not testing the close function right now, we'll get
                     // an exception. We don't necessarily care what the exception is, and that's okay since that's not
@@ -1363,7 +1363,7 @@ namespace dhorn
                     try
                     {
                         dhorn::experimental::socket_base sock2(rawSocket);
-                        Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                        ASSERT_TRUE(static_cast<SOCKET>(sock2) == rawSocket);
                     }
                     catch (dhorn::experimental::socket_exception &/*ignored*/)
                     {
@@ -1383,8 +1383,8 @@ namespace dhorn
                     try
                     {
                         dhorn::experimental::socket_base sock2(std::move(sock));
-                        Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
-                        Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                        ASSERT_TRUE(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
+                        ASSERT_TRUE(static_cast<SOCKET>(sock2) == rawSocket);
                     }
                     catch (dhorn::experimental::socket_exception &/*ignored*/)
                     {
@@ -1392,8 +1392,8 @@ namespace dhorn
 
                     // Moving an invalid socket shouldn't give any errors, etc.
                     dhorn::experimental::socket_base sock2(std::move(sock));
-                    Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
-                    Assert::IsTrue(static_cast<SOCKET>(sock2) == dhorn::experimental::invalid_socket);
+                    ASSERT_TRUE(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
+                    ASSERT_TRUE(static_cast<SOCKET>(sock2) == dhorn::experimental::invalid_socket);
                 });
             }
 
@@ -1412,7 +1412,7 @@ namespace dhorn
                     }
                     catch (dhorn::experimental::socket_exception &e)
                     {
-                        Assert::IsTrue(e.get_error() == WSAEFAULT);
+                        ASSERT_TRUE(e.get_error() == WSAEFAULT);
                     }
                 });
             }
@@ -1429,11 +1429,11 @@ namespace dhorn
                     try
                     {
                         dhorn::experimental::socket_base sock2;
-                        Assert::IsTrue(static_cast<SOCKET>(sock2) == dhorn::experimental::invalid_socket); // don't inline
+                        ASSERT_TRUE(static_cast<SOCKET>(sock2) == dhorn::experimental::invalid_socket); // don't inline
 
                         sock2 = std::move(sock);
-                        Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
-                        Assert::IsTrue(static_cast<SOCKET>(sock2) == rawSocket);
+                        ASSERT_TRUE(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
+                        ASSERT_TRUE(static_cast<SOCKET>(sock2) == rawSocket);
                     }
                     catch (dhorn::experimental::socket_exception &/*ignored*/)
                     {
@@ -1441,8 +1441,8 @@ namespace dhorn
 
                     // Moving an invalid socket shouldn't give any errors, etc.
                     dhorn::experimental::socket_base sock2(std::move(sock));
-                    Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
-                    Assert::IsTrue(static_cast<SOCKET>(sock2) == dhorn::experimental::invalid_socket);
+                    ASSERT_TRUE(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
+                    ASSERT_TRUE(static_cast<SOCKET>(sock2) == dhorn::experimental::invalid_socket);
                 });
             }
 
@@ -1454,10 +1454,10 @@ namespace dhorn
                     try
                     {
                         dhorn::experimental::socket_base sock;
-                        Assert::IsTrue(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
+                        ASSERT_TRUE(static_cast<SOCKET>(sock) == dhorn::experimental::invalid_socket);
 
                         sock = rawSocket;
-                        Assert::IsTrue(static_cast<SOCKET>(sock) == rawSocket);
+                        ASSERT_TRUE(static_cast<SOCKET>(sock) == rawSocket);
                     }
                     catch (dhorn::experimental::socket_exception &/*ignored*/)
                     {
@@ -1473,10 +1473,10 @@ namespace dhorn
                     try
                     {
                         dhorn::experimental::socket_base sock;
-                        Assert::IsFalse(sock);
+                        ASSERT_FALSE(sock);
 
                         sock = rawSocket;
-                        Assert::IsTrue(sock);
+                        ASSERT_TRUE(sock);
                     }
                     catch (dhorn::experimental::socket_exception &/*ignored*/)
                     {
@@ -1491,13 +1491,13 @@ namespace dhorn
                     dhorn::experimental::address_family::internetwork_version_4,
                     dhorn::experimental::socket_type::stream,
                     dhorn::experimental::ip_protocol::transmission_control_protocol);
-                Assert::AreNotEqual(static_cast<SOCKET>(tcpSocket), dhorn::experimental::invalid_socket);
+                ASSERT_NE(static_cast<SOCKET>(tcpSocket), dhorn::experimental::invalid_socket);
 
                 dhorn::experimental::socket_base udpSocket(
                     dhorn::experimental::address_family::internetwork_version_4,
                     dhorn::experimental::socket_type::datagram,
                     dhorn::experimental::ip_protocol::user_datagram_protocol);
-                Assert::AreNotEqual(static_cast<SOCKET>(udpSocket), dhorn::experimental::invalid_socket);
+                ASSERT_NE(static_cast<SOCKET>(udpSocket), dhorn::experimental::invalid_socket);
 
                 // Close the sockets ourselves; We're not testing the close function yet
                 ::closesocket(tcpSocket.detach());
@@ -1514,7 +1514,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
                 }
 
                 try
@@ -1527,7 +1527,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
                 }
             }
 
@@ -1541,13 +1541,13 @@ namespace dhorn
                     dhorn::experimental::address_family::internetwork_version_4,
                     dhorn::experimental::socket_type::stream,
                     dhorn::experimental::ip_protocol::transmission_control_protocol);
-                Assert::AreNotEqual(static_cast<SOCKET>(tcpSocket), dhorn::experimental::invalid_socket);
+                ASSERT_NE(static_cast<SOCKET>(tcpSocket), dhorn::experimental::invalid_socket);
 
                 udpSocket.open(
                     dhorn::experimental::address_family::internetwork_version_4,
                     dhorn::experimental::socket_type::datagram,
                     dhorn::experimental::ip_protocol::user_datagram_protocol);
-                Assert::AreNotEqual(static_cast<SOCKET>(udpSocket), dhorn::experimental::invalid_socket);
+                ASSERT_NE(static_cast<SOCKET>(udpSocket), dhorn::experimental::invalid_socket);
 
                 // Calling open on a socket already in use should throw and leave the socket in a correct state
                 try
@@ -1560,7 +1560,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAEISCONN), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAEISCONN), e.get_error());
                 }
 
                 // Close the sockets ourselves; We're not testing the close function yet
@@ -1578,7 +1578,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
                 }
 
                 try
@@ -1591,7 +1591,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAEPROTONOSUPPORT), e.get_error());
                 }
             }
 
@@ -1600,13 +1600,13 @@ namespace dhorn
                 ExecuteSocketTest([](dhorn::experimental::socket_t rawSocket)
                 {
                     dhorn::experimental::socket_base sock(rawSocket);
-                    Assert::AreEqual(rawSocket, static_cast<SOCKET>(sock));
+                    ASSERT_EQ(rawSocket, static_cast<SOCKET>(sock));
 
                     sock.close();
-                    Assert::AreEqual(dhorn::experimental::invalid_socket, static_cast<SOCKET>(sock));
+                    ASSERT_EQ(dhorn::experimental::invalid_socket, static_cast<SOCKET>(sock));
 
                     // Calling closesocket should fail since the socket is already closed
-                    Assert::AreNotEqual(0, ::closesocket(rawSocket));
+                    ASSERT_NE(0, ::closesocket(rawSocket));
                 }, false /*don't close*/);
             }
 
@@ -1624,12 +1624,12 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAENOTSOCK);
+                    ASSERT_TRUE(e.get_error() == WSAENOTSOCK);
                 }
 
                 // Bind should succeed if the socket is created with IPPROTO_TCP
                 auto rawSock = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-                Assert::IsTrue(rawSock != dhorn::experimental::invalid_socket);
+                ASSERT_TRUE(rawSock != dhorn::experimental::invalid_socket);
 
                 dhorn::experimental::socket_base sock(rawSock);
                 sock.bind(testAddr);
@@ -1642,7 +1642,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::IsTrue(e.get_error() == WSAEINVAL);
+                    ASSERT_TRUE(e.get_error() == WSAEINVAL);
                 }
 
                 sock.close();
@@ -1661,7 +1661,7 @@ namespace dhorn
                     }
                     catch (dhorn::experimental::socket_exception &e)
                     {
-                        Assert::IsTrue(e.get_error() == WSAEINVAL);
+                        ASSERT_TRUE(e.get_error() == WSAEINVAL);
                     }
 
                     sock.detach(); // Let ExecuteSocketTest close the socket
@@ -1684,7 +1684,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAEINVAL), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAEINVAL), e.get_error());
                 }
 
                 // Bind against the test socket_address
@@ -1692,7 +1692,7 @@ namespace dhorn
 
                 // Make sure that the address is the same
                 auto addr = sock.get_socket_name();
-                Assert::IsTrue(addr == testAddr);
+                ASSERT_TRUE(addr == testAddr);
 
                 sock.close();
             }
@@ -1710,7 +1710,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAENOTSOCK), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAENOTSOCK), e.get_error());
                 }
 
                 try
@@ -1723,7 +1723,7 @@ namespace dhorn
                 }
                 catch (dhorn::experimental::socket_exception &e)
                 {
-                    Assert::AreEqual(static_cast<int>(WSAENOTSOCK), e.get_error());
+                    ASSERT_EQ(static_cast<int>(WSAENOTSOCK), e.get_error());
                 }
 
                 sock.open(
@@ -1736,11 +1736,11 @@ namespace dhorn
 
                 // Verify that the value is false first (otherwise we're testing nothing...)
                 bool val = sock.get_socket_option<bool>(dhorn::experimental::socket_level::socket, dhorn::experimental::socket_option::debug_info);
-                Assert::IsFalse(val);
+                ASSERT_FALSE(val);
 
                 sock.set_socket_option(dhorn::experimental::socket_level::socket, dhorn::experimental::socket_option::debug_info, true);
                 val = sock.get_socket_option<bool>(dhorn::experimental::socket_level::socket, dhorn::experimental::socket_option::debug_info);
-                Assert::IsTrue(val);
+                ASSERT_TRUE(val);
 
                 sock.close();
             }
@@ -1762,7 +1762,7 @@ namespace dhorn
                     succeeded = true;
                 });
 
-                Assert::IsTrue(succeeded);
+                ASSERT_TRUE(succeeded);
             }
 
             TEST_METHOD(GetPeerNameTest)
@@ -1774,14 +1774,14 @@ namespace dhorn
                     [&](dhorn::experimental::socket_base& /*serverSocket*/, dhorn::experimental::socket_base& connectedSocket)
                 {
                     auto peerName = connectedSocket.get_peer_name();
-                    Assert::IsTrue(peerName.size() > 0);
+                    ASSERT_TRUE(peerName.size() > 0);
                 },
                     [&](dhorn::experimental::socket_base& clientSocket)
                 {
                     // We can't predict the address of what we're connected to, but we can assert that it gave us a
                     // valid value
                     auto peerName = clientSocket.get_peer_name();
-                    Assert::IsTrue(peerName.size() > 0);
+                    ASSERT_TRUE(peerName.size() > 0);
                 });
             }
 
@@ -1796,30 +1796,30 @@ namespace dhorn
                     // Receive using a pointer to a buffer
                     char buffer[4] = {};
                     auto len = connectedSocket.receive(buffer, 3, dhorn::experimental::message_flags::none);
-                    Assert::IsTrue(len == 3);
-                    Assert::IsTrue(strcmp(buffer, "foo") == 0);
+                    ASSERT_TRUE(len == 3);
+                    ASSERT_TRUE(strcmp(buffer, "foo") == 0);
 
                     // Send using iterators
                     const char sendBuff[] = "bar";
                     len = connectedSocket.send(std::begin(sendBuff), std::end(sendBuff), dhorn::experimental::message_flags::none);
-                    Assert::IsTrue(len == 4);
+                    ASSERT_TRUE(len == 4);
 
                     // Receive using an array
                     len = connectedSocket.receive(buffer, dhorn::experimental::message_flags::none);
-                    Assert::IsTrue(len == 4);
-                    Assert::IsTrue(strcmp(buffer, "car") == 0);
+                    ASSERT_TRUE(len == 4);
+                    ASSERT_TRUE(strcmp(buffer, "car") == 0);
                 },
                     [&](dhorn::experimental::socket_base& clientSocket)
                 {
                     // Send using a pointer to a buffer
                     auto len = clientSocket.send("foo", 3, dhorn::experimental::message_flags::none);
-                    Assert::IsTrue(len == 3);
+                    ASSERT_TRUE(len == 3);
 
                     // Receive using iterators
                     char buffer[4] = {};
                     auto itr = clientSocket.receive(std::begin(buffer), std::end(buffer), dhorn::experimental::message_flags::none);
-                    Assert::IsTrue(std::distance(std::begin(buffer), itr) == 4);
-                    Assert::IsTrue(strcmp(buffer, "bar") == 0);
+                    ASSERT_TRUE(std::distance(std::begin(buffer), itr) == 4);
+                    ASSERT_TRUE(strcmp(buffer, "bar") == 0);
 
                     // Send using an array
                     const char sendBuff[] = "car";
@@ -1844,36 +1844,36 @@ namespace dhorn
                 // Send "foo" using a pointer to a buffer
                 dhorn::experimental::socket_address dest2(dhorn::experimental::ipv4_address(dhorn::experimental::local_host), 1338);
                 auto len = sock1.send_to("foo", 3, dhorn::experimental::message_flags::none, dest2);
-                Assert::IsTrue(len == 3);
+                ASSERT_TRUE(len == 3);
 
                 // Receive using a pointer to a buffer
                 char buffer[4] = {};
                 dhorn::experimental::socket_address dest1; // Should pick up the correct destination address
                 len = sock2.receive_from(buffer, 3, dhorn::experimental::message_flags::none, dest1);
-                Assert::IsTrue(len == 3);
-                Assert::IsTrue(strcmp(buffer, "foo") == 0);
+                ASSERT_TRUE(len == 3);
+                ASSERT_TRUE(strcmp(buffer, "foo") == 0);
 
 
                 // Send "bar" using iterators
                 const char sendBuff[] = "bar";
                 len = sock2.send_to(std::begin(sendBuff), std::end(sendBuff), dhorn::experimental::message_flags::none, dest1);
-                Assert::IsTrue(len == 4);
+                ASSERT_TRUE(len == 4);
 
                 // Receive using iterators
                 auto itr = sock1.receive_from(std::begin(buffer), std::end(buffer), dhorn::experimental::message_flags::none, dest2);
-                Assert::IsTrue(std::distance(std::begin(buffer), itr) == 4);
-                Assert::IsTrue(strcmp(buffer, "bar") == 0);
+                ASSERT_TRUE(std::distance(std::begin(buffer), itr) == 4);
+                ASSERT_TRUE(strcmp(buffer, "bar") == 0);
 
 
                 // Send "car" using an array
                 const char sendBuff2[] = "car";
                 len = sock1.send_to(sendBuff2, dhorn::experimental::message_flags::none, dest2);
-                Assert::IsTrue(len == 4);
+                ASSERT_TRUE(len == 4);
 
                 // Receive using an array
                 sock2.receive_from(buffer, dhorn::experimental::message_flags::none, dest1);
-                Assert::IsTrue(len == 4);
-                Assert::IsTrue(strcmp(buffer, "car") == 0);
+                ASSERT_TRUE(len == 4);
+                ASSERT_TRUE(strcmp(buffer, "car") == 0);
 
                 sock1.close();
                 sock2.close();
@@ -1887,14 +1887,14 @@ namespace dhorn
             TEST_METHOD(CapacityTest)
             {
                 dhorn::experimental::udp_packet<int> packet(100);
-                Assert::AreEqual(static_cast<std::size_t>(100), packet.capacity());
+                ASSERT_EQ(static_cast<std::size_t>(100), packet.capacity());
             }
 
             TEST_METHOD(InitialSizeTest)
             {
                 // Size is tested more completely in the SetDataTest
                 dhorn::experimental::udp_packet<int> packet(100);
-                Assert::AreEqual(static_cast<std::size_t>(0), packet.size());
+                ASSERT_EQ(static_cast<std::size_t>(0), packet.size());
             }
 
             TEST_METHOD(SetDataTest)
@@ -1908,13 +1908,13 @@ namespace dhorn
 
                 // Test setting with the maximum amount
                 packet.set_data(std::begin(vals), std::begin(vals) + 100);
-                Assert::AreEqual(static_cast<std::size_t>(100), packet.size());
-                Assert::IsTrue(std::equal(std::begin(vals), std::begin(vals) + 100, packet.buffer().get()));
+                ASSERT_EQ(static_cast<std::size_t>(100), packet.size());
+                ASSERT_TRUE(std::equal(std::begin(vals), std::begin(vals) + 100, packet.buffer().get()));
 
                 // Now set with half the amount
                 packet.set_data(std::begin(vals) + 50, std::begin(vals) + 100);
-                Assert::AreEqual(static_cast<std::size_t>(50), packet.size());
-                Assert::IsTrue(std::equal(std::begin(vals) + 50, std::begin(vals) + 100, packet.buffer().get()));
+                ASSERT_EQ(static_cast<std::size_t>(50), packet.size());
+                ASSERT_TRUE(std::equal(std::begin(vals) + 50, std::begin(vals) + 100, packet.buffer().get()));
 
                 // Setting with more than the maximum amount should throw
                 try
@@ -1940,13 +1940,13 @@ namespace dhorn
 
                 auto checkFunc = [&](const dhorn::experimental::udp_packet<int> &p1, const dhorn::experimental::udp_packet<int> &p2)
                 {
-                    Assert::AreEqual(static_cast<std::size_t>(5), p1.size());
-                    Assert::AreEqual(static_cast<std::size_t>(10), p1.capacity());
-                    Assert::IsTrue(std::equal(vals1.begin(), vals1.end(), p1.buffer().get()));
+                    ASSERT_EQ(static_cast<std::size_t>(5), p1.size());
+                    ASSERT_EQ(static_cast<std::size_t>(10), p1.capacity());
+                    ASSERT_TRUE(std::equal(vals1.begin(), vals1.end(), p1.buffer().get()));
 
-                    Assert::AreEqual(static_cast<std::size_t>(10), p2.size());
-                    Assert::AreEqual(static_cast<std::size_t>(20), p2.capacity());
-                    Assert::IsTrue(std::equal(vals2.begin(), vals2.end(), p2.buffer().get()));
+                    ASSERT_EQ(static_cast<std::size_t>(10), p2.size());
+                    ASSERT_EQ(static_cast<std::size_t>(20), p2.capacity());
+                    ASSERT_TRUE(std::equal(vals2.begin(), vals2.end(), p2.buffer().get()));
                 };
 
                 checkFunc(packet1, packet2);
@@ -1997,15 +1997,15 @@ namespace dhorn
                 sock1.send(packet1);
                 dhorn::experimental::udp_packet<char> packet2(4);
                 sock2.receive(packet2);
-                Assert::AreEqual(static_cast<std::size_t>(4), packet2.size());
-                Assert::AreEqual(0, strcmp("foo", packet2.buffer().get()));
+                ASSERT_EQ(static_cast<std::size_t>(4), packet2.size());
+                ASSERT_EQ(0, strcmp("foo", packet2.buffer().get()));
 
                 // Send the next udp_packet re-using the socket_address information from the receive
                 packet2.set_data("bar", 4);
                 sock2.send(packet2);
                 sock1.receive(packet1);
-                Assert::AreEqual(static_cast<std::size_t>(4), packet1.size());
-                Assert::AreEqual(0, strcmp("bar", packet1.buffer().get()));
+                ASSERT_EQ(static_cast<std::size_t>(4), packet1.size());
+                ASSERT_EQ(0, strcmp("bar", packet1.buffer().get()));
 
                 sock1.close();
                 sock2.close();
@@ -2051,8 +2051,8 @@ namespace dhorn
                     std::vector<int> recData(data.size() * 2);
                     auto itr = client.receive(recData.begin(), recData.end());
                     recData.erase(itr, recData.end());
-                    Assert::AreEqual(data.size(), recData.size());
-                    Assert::IsTrue(std::equal(data.begin(), data.end(), recData.begin()));
+                    ASSERT_EQ(data.size(), recData.size());
+                    ASSERT_TRUE(std::equal(data.begin(), data.end(), recData.begin()));
 
                     // Send the data back (in reverse order)
                     client.send(data.rbegin(), data.rend());
@@ -2070,10 +2070,10 @@ namespace dhorn
                 std::vector<int> recData(data.size());
                 auto itr = sock.receive(recData.begin(), recData.end());
                 recData.erase(itr, recData.end());
-                Assert::AreEqual(data.size(), recData.size());
+                ASSERT_EQ(data.size(), recData.size());
                 for (std::size_t i = 0; i < data.size(); ++i)
                 {
-                    Assert::AreEqual(recData[recData.size() - i - 1], data[i]);
+                    ASSERT_EQ(recData[recData.size() - i - 1], data[i]);
                 }
 
                 // Close the connected client

@@ -28,14 +28,14 @@ namespace dhorn
             void DoTest(const StringType& str, Ty expected)
             {
                 auto val = dhorn::experimental::numeric_cast<Ty>(str);
-                Assert::AreEqual(expected, val);
+                ASSERT_EQ(expected, val);
             }
 
             template <typename, typename StringType>
             void DoTest(const StringType& str, double expected)
             {
                 auto val = dhorn::experimental::numeric_cast<double>(str);
-                Assert::AreEqual(expected, val, tolerance);
+                ASSERT_EQ(expected, val, tolerance);
             }
 
             template <typename Ty>
